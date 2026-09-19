@@ -156,7 +156,7 @@ export function Header({ latestPost = null }: Props) {
         </div>
       </div>
 
-      <div className="section-shell relative flex items-center justify-between gap-3 py-3 md:py-3.5">
+      <div className="section-shell relative flex items-center justify-between gap-3 py-3.5 md:py-4">
         {/* Mobile: search (left) */}
         <button
           type="button"
@@ -207,7 +207,7 @@ export function Header({ latestPost = null }: Props) {
             width={200}
             height={55}
             priority
-            className="h-7 w-auto sm:h-8 md:h-10"
+            className="h-10 w-auto max-w-[min(58vw,14rem)] object-contain sm:h-11 md:h-12 md:max-w-none"
           />
         </Link>
 
