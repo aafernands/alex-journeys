@@ -6,19 +6,19 @@ export function DestinationPills() {
   return (
     <section
       id="where-next"
-      className="bg-white"
+      className="border-t border-surface bg-white"
       aria-labelledby="where-next-heading"
     >
-      <div className="mx-auto max-w-6xl px-5 py-14 md:px-8 md:py-20">
+      <div className="mx-auto max-w-6xl px-5 py-14 md:px-8 md:py-16">
         <h2
           id="where-next-heading"
           className="font-display text-center text-display uppercase tracking-tight text-heading"
         >
-          Where you&apos;re going next?
+          Places from the journal
         </h2>
         <p className="mx-auto mt-3 max-w-lg text-center text-sm text-muted md:text-base">
-          Photo-led stops from trips already in the journal — tap a place to
-          browse related stories.
+          Photo-led stops from trips already taken — tap a place to browse
+          related stories.
         </p>
 
         <ul className="mt-10 flex flex-wrap items-start justify-center gap-5 sm:gap-6 md:gap-8">

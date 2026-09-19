@@ -88,3 +88,78 @@ export function formatPostDateShort(iso: string): string {
     timeZone: "America/New_York",
   });
 }
+
+const STOP = new Set([
+  "the",
+  "and",
+  "for",
+  "with",
+  "from",
+  "your",
+  "this",
+  "that",
+  "into",
+  "over",
+  "travel",
+  "guide",
+  "tips",
+  "best",
+  "days",
+  "week",
+  "trip",
+  "next",
+  "how",
+  "what",
+  "when",
+  "where",
+]);
+
+function tokenize(...parts: string[]): string[] {
+  const out = new Set<string>();
+  for (const part of parts) {
+    for (const raw of part.toLowerCase().split(/[^a-z0-9]+/)) {
+      if (raw.length < 3 || STOP.has(raw)) continue;
+      out.add(raw);
+    }
+  }
+  return [...out];
+}
+
+/** Newest post by date (index is already newest-first). */
+export function getLatestPost(): PostMeta | null {
+  const posts = getAllPosts();
+  return posts[0] ?? null;
+}
+
+/**
+ * Related posts: prefer shared destinations, then title/slug keyword overlap,
+ * else fall back to recent posts.
+ */
+export function getRelatedPosts(slug: string, limit = 3): PostMeta[] {
+  const all = getAllPosts();
+  const current = all.find((p) => p.slug === slug);
+  const others = all.filter((p) => p.slug !== slug);
+  if (!current) return others.slice(0, limit);
+
+  const currentTokens = new Set(
+    tokenize(current.title, current.slug, ...current.destinations),
+  );
+
+  const scored = others.map((p) => {
+    let score = 0;
+    for (const d of p.destinations) {
+      if (current.destinations.includes(d)) score += 10;
+    }
+    for (const token of tokenize(p.title, p.slug, ...p.destinations)) {
+      if (currentTokens.has(token)) score += 2;
+    }
+    return { post: p, score };
+  });
+
+  scored.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return new Date(b.post.date).getTime() - new Date(a.post.date).getTime();
+  });
+
+  return scored.slice(0, limit).map((s) => s.post);
+}

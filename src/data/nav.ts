@@ -139,6 +139,23 @@ export const resourcesNav: NavChild[] = [
   },
 ];
 
+
+/** Items shown at the top of the Resources flyout / drawer (not the resources hub grid). */
+export const resourcesMenuExtras: NavChild[] = [
+  {
+    title: "Experiences",
+    href: "/experiences",
+    description: "Adventure, food, outdoors, and day trips.",
+    icon: "sparkles",
+  },
+  {
+    title: "Trip tools",
+    href: "/plan-your-trip",
+    description: "Booking partners and apps I actually use.",
+    icon: "compass",
+  },
+];
+
 /** Useful affiliate partners from /plan-your-trip — not booking widgets. */
 export const tripPlannerTools: AffiliateTool[] = [
   {

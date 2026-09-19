@@ -3,10 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostContent } from "@/components/blog/PostContent";
+import { RelatedPosts } from "@/components/blog/RelatedPosts";
 import {
   formatPostDate,
   getPostBySlug,
   getPostSlugs,
+  getRelatedPosts,
 } from "@/lib/posts";
 
 type PageProps = {
@@ -59,6 +61,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   if (!post) notFound();
 
   const toc = extractToc(post.contentHtml);
+  const related = getRelatedPosts(slug, 3);
 
   return (
     <main className="bg-white">
@@ -216,6 +219,14 @@ export default async function BlogPostPage({ params }: PageProps) {
           </Link>
         </footer>
       </article>
+
+      {related.length > 0 ? (
+        <div className="border-t border-surface bg-surface-soft">
+          <div className="mx-auto max-w-6xl px-5 py-12 md:px-8 md:py-16">
+            <RelatedPosts posts={related} />
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

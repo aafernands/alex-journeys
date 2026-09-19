@@ -19,17 +19,18 @@ export const site = {
 };
 
 export const about = {
-  headline: "Hey there — I’m Alex",
+  headline: "Hi, I’m Alex",
   paragraphs: [
     "I’m Alex Fernandes — traveler, photographer, and the voice behind this journal. Based in New Jersey, I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
     "Expect trip notes, destination pages, and favorites from the road — not an agency, not a booking service. Just a personal trip journal with room to breathe.",
+    "Alex Journly is the name on the masthead; Fernandes Journeys is the same journal — one traveler, one set of stories.",
   ],
 };
 
 export const hero = {
   tagline: "Inspire. Capture. Discover.",
   subtitle:
-    "A personal travel journal of places I’ve been — destinations, trip notes, and photos from journeys already behind me.",
+    "A personal travel blog sharing places I’ve been and notes from the road — destinations, trip stories, and photos from journeys already behind me.",
   ctaPrimary: "Explore destinations",
   ctaSecondary: "Read the blog",
   /** Maroon Bells sunrise — matches the WordPress hero mood */
@@ -37,6 +38,34 @@ export const hero = {
     "https://i0.wp.com/alexjournly.com/wp-content/uploads/2026/06/A60C26AF-799C-4F17-8A9F-F97A75ADB417-e1780787677499.webp?fit=1320%2C1728&ssl=1",
   imageAlt: "Sunrise over Maroon Bells reflected in a calm alpine lake",
 };
+
+/** Homepage Start Here funnel cards */
+export const startHereCards = [
+  {
+    title: "Destinations",
+    href: "/destinations",
+    icon: "map-pin",
+    description:
+      "Browse places I’ve actually visited — country pages and trip notes tied to real itineraries.",
+    cta: "See places",
+  },
+  {
+    title: "Blog & stories",
+    href: "/blog",
+    icon: "book-open",
+    description:
+      "Guides, sunrise chases, packing fails, and the long-form notes that didn’t fit a destination page.",
+    cta: "Read stories",
+  },
+  {
+    title: "Resources",
+    href: "/resources",
+    icon: "backpack",
+    description:
+      "Budget tips, gear, apps, and money notes I still use when the next ticket gets booked.",
+    cta: "Browse resources",
+  },
+];
 
 /** Photo pills for the destination row on the homepage */
 export const destinationPills = [

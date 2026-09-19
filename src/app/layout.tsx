@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat, Open_Sans } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { getLatestPost } from "@/lib/posts";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -39,13 +40,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const latest = getLatestPost();
+  const latestPost = latest
+    ? { slug: latest.slug, title: latest.title }
+    : null;
+
   return (
     <html
       lang="en"
       className={`${montserrat.variable} ${openSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
-        <Header />
+        <Header latestPost={latestPost} />
         <div className="flex-1">{children}</div>
         <Footer />
       </body>

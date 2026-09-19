@@ -2,19 +2,27 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { TopicFlyout } from "@/components/header/TopicFlyout";
 import { MobileTopicSection } from "@/components/header/MobileTopicSection";
 import { destinationsTree } from "@/data/destinations";
-import { experiencesNav, resourcesNav } from "@/data/nav";
+import {
+  experiencesNav,
+  resourcesMenuExtras,
+  resourcesNav,
+} from "@/data/nav";
 
-const links = [
-  { href: "/blog", label: "Blog" },
-  { href: "/plan-your-trip", label: "Trip Planner" },
-  { href: "/contact", label: "Contact" },
-];
+type LatestPost = { slug: string; title: string };
 
-export function Header() {
+type Props = {
+  latestPost?: LatestPost | null;
+};
+
+const resourcesFlyoutItems = [...resourcesMenuExtras, ...resourcesNav];
+
+export function Header({ latestPost = null }: Props) {
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [destOpen, setDestOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -54,6 +62,11 @@ export function Header() {
   }, []);
 
   useEffect(() => {
+    closeAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- close menus on route change only
+  }, [pathname]);
+
+  useEffect(() => {
     if (!destOpen) return;
 
     const onKey = (e: KeyboardEvent) => {
@@ -89,7 +102,9 @@ export function Header() {
     return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen, closeAll]);
 
-  const overHero = !scrolled && !mobileOpen;
+  const darkHero =
+    pathname === "/" || /^\/blog\/[^/]+$/.test(pathname);
+  const overHero = darkHero && !scrolled && !mobileOpen;
   const navLinkClass = overHero
     ? "text-white/95 hover:text-white"
     : "text-heading hover:text-accent";
@@ -103,7 +118,7 @@ export function Header() {
           : "border-b border-surface bg-white/95 shadow-sm backdrop-blur-md"
       }`}
     >
-      {/* Slim alerts row — no weather widget */}
+      {/* Slim metastrip */}
       <div
         className={`border-b transition-colors ${
           overHero
@@ -111,10 +126,10 @@ export function Header() {
             : "border-surface bg-surface-soft"
         }`}
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-1.5 md:px-8">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-1.5 md:px-8">
           <a
             href="#newsletter"
-            className={`inline-flex items-center gap-2 text-sm font-semibold transition ${
+            className={`inline-flex shrink-0 items-center gap-2 text-sm font-semibold transition ${
               overHero
                 ? "text-accent hover:text-white"
                 : "text-accent hover:text-accent-deep"
@@ -123,16 +138,31 @@ export function Header() {
             <BellIcon />
             Get Travel Alerts
           </a>
-          <Link
-            href="/blog"
-            className={`hidden text-sm font-semibold uppercase tracking-wide sm:inline ${
-              overHero
-                ? "text-white/80 hover:text-white"
-                : "text-text hover:text-accent"
-            }`}
-          >
-            Latest from the road
-          </Link>
+          {latestPost ? (
+            <Link
+              href={`/blog/${latestPost.slug}`}
+              className={`min-w-0 truncate text-sm font-semibold sm:max-w-md ${
+                overHero
+                  ? "text-white/85 hover:text-white"
+                  : "text-text hover:text-accent"
+              }`}
+            >
+              <span className="hidden sm:inline">Latest from the road: </span>
+              <span className="sm:hidden">Latest: </span>
+              {latestPost.title}
+            </Link>
+          ) : (
+            <Link
+              href="/blog"
+              className={`hidden text-sm font-semibold uppercase tracking-wide sm:inline ${
+                overHero
+                  ? "text-white/80 hover:text-white"
+                  : "text-text hover:text-accent"
+              }`}
+            >
+              Latest from the road
+            </Link>
+          )}
         </div>
       </div>
 
@@ -331,47 +361,39 @@ export function Header() {
             )}
           </div>
 
-          <TopicFlyout
-            label="Experiences"
-            href="/experiences"
-            items={experiencesNav}
-            navLinkClass={navLinkClass}
-            chevronClass={chevronClass}
-          />
+          <Link
+            href="/blog"
+            className={`font-sans text-sm font-extrabold uppercase tracking-wide transition ${navLinkClass}`}
+          >
+            Blog
+          </Link>
+
           <TopicFlyout
             label="Resources"
             href="/resources"
-            items={resourcesNav}
+            items={resourcesFlyoutItems}
             navLinkClass={navLinkClass}
             chevronClass={chevronClass}
           />
 
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`font-sans text-sm font-extrabold uppercase tracking-wide transition ${navLinkClass}`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          <Link
+            href="/start-here"
+            className={`font-sans text-sm font-extrabold uppercase tracking-wide transition ${navLinkClass}`}
+          >
+            Start Here
+          </Link>
 
           <Link
             href="/plan-your-trip"
             className="inline-flex items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-accent-deep"
           >
-            Trip Planner
+            Trip tools
           </Link>
         </nav>
 
-        {/* Mobile: hamburger only — never with full desktop nav */}
         <button
           type="button"
-          className={`inline-flex items-center justify-center rounded-md p-2.5 md:hidden ${
-            overHero
-              ? "bg-accent text-white"
-              : "bg-accent text-white"
-          }`}
+          className="inline-flex items-center justify-center rounded-md bg-accent p-2.5 text-white md:hidden"
           aria-expanded={mobileOpen}
           aria-controls="mobile-nav"
           onClick={() => setMobileOpen((v) => !v)}
@@ -496,36 +518,67 @@ export function Header() {
                 </ul>
               )}
             </li>
+
+            <li>
+              <Link
+                href="/blog"
+                className="block py-2.5 text-base font-extrabold uppercase tracking-wide text-heading hover:text-accent"
+                onClick={closeAll}
+              >
+                Blog
+              </Link>
+            </li>
+
+            <MobileTopicSection
+              label="Resources"
+              href="/resources"
+              items={resourcesFlyoutItems}
+              onNavigate={closeAll}
+            />
+
+            <li>
+              <Link
+                href="/start-here"
+                className="block py-2.5 text-base font-extrabold uppercase tracking-wide text-heading hover:text-accent"
+                onClick={closeAll}
+              >
+                Start Here
+              </Link>
+            </li>
+
             <MobileTopicSection
               label="Experiences"
               href="/experiences"
               items={experiencesNav}
               onNavigate={closeAll}
             />
-            <MobileTopicSection
-              label="Resources"
-              href="/resources"
-              items={resourcesNav}
-              onNavigate={closeAll}
-            />
-            {links.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="block py-2.5 text-base font-extrabold uppercase tracking-wide text-heading hover:text-accent"
-                  onClick={closeAll}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
+
+            <li>
+              <Link
+                href="/about"
+                className="block py-2.5 text-base font-extrabold uppercase tracking-wide text-heading hover:text-accent"
+                onClick={closeAll}
+              >
+                About
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/contact"
+                className="block py-2.5 text-base font-extrabold uppercase tracking-wide text-heading hover:text-accent"
+                onClick={closeAll}
+              >
+                Contact
+              </Link>
+            </li>
+
             <li className="pt-2">
               <Link
                 href="/plan-your-trip"
                 className="inline-flex w-full items-center justify-center rounded-md bg-accent px-4 py-3 text-sm font-bold uppercase tracking-wide text-white"
                 onClick={closeAll}
               >
-                Trip Planner
+                Trip tools
               </Link>
             </li>
           </ul>

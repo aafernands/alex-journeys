@@ -14,7 +14,6 @@ export function Footer() {
 
   return (
     <footer className="bg-surface-soft" role="contentinfo">
-      {/* Traveler's Journal newsletter */}
       <section
         id="newsletter"
         className="border-b border-surface"
@@ -91,7 +90,7 @@ export function Footer() {
               {about.paragraphs[0]}
             </p>
             <Link
-              href="/#hidden-gems"
+              href="/about"
               className="mt-4 inline-block text-sm font-semibold text-link transition hover:text-accent"
             >
               Learn more →
@@ -135,17 +134,20 @@ export function Footer() {
             {site.journalName}.
           </p>
           <nav aria-label="Legal" className="flex flex-wrap gap-4">
+            <Link href="/start-here" className="text-link hover:text-accent">
+              Start Here
+            </Link>
+            <Link href="/about" className="text-link hover:text-accent">
+              About
+            </Link>
             <Link href="/blog" className="text-link hover:text-accent">
               Blog
-            </Link>
-            <Link href="/experiences" className="text-link hover:text-accent">
-              Experiences
             </Link>
             <Link href="/resources" className="text-link hover:text-accent">
               Resources
             </Link>
             <Link href="/plan-your-trip" className="text-link hover:text-accent">
-              Trip Planner
+              Trip tools
             </Link>
             <Link href="/contact" className="text-link hover:text-accent">
               Contact
