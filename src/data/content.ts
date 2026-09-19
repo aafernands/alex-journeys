@@ -73,36 +73,36 @@ export const destinationPills = [
     name: "Iceland",
     href: "/destinations/iceland",
     image:
-      "https://images.unsplash.com/photo-1531168556467-80aace525c26?auto=format&fit=crop&w=600&q=80",
-    imageAlt: "Icelandic waterfall and cliffs",
+      "https://i0.wp.com/alexjournly.com/wp-content/uploads/2025/07/IMG_6855-scaled-1.webp?fit=1440%2C1920&ssl=1",
+    imageAlt: "Discovering Iceland…",
   },
   {
     name: "Brazil",
     href: "/destinations/brazil",
     image:
-      "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=600&q=80",
-    imageAlt: "Christ the Redeemer overlooking Rio",
+      "https://i0.wp.com/alexjournly.com/wp-content/uploads/2025/05/img_4839.webp?fit=1440%2C1920&ssl=1",
+    imageAlt: "Rio de Janeiro, Brazil",
   },
   {
     name: "USA",
     href: "/destinations/united-states",
     image:
-      "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=600&q=80",
-    imageAlt: "Open road through American landscape",
+      "https://i0.wp.com/alexjournly.com/wp-content/uploads/2026/06/A60C26AF-799C-4F17-8A9F-F97A75ADB417-e1780787677499.webp?fit=1320%2C1728&ssl=1",
+    imageAlt: "Maroon Bells View and Lake reflection…",
   },
   {
     name: "Mexico",
     href: "/destinations/mexico",
     image:
-      "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?auto=format&fit=crop&w=600&q=80",
-    imageAlt: "Caribbean shoreline in Mexico",
+      "https://i0.wp.com/alexjournly.com/wp-content/uploads/2026/06/IMG_9395-scaled.webp?fit=1440%2C1920&ssl=1",
+    imageAlt: "Cancún, Mexico",
   },
   {
     name: "Canada",
     href: "/destinations/canada",
     image:
-      "https://images.unsplash.com/photo-1519834785168-50ca68536663?auto=format&fit=crop&w=600&q=80",
-    imageAlt: "Toronto skyline and waterfront",
+      "https://i0.wp.com/alexjournly.com/wp-content/uploads/2024/10/img_0863-1.webp?fit=1280%2C1920&ssl=1",
+    imageAlt: "Toronto, Canada",
   },
 ];
 

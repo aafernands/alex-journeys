@@ -63,6 +63,17 @@ export default async function DestinationPage({ params }: PageProps) {
           </ol>
         </nav>
 
+        <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+          <Image
+            src={dest.image}
+            alt={dest.imageAlt}
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, 768px"
+            className="object-cover"
+          />
+        </div>
+
         <p className="mt-8 eyebrow">
           {dest.continent}
           {dest.region !== dest.continent ? ` · ${dest.region}` : ""}
