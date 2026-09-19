@@ -22,14 +22,14 @@ If unset, `/cms` shows a setup message and does not crash.
 
 ### 2. GitHub token
 
-Create a fine-grained personal access token with **Contents: Read and write** on repo `aafernands/travel-lifestyle-site`.
+Create a fine-grained personal access token with **Contents: Read and write** on repo `aafernands/fernandes-journeys`.
 
 Set on Vercel (and locally):
 
 | Variable | Required | Default |
 | --- | --- | --- |
 | `CMS_GITHUB_TOKEN` | Yes (or `GITHUB_TOKEN`) | — |
-| `CMS_GITHUB_REPO` | No | `aafernands/travel-lifestyle-site` |
+| `CMS_GITHUB_REPO` | No | `aafernands/fernandes-journeys` |
 | `CMS_GITHUB_BRANCH` | No | `main` |
 
 ### 3. Publish

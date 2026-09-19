@@ -2,8 +2,8 @@
 
 Alex Fernandes’s personal travel journal — destinations from past trips, trip notes, and photos from the road. User-facing brand **Fernandes Journeys** (logo PNG may still show the old alex journly wordmark until replaced).
 
-**Live:** [travel-lifestyle-site.vercel.app](https://travel-lifestyle-site.vercel.app)  
-**Repo:** [github.com/aafernands/travel-lifestyle-site](https://github.com/aafernands/travel-lifestyle-site)
+**Live:** [fernandes-journeys.vercel.app](https://fernandes-journeys.vercel.app)  
+**Repo:** [github.com/aafernands/fernandes-journeys](https://github.com/aafernands/fernandes-journeys)
 
 ## Stack
 

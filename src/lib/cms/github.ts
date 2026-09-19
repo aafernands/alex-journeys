@@ -1,7 +1,7 @@
 import type { Post, PostMeta } from "@/lib/post-types";
 import { toPostMeta, type ValidatedPost } from "@/lib/cms/validate";
 
-const DEFAULT_REPO = "aafernands/travel-lifestyle-site";
+const DEFAULT_REPO = "aafernands/fernandes-journeys";
 const DEFAULT_BRANCH = "main";
 const POSTS_PATH = "src/content/posts";
 
