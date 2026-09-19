@@ -27,11 +27,8 @@ export default function BlogIndexPage() {
           </ol>
         </nav>
 
-        <p className="mt-8 journal-entry-label">
-          <span aria-hidden="true">✦</span>
-          Journal
-        </p>
-        <h1 className="font-display mt-4 text-display text-heading">Stories</h1>
+        <p className="mt-8 eyebrow">Journal</p>
+        <h1 className="font-display mt-2 text-display text-heading">Stories</h1>
         <p className="mt-4 max-w-2xl text-lead text-text">
           {posts.length} stories from the road — destination guides, trip notes,
           and practical travel tips. Filter by place or guide topic.

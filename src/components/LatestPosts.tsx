@@ -18,7 +18,7 @@ export function LatestPosts() {
         title="Latest stories."
         titleId="latest-heading"
         action={
-          <Link href="/blog" className="btn btn-secondary rounded-sm">
+          <Link href="/blog" className="btn btn-secondary">
             Browse all stories
             <span aria-hidden="true">→</span>
           </Link>

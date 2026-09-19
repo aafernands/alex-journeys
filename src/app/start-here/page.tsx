@@ -61,13 +61,13 @@ export default function StartHerePage() {
           <li key={step.href}>
             <Link
               href={step.href}
-              className="panel-interactive group flex h-full gap-4 border-dashed p-5 md:p-6"
+              className="panel-interactive group flex h-full gap-4 p-5 md:p-6"
             >
               <span className="flex flex-col items-center gap-3">
                 <span className="font-display text-xs font-bold tracking-[0.14em] text-muted">
                   {step.n}
                 </span>
-                <span className="panel-nested flex size-11 items-center justify-center rounded-sm bg-white text-accent">
+                <span className="panel-nested flex size-11 items-center justify-center bg-white text-accent">
                   <NavIcon name={step.icon} size={20} />
                 </span>
               </span>
@@ -87,7 +87,7 @@ export default function StartHerePage() {
         ))}
       </ol>
 
-      <div className="panel-soft mt-12 border-dashed p-6 text-center">
+      <div className="panel-soft mt-12 p-6 text-center">
         <p className="text-sm text-text">
           Want the short version of who I am?{" "}
           <Link href="/about" className="font-semibold text-link hover:text-accent">

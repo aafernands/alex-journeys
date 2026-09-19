@@ -206,10 +206,10 @@ body {
   letter-spacing: -0.03em;
 }
 
-/* Boxed UI language — paper cards, soft ink shadow, notebook corners */
+/* Boxed UI language — hairline panels, flat fills */
 .panel {
   border: 1px solid var(--border);
-  border-radius: 0.25rem; /* rounded-sm — notebook, not SaaS */
+  border-radius: 0.25rem;
   background: var(--white);
   box-shadow: 0 1px 0 color-mix(in srgb, var(--sand) 50%, transparent),
     0 12px 28px -20px rgba(31, 26, 20, 0.35);
@@ -217,31 +217,26 @@ body {
 
 .panel-soft {
   border: 1px solid var(--border);
-  border-radius: 0.25rem;
+  border-radius: 0.75rem;
   background: var(--surface-soft);
 }
 
 .panel-nested {
-  border: 1px dashed var(--border-strong);
-  border-radius: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem; /* 8px / rounded-lg */
   background: var(--surface-soft);
 }
 
 .panel-interactive {
   border: 1px solid var(--border);
-  border-radius: 0.25rem;
+  border-radius: 0.75rem;
   background: var(--white);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--sand) 45%, transparent),
-    0 10px 24px -18px rgba(31, 26, 20, 0.32);
-  transition: background-color 150ms ease, border-color 150ms ease,
-    box-shadow 150ms ease;
+  transition: background-color 150ms ease, border-color 150ms ease;
 }
 
 .panel-interactive:hover {
   background: var(--surface-soft);
   border-color: var(--border-strong);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--sand) 55%, transparent),
-    0 14px 28px -18px rgba(31, 26, 20, 0.38);
 }
 
 /* Journal entry caption bar (was product window chrome) */
@@ -501,33 +496,4 @@ body {
 .font-display.text-display,
 .font-display.text-title {
   font-weight: 600;
-}
-
-/* Journal card accents */
-.journal-ruled {
-  background-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent calc(1.5rem - 1px),
-    var(--paper-line) calc(1.5rem - 1px),
-    var(--paper-line) 1.5rem
-  );
-  background-size: 100% 1.5rem;
-  background-position: left top;
-}
-
-.journal-stamp {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid color-mix(in srgb, var(--accent-deep) 70%, transparent);
-  color: var(--accent-deep);
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 0.35rem 0.55rem;
-  border-radius: 0.15rem;
-  opacity: 0.85;
-  transform: rotate(-6deg);
 }

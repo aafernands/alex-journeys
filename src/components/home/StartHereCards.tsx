@@ -26,22 +26,14 @@ export function StartHereCards() {
 
       <ul className="mt-10 grid gap-4 sm:grid-cols-3 sm:gap-5">
         {startHereCards.map((card, i) => (
-          <li key={card.href} className="relative">
-            {i === 0 ? (
-              <span
-                className="journal-tape absolute -top-2 left-5 z-10 rotate-[-4deg] px-2.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-heading"
-                aria-hidden="true"
-              >
-                First page
-              </span>
-            ) : null}
+          <li key={card.href}>
             <Link
               href={card.href}
-              className="panel-interactive group flex h-full flex-col border-dashed p-5 md:p-6"
+              className="panel-interactive group flex h-full flex-col p-5 md:p-6"
             >
               <div className="flex items-center justify-between gap-3">
                 <span
-                  className={`flex size-10 items-center justify-center rounded-sm border ${badgeTints[i % badgeTints.length]}`}
+                  className={`flex size-10 items-center justify-center rounded-lg border ${badgeTints[i % badgeTints.length]}`}
                 >
                   <NavIcon name={card.icon} size={20} />
                 </span>
@@ -49,13 +41,13 @@ export function StartHereCards() {
                   {String(i + 1).padStart(2, "0")}
                 </span>
               </div>
-              <span className="font-display mt-5 text-lg font-semibold text-heading">
+              <span className="font-display mt-5 text-lg font-bold text-heading">
                 {card.title}
               </span>
               <span className="mt-2 flex-1 text-sm leading-relaxed text-text">
                 {card.description}
               </span>
-              <span className="btn btn-secondary btn-block mt-5 !min-h-10 rounded-sm text-sm group-hover:bg-white">
+              <span className="btn btn-secondary btn-block mt-5 !min-h-10 text-sm group-hover:bg-white">
                 {card.cta}
                 <span aria-hidden="true">→</span>
               </span>

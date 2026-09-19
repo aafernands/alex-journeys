@@ -22,7 +22,7 @@ export default function AboutPage() {
       ]}
     >
       <div className="mt-10 grid gap-8 md:mt-12 md:grid-cols-[minmax(0,14rem)_1fr] md:items-start md:gap-10">
-        <div className="relative mx-auto aspect-[3/4] w-full max-w-[14rem] overflow-hidden rounded-sm border border-border bg-surface-soft shadow-[0_12px_28px_-18px_rgba(31,26,20,0.4)] md:mx-0">
+        <div className="relative mx-auto aspect-[3/4] w-full max-w-[14rem] overflow-hidden rounded-xl border border-border bg-surface-soft md:mx-0">
           <Image
             src={site.authorPhoto}
             alt={site.authorName}
@@ -32,19 +32,16 @@ export default function AboutPage() {
             priority
           />
         </div>
-        <div className="panel journal-ruled space-y-5 p-6 text-base leading-relaxed text-text md:p-8">
+        <div className="panel space-y-5 p-6 text-base leading-relaxed text-text md:p-8">
           {about.paragraphs.slice(1).map((p) => (
             <p key={p.slice(0, 24)}>{p}</p>
           ))}
         </div>
       </div>
 
-      <aside className="panel-soft mt-8 border-dashed p-6 md:p-8">
-        <p className="journal-entry-label">
-          <span aria-hidden="true">✦</span>
-          Next step
-        </p>
-        <p className="font-display mt-4 text-lg font-semibold text-heading">
+      <aside className="panel-soft mt-8 p-6 md:p-8">
+        <p className="eyebrow">Next step</p>
+        <p className="font-display mt-2 text-lg font-bold text-heading">
           New to the journal?
         </p>
         <p className="mt-2 text-sm leading-relaxed text-text">

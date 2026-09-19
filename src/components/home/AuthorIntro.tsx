@@ -12,14 +12,8 @@ export function AuthorIntro() {
       size="md"
       aria-labelledby="author-heading"
     >
-      <div className="panel relative flex flex-col gap-6 overflow-hidden p-6 md:flex-row md:items-center md:gap-8 md:p-8">
-        <span
-          className="journal-tape absolute right-6 top-4 hidden rotate-2 px-2.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-heading sm:inline"
-          aria-hidden="true"
-        >
-          Author note
-        </span>
-        <div className="relative size-16 shrink-0 overflow-hidden rounded-sm border border-border bg-surface-soft shadow-[0_8px_20px_-14px_rgba(31,26,20,0.45)] md:size-20">
+      <div className="panel flex flex-col gap-6 p-6 md:flex-row md:items-center md:gap-8 md:p-8">
+        <div className="relative size-16 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-soft md:size-20">
           <Image
             src={site.authorPhoto}
             alt={site.authorName}
@@ -29,13 +23,10 @@ export function AuthorIntro() {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="journal-entry-label">
-            <span aria-hidden="true">✦</span>
-            About the journal
-          </p>
+          <p className="eyebrow">About the journal</p>
           <h2
             id="author-heading"
-            className="font-display mt-4 text-2xl font-semibold tracking-tight text-heading md:text-[1.75rem]"
+            className="font-display mt-2 text-2xl font-bold tracking-tight text-heading md:text-[1.75rem]"
           >
             {about.headline}
           </h2>
@@ -43,12 +34,12 @@ export function AuthorIntro() {
             {about.paragraphs[0]}
           </p>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link href="/about" className="btn btn-ink btn-block rounded-sm sm:w-auto">
+            <Link href="/about" className="btn btn-ink btn-block sm:w-auto">
               About me
             </Link>
             <Link
               href="/start-here"
-              className="btn btn-secondary btn-block rounded-sm sm:w-auto"
+              className="btn btn-secondary btn-block sm:w-auto"
             >
               Start here
             </Link>

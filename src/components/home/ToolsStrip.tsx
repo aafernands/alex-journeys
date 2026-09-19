@@ -19,7 +19,7 @@ export function ToolsStrip() {
         titleId="tools-strip-heading"
         description="Partners I actually open when planning — stays, flights, insurance, and connectivity."
         action={
-          <Link href="/tools" className="btn btn-ink rounded-sm">
+          <Link href="/tools" className="btn btn-ink">
             See all tools
             <span aria-hidden="true">→</span>
           </Link>
@@ -33,13 +33,13 @@ export function ToolsStrip() {
               href={tool.href}
               target="_blank"
               rel="noopener noreferrer sponsored"
-              className="panel-interactive group flex h-full items-center gap-3 border-dashed p-4"
+              className="panel-interactive group flex h-full items-center gap-3 p-4"
             >
               <span className="panel-nested flex size-9 shrink-0 items-center justify-center bg-white text-accent">
                 <NavIcon name={tool.icon} size={16} />
               </span>
               <span className="min-w-0">
-                <span className="font-display block text-sm font-semibold text-heading">
+                <span className="block text-sm font-semibold text-heading">
                   {tool.title}
                 </span>
                 <span className="block text-xs text-muted">{tool.partner}</span>
