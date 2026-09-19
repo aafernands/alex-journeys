@@ -27,7 +27,7 @@ export async function generateMetadata({
   if (!dest) return { title: "Destination" };
   return {
     title: dest.name,
-    description: `Notes from my trip to ${dest.name} — Fernandes Journeys.`,
+    description: `Notes from my trip to ${dest.name} — Alex Journly.`,
   };
 }
 
@@ -39,43 +39,43 @@ export default async function DestinationPage({ params }: PageProps) {
   const related = getPostsByDestination(slug);
 
   return (
-    <main className="border-b border-sand/50 bg-cream">
-      <div className="mx-auto max-w-3xl px-5 py-14 md:px-8 md:py-20">
+    <main className="bg-white pt-28 md:pt-32">
+      <div className="mx-auto max-w-3xl px-5 py-10 md:px-8 md:py-14">
         <nav aria-label="Breadcrumb" className="text-sm text-muted">
           <ol className="flex flex-wrap items-center gap-2">
             <li>
-              <Link href="/" className="transition hover:text-terracotta">
+              <Link href="/" className="text-link transition hover:text-accent">
                 Home
               </Link>
             </li>
-            <li aria-hidden="true">/</li>
+            <li aria-hidden="true">›</li>
             <li>
               <Link
                 href="/destinations"
-                className="transition hover:text-terracotta"
+                className="text-link transition hover:text-accent"
               >
                 Destinations
               </Link>
             </li>
-            <li aria-hidden="true">/</li>
-            <li className="text-ink-soft">{dest.name}</li>
+            <li aria-hidden="true">›</li>
+            <li className="text-text">{dest.name}</li>
           </ol>
         </nav>
 
-        <p className="mt-8 text-xs font-semibold uppercase tracking-[0.2em] text-sage">
+        <p className="mt-8 text-label text-muted">
           {dest.continent}
           {dest.region !== dest.continent ? ` · ${dest.region}` : ""}
         </p>
-        <h1 className="font-display mt-2 text-4xl tracking-tight text-ink sm:text-5xl md:text-6xl">
+        <h1 className="font-display mt-2 text-display uppercase tracking-tight text-heading">
           {dest.name}
         </h1>
-        <p className="mt-6 text-lg leading-relaxed text-ink-soft">{dest.blurb}</p>
+        <p className="mt-6 text-lead text-text">{dest.blurb}</p>
 
         {related.length > 0 ? (
           <section className="mt-12" aria-labelledby="related-posts-heading">
             <h2
               id="related-posts-heading"
-              className="font-display text-2xl tracking-tight text-ink md:text-3xl"
+              className="font-display text-title text-heading"
             >
               Related stories
             </h2>
@@ -84,9 +84,9 @@ export default async function DestinationPage({ params }: PageProps) {
                 <li key={post.slug}>
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="group flex gap-4 overflow-hidden rounded-xl border border-sand/70 bg-surface p-3 transition hover:border-terracotta/30 hover:shadow-md sm:p-4"
+                    className="group flex gap-4 overflow-hidden rounded-xl border border-surface bg-white p-3 transition hover:border-accent/30 hover:shadow-md sm:p-4"
                   >
-                    <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-lg bg-cream-deep sm:h-24 sm:w-32">
+                    <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-lg bg-surface sm:h-24 sm:w-32">
                       {post.featuredImage ? (
                         <Image
                           src={post.featuredImage.url}
@@ -104,10 +104,10 @@ export default async function DestinationPage({ params }: PageProps) {
                       >
                         {formatPostDateShort(post.date)}
                       </time>
-                      <p className="font-display mt-1 text-lg leading-snug text-ink transition group-hover:text-terracotta sm:text-xl">
+                      <p className="font-display mt-1 text-lg font-semibold leading-snug text-heading transition group-hover:text-accent sm:text-xl">
                         {post.title}
                       </p>
-                      <p className="mt-1 line-clamp-2 text-sm text-ink-soft">
+                      <p className="mt-1 line-clamp-2 text-sm text-text">
                         {post.excerpt}
                       </p>
                     </div>
@@ -117,11 +117,9 @@ export default async function DestinationPage({ params }: PageProps) {
             </ul>
           </section>
         ) : (
-          <div className="mt-10 rounded-2xl border border-dashed border-sand bg-cream-deep/60 px-6 py-16 text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-              Photo space
-            </p>
-            <p className="font-display mt-3 text-2xl text-ink-soft">
+          <div className="mt-10 rounded-2xl border border-dashed border-surface bg-surface-soft px-6 py-16 text-center">
+            <p className="text-label text-muted">Photo space</p>
+            <p className="font-display mt-3 text-2xl text-text">
               Room for trip photos later
             </p>
             <p className="mx-auto mt-2 max-w-sm text-sm text-muted">
@@ -134,13 +132,13 @@ export default async function DestinationPage({ params }: PageProps) {
         <div className="mt-10 flex flex-wrap gap-3">
           <Link
             href="/destinations"
-            className="inline-flex items-center justify-center rounded-full border border-ink/15 bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition hover:border-terracotta/40 hover:text-terracotta"
+            className="inline-flex items-center justify-center rounded-md border border-heading/15 bg-white px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-heading transition hover:border-accent hover:text-accent"
           >
             ← All destinations
           </Link>
           <Link
             href="/blog"
-            className="inline-flex items-center justify-center rounded-full bg-terracotta px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-terracotta-deep"
+            className="inline-flex items-center justify-center rounded-md bg-accent px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-accent-deep"
           >
             Browse the blog
           </Link>

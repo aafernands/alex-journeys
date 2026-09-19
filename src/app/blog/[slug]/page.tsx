@@ -36,78 +36,181 @@ export async function generateMetadata({
   };
 }
 
+/** Pull simple TOC from h2 text in HTML when present */
+function extractToc(html: string): { id: string; label: string }[] {
+  const headings: { id: string; label: string }[] = [];
+  const re = /<h2[^>]*>(.*?)<\/h2>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html)) !== null) {
+    const label = m[1].replace(/<[^>]+>/g, "").trim();
+    if (!label) continue;
+    const id = label
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+    headings.push({ id, label });
+  }
+  return headings.slice(0, 8);
+}
+
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
   const post = getPostBySlug(slug);
   if (!post) notFound();
 
-  return (
-    <main className="border-b border-sand/50 bg-cream">
-      <article className="mx-auto max-w-3xl px-5 py-14 md:px-8 md:py-20">
-        <nav aria-label="Breadcrumb" className="text-sm text-muted">
-          <ol className="flex flex-wrap items-center gap-2">
-            <li>
-              <Link href="/" className="transition hover:text-terracotta">
-                Home
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li>
-              <Link href="/blog" className="transition hover:text-terracotta">
-                Blog
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li className="max-w-[14rem] truncate text-ink-soft sm:max-w-none">
-              {post.title}
-            </li>
-          </ol>
-        </nav>
+  const toc = extractToc(post.contentHtml);
 
-        <header className="mt-8">
-          <time
-            className="text-xs font-semibold uppercase tracking-[0.16em] text-sage"
-            dateTime={post.date}
-          >
-            {formatPostDate(post.date)}
-          </time>
-          <h1 className="font-display mt-3 text-4xl tracking-tight text-ink sm:text-5xl">
+  return (
+    <main className="bg-white">
+      {/* Dark full-bleed hero */}
+      <header className="relative flex min-h-[50vh] items-end overflow-hidden bg-near-black md:min-h-[58vh]">
+        {post.featuredImage ? (
+          <Image
+            src={post.featuredImage.url}
+            alt={post.featuredImage.alt || post.title}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+        ) : null}
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-near-black/85 via-near-black/45 to-near-black/50"
+          aria-hidden="true"
+        />
+        <div className="relative z-10 mx-auto w-full max-w-3xl px-5 pb-12 pt-36 md:px-8 md:pb-16 md:pt-44">
+          <nav aria-label="Breadcrumb" className="text-sm text-white/70">
+            <ol className="flex flex-wrap items-center gap-2">
+              <li>
+                <Link href="/" className="text-link transition hover:text-white">
+                  Home
+                </Link>
+              </li>
+              <li aria-hidden="true">›</li>
+              <li>
+                <Link
+                  href="/blog"
+                  className="text-link transition hover:text-white"
+                >
+                  Blog
+                </Link>
+              </li>
+              <li aria-hidden="true">›</li>
+              <li className="max-w-[12rem] truncate text-white/80 sm:max-w-none">
+                {post.title}
+              </li>
+            </ol>
+          </nav>
+          <h1 className="font-display mt-5 text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl md:text-[2rem] md:leading-snug">
             {post.title}
           </h1>
-          {post.excerpt ? (
-            <p className="mt-5 text-lg leading-relaxed text-ink-soft">
-              {post.excerpt}
-            </p>
-          ) : null}
-        </header>
+        </div>
+      </header>
 
-        {post.featuredImage ? (
-          <div className="relative mt-10 aspect-[16/10] overflow-hidden rounded-2xl bg-cream-deep shadow-[0_16px_40px_-24px_rgba(28,25,23,0.4)]">
-            <Image
-              src={post.featuredImage.url}
-              alt={post.featuredImage.alt || post.title}
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 768px"
-              className="object-cover"
-            />
+      <article className="mx-auto max-w-3xl px-5 py-10 md:px-8 md:py-14">
+        {/* Byline */}
+        <div className="flex flex-wrap items-center gap-4 border-b border-surface pb-8">
+          <div
+            className="flex size-14 items-center justify-center rounded-full bg-surface text-lg font-bold text-heading ring-2 ring-accent"
+            aria-hidden="true"
+          >
+            AF
           </div>
+          <div>
+            <p className="font-semibold text-heading">By Alex F.</p>
+            <time
+              className="text-sm text-muted"
+              dateTime={post.date}
+            >
+              Article updated on {formatPostDate(post.date)}
+            </time>
+          </div>
+        </div>
+
+        {post.excerpt ? (
+          <p className="mx-auto mt-8 max-w-xl text-center text-lg italic leading-relaxed text-heading md:text-xl">
+            {post.excerpt}
+          </p>
+        ) : null}
+
+        {/* Affiliates disclosure */}
+        <aside
+          className="mt-8 rounded-lg border border-surface bg-surface-soft px-5 py-4"
+          aria-label="Affiliates disclosure"
+        >
+          <p className="font-display text-sm font-bold text-heading">
+            Affiliates Disclosure
+          </p>
+          <p className="mt-1 text-sm italic leading-relaxed text-text">
+            Some links on this page may be affiliate links. If you book or buy
+            through them, I may earn a small commission at no extra cost to you
+            — thanks for supporting the journal.
+          </p>
+        </aside>
+
+        {/* Summary / TOC */}
+        {toc.length > 0 ? (
+          <nav
+            className="mt-8 border-y border-steel/30 py-5"
+            aria-label="Summary"
+          >
+            <p className="font-display text-base font-bold text-heading">
+              Summary
+            </p>
+            <ul className="mt-3 space-y-2">
+              {toc.map((item) => (
+                <li key={item.id} className="flex items-start gap-2.5">
+                  <span
+                    className="mt-1.5 size-2.5 shrink-0 bg-steel"
+                    aria-hidden="true"
+                  />
+                  <a
+                    href={`#${item.id}`}
+                    className="text-link underline decoration-steel/40 underline-offset-2 transition hover:text-accent"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
         ) : null}
 
         <div className="mt-10 md:mt-12">
           <PostContent html={post.contentHtml} />
         </div>
 
-        <footer className="mt-14 flex flex-wrap gap-3 border-t border-sand/60 pt-8">
+        {/* Author card — stays in flow, no float over body */}
+        <aside className="mt-14 flex flex-col gap-5 rounded-2xl border border-surface bg-surface-soft p-6 sm:flex-row sm:items-start">
+          <div
+            className="flex size-20 shrink-0 items-center justify-center rounded-full bg-white text-2xl font-bold text-heading ring-2 ring-accent"
+            aria-hidden="true"
+          >
+            AF
+          </div>
+          <div>
+            <p className="font-display text-lg font-bold text-heading">
+              I&apos;m Alex
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-text">
+              Explorer passionate about travel and discovery. This journal —
+              Alex Journly / Fernandes Journeys — is where I write down places
+              I&apos;ve been so I don&apos;t forget the light, the food, and the
+              roads in between.
+            </p>
+          </div>
+        </aside>
+
+        <footer className="mt-12 flex flex-wrap gap-3 border-t border-surface pt-8">
           <Link
             href="/blog"
-            className="inline-flex items-center justify-center rounded-full border border-ink/15 bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition hover:border-terracotta/40 hover:text-terracotta"
+            className="inline-flex items-center justify-center rounded-md border border-heading/15 bg-white px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-heading transition hover:border-accent hover:text-accent"
           >
             ← All posts
           </Link>
           <Link
             href="/destinations"
-            className="inline-flex items-center justify-center rounded-full bg-terracotta px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-terracotta-deep"
+            className="inline-flex items-center justify-center rounded-md bg-accent px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-accent-deep"
           >
             Destinations
           </Link>

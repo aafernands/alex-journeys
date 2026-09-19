@@ -1,20 +1,20 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { site } from "@/data/content";
 import { destinationsTree } from "@/data/destinations";
 
 const links = [
   { href: "/blog", label: "Blog" },
-  { href: "/#about", label: "About" },
-  { href: "/#favorites", label: "Favorites" },
-  { href: "/#newsletter", label: "Newsletter" },
+  { href: "/#hidden-gems", label: "Stories" },
+  { href: "/#newsletter", label: "Journal" },
 ];
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [destOpen, setDestOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [desktopOpenContinent, setDesktopOpenContinent] = useState<
     string | null
   >(null);
@@ -42,6 +42,13 @@ export function Header() {
     setMobileRegion(null);
     closeDest();
   }, [closeDest]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 48);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (!destOpen) return;
@@ -79,23 +86,81 @@ export function Header() {
     return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen, closeAll]);
 
+  const overHero = !scrolled && !mobileOpen;
+  const navLinkClass = overHero
+    ? "text-white/95 hover:text-white"
+    : "text-heading hover:text-accent";
+  const chevronClass = overHero ? "text-white/80" : "text-muted";
+
   return (
-    <header className="sticky top-0 z-50 border-b border-sand/60 bg-cream/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 md:px-8">
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+        overHero
+          ? "bg-transparent"
+          : "border-b border-surface bg-white/95 shadow-sm backdrop-blur-md"
+      }`}
+    >
+      {/* Slim alerts row — no weather widget */}
+      <div
+        className={`border-b transition-colors ${
+          overHero
+            ? "border-white/15 bg-black/25"
+            : "border-surface bg-surface-soft"
+        }`}
+      >
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-1.5 md:px-8">
+          <a
+            href="#newsletter"
+            className={`inline-flex items-center gap-2 text-sm font-semibold transition ${
+              overHero
+                ? "text-accent hover:text-white"
+                : "text-accent hover:text-accent-deep"
+            }`}
+          >
+            <BellIcon />
+            Get Travel Alerts
+          </a>
+          <Link
+            href="/blog"
+            className={`hidden text-sm font-semibold uppercase tracking-wide sm:inline ${
+              overHero
+                ? "text-white/80 hover:text-white"
+                : "text-text hover:text-accent"
+            }`}
+          >
+            Latest from the road
+          </Link>
+        </div>
+      </div>
+
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 md:px-8 md:py-3.5">
         <Link
           href="/"
-          className="font-display text-xl tracking-tight text-ink transition hover:text-terracotta md:text-2xl"
+          className="relative z-10 shrink-0"
           onClick={closeAll}
+          aria-label="Alex Journly home"
         >
-          {site.name}
+          <Image
+            src="/brand/logo-alex-journly.png"
+            alt="alex journly"
+            width={200}
+            height={55}
+            priority
+            className={`h-8 w-auto transition md:h-10 ${
+              overHero ? "brightness-0 invert" : ""
+            }`}
+          />
         </Link>
 
-        <nav className="hidden items-center gap-7 lg:gap-8 md:flex" aria-label="Primary">
+        <nav
+          className="hidden items-center gap-6 lg:gap-7 md:flex"
+          aria-label="Primary"
+        >
           <div className="relative" ref={destWrapRef}>
             <button
               ref={destButtonRef}
               type="button"
-              className="inline-flex items-center gap-1.5 text-sm font-medium tracking-wide text-ink-soft transition hover:text-terracotta"
+              className={`inline-flex items-center gap-1.5 font-sans text-sm font-extrabold uppercase tracking-wide transition ${navLinkClass}`}
               aria-expanded={destOpen}
               aria-haspopup="true"
               aria-controls={destMenuId}
@@ -106,7 +171,9 @@ export function Header() {
               }}
             >
               Destinations
-              <ChevronDown open={destOpen} />
+              <span className={chevronClass}>
+                <ChevronDown open={destOpen} />
+              </span>
             </button>
 
             {destOpen && (
@@ -114,17 +181,17 @@ export function Header() {
                 id={destMenuId}
                 role="menu"
                 aria-label="Destinations"
-                className="absolute left-0 top-full z-50 mt-3 min-w-[14rem] rounded-xl border border-sand/80 bg-surface py-2 shadow-[0_16px_40px_-20px_rgba(28,25,23,0.45)]"
+                className="absolute left-0 top-full z-50 mt-3 min-w-[14rem] rounded-xl border border-surface bg-white py-2 shadow-[0_16px_40px_-20px_rgba(12,13,14,0.35)]"
               >
                 <Link
                   href="/destinations"
                   role="menuitem"
-                  className="block px-4 py-2 text-sm font-medium text-ink transition hover:bg-cream-deep hover:text-terracotta"
+                  className="block px-4 py-2 text-sm font-semibold text-heading transition hover:bg-surface-soft hover:text-accent"
                   onClick={closeDest}
                 >
                   All destinations
                 </Link>
-                <div className="my-1 border-t border-sand/60" />
+                <div className="my-1 border-t border-surface" />
 
                 {destinationsTree.map((continent) => {
                   const hasRegions = Boolean(continent.regions?.length);
@@ -138,7 +205,7 @@ export function Header() {
                           role="menuitem"
                           aria-expanded={isContinentOpen}
                           aria-haspopup="true"
-                          className="flex w-full items-center justify-between gap-4 px-4 py-2 text-left text-sm text-ink-soft transition hover:bg-cream-deep hover:text-terracotta"
+                          className="flex w-full items-center justify-between gap-4 px-4 py-2 text-left text-sm text-text transition hover:bg-surface-soft hover:text-accent"
                           onClick={() => {
                             setDesktopOpenContinent(
                               isContinentOpen ? null : continent.id,
@@ -156,14 +223,14 @@ export function Header() {
                         {isContinentOpen && (
                           <ul
                             role="menu"
-                            className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-sand/80 bg-surface py-2 shadow-[0_16px_40px_-20px_rgba(28,25,23,0.45)]"
+                            className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-surface bg-white py-2 shadow-[0_16px_40px_-20px_rgba(12,13,14,0.35)]"
                           >
                             {continent.countries.map((country) => (
                               <li key={country.slug} role="none">
                                 <Link
                                   href={`/destinations/${country.slug}`}
                                   role="menuitem"
-                                  className="block px-4 py-2 text-sm text-ink-soft transition hover:bg-cream-deep hover:text-terracotta"
+                                  className="block px-4 py-2 text-sm text-text transition hover:bg-surface-soft hover:text-accent"
                                   onClick={closeDest}
                                 >
                                   {country.name}
@@ -183,7 +250,7 @@ export function Header() {
                         role="menuitem"
                         aria-expanded={isContinentOpen}
                         aria-haspopup="true"
-                        className="flex w-full items-center justify-between gap-4 px-4 py-2 text-left text-sm text-ink-soft transition hover:bg-cream-deep hover:text-terracotta"
+                        className="flex w-full items-center justify-between gap-4 px-4 py-2 text-left text-sm text-text transition hover:bg-surface-soft hover:text-accent"
                         onClick={() => {
                           setDesktopOpenContinent(
                             isContinentOpen ? null : continent.id,
@@ -201,7 +268,7 @@ export function Header() {
                       {isContinentOpen && continent.regions && (
                         <ul
                           role="menu"
-                          className="absolute left-full top-0 ml-1 min-w-[13rem] rounded-xl border border-sand/80 bg-surface py-2 shadow-[0_16px_40px_-20px_rgba(28,25,23,0.45)]"
+                          className="absolute left-full top-0 ml-1 min-w-[13rem] rounded-xl border border-surface bg-white py-2 shadow-[0_16px_40px_-20px_rgba(12,13,14,0.35)]"
                         >
                           {continent.regions.map((region) => {
                             const isRegionOpen =
@@ -217,7 +284,7 @@ export function Header() {
                                   role="menuitem"
                                   aria-expanded={isRegionOpen}
                                   aria-haspopup="true"
-                                  className="flex w-full items-center justify-between gap-4 px-4 py-2 text-left text-sm text-ink-soft transition hover:bg-cream-deep hover:text-terracotta"
+                                  className="flex w-full items-center justify-between gap-4 px-4 py-2 text-left text-sm text-text transition hover:bg-surface-soft hover:text-accent"
                                   onClick={() =>
                                     setDesktopOpenRegion(
                                       isRegionOpen ? null : region.id,
@@ -233,14 +300,14 @@ export function Header() {
                                 {isRegionOpen && (
                                   <ul
                                     role="menu"
-                                    className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-sand/80 bg-surface py-2 shadow-[0_16px_40px_-20px_rgba(28,25,23,0.45)]"
+                                    className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-surface bg-white py-2 shadow-[0_16px_40px_-20px_rgba(12,13,14,0.35)]"
                                   >
                                     {region.countries.map((country) => (
                                       <li key={country.slug} role="none">
                                         <Link
                                           href={`/destinations/${country.slug}`}
                                           role="menuitem"
-                                          className="block px-4 py-2 text-sm text-ink-soft transition hover:bg-cream-deep hover:text-terracotta"
+                                          className="block px-4 py-2 text-sm text-text transition hover:bg-surface-soft hover:text-accent"
                                           onClick={closeDest}
                                         >
                                           {country.name}
@@ -265,16 +332,28 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium tracking-wide text-ink-soft transition hover:text-terracotta"
+              className={`font-sans text-sm font-extrabold uppercase tracking-wide transition ${navLinkClass}`}
             >
               {link.label}
             </Link>
           ))}
+
+          <Link
+            href="/destinations"
+            className="inline-flex items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-accent-deep"
+          >
+            Plan a trip
+          </Link>
         </nav>
 
+        {/* Mobile: hamburger only — never with full desktop nav */}
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-md p-2 text-ink md:hidden"
+          className={`inline-flex items-center justify-center rounded-md p-2.5 md:hidden ${
+            overHero
+              ? "bg-accent text-white"
+              : "bg-accent text-white"
+          }`}
           aria-expanded={mobileOpen}
           aria-controls="mobile-nav"
           onClick={() => setMobileOpen((v) => !v)}
@@ -286,7 +365,7 @@ export function Header() {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.75"
+            strokeWidth="2"
             aria-hidden="true"
           >
             {mobileOpen ? (
@@ -301,14 +380,14 @@ export function Header() {
       {mobileOpen && (
         <nav
           id="mobile-nav"
-          className="border-t border-sand/60 bg-cream px-5 py-4 md:hidden"
+          className="max-h-[min(80vh,32rem)] overflow-y-auto border-t border-surface bg-white px-5 py-4 md:hidden"
           aria-label="Mobile"
         >
           <ul className="flex flex-col gap-1">
             <li>
               <button
                 type="button"
-                className="flex w-full items-center justify-between py-2 text-base font-medium text-ink-soft transition hover:text-terracotta"
+                className="flex w-full items-center justify-between py-2.5 text-base font-extrabold uppercase tracking-wide text-heading"
                 aria-expanded={mobileDestOpen}
                 onClick={() => setMobileDestOpen((v) => !v)}
               >
@@ -316,11 +395,11 @@ export function Header() {
                 <ChevronDown open={mobileDestOpen} />
               </button>
               {mobileDestOpen && (
-                <ul className="mb-2 ml-3 border-l border-sand/70 pl-3">
+                <ul className="mb-2 ml-3 border-l border-surface pl-3">
                   <li>
                     <Link
                       href="/destinations"
-                      className="block py-1.5 text-sm text-ink-soft hover:text-terracotta"
+                      className="block py-1.5 text-sm text-text hover:text-accent"
                       onClick={closeAll}
                     >
                       All destinations
@@ -332,7 +411,7 @@ export function Header() {
                       <li key={continent.id}>
                         <button
                           type="button"
-                          className="flex w-full items-center justify-between py-1.5 text-sm font-medium text-ink transition hover:text-terracotta"
+                          className="flex w-full items-center justify-between py-1.5 text-sm font-semibold text-heading"
                           aria-expanded={continentOpen}
                           onClick={() =>
                             setMobileContinent(
@@ -344,12 +423,12 @@ export function Header() {
                           <ChevronDown open={continentOpen} />
                         </button>
                         {continentOpen && (
-                          <ul className="mb-1 ml-2 border-l border-sand/60 pl-3">
+                          <ul className="mb-1 ml-2 border-l border-surface pl-3">
                             {continent.countries?.map((country) => (
                               <li key={country.slug}>
                                 <Link
                                   href={`/destinations/${country.slug}`}
-                                  className="block py-1.5 text-sm text-ink-soft hover:text-terracotta"
+                                  className="block py-1.5 text-sm text-text hover:text-accent"
                                   onClick={closeAll}
                                 >
                                   {country.name}
@@ -362,7 +441,7 @@ export function Header() {
                                 <li key={region.id}>
                                   <button
                                     type="button"
-                                    className="flex w-full items-center justify-between py-1.5 text-sm font-medium text-ink-soft transition hover:text-terracotta"
+                                    className="flex w-full items-center justify-between py-1.5 text-sm font-medium text-text"
                                     aria-expanded={regionOpen}
                                     onClick={() =>
                                       setMobileRegion(
@@ -374,12 +453,12 @@ export function Header() {
                                     <ChevronDown open={regionOpen} />
                                   </button>
                                   {regionOpen && (
-                                    <ul className="mb-1 ml-2 border-l border-sand/50 pl-3">
+                                    <ul className="mb-1 ml-2 border-l border-surface pl-3">
                                       {region.countries.map((country) => (
                                         <li key={country.slug}>
                                           <Link
                                             href={`/destinations/${country.slug}`}
-                                            className="block py-1.5 text-sm text-ink-soft hover:text-terracotta"
+                                            className="block py-1.5 text-sm text-text hover:text-accent"
                                             onClick={closeAll}
                                           >
                                             {country.name}
@@ -403,17 +482,51 @@ export function Header() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="block py-2 text-base font-medium text-ink-soft transition hover:text-terracotta"
+                  className="block py-2.5 text-base font-extrabold uppercase tracking-wide text-heading hover:text-accent"
                   onClick={closeAll}
                 >
                   {link.label}
                 </Link>
               </li>
             ))}
+            <li className="pt-2">
+              <Link
+                href="/destinations"
+                className="inline-flex w-full items-center justify-center rounded-md bg-accent px-4 py-3 text-sm font-bold uppercase tracking-wide text-white"
+                onClick={closeAll}
+              >
+                Plan a trip
+              </Link>
+            </li>
           </ul>
         </nav>
       )}
     </header>
+  );
+}
+
+function BellIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+    >
+      <path
+        d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10 21a2 2 0 0 0 4 0"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

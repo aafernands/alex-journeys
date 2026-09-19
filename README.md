@@ -1,6 +1,6 @@
-# Fernandes Journeys — Travel Blog
+# Alex Journly / Fernandes Journeys — Travel Blog
 
-Alex’s personal travel blog for real journeys, destinations, and notes from the road. Built as **Fernandes Journeys** — a finished first version you can deploy and customize.
+Alex’s personal travel journal — destinations from past trips, trip notes, and photos from the road. Brand wordmark **Alex Journly**; journal voice **Fernandes Journeys**.
 
 **Live:** [travel-lifestyle-site.vercel.app](https://travel-lifestyle-site.vercel.app)  
 **Repo:** [github.com/aafernands/travel-lifestyle-site](https://github.com/aafernands/travel-lifestyle-site)
@@ -9,22 +9,18 @@ Alex’s personal travel blog for real journeys, destinations, and notes from th
 
 - **Next.js** (App Router) + **TypeScript**
 - **Tailwind CSS** v4
-- **next/font** — Cormorant Garamond (display) + DM Sans (body)
+- **next/font** — Montserrat (display) + Open Sans (body)
 - Blog posts as cleaned JSON under `src/content/posts/`
-- Remote images from **WordPress/CDN** (alexjournly.com, i0.wp.com) and Unsplash for the hero
+- Remote images from **WordPress/CDN** (alexjournly.com, i0.wp.com) and Unsplash
 
 ## WordPress migration
 
-Blog content was migrated from the WordPress site **[alexjournly.com](https://alexjournly.com)** (REST API export).
+Blog content was migrated from **[alexjournly.com](https://alexjournly.com)** (REST API export).
 
-- Source inventory: see `/workspace/wp-migration/` locally (or re-export from WP)
 - Migration script: `scripts/migrate-wp-posts.mjs`
 - Output: `src/content/posts/*.json` (30 posts) + `_index.json`
 - Original publish dates and slugs are preserved
-- HTML is cleaned (scripts, tracking widgets, WP class noise removed; headings, paragraphs, lists, images, and links kept)
 - Featured images remain remote URLs for v1
-
-Re-run the migrator if the source JSON is updated:
 
 ```bash
 node scripts/migrate-wp-posts.mjs
@@ -32,10 +28,14 @@ node scripts/migrate-wp-posts.mjs
 
 ## Design
 
-- Warm ivory / cream canvas with charcoal ink, terracotta accents, and soft sage
-- Editorial typography and generous spacing
-- Mobile-first layout, sticky header, restrained hover/fade motion
-- Semantic HTML, visible focus rings, skip link, and `prefers-reduced-motion` support
+Restyled to match the WordPress editorial look (with fixes):
+
+- Light, photo-led travel editorial — full-bleed hero, uppercase Montserrat headlines
+- Accent orange `#F97316` for primary CTAs only; link blue `#2192DD`; surfaces `#E7EBF0`
+- Sticky header: transparent over hero → frosted white after scroll; logo wordmark in header
+- Destination **photo** pills; **Hidden Gems** featured tray; Traveler’s Journal footer
+- Post pages: dark full-bleed hero, byline, 18/27 body, disclosure + TOC
+- **Not** copied: fixed orange dock, stuck weather widget, Elementor clutter, dual hamburger+nav
 
 ## Run locally
 
@@ -46,57 +46,10 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-Other scripts:
-
 ```bash
-npm run build   # production build
-npm run start   # serve the production build
-npm run lint    # ESLint
+npm run build
 ```
 
-## Customize content
+## Deploy
 
-| What | Where |
-| --- | --- |
-| Site name, hero, about, favorites | `src/data/content.ts` |
-| Destinations tree | `src/data/destinations.ts` |
-| Blog posts | `src/content/posts/` |
-| Homepage featured posts | `src/content/posts/_index.json` → `featuredHomepage` |
-
-Sections are React components under `src/components/`. Blog routes: `/blog` and `/blog/[slug]`.
-
-## Deploy (Vercel)
-
-1. Push this repo to GitHub (already set up for `aafernands/travel-lifestyle-site`).
-2. Import the project in [Vercel](https://vercel.com/new).
-3. Framework preset: **Next.js** — build command `npm run build`, output handled automatically.
-4. Deploy. Optional: add a custom domain in the Vercel project settings.
-
-You can also deploy with the Vercel CLI:
-
-```bash
-npx vercel
-```
-
-## Image attribution
-
-- **Blog featured / inline images:** hosted on alexjournly.com / Jetpack CDN (`i0.wp.com`) from the WordPress migration.
-- **Hero:** [Travel journal](https://unsplash.com/photos/X5BWooeOZew) on Unsplash (photo-1488646953014-85cb44e25828). Unsplash [License](https://unsplash.com/license): free to use; attribution appreciated but not required.
-
-## Project structure
-
-```
-src/
-  app/             # App Router — home, /blog, /destinations
-  components/      # Header, Hero, Stories, About, blog cards, …
-  content/posts/   # Migrated post JSON
-  data/            # Site copy + destinations
-  lib/posts.ts     # Post loaders
-scripts/
-  migrate-wp-posts.mjs
-```
-
-## Notes
-
-- Newsletter form is UI-only (prevents default submit). Wire to Buttondown, Mailchimp, Resend, etc. when ready.
-- Social links and `hello@fernandesjourneys.com` are placeholders.
+Connected to Vercel from `main`. Push to deploy.

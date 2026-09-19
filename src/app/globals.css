@@ -1,34 +1,42 @@
 @import "tailwindcss";
 
 :root {
-  --cream: #f7f3ee;
-  --cream-deep: #efe8df;
-  --ink: #1c1917;
-  --ink-soft: #44403c;
-  --muted: #78716c;
-  --terracotta: #c45c26;
-  --terracotta-deep: #a34a1c;
-  --sage: #5c6b5a;
-  --sage-soft: #e4ebe3;
-  --sand: #d6c4b0;
-  --white: #fffcf8;
-  --ring: #c45c26;
+  /* Brand — observed from alexjournly.com */
+  --accent: #f97316;
+  --accent-deep: #ea580c;
+  --bg: #ffffff;
+  --surface: #e7ebf0;
+  --surface-soft: #eef1f4;
+  --text: #333333;
+  --heading: #181818;
+  --near-black: #0c0d0e;
+  --link: #2192dd;
+  --muted: #8a8a8c;
+  --muted-light: #c3c3c3;
+  --sand: #ddd3c7;
+  --steel: #5180a0;
+  --white: #ffffff;
+  --hero-type: #e7ebf0;
+  --ring: #f97316;
 }
 
 @theme inline {
-  --color-cream: var(--cream);
-  --color-cream-deep: var(--cream-deep);
-  --color-ink: var(--ink);
-  --color-ink-soft: var(--ink-soft);
+  --color-accent: var(--accent);
+  --color-accent-deep: var(--accent-deep);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-soft: var(--surface-soft);
+  --color-text: var(--text);
+  --color-heading: var(--heading);
+  --color-near-black: var(--near-black);
+  --color-link: var(--link);
   --color-muted: var(--muted);
-  --color-terracotta: var(--terracotta);
-  --color-terracotta-deep: var(--terracotta-deep);
-  --color-sage: var(--sage);
-  --color-sage-soft: var(--sage-soft);
+  --color-muted-light: var(--muted-light);
   --color-sand: var(--sand);
-  --color-surface: var(--white);
-  --font-display: var(--font-cormorant);
-  --font-sans: var(--font-dm-sans);
+  --color-steel: var(--steel);
+  --color-hero-type: var(--hero-type);
+  --font-display: var(--font-montserrat);
+  --font-sans: var(--font-open-sans);
 }
 
 html {
@@ -50,14 +58,16 @@ html {
 }
 
 body {
-  background: var(--cream);
-  color: var(--ink);
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-open-sans), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--terracotta) 28%, transparent);
-  color: var(--ink);
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  color: var(--heading);
 }
 
 :focus-visible {
@@ -66,22 +76,42 @@ body {
 }
 
 .font-display {
-  font-family: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  font-family: var(--font-montserrat), system-ui, sans-serif;
 }
 
-.sample-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.65rem;
+/* Type scale: 14 / 16 / 20 / 32 / 56 */
+.text-label {
+  font-size: 0.75rem; /* 12 */
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--muted);
-  background: var(--cream-deep);
-  border: 1px solid color-mix(in srgb, var(--sand) 70%, transparent);
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
+}
+
+.text-sm-tight {
+  font-size: 0.875rem; /* 14 */
+  line-height: 1.45;
+}
+
+.text-body {
+  font-size: 1rem; /* 16 */
+  line-height: 1.5;
+}
+
+.text-lead {
+  font-size: 1.25rem; /* 20 */
+  line-height: 1.45;
+}
+
+.text-title {
+  font-size: 2rem; /* 32 */
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.text-display {
+  font-size: clamp(2.25rem, 5vw, 3.5rem); /* ~36–56 */
+  line-height: 1.1;
+  font-weight: 700;
 }
 
 @keyframes fade-up {
@@ -111,26 +141,11 @@ body {
   animation-delay: 0.3s;
 }
 
-.grain {
-  position: relative;
-}
-
-.grain::after {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  mix-blend-mode: multiply;
-}
-
-
-/* Migrated WordPress post body */
+/* Migrated WordPress post body — 18/27 Open Sans */
 .post-prose {
-  color: var(--ink-soft);
-  font-size: 1.05rem;
-  line-height: 1.75;
+  color: var(--text);
+  font-size: 1.125rem; /* 18 */
+  line-height: 1.5; /* 27 */
 }
 
 .post-prose > * + * {
@@ -140,10 +155,10 @@ body {
 .post-prose h2,
 .post-prose h3,
 .post-prose h4 {
-  color: var(--ink);
-  font-family: var(--font-cormorant), Georgia, serif;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  color: var(--heading);
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   line-height: 1.25;
   margin-top: 1.75em;
 }
@@ -153,17 +168,17 @@ body {
 }
 
 .post-prose h3 {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
 }
 
 .post-prose a {
-  color: var(--terracotta);
+  color: var(--link);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .post-prose a:hover {
-  color: var(--terracotta-deep);
+  color: var(--accent);
 }
 
 .post-prose ul,
@@ -176,7 +191,7 @@ body {
 }
 
 .post-prose blockquote {
-  border-left: 3px solid var(--sand);
+  border-left: 3px solid var(--surface);
   padding-left: 1em;
   color: var(--muted);
   font-style: italic;
@@ -190,24 +205,35 @@ body {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 0.75rem;
+  border-radius: 0.625rem;
 }
 
 .post-prose figcaption {
   margin-top: 0.5em;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   color: var(--muted);
   text-align: center;
 }
 
 .post-prose strong,
 .post-prose b {
-  color: var(--ink);
+  color: var(--heading);
   font-weight: 600;
 }
 
 .post-prose hr {
   border: none;
-  border-top: 1px solid color-mix(in srgb, var(--sand) 80%, transparent);
+  border-top: 1px solid var(--surface);
   margin: 2em 0;
+}
+
+.post-prose .lede {
+  font-style: italic;
+  text-align: center;
+  font-size: 1.2rem;
+  line-height: 1.55;
+  color: var(--heading);
+  max-width: 38rem;
+  margin-left: auto;
+  margin-right: auto;
 }

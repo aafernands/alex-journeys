@@ -1,34 +1,34 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, DM_Sans } from "next/font/google";
+import { Montserrat, Open_Sans } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
 
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "600", "700", "800", "900"],
   display: "swap",
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const openSans = Open_Sans({
+  variable: "--font-open-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "600", "700", "800"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "Fernandes Journeys — Travel Blog",
-    template: "%s · Fernandes Journeys",
+    default: "Alex Journly — Travel Journal",
+    template: "%s · Alex Journly",
   },
   description:
-    "Fernandes Journeys is Alex’s personal travel blog — destinations from past trips and notes from the road.",
+    "Alex Journly is a personal travel journal — destinations from past trips, trip notes, and photos from the road. Also known as Fernandes Journeys.",
   openGraph: {
-    title: "Fernandes Journeys — Travel Blog",
+    title: "Alex Journly — Travel Journal",
     description:
-      "Fernandes Journeys is Alex’s personal travel blog — destinations from past trips and notes from the road.",
+      "Personal travel journal — destinations from past trips and notes from the road.",
     type: "website",
     locale: "en_US",
   },
@@ -42,7 +42,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cormorant.variable} ${dmSans.variable} h-full antialiased`}
+      className={`${montserrat.variable} ${openSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
         <Header />
