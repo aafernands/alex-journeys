@@ -52,6 +52,9 @@ export default function AboutPage() {
           <Link href="/start-here" className="btn btn-primary btn-block sm:w-auto">
             Start here
           </Link>
+          <Link href="/media-kit" className="btn btn-secondary btn-block sm:w-auto">
+            Media kit
+          </Link>
           <Link href="/contact" className="btn btn-secondary btn-block sm:w-auto">
             Contact
           </Link>

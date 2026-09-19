@@ -20,6 +20,7 @@ const explore = [
 
 const company = [
   { href: "/about", label: "About" },
+  { href: "/media-kit", label: "Media kit" },
   { href: "/contact", label: "Contact" },
   { href: "/policies", label: "Policies" },
 ];
