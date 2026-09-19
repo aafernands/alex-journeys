@@ -17,8 +17,10 @@ export default function DestinationsIndexPage() {
           Places I&apos;ve been
         </h1>
         <p className="mt-4 max-w-2xl text-lead text-text">
-          A map of past trips — not a catalog to book from. Each page collects
-          notes and photos from journeys already taken.
+          Whether you&apos;re dreaming of icy adventures in Iceland, beach
+          escapes in Mexico, or vibrant cities across Europe and South America —
+          you&apos;re in the right place. This is a map of past trips and
+          personal stories, not a catalog to book from.
         </p>
 
         <div className="mt-12 space-y-12">

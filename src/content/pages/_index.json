@@ -1,0 +1,74 @@
+{
+  "migratedAt": "2026-09-19T20:24:54.507Z",
+  "source": "alexjournly.com WordPress via wpcom-mcp-content-authoring",
+  "pages": [
+    "policies",
+    "culinary",
+    "travel-wallet"
+  ],
+  "hubs": [
+    "resources",
+    "experiences",
+    "bucket-list",
+    "contact",
+    "plan-your-trip"
+  ],
+  "skipped": [
+    {
+      "slug": "sustainability",
+      "reason": "Mostly lorem ipsum placeholder + broken carbon calculator; sustainable-travel-tips blog post already covers the topic"
+    },
+    {
+      "slug": "inspiration",
+      "reason": "Empty content"
+    },
+    {
+      "slug": "inspiration-2",
+      "reason": "Empty duplicate"
+    },
+    {
+      "slug": "culinary-2",
+      "reason": "Duplicate of culinary"
+    },
+    {
+      "slug": "contact-2",
+      "reason": "Duplicate of contact; kept contact (newer modified)"
+    },
+    {
+      "slug": "bucket-list-2",
+      "reason": "Duplicate post-grid of bucket-list"
+    },
+    {
+      "slug": "travel-wallet-2",
+      "reason": "Duplicate of travel-wallet"
+    },
+    {
+      "slug": "budgeting-for-travel",
+      "reason": "Empty page (no editorial body)"
+    },
+    {
+      "slug": "things-to-do",
+      "reason": "Empty page"
+    },
+    {
+      "slug": "tours-and-activities",
+      "reason": "Empty page / booking-adjacent"
+    },
+    {
+      "slug": "get-travel-insurance",
+      "reason": "Empty page; insurance guide already a blog post"
+    },
+    {
+      "slug": "destinations",
+      "reason": "Already rebuilt as /destinations in Next.js; kept existing design"
+    }
+  ],
+  "draft": "ios-26-boarding-pass-experience (stored under src/content/drafts/, not published)",
+  "nav": {
+    "source": "WordPress Blog Menu id 42 + Trip Planner affiliates",
+    "icons": "lucide-react (replaced Font Awesome)",
+    "skipped": [
+      "Login"
+    ]
+  }
+}

@@ -63,11 +63,11 @@ export function Footer() {
                 <span>
                   By entering your email, you agree to receive Alex Journly
                   emails and agree to our{" "}
-                  <Link href="/#newsletter" className="text-link underline">
+                  <Link href="/policies" className="text-link underline">
                     Terms and Conditions
                   </Link>{" "}
                   and{" "}
-                  <Link href="/#newsletter" className="text-link underline">
+                  <Link href="/policies" className="text-link underline">
                     Privacy Policy
                   </Link>
                   .
@@ -138,11 +138,20 @@ export function Footer() {
             <Link href="/blog" className="text-link hover:text-accent">
               Blog
             </Link>
-            <Link href="/destinations" className="text-link hover:text-accent">
-              Destinations
+            <Link href="/experiences" className="text-link hover:text-accent">
+              Experiences
             </Link>
-            <Link href="/#newsletter" className="text-link hover:text-accent">
-              Privacy
+            <Link href="/resources" className="text-link hover:text-accent">
+              Resources
+            </Link>
+            <Link href="/plan-your-trip" className="text-link hover:text-accent">
+              Trip Planner
+            </Link>
+            <Link href="/contact" className="text-link hover:text-accent">
+              Contact
+            </Link>
+            <Link href="/policies" className="text-link hover:text-accent">
+              Policies
             </Link>
           </nav>
         </div>

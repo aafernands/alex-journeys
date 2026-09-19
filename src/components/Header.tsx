@@ -3,12 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { TopicFlyout } from "@/components/header/TopicFlyout";
+import { MobileTopicSection } from "@/components/header/MobileTopicSection";
 import { destinationsTree } from "@/data/destinations";
+import { experiencesNav, resourcesNav } from "@/data/nav";
 
 const links = [
   { href: "/blog", label: "Blog" },
-  { href: "/#hidden-gems", label: "Stories" },
-  { href: "/#newsletter", label: "Journal" },
+  { href: "/plan-your-trip", label: "Trip Planner" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export function Header() {
@@ -328,6 +331,21 @@ export function Header() {
             )}
           </div>
 
+          <TopicFlyout
+            label="Experiences"
+            href="/experiences"
+            items={experiencesNav}
+            navLinkClass={navLinkClass}
+            chevronClass={chevronClass}
+          />
+          <TopicFlyout
+            label="Resources"
+            href="/resources"
+            items={resourcesNav}
+            navLinkClass={navLinkClass}
+            chevronClass={chevronClass}
+          />
+
           {links.map((link) => (
             <Link
               key={link.href}
@@ -339,10 +357,10 @@ export function Header() {
           ))}
 
           <Link
-            href="/destinations"
+            href="/plan-your-trip"
             className="inline-flex items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-accent-deep"
           >
-            Plan a trip
+            Trip Planner
           </Link>
         </nav>
 
@@ -478,6 +496,18 @@ export function Header() {
                 </ul>
               )}
             </li>
+            <MobileTopicSection
+              label="Experiences"
+              href="/experiences"
+              items={experiencesNav}
+              onNavigate={closeAll}
+            />
+            <MobileTopicSection
+              label="Resources"
+              href="/resources"
+              items={resourcesNav}
+              onNavigate={closeAll}
+            />
             {links.map((link) => (
               <li key={link.href}>
                 <Link
@@ -491,11 +521,11 @@ export function Header() {
             ))}
             <li className="pt-2">
               <Link
-                href="/destinations"
+                href="/plan-your-trip"
                 className="inline-flex w-full items-center justify-center rounded-md bg-accent px-4 py-3 text-sm font-bold uppercase tracking-wide text-white"
                 onClick={closeAll}
               >
-                Plan a trip
+                Trip Planner
               </Link>
             </li>
           </ul>

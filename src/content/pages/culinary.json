@@ -1,0 +1,13 @@
+{
+  "slug": "culinary",
+  "title": "Culinary Adventures",
+  "label": "Food & culture",
+  "description": "Exploring the world one bite at a time — Icelandic seafood, Brazilian classics, and street-food finds from the road.",
+  "contentHtml": "<p class=\"lede\">Food is more than just sustenance — it’s a gateway to culture, history, and tradition. On this journey, I delve into the flavors that define each destination I visit, from the street food stalls of bustling cities to the hidden gems tucked away in quiet corners.</p>\n<h2>Icelandic Cuisine: A Fusion of Tradition and Innovation</h2>\n<p>In Iceland, the culinary scene offers a perfect balance of tradition and modernity. From hearty seafood stews to experimental dishes using local ingredients, Icelandic food is a treat for the senses. Don’t miss out on their legendary coastal markets, where the freshest catches of the day are transformed into mouth-watering meals.</p>\n<h2>Brazilian Delights: A Taste of Home</h2>\n<p>Having grown up in Brazil, I have a deep connection to its vibrant culinary traditions. Brazilian food is a feast of flavors — bold, colorful, and full of life. Whether it’s the smoky goodness of churrasco, the comforting bowl of feijoada, or the sweet indulgence of brigadeiros, each dish brings back fond memories and new experiences.</p>\n<h2>Street Food Treasures: Finding Hidden Gems</h2>\n<p>Wherever I travel, street food is always on my must-try list. There’s something magical about discovering a vendor whose dishes transport you straight into the heart of their culture. Whether it’s spicy noodles in Southeast Asia, tacos in Mexico, or crepes in Paris, street food offers authentic, unfiltered glimpses into local life.</p>\n<h2>A Global Feast: Other Culinary Wonders</h2>\n<p>As I continue to explore the world, I’m constantly amazed by the diversity of flavors out there. From the delicate pastas of Italy to the aromatic spices of India, each meal tells a unique story. I’ll share my discoveries, along with tips for finding the best eats wherever you are.</p>",
+  "source": {
+    "site": "https://alexjournly.com",
+    "url": "https://alexjournly.com/culinary/",
+    "wpId": 175,
+    "wpSlug": "culinary"
+  }
+}
