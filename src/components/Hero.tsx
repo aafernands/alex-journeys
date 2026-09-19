@@ -13,17 +13,12 @@ export function Hero() {
         <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12 xl:gap-16">
           {/* Copy column */}
           <div className="lg:col-span-5 xl:col-span-5">
-            <p className="animate-fade-up inline-flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-heading">
-              <span
-                className="size-1.5 rounded-full bg-accent"
-                aria-hidden="true"
-              />
-              <span className="text-heading">{site.name}</span>
-              <span className="text-muted" aria-hidden="true">
-                /
-              </span>
+            <p className="journal-entry-label animate-fade-up">
+              <span aria-hidden="true">✦</span>
+              Field journal
+              <span className="text-muted">·</span>
               <span className="font-medium normal-case tracking-normal text-muted">
-                Personal travel journal
+                {site.name}
               </span>
             </p>
 
@@ -55,8 +50,8 @@ export function Hero() {
             </div>
 
             {/* Compact status strip — product density without nursing copy */}
-            <div className="animate-fade-up animate-delay-3 panel-soft mt-8 hidden p-4 sm:block">
-              <p className="text-label text-heading">From the road</p>
+            <div className="animate-fade-up animate-delay-3 panel-soft mt-8 hidden border-dashed p-4 sm:block">
+              <p className="text-label text-heading">Packed in this journal</p>
               <ul className="mt-3 grid gap-2 text-sm text-text sm:grid-cols-3">
                 <li className="flex items-center gap-2">
                   <span
@@ -85,16 +80,16 @@ export function Hero() {
 
           {/* Product window — travel photo framed in the same card language */}
           <div className="animate-fade-up animate-delay-2 lg:col-span-7 xl:col-span-7">
-            <div className="panel overflow-hidden shadow-sm">
+            <div className="panel relative overflow-hidden">
+              <div className="journal-tape absolute -top-2 right-6 z-10 rotate-3 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-heading">
+                Glued in
+              </div>
               <div className="window-chrome">
-                <span className="window-dot" aria-hidden="true" />
-                <span className="window-dot" aria-hidden="true" />
-                <span className="window-dot" aria-hidden="true" />
-                <span className="ml-2 truncate text-xs font-semibold text-muted">
+                <span className="font-display text-sm font-semibold text-heading">
                   Maroon Bells · Colorado
                 </span>
-                <span className="ml-auto hidden rounded-md border border-border bg-white px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-muted sm:inline">
-                  Field note
+                <span className="ml-auto hidden text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-muted sm:inline">
+                  Entry · photo log
                 </span>
               </div>
               <div className="relative aspect-[4/3] bg-surface sm:aspect-[16/11]">

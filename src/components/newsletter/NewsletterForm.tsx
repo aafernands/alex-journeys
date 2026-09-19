@@ -5,9 +5,11 @@ import { FormEvent, useState } from "react";
 
 type Props = {
   className?: string;
+  variant?: "dark" | "journal";
 };
 
-export function NewsletterForm({ className }: Props) {
+export function NewsletterForm({ className, variant = "dark" }: Props) {
+  const journal = variant === "journal";
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
     "idle",
@@ -58,9 +60,15 @@ export function NewsletterForm({ className }: Props) {
         placeholder="Enter your email"
         autoComplete="email"
         disabled={status === "loading" || status === "success"}
-        className="min-h-11 w-full rounded-lg border border-white/15 bg-white/10 px-4 text-sm text-white placeholder:text-white/45 transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:opacity-60"
+        className={
+          journal
+            ? "min-h-11 w-full rounded-sm border border-border bg-surface-soft px-4 text-sm text-heading placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25 disabled:opacity-60"
+            : "min-h-11 w-full rounded-lg border border-white/15 bg-white/10 px-4 text-sm text-white placeholder:text-white/45 transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:opacity-60"
+        }
       />
-      <label className="flex items-start gap-2.5 text-sm leading-snug text-white/65">
+      <label
+        className={`flex items-start gap-2.5 text-sm leading-snug ${journal ? "text-text/75" : "text-white/65"}`}
+      >
         <input
           type="checkbox"
           required
@@ -72,14 +80,22 @@ export function NewsletterForm({ className }: Props) {
           and agree to our{" "}
           <Link
             href="/policies"
-            className="text-white underline underline-offset-2 hover:text-accent"
+            className={
+              journal
+                ? "text-link underline underline-offset-2 hover:text-accent-deep"
+                : "text-white underline underline-offset-2 hover:text-accent"
+            }
           >
             Terms and Conditions
           </Link>{" "}
           and{" "}
           <Link
             href="/policies"
-            className="text-white underline underline-offset-2 hover:text-accent"
+            className={
+              journal
+                ? "text-link underline underline-offset-2 hover:text-accent-deep"
+                : "text-white underline underline-offset-2 hover:text-accent"
+            }
           >
             Privacy Policy
           </Link>
@@ -89,7 +105,7 @@ export function NewsletterForm({ className }: Props) {
       <button
         type="submit"
         disabled={status === "loading" || status === "success"}
-        className="btn btn-primary btn-block sm:w-auto disabled:opacity-60"
+        className="btn btn-ink btn-block sm:w-auto disabled:opacity-60"
       >
         {status === "loading"
           ? "Subscribing…"
@@ -100,7 +116,13 @@ export function NewsletterForm({ className }: Props) {
       {message ? (
         <p
           className={`text-sm ${
-            status === "error" ? "text-red-300" : "text-accent"
+            status === "error"
+              ? journal
+                ? "text-red-700"
+                : "text-red-300"
+              : journal
+                ? "text-accent-deep"
+                : "text-accent"
           }`}
           role={status === "error" ? "alert" : "status"}
         >
