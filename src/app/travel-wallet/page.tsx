@@ -21,7 +21,7 @@ export default function TravelWalletPage() {
       html={page.contentHtml}
       crumbs={[
         { href: "/", label: "Home" },
-        { href: "/resources", label: "Resources" },
+        { href: "/guides/money-budget", label: "Money & budget" },
         { label: "Travel Wallet" },
       ]}
     />

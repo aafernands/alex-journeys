@@ -22,7 +22,7 @@ export default function CulinaryPage() {
       html={page.contentHtml}
       crumbs={[
         { href: "/", label: "Home" },
-        { href: "/experiences", label: "Experiences" },
+        { href: "/guides/experiences", label: "Experiences" },
         { label: "Culinary" },
       ]}
     >
@@ -36,7 +36,7 @@ export default function CulinaryPage() {
           NJ Wine Expo
         </Link>
         {" · "}
-        <Link href="/experiences" className="text-link hover:text-accent">
+        <Link href="/guides/experiences" className="text-link hover:text-accent">
           all experiences
         </Link>
       </p>

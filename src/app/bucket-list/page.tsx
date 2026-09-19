@@ -23,7 +23,7 @@ export default function BucketListPage() {
       narrow={false}
       crumbs={[
         { href: "/", label: "Home" },
-        { href: "/experiences", label: "Experiences" },
+        { href: "/guides/experiences", label: "Experiences" },
         { label: "Bucket list" },
       ]}
     >

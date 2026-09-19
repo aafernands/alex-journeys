@@ -63,7 +63,7 @@ export function Hero() {
                     className="size-1.5 shrink-0 rounded-full bg-accent"
                     aria-hidden="true"
                   />
-                  Destinations visited
+                  Places visited
                 </li>
                 <li className="flex items-center gap-2">
                   <span

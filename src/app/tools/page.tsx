@@ -5,21 +5,21 @@ import { SitePage } from "@/components/pages/SitePage";
 import { tripPlannerTools } from "@/data/nav";
 
 export const metadata: Metadata = {
-  title: "Trip Planner",
+  title: "Tools I use",
   description:
     "Affiliate tools I actually use when planning trips — stays, flights, insurance, money, and connectivity.",
 };
 
-export default function PlanYourTripPage() {
+export default function ToolsPage() {
   return (
     <SitePage
       label="Tools from the road"
-      title="Trip Planner"
+      title="Tools I use"
       description="A short list of partners I use when planning — not a booking desk. Some links are affiliates; if you book through them I may earn a small commission at no extra cost to you."
       narrow={false}
       crumbs={[
         { href: "/", label: "Home" },
-        { label: "Trip Planner" },
+        { label: "Tools I use" },
       ]}
     >
       <ul className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -52,7 +52,10 @@ export default function PlanYourTripPage() {
 
       <p className="mt-10 text-sm text-muted">
         Related journal notes:{" "}
-        <Link href="/blog/travel-insurance-allianz-world-nomads" className="text-link hover:text-accent">
+        <Link
+          href="/blog/travel-insurance-allianz-world-nomads"
+          className="text-link hover:text-accent"
+        >
           travel insurance
         </Link>
         {" · "}
@@ -60,8 +63,8 @@ export default function PlanYourTripPage() {
           Wise review
         </Link>
         {" · "}
-        <Link href="/resources" className="text-link hover:text-accent">
-          all resources
+        <Link href="/guides" className="text-link hover:text-accent">
+          all guides
         </Link>
         {" · "}
         <Link href="/policies" className="text-link hover:text-accent">

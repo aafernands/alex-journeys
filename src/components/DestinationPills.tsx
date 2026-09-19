@@ -12,7 +12,7 @@ export function DestinationPills() {
       aria-labelledby="where-next-heading"
     >
       <SectionHead
-        eyebrow="Destinations"
+        eyebrow="Places"
         title="Places from the journal."
         titleId="where-next-heading"
         description="Photo-led stops from trips already taken — tap a place to browse related stories."

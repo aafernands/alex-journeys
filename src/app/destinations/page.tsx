@@ -3,7 +3,7 @@ import Link from "next/link";
 import { destinationsTree } from "@/data/destinations";
 
 export const metadata: Metadata = {
-  title: "Destinations",
+  title: "Places",
   description:
     "Places I’ve been — destinations from past trips on Alex Journly.",
 };
@@ -12,7 +12,7 @@ export default function DestinationsIndexPage() {
   return (
     <main className="bg-white">
       <div className="section-shell py-10 md:py-14">
-        <p className="eyebrow">Destinations</p>
+        <p className="eyebrow">Places</p>
         <h1 className="font-display mt-2 text-display text-heading">
           Places I&apos;ve been.
         </h1>
@@ -37,36 +37,17 @@ export default function DestinationsIndexPage() {
                 {continent.name}
               </h2>
 
-              {continent.countries && (
-                <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {continent.countries.map((country) => (
-                    <li key={country.slug}>
-                      <DestinationCard
-                        href={`/destinations/${country.slug}`}
-                        title={country.name}
-                        subtitle={country.region}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              {continent.regions?.map((region) => (
-                <div key={region.id} className="mt-8">
-                  <h3 className="eyebrow">{region.name}</h3>
-                  <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {region.countries.map((country) => (
-                      <li key={country.slug}>
-                        <DestinationCard
-                          href={`/destinations/${country.slug}`}
-                          title={country.name}
-                          subtitle={region.name}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+              <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {continent.countries.map((country) => (
+                  <li key={country.slug}>
+                    <DestinationCard
+                      href={`/destinations/${country.slug}`}
+                      title={country.name}
+                      subtitle={country.region}
+                    />
+                  </li>
+                ))}
+              </ul>
             </section>
           ))}
         </div>

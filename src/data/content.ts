@@ -30,19 +30,19 @@ export const about = {
 export const hero = {
   tagline: "Inspire. Capture. Discover.",
   subtitle:
-    "A personal travel blog sharing places I’ve been and notes from the road — destinations, trip stories, and photos from journeys already behind me.",
-  ctaPrimary: "Explore destinations",
-  ctaSecondary: "Read the blog",
+    "A personal travel blog sharing places I’ve been and notes from the road — places, stories, guides, and photos from journeys already behind me.",
+  ctaPrimary: "Explore places",
+  ctaSecondary: "Read stories",
   /** Maroon Bells sunrise — matches the WordPress hero mood */
   image:
     "https://i0.wp.com/alexjournly.com/wp-content/uploads/2026/06/A60C26AF-799C-4F17-8A9F-F97A75ADB417-e1780787677499.webp?fit=1320%2C1728&ssl=1",
   imageAlt: "Sunrise over Maroon Bells reflected in a calm alpine lake",
 };
 
-/** Homepage Start Here funnel cards */
+/** Homepage Start Here funnel cards — Places · Stories · Guides */
 export const startHereCards = [
   {
-    title: "Destinations",
+    title: "Places",
     href: "/destinations",
     icon: "map-pin",
     description:
@@ -50,20 +50,20 @@ export const startHereCards = [
     cta: "See places",
   },
   {
-    title: "Blog & stories",
+    title: "Stories",
     href: "/blog",
     icon: "book-open",
     description:
-      "Guides, sunrise chases, packing fails, and the long-form notes that didn’t fit a destination page.",
+      "Guides, sunrise chases, packing fails, and the long-form notes from the road.",
     cta: "Read stories",
   },
   {
-    title: "Resources",
-    href: "/resources",
-    icon: "backpack",
+    title: "Guides",
+    href: "/guides",
+    icon: "compass",
     description:
-      "Budget tips, gear, apps, and money notes I still use when the next ticket gets booked.",
-    cta: "Browse resources",
+      "Plan, money, packing, smarter travel, stays, and experiences — six hubs of notes I still use.",
+    cta: "Open guides",
   },
 ];
 

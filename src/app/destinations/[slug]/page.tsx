@@ -24,7 +24,7 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const dest = getDestinationBySlug(slug);
-  if (!dest) return { title: "Destination" };
+  if (!dest) return { title: "Place" };
   return {
     title: dest.name,
     description: `Notes from my trip to ${dest.name} — Alex Journly.`,
@@ -135,13 +135,13 @@ export default async function DestinationPage({ params }: PageProps) {
             href="/destinations"
             className="btn btn-secondary"
           >
-            ← All destinations
+            ← All places
           </Link>
           <Link
             href="/blog"
             className="btn btn-primary"
           >
-            Browse the blog
+            Browse stories
           </Link>
         </div>
       </div>

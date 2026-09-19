@@ -6,13 +6,13 @@ import { SitePage } from "@/components/pages/SitePage";
 export const metadata: Metadata = {
   title: "Start Here",
   description:
-    "New to Alex Journly? Start with destinations, blog stories, resources, and trip tools from this personal travel journal.",
+    "New to Alex Journly? Start with Places, Stories, Guides, and Tools from this personal travel journal.",
 };
 
 const steps = [
   {
     n: "01",
-    title: "Destinations",
+    title: "Places",
     href: "/destinations",
     icon: "map-pin",
     description:
@@ -20,7 +20,7 @@ const steps = [
   },
   {
     n: "02",
-    title: "Blog",
+    title: "Stories",
     href: "/blog",
     icon: "book-open",
     description:
@@ -28,17 +28,17 @@ const steps = [
   },
   {
     n: "03",
-    title: "Resources",
-    href: "/resources",
-    icon: "backpack",
+    title: "Guides",
+    href: "/guides",
+    icon: "compass",
     description:
-      "Budget tips, gear, apps, and money notes that still earn a spot in my bag.",
+      "Six hubs — plan, money, packing, smarter travel, stays, and experiences.",
   },
   {
     n: "04",
-    title: "Trip tools",
-    href: "/plan-your-trip",
-    icon: "compass",
+    title: "Tools",
+    href: "/tools",
+    icon: "suitcase",
     description:
       "Honest affiliate tools I use for stays, flights, insurance, and connectivity — not a booking desk.",
   },

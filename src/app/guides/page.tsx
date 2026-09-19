@@ -1,0 +1,51 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { NavIcon } from "@/components/icons/NavIcon";
+import { SitePage } from "@/components/pages/SitePage";
+import { guideHubs, guidesIntro } from "@/data/guides";
+
+export const metadata: Metadata = {
+  title: "Guides",
+  description: guidesIntro.description,
+};
+
+export default function GuidesPage() {
+  return (
+    <SitePage
+      label={guidesIntro.label}
+      title={guidesIntro.title}
+      description={guidesIntro.description}
+      narrow={false}
+      crumbs={[
+        { href: "/", label: "Home" },
+        { label: "Guides" },
+      ]}
+    >
+      <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {guideHubs.map((hub) => (
+          <li key={hub.slug}>
+            <Link
+              href={`/guides/${hub.slug}`}
+              className="panel-interactive group flex h-full gap-4 p-5"
+            >
+              <span className="panel-nested flex size-11 shrink-0 items-center justify-center bg-white text-accent">
+                <NavIcon name={hub.icon} size={20} />
+              </span>
+              <span>
+                <span className="font-display block text-lg font-bold text-heading">
+                  {hub.title}
+                </span>
+                <span className="mt-1 block text-sm leading-relaxed text-text">
+                  {hub.description}
+                </span>
+                <span className="mt-3 inline-block text-sm font-semibold text-link transition group-hover:text-accent">
+                  Open hub →
+                </span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </SitePage>
+  );
+}

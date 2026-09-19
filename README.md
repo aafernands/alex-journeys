@@ -12,7 +12,8 @@ Alex’s personal travel journal — destinations from past trips, trip notes, a
 - **next/font** — Montserrat (display) + Open Sans (body)
 - Blog posts as cleaned JSON under `src/content/posts/`
 - Static pages (policies, culinary, travel-wallet) under `src/content/pages/`
-- Topic hubs: `/resources`, `/experiences`, `/bucket-list`, `/contact`
+- Pillars: Places (`/destinations`), Stories (`/blog`), Guides (`/guides`), Tools (`/tools`)
+- Also: `/bucket-list`, `/start-here`, `/contact`
 - Unpublished draft: `src/content/drafts/` (not listed on /blog)
 - Remote images from **WordPress/CDN** (alexjournly.com, i0.wp.com) and Unsplash
 

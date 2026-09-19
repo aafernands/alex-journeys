@@ -6,20 +6,15 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { TopicFlyout } from "@/components/header/TopicFlyout";
 import { MobileTopicSection } from "@/components/header/MobileTopicSection";
+import { NavIcon } from "@/components/icons/NavIcon";
 import { destinationsTree } from "@/data/destinations";
-import {
-  experiencesNav,
-  resourcesMenuExtras,
-  resourcesNav,
-} from "@/data/nav";
+import { guidesNav } from "@/data/guides";
 
 type LatestPost = { slug: string; title: string };
 
 type Props = {
   latestPost?: LatestPost | null;
 };
-
-const resourcesFlyoutItems = [...resourcesMenuExtras, ...resourcesNav];
 
 export function Header({ latestPost = null }: Props) {
   const pathname = usePathname();
@@ -28,12 +23,8 @@ export function Header({ latestPost = null }: Props) {
   const [desktopOpenContinent, setDesktopOpenContinent] = useState<
     string | null
   >(null);
-  const [desktopOpenRegion, setDesktopOpenRegion] = useState<string | null>(
-    null,
-  );
   const [mobileDestOpen, setMobileDestOpen] = useState(false);
   const [mobileContinent, setMobileContinent] = useState<string | null>(null);
-  const [mobileRegion, setMobileRegion] = useState<string | null>(null);
 
   const destMenuId = useId();
   const destWrapRef = useRef<HTMLDivElement>(null);
@@ -42,14 +33,12 @@ export function Header({ latestPost = null }: Props) {
   const closeDest = useCallback(() => {
     setDestOpen(false);
     setDesktopOpenContinent(null);
-    setDesktopOpenRegion(null);
   }, []);
 
   const closeAll = useCallback(() => {
     setMobileOpen(false);
     setMobileDestOpen(false);
     setMobileContinent(null);
-    setMobileRegion(null);
     closeDest();
   }, [closeDest]);
 
@@ -99,7 +88,6 @@ export function Header({ latestPost = null }: Props) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-md">
-      {/* Slim metastrip */}
       <div className="border-b border-border bg-surface-soft">
         <div className="section-shell flex items-center justify-between gap-3 py-1.5">
           <a
@@ -161,10 +149,9 @@ export function Header({ latestPost = null }: Props) {
               onClick={() => {
                 setDestOpen((v) => !v);
                 setDesktopOpenContinent(null);
-                setDesktopOpenRegion(null);
               }}
             >
-              Destinations
+              Places
               <span className={chevronClass}>
                 <ChevronDown open={destOpen} />
               </span>
@@ -174,7 +161,7 @@ export function Header({ latestPost = null }: Props) {
               <div
                 id={destMenuId}
                 role="menu"
-                aria-label="Destinations"
+                aria-label="Places"
                 className="absolute left-0 top-full z-50 mt-3 min-w-[14rem] rounded-xl border border-border bg-white py-2"
               >
                 <Link
@@ -183,60 +170,12 @@ export function Header({ latestPost = null }: Props) {
                   className="block px-4 py-2 text-sm font-semibold text-heading transition hover:bg-surface-soft hover:text-accent"
                   onClick={closeDest}
                 >
-                  All destinations
+                  All places
                 </Link>
                 <div className="my-1 border-t border-surface" />
 
                 {destinationsTree.map((continent) => {
-                  const hasRegions = Boolean(continent.regions?.length);
                   const isContinentOpen = desktopOpenContinent === continent.id;
-
-                  if (!hasRegions && continent.countries) {
-                    return (
-                      <div key={continent.id} className="relative">
-                        <button
-                          type="button"
-                          role="menuitem"
-                          aria-expanded={isContinentOpen}
-                          aria-haspopup="true"
-                          className="flex w-full items-center justify-between gap-4 px-4 py-2 text-left text-sm text-text transition hover:bg-surface-soft hover:text-accent"
-                          onClick={() => {
-                            setDesktopOpenContinent(
-                              isContinentOpen ? null : continent.id,
-                            );
-                            setDesktopOpenRegion(null);
-                          }}
-                          onMouseEnter={() => {
-                            setDesktopOpenContinent(continent.id);
-                            setDesktopOpenRegion(null);
-                          }}
-                        >
-                          {continent.name}
-                          <ChevronRight />
-                        </button>
-                        {isContinentOpen && (
-                          <ul
-                            role="menu"
-                            className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-border bg-white py-2"
-                          >
-                            {continent.countries.map((country) => (
-                              <li key={country.slug} role="none">
-                                <Link
-                                  href={`/destinations/${country.slug}`}
-                                  role="menuitem"
-                                  className="block px-4 py-2 text-sm text-text transition hover:bg-surface-soft hover:text-accent"
-                                  onClick={closeDest}
-                                >
-                                  {country.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    );
-                  }
-
                   return (
                     <div key={continent.id} className="relative">
                       <button
@@ -249,70 +188,31 @@ export function Header({ latestPost = null }: Props) {
                           setDesktopOpenContinent(
                             isContinentOpen ? null : continent.id,
                           );
-                          setDesktopOpenRegion(null);
                         }}
                         onMouseEnter={() => {
                           setDesktopOpenContinent(continent.id);
-                          setDesktopOpenRegion(null);
                         }}
                       >
                         {continent.name}
                         <ChevronRight />
                       </button>
-                      {isContinentOpen && continent.regions && (
+                      {isContinentOpen && (
                         <ul
                           role="menu"
-                          className="absolute left-full top-0 ml-1 min-w-[13rem] rounded-xl border border-border bg-white py-2"
+                          className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-border bg-white py-2"
                         >
-                          {continent.regions.map((region) => {
-                            const isRegionOpen =
-                              desktopOpenRegion === region.id;
-                            return (
-                              <li
-                                key={region.id}
-                                role="none"
-                                className="relative"
+                          {continent.countries.map((country) => (
+                            <li key={country.slug} role="none">
+                              <Link
+                                href={`/destinations/${country.slug}`}
+                                role="menuitem"
+                                className="block px-4 py-2 text-sm text-text transition hover:bg-surface-soft hover:text-accent"
+                                onClick={closeDest}
                               >
-                                <button
-                                  type="button"
-                                  role="menuitem"
-                                  aria-expanded={isRegionOpen}
-                                  aria-haspopup="true"
-                                  className="flex w-full items-center justify-between gap-4 px-4 py-2 text-left text-sm text-text transition hover:bg-surface-soft hover:text-accent"
-                                  onClick={() =>
-                                    setDesktopOpenRegion(
-                                      isRegionOpen ? null : region.id,
-                                    )
-                                  }
-                                  onMouseEnter={() =>
-                                    setDesktopOpenRegion(region.id)
-                                  }
-                                >
-                                  {region.name}
-                                  <ChevronRight />
-                                </button>
-                                {isRegionOpen && (
-                                  <ul
-                                    role="menu"
-                                    className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-border bg-white py-2"
-                                  >
-                                    {region.countries.map((country) => (
-                                      <li key={country.slug} role="none">
-                                        <Link
-                                          href={`/destinations/${country.slug}`}
-                                          role="menuitem"
-                                          className="block px-4 py-2 text-sm text-text transition hover:bg-surface-soft hover:text-accent"
-                                          onClick={closeDest}
-                                        >
-                                          {country.name}
-                                        </Link>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-                              </li>
-                            );
-                          })}
+                                {country.name}
+                              </Link>
+                            </li>
+                          ))}
                         </ul>
                       )}
                     </div>
@@ -326,13 +226,13 @@ export function Header({ latestPost = null }: Props) {
             href="/blog"
             className={`font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
           >
-            Blog
+            Stories
           </Link>
 
           <TopicFlyout
-            label="Resources"
-            href="/resources"
-            items={resourcesFlyoutItems}
+            label="Guides"
+            href="/guides"
+            items={guidesNav}
             navLinkClass={navLinkClass}
             chevronClass={chevronClass}
           />
@@ -341,14 +241,11 @@ export function Header({ latestPost = null }: Props) {
             href="/start-here"
             className={`font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
           >
-            Start Here
+            Start here
           </Link>
 
-          <Link
-            href="/plan-your-trip"
-            className="btn btn-ink !min-h-9 !px-4 !py-1.5 text-sm"
-          >
-            Trip tools
+          <Link href="/tools" className="btn btn-ink !min-h-9 !px-4 !py-1.5 text-sm">
+            Tools I use
           </Link>
         </nav>
 
@@ -392,7 +289,10 @@ export function Header({ latestPost = null }: Props) {
                 aria-expanded={mobileDestOpen}
                 onClick={() => setMobileDestOpen((v) => !v)}
               >
-                Destinations
+                <span className="inline-flex items-center gap-2.5">
+                  <NavIcon name="map-pin" size={18} className="text-accent" />
+                  Places
+                </span>
                 <ChevronDown open={mobileDestOpen} />
               </button>
               {mobileDestOpen && (
@@ -403,7 +303,7 @@ export function Header({ latestPost = null }: Props) {
                       className="block py-1.5 text-sm text-text hover:text-accent"
                       onClick={closeAll}
                     >
-                      All destinations
+                      All places
                     </Link>
                   </li>
                   {destinationsTree.map((continent) => {
@@ -425,7 +325,7 @@ export function Header({ latestPost = null }: Props) {
                         </button>
                         {continentOpen && (
                           <ul className="mb-1 ml-2 border-l border-border pl-3">
-                            {continent.countries?.map((country) => (
+                            {continent.countries.map((country) => (
                               <li key={country.slug}>
                                 <Link
                                   href={`/destinations/${country.slug}`}
@@ -436,41 +336,6 @@ export function Header({ latestPost = null }: Props) {
                                 </Link>
                               </li>
                             ))}
-                            {continent.regions?.map((region) => {
-                              const regionOpen = mobileRegion === region.id;
-                              return (
-                                <li key={region.id}>
-                                  <button
-                                    type="button"
-                                    className="flex w-full items-center justify-between py-1.5 text-sm font-medium text-text"
-                                    aria-expanded={regionOpen}
-                                    onClick={() =>
-                                      setMobileRegion(
-                                        regionOpen ? null : region.id,
-                                      )
-                                    }
-                                  >
-                                    {region.name}
-                                    <ChevronDown open={regionOpen} />
-                                  </button>
-                                  {regionOpen && (
-                                    <ul className="mb-1 ml-2 border-l border-border pl-3">
-                                      {region.countries.map((country) => (
-                                        <li key={country.slug}>
-                                          <Link
-                                            href={`/destinations/${country.slug}`}
-                                            className="block py-1.5 text-sm text-text hover:text-accent"
-                                            onClick={closeAll}
-                                          >
-                                            {country.name}
-                                          </Link>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  )}
-                                </li>
-                              );
-                            })}
                           </ul>
                         )}
                       </li>
@@ -483,41 +348,46 @@ export function Header({ latestPost = null }: Props) {
             <li>
               <Link
                 href="/blog"
-                className="block py-2.5 text-base font-semibold tracking-tight text-heading hover:text-accent"
+                className="flex items-center gap-2.5 py-2.5 text-base font-semibold tracking-tight text-heading hover:text-accent"
                 onClick={closeAll}
               >
-                Blog
+                <NavIcon name="book-open" size={18} className="text-accent" />
+                Stories
               </Link>
             </li>
 
             <MobileTopicSection
-              label="Resources"
-              href="/resources"
-              items={resourcesFlyoutItems}
+              label="Guides"
+              href="/guides"
+              items={guidesNav}
               onNavigate={closeAll}
             />
 
             <li>
               <Link
                 href="/start-here"
-                className="block py-2.5 text-base font-semibold tracking-tight text-heading hover:text-accent"
+                className="flex items-center gap-2.5 py-2.5 text-base font-semibold tracking-tight text-heading hover:text-accent"
                 onClick={closeAll}
               >
-                Start Here
+                <NavIcon name="compass" size={18} className="text-accent" />
+                Start here
               </Link>
             </li>
 
-            <MobileTopicSection
-              label="Experiences"
-              href="/experiences"
-              items={experiencesNav}
-              onNavigate={closeAll}
-            />
+            <li className="pt-2">
+              <Link
+                href="/tools"
+                className="btn btn-primary btn-block"
+                onClick={closeAll}
+              >
+                Tools I use
+              </Link>
+            </li>
 
-            <li>
+            <li className="mt-3 border-t border-border pt-3">
               <Link
                 href="/about"
-                className="block py-2.5 text-base font-semibold tracking-tight text-heading hover:text-accent"
+                className="block py-2 text-sm font-semibold text-text hover:text-accent"
                 onClick={closeAll}
               >
                 About
@@ -526,20 +396,10 @@ export function Header({ latestPost = null }: Props) {
             <li>
               <Link
                 href="/contact"
-                className="block py-2.5 text-base font-semibold tracking-tight text-heading hover:text-accent"
+                className="block py-2 text-sm font-semibold text-text hover:text-accent"
                 onClick={closeAll}
               >
                 Contact
-              </Link>
-            </li>
-
-            <li className="pt-2">
-              <Link
-                href="/plan-your-trip"
-                className="btn btn-primary btn-block"
-                onClick={closeAll}
-              >
-                Trip tools
               </Link>
             </li>
           </ul>

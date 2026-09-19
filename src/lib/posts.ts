@@ -1,30 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
+import type { Post, PostMeta } from "@/lib/post-types";
 
-export type FeaturedImage = {
-  url: string;
-  alt: string;
-  width?: number;
-  height?: number;
-};
-
-export type PostMeta = {
-  slug: string;
-  title: string;
-  date: string;
-  excerpt: string;
-  featuredImage: FeaturedImage | null;
-  destinations: string[];
-};
-
-export type Post = PostMeta & {
-  contentHtml: string;
-  source: {
-    site: string;
-    url: string;
-    wpId: number;
-  };
-};
+export type { FeaturedImage, Post, PostMeta } from "@/lib/post-types";
+export { formatPostDate, formatPostDateShort } from "@/lib/dates";
 
 type PostsIndex = {
   count: number;
@@ -67,26 +46,10 @@ export function getPostsByDestination(destinationSlug: string): PostMeta[] {
   );
 }
 
-export function formatPostDate(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    timeZone: "America/New_York",
-  });
-}
-
-export function formatPostDateShort(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    timeZone: "America/New_York",
-  });
+/** Newest post by date (index is already newest-first). */
+export function getLatestPost(): PostMeta | null {
+  const posts = getAllPosts();
+  return posts[0] ?? null;
 }
 
 const STOP = new Set([
@@ -123,12 +86,6 @@ function tokenize(...parts: string[]): string[] {
     }
   }
   return [...out];
-}
-
-/** Newest post by date (index is already newest-first). */
-export function getLatestPost(): PostMeta | null {
-  const posts = getAllPosts();
-  return posts[0] ?? null;
 }
 
 /**

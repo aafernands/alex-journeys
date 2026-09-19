@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { legacyPathRedirects } from "./src/data/guides";
 
 const nextConfig: NextConfig = {
   images: {
@@ -34,6 +35,13 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
+  },
+  async redirects() {
+    return legacyPathRedirects.map((r) => ({
+      source: r.source,
+      destination: r.destination,
+      permanent: true,
+    }));
   },
 };
 

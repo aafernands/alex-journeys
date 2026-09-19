@@ -9,17 +9,17 @@ export function LatestPosts() {
   return (
     <Section
       id="latest"
-      tone="soft"
+      tone="white"
       hairline
       aria-labelledby="latest-heading"
     >
       <SectionHead
         eyebrow="From the journal"
-        title="Latest blog posts."
+        title="Latest stories."
         titleId="latest-heading"
         action={
           <Link href="/blog" className="btn btn-secondary">
-            Browse the full blog
+            Browse all stories
             <span aria-hidden="true">→</span>
           </Link>
         }

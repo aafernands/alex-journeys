@@ -10,11 +10,11 @@ const social = [
 ];
 
 const explore = [
-  { href: "/destinations", label: "Destinations" },
-  { href: "/blog", label: "Blog" },
-  { href: "/resources", label: "Resources" },
-  { href: "/start-here", label: "Start Here" },
-  { href: "/plan-your-trip", label: "Trip tools" },
+  { href: "/destinations", label: "Places" },
+  { href: "/blog", label: "Stories" },
+  { href: "/guides", label: "Guides" },
+  { href: "/start-here", label: "Start here" },
+  { href: "/tools", label: "Tools I use" },
 ];
 
 const company = [

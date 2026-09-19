@@ -7,11 +7,11 @@
     "travel-wallet"
   ],
   "hubs": [
-    "resources",
-    "experiences",
+    "guides",
+    "tools",
     "bucket-list",
     "contact",
-    "plan-your-trip"
+    "start-here"
   ],
   "skipped": [
     {

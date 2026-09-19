@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { PostMeta } from "@/lib/posts";
-import { formatPostDateShort } from "@/lib/posts";
+import type { PostMeta } from "@/lib/post-types";
+import { formatPostDateShort } from "@/lib/dates";
 
 type Props = {
   post: PostMeta;
