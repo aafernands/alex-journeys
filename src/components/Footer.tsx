@@ -3,6 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { NewsletterForm } from "@/components/newsletter/NewsletterForm";
+import {
+  PostageStamp,
+  PostmarkWatermark,
+} from "@/components/newsletter/PostmarkWatermark";
 import { site, about } from "@/data/content";
 
 const social = [
@@ -31,57 +35,95 @@ export function Footer() {
 
   return (
     <footer className="bg-bg" role="contentinfo">
-      {/* Dark inset CTA / newsletter slab */}
+      {/* Postcard / airmail newsletter */}
       <section
         id="newsletter"
         className="border-t border-border"
         aria-labelledby="newsletter-heading"
       >
         <div className="section-shell py-12 md:py-16">
-          <div className="rounded-xl bg-heading p-6 text-white md:p-8 lg:p-10">
-            <div className="md:grid md:grid-cols-12 md:gap-12">
-              <div className="md:col-span-7">
-                <p className="eyebrow !text-accent">Newsletter</p>
-                <h2
-                  id="newsletter-heading"
-                  className="font-display mt-2 text-3xl tracking-tight sm:text-4xl"
-                >
-                  <span className="font-normal">The Traveler&apos;s</span>{" "}
-                  <span className="font-bold">Journal</span>
-                </h2>
-                <p className="mt-4 max-w-lg text-base leading-relaxed text-white/75">
-                  Join for travel inspiration, trip notes, and exclusive insights
-                  from the road — no agency pitches, just the journal.
-                </p>
+          <div className="newsletter-postcard relative overflow-hidden rounded-xl bg-heading text-white shadow-[0_20px_50px_-28px_rgba(0,0,0,0.55)]">
+            {/* Airmail stripe frame */}
+            <div
+              className="pointer-events-none absolute inset-0 rounded-xl opacity-90"
+              style={{
+                padding: "3px",
+                background:
+                  "repeating-linear-gradient(135deg, #f97316 0 14px, #ffffff 14px 22px, #1d4ed8 22px 36px, #ffffff 36px 44px)",
+                WebkitMask:
+                  "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+                WebkitMaskComposite: "xor",
+                maskComposite: "exclude",
+              }}
+              aria-hidden="true"
+            />
 
-                <NewsletterForm />
+            {/* Giant postmark watermark */}
+            <PostmarkWatermark className="pointer-events-none absolute -right-16 -top-10 h-[22rem] w-[22rem] rotate-[-18deg] text-white/25 md:-right-10 md:top-1/2 md:h-[26rem] md:w-[26rem] md:-translate-y-1/2" />
+
+            {/* Soft paper glow */}
+            <div
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_0%,rgba(249,115,22,0.22),transparent_55%),radial-gradient(ellipse_at_90%_80%,rgba(255,255,255,0.06),transparent_45%)]"
+              aria-hidden="true"
+            />
+
+            <div className="relative z-10 p-6 md:p-8 lg:p-10">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="eyebrow !text-accent">Dispatch from the road</p>
+                  <h2
+                    id="newsletter-heading"
+                    className="font-display mt-2 max-w-xl text-3xl tracking-tight sm:text-4xl lg:text-[2.75rem]"
+                  >
+                    <span className="font-normal">The Traveler&apos;s</span>{" "}
+                    <span className="font-bold">Journal</span>
+                  </h2>
+                </div>
+                <PostageStamp className="hidden shrink-0 sm:block" />
               </div>
 
-              <div className="mt-10 border-t border-white/10 pt-8 md:col-span-5 md:mt-0 md:border-t-0 md:border-l md:pt-0 md:pl-10">
-                <p className="eyebrow !text-accent">About</p>
-                <div className="mt-3 flex gap-4">
-                  <div className="relative size-14 shrink-0 overflow-hidden rounded-lg border border-white/15 bg-white/5">
-                    <Image
-                      src={site.authorPhoto}
-                      alt={site.authorName}
-                      fill
-                      sizes="56px"
-                      className="object-cover object-top"
-                    />
+              <div className="mt-8 md:grid md:grid-cols-12 md:gap-12 md:items-start">
+                <div className="md:col-span-7">
+                  <p className="max-w-lg text-base leading-relaxed text-white/80">
+                    Drop your email like a postcard home. Trip notes, hidden
+                    corners, and journal dispatches — no agency pitches, just
+                    what I&apos;m actually packing and booking.
+                  </p>
+
+                  <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
+                    <span className="size-1.5 rounded-full bg-accent" />
+                    Postmark · free · unsubscribe anytime
                   </div>
-                  <div className="min-w-0">
-                    <h3 className="font-display text-xl font-bold text-white">
-                      {about.headline}
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-white/70">
-                      {about.paragraphs[0]}
-                    </p>
-                    <Link
-                      href="/about"
-                      className="mt-3 inline-flex text-sm font-semibold text-white transition hover:text-accent"
-                    >
-                      Learn more →
-                    </Link>
+
+                  <NewsletterForm />
+                </div>
+
+                <div className="mt-10 border-t border-white/10 pt-8 md:col-span-5 md:mt-0 md:border-t-0 md:border-l md:border-white/10 md:pt-0 md:pl-10">
+                  <p className="eyebrow !text-accent">About the sender</p>
+                  <div className="mt-3 flex gap-4">
+                    <div className="relative size-14 shrink-0 overflow-hidden rounded-lg border border-white/15 bg-white/5 ring-2 ring-accent/30 ring-offset-2 ring-offset-heading">
+                      <Image
+                        src={site.authorPhoto}
+                        alt={site.authorName}
+                        fill
+                        sizes="56px"
+                        className="object-cover object-top"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-display text-xl font-bold text-white">
+                        {about.headline}
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-white/70">
+                        {about.paragraphs[0]}
+                      </p>
+                      <Link
+                        href="/about"
+                        className="mt-3 inline-flex text-sm font-semibold text-white transition hover:text-accent"
+                      >
+                        Learn more →
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
