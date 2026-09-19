@@ -35,7 +35,8 @@ export function Section({
   "aria-labelledby": labelledBy,
 }: Props) {
   const py = size === "lg" ? "py-12 md:py-16" : "py-10 md:py-12";
-  const borders = hairline ? "border-y border-border" : "";
+  /* Dashed rule between journal spreads — softer than solid product chrome */
+  const borders = hairline ? "border-y border-dashed border-border-strong" : "";
 
   return (
     <section
@@ -71,16 +72,29 @@ export function SectionHead({
   return (
     <div
       className={`flex flex-col gap-4 ${
-        action
-          ? "md:flex-row md:items-end md:justify-between"
-          : ""
+        action ? "md:flex-row md:items-end md:justify-between" : ""
       }`}
     >
-      <div className={centered && !action ? "mx-auto max-w-2xl text-center" : "max-w-2xl"}>
-        {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+      <div
+        className={
+          centered && !action ? "mx-auto max-w-2xl text-center" : "max-w-2xl"
+        }
+      >
+        {eyebrow ? (
+          <p
+            className={`journal-entry-label w-fit ${
+              centered && !action ? "mx-auto" : ""
+            }`}
+          >
+            <span aria-hidden="true">✦</span>
+            {eyebrow}
+          </p>
+        ) : null}
         <h2
           id={titleId}
-          className={`font-display text-display text-heading ${eyebrow ? "mt-2" : ""}`}
+          className={`font-display text-display text-heading ${
+            eyebrow ? "mt-4" : ""
+          } ${centered && !action ? "mx-auto" : ""}`}
         >
           {title}
         </h2>
@@ -90,7 +104,9 @@ export function SectionHead({
           </p>
         ) : null}
       </div>
-      {action ? <div className="shrink-0 self-start md:self-auto">{action}</div> : null}
+      {action ? (
+        <div className="shrink-0 self-start md:self-auto">{action}</div>
+      ) : null}
     </div>
   );
 }

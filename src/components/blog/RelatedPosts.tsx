@@ -10,9 +10,13 @@ export function RelatedPosts({ posts }: Props) {
 
   return (
     <section aria-labelledby="related-posts-heading">
+      <p className="journal-entry-label">
+        <span aria-hidden="true">✦</span>
+        More pages
+      </p>
       <h2
         id="related-posts-heading"
-        className="font-display text-2xl font-bold tracking-tight text-heading md:text-3xl"
+        className="font-display mt-4 text-2xl font-semibold tracking-tight text-heading md:text-3xl"
       >
         Related posts
       </h2>

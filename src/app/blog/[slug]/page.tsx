@@ -98,14 +98,17 @@ export default async function BlogPostPage({ params }: PageProps) {
               </ol>
             </nav>
 
-            <p className="mt-8 eyebrow">Journal</p>
-            <h1 className="font-display text-display mt-2 text-heading">
+            <p className="mt-8 journal-entry-label">
+              <span aria-hidden="true">✦</span>
+              Journal entry
+            </p>
+            <h1 className="font-display text-display mt-4 text-heading">
               {post.title}
             </h1>
 
-            <div className="mt-6 flex flex-wrap items-center gap-4">
+            <div className="mt-6 flex flex-wrap items-center gap-4 border-b border-dashed border-border pb-6">
               <div
-                className="flex size-11 items-center justify-center rounded-lg border border-border bg-surface-soft text-sm font-bold text-heading"
+                className="flex size-11 items-center justify-center rounded-sm border border-dashed border-border-strong bg-surface-soft text-sm font-bold text-heading"
                 aria-hidden="true"
               >
                 AF
@@ -123,13 +126,19 @@ export default async function BlogPostPage({ params }: PageProps) {
           </div>
 
           {post.featuredImage ? (
-            <div className="panel mx-auto mt-10 max-w-4xl overflow-hidden shadow-sm">
+            <div className="panel relative mx-auto mt-10 max-w-4xl overflow-hidden">
+              <span
+                className="journal-tape absolute right-6 top-2 z-10 rotate-2 px-2.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-heading"
+                aria-hidden="true"
+              >
+                Field photo
+              </span>
               <div className="window-chrome">
-                <span className="window-dot" aria-hidden="true" />
-                <span className="window-dot" aria-hidden="true" />
-                <span className="window-dot" aria-hidden="true" />
-                <span className="ml-2 truncate text-xs font-semibold text-muted">
-                  Field photo
+                <span className="font-display text-sm font-semibold text-heading">
+                  Stuck in the journal
+                </span>
+                <span className="ml-auto hidden text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-muted sm:inline">
+                  Entry · photo log
                 </span>
               </div>
               <div className="relative aspect-[16/10] bg-surface">
@@ -196,8 +205,8 @@ export default async function BlogPostPage({ params }: PageProps) {
             <PostContent html={post.contentHtml} />
           </div>
 
-          <aside className="panel-soft mt-14 flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
-            <div className="relative size-16 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-soft">
+          <aside className="panel-soft mt-14 flex flex-col gap-5 border-dashed p-6 sm:flex-row sm:items-start">
+            <div className="relative size-16 shrink-0 overflow-hidden rounded-sm border border-border bg-surface-soft">
               <Image
                 src={site.authorPhoto}
                 alt={site.authorName}
@@ -219,7 +228,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             </div>
           </aside>
 
-          <footer className="mt-12 flex flex-wrap gap-3 border-t border-border pt-8">
+          <footer className="mt-12 flex flex-wrap gap-3 border-t border-dashed border-border-strong pt-8">
             <Link href="/blog" className="btn btn-secondary">
               ← All posts
             </Link>

@@ -16,7 +16,7 @@ type Props = {
   tone?: "default" | "white";
 };
 
-/** Shared product page chrome — same section shell + type system as homepage. */
+/** Shared journal page chrome — same section shell + type system as homepage. */
 export function SitePage({
   label,
   title,
@@ -57,11 +57,14 @@ export function SitePage({
           ) : null}
 
           {label ? (
-            <p className={`${crumbs ? "mt-8" : ""} eyebrow`}>{label}</p>
+            <p className={`${crumbs ? "mt-8" : ""} journal-entry-label`}>
+              <span aria-hidden="true">✦</span>
+              {label}
+            </p>
           ) : null}
           <h1
             className={`font-display text-display text-heading ${
-              label || crumbs ? "mt-2" : ""
+              label || crumbs ? "mt-4" : ""
             }`}
           >
             {title}

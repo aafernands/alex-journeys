@@ -19,14 +19,20 @@ export function HiddenGems() {
         titleId="hidden-gems-heading"
         description="Featured stories worth a slower read — the stops and details I still talk about."
         action={
-          <Link href="/blog" className="btn btn-secondary">
+          <Link href="/blog" className="btn btn-secondary rounded-sm">
             View all stories
             <span aria-hidden="true">→</span>
           </Link>
         }
       />
 
-      <div className="panel mt-10 overflow-hidden">
+      <div className="panel relative mt-10 overflow-hidden">
+        <span
+          className="journal-tape absolute right-8 top-3 z-20 rotate-2 px-2.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-heading"
+          aria-hidden="true"
+        >
+          Keepers
+        </span>
         <div className="relative min-h-[11rem] md:min-h-[13rem]">
           <Image
             src={featuredBand.image}
@@ -41,24 +47,24 @@ export function HiddenGems() {
             aria-hidden="true"
           />
           <div className="relative z-10 flex h-full min-h-[11rem] flex-col items-start justify-end px-6 py-7 md:min-h-[13rem] md:px-8 md:py-9">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-accent">
+            <p className="journal-entry-label !border-white/40 !bg-white/10 !text-white">
               Featured tray
             </p>
-            <p className="font-display mt-1 text-2xl font-bold tracking-tight text-white md:text-3xl">
+            <p className="font-display mt-3 text-2xl font-semibold tracking-tight text-white md:text-3xl">
               Stories that stayed with me
             </p>
           </div>
         </div>
 
-        <div className="bg-surface-soft p-4 sm:p-5 md:p-6">
+        <div className="journal-ruled border-t border-dashed border-border bg-surface-soft p-4 sm:p-5 md:p-6">
           <ul className="grid gap-3 sm:grid-cols-2 sm:gap-4">
             {posts.map((post) => (
               <li key={post.slug}>
                 <Link
                   href={`/blog/${post.slug}`}
-                  className="panel-interactive group flex gap-3 p-3 sm:gap-4 sm:p-4"
+                  className="panel-interactive group flex gap-3 border-dashed p-3 sm:gap-4 sm:p-4"
                 >
-                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-white sm:h-24 sm:w-24">
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-sm border border-border bg-white sm:h-24 sm:w-24">
                     {post.featuredImage ? (
                       <Image
                         src={post.featuredImage.url}

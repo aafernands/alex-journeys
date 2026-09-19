@@ -20,13 +20,21 @@ export function DestinationPills() {
       />
 
       <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 lg:gap-4">
-        {destinationPills.map((pill) => (
-          <li key={pill.name}>
+        {destinationPills.map((pill, i) => (
+          <li key={pill.name} className="relative">
+            {i % 5 === 1 ? (
+              <span
+                className="journal-tape absolute -top-1.5 left-1/2 z-10 -translate-x-1/2 rotate-2 px-2 py-0.5 text-[0.55rem] font-bold uppercase tracking-[0.12em] text-heading"
+                aria-hidden="true"
+              >
+                Pasted
+              </span>
+            ) : null}
             <Link
               href={pill.href}
               className="panel-interactive group flex h-full flex-col overflow-hidden"
             >
-              <div className="relative aspect-[4/3] overflow-hidden border-b border-border bg-surface">
+              <div className="relative aspect-[4/3] overflow-hidden border-b border-dashed border-border bg-surface">
                 <Image
                   src={pill.image}
                   alt={pill.imageAlt}

@@ -16,7 +16,7 @@ export function GuidesHubStrip() {
         titleId="guides-hubs-heading"
         description="Six hubs of notes I still use — planning, money, packing, smarter travel, stays, and experiences."
         action={
-          <Link href="/guides" className="btn btn-secondary">
+          <Link href="/guides" className="btn btn-secondary rounded-sm">
             All guides
             <span aria-hidden="true">→</span>
           </Link>
@@ -28,13 +28,13 @@ export function GuidesHubStrip() {
           <li key={hub.slug}>
             <Link
               href={`/guides/${hub.slug}`}
-              className="panel-interactive group flex h-full gap-3 p-4 md:p-5"
+              className="panel-interactive group flex h-full gap-3 border-dashed p-4 md:p-5"
             >
               <span className="panel-nested flex size-10 shrink-0 items-center justify-center bg-white text-accent">
                 <NavIcon name={hub.icon} size={18} />
               </span>
               <span className="min-w-0">
-                <span className="font-display block text-base font-bold text-heading">
+                <span className="font-display block text-base font-semibold text-heading">
                   {hub.title}
                 </span>
                 <span className="mt-1 block text-sm leading-snug text-text line-clamp-2">

@@ -10,9 +10,15 @@ type Props = {
 
 export function PostCard({ post, priority = false }: Props) {
   return (
-    <article className="panel-interactive group flex h-full flex-col overflow-hidden">
+    <article className="panel-interactive group relative flex h-full flex-col overflow-hidden">
+      <span
+        className="journal-tape absolute left-4 top-3 z-10 rotate-[-3deg] px-2 py-0.5 text-[0.55rem] font-bold uppercase tracking-[0.12em] text-heading opacity-90 transition group-hover:opacity-100"
+        aria-hidden="true"
+      >
+        Entry
+      </span>
       <Link href={`/blog/${post.slug}`} className="flex h-full flex-col">
-        <div className="relative aspect-[16/10] overflow-hidden border-b border-border bg-surface">
+        <div className="relative aspect-[16/10] overflow-hidden border-b border-dashed border-border bg-surface">
           {post.featuredImage ? (
             <Image
               src={post.featuredImage.url}
@@ -28,7 +34,7 @@ export function PostCard({ post, priority = false }: Props) {
             </div>
           )}
         </div>
-        <div className="flex flex-1 flex-col p-5 md:p-6">
+        <div className="flex flex-1 flex-col bg-white p-5 md:p-6">
           <time
             className="text-xs font-semibold uppercase tracking-[0.06em] text-muted"
             dateTime={post.date}
@@ -43,7 +49,7 @@ export function PostCard({ post, priority = false }: Props) {
               {post.excerpt}
             </p>
           ) : null}
-          <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-link transition group-hover:text-accent">
+          <span className="mt-5 inline-flex items-center gap-1.5 border-t border-dashed border-border pt-4 text-sm font-semibold text-link transition group-hover:text-accent">
             Read story
             <span aria-hidden="true">→</span>
           </span>
