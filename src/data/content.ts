@@ -5,7 +5,7 @@
 
 export const site = {
   name: "Fernandes Journeys",
-  tagline: "Real journeys, destinations, and notes from the road",
+  tagline: "Places I’ve been, written down so I don’t forget",
   email: "hello@fernandesjourneys.com",
   social: {
     instagram: "https://instagram.com/",
@@ -90,20 +90,20 @@ export const favorites = [
 ];
 
 export const about = {
-  headline: "Stories over checklists",
+  headline: "A journal of places I’ve been",
   paragraphs: [
-    "I’m Alex — and Fernandes Journeys is where I post my travelling: the routes I take, the places that stick, and the small details I’d tell a friend before they booked a ticket.",
-    "Expect trip reports, destination notes, and favorites from the road — not a lifestyle magazine, just a travel blog with room to breathe. Sample stories below until the next journey goes live.",
+    "I’m Alex — and Fernandes Journeys is my personal travel blog. I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
+    "Expect trip notes, destination pages, and favorites from the road — not an agency, not a booking service, just a trip journal with room to breathe. Sample stories below until the next write-up goes live.",
   ],
 };
 
 export const hero = {
-  eyebrow: "Travel blog · Journeys · Notes from the road",
+  eyebrow: "Personal travel blog · Past trips · Notes from the road",
   title: "Fernandes Journeys",
   subtitle:
-    "Real trips, honest notes, and destinations worth the detour — written first-person from wherever the road leads next.",
-  ctaPrimary: "Read recent trips",
-  ctaSecondary: "Get the newsletter",
+    "I share places I’ve been — destinations, trip notes, and photos from journeys already behind me. Pull up a chair; this is my journal, not a travel agency.",
+  ctaPrimary: "Browse destinations",
+  ctaSecondary: "Read recent trips",
   image:
     "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80",
   imageAlt: "Open travel journal and camera on a sunlit surface",

@@ -1,10 +1,8 @@
-import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { Stories } from "@/components/Stories";
 import { About } from "@/components/About";
 import { Favorites } from "@/components/Favorites";
 import { Newsletter } from "@/components/Newsletter";
-import { Footer } from "@/components/Footer";
 
 export default function HomePage() {
   return (
@@ -15,7 +13,6 @@ export default function HomePage() {
       >
         Skip to stories
       </a>
-      <Header />
       <main className="flex-1">
         <Hero />
         <Stories />
@@ -23,7 +20,6 @@ export default function HomePage() {
         <Favorites />
         <Newsletter />
       </main>
-      <Footer />
     </>
   );
 }

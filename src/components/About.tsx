@@ -20,7 +20,7 @@ export function About() {
             />
           </div>
           <div className="absolute -right-3 top-6 hidden rounded-lg bg-sage-soft px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-sage md:block">
-            On assignment
+            Past trips
           </div>
         </div>
 
@@ -45,7 +45,7 @@ export function About() {
               <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
                 Focus
               </dt>
-              <dd className="font-display mt-1 text-xl text-ink">Slow travel</dd>
+              <dd className="font-display mt-1 text-xl text-ink">Trip notes</dd>
             </div>
             <div>
               <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">

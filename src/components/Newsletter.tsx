@@ -23,7 +23,7 @@ export function Newsletter() {
           <div className="relative mx-auto max-w-2xl text-center">
             <p className="sample-badge">Sample CTA · not a live signup</p>
             <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-sage">
-              Newsletter & contact
+              Occasional notes
             </p>
             <h2
               id="newsletter-heading"
@@ -32,9 +32,9 @@ export function Newsletter() {
               Letters from the road
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-ink-soft">
-              Occasional notes on destinations, stays worth booking, and trip
-              details that don’t fit in a caption. Connect your form provider
-              when you’re ready — this UI is a polished placeholder.
+              When I post a new destination or trip note, I may send a short
+              update — no pitches, no packing lists for sale. Connect a form
+              provider when you’re ready; this UI is a polished placeholder.
             </p>
 
             <form
@@ -60,7 +60,7 @@ export function Newsletter() {
                 type="submit"
                 className="min-h-12 rounded-full bg-ink px-6 text-sm font-semibold text-cream transition hover:bg-terracotta focus-visible:outline-offset-4"
               >
-                Subscribe
+                Stay in the loop
               </button>
             </form>
 

@@ -16,13 +16,13 @@ export function Favorites() {
             id="favorites-heading"
             className="font-display mt-2 text-3xl tracking-tight text-cream sm:text-4xl md:text-5xl"
           >
-            Curated favorites
+            Favorites from the road
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-cream/70 md:text-base">
             <span className="sample-badge !bg-ink !text-sand !border-sand/30">
               Sample picks
             </span>{" "}
-            Hotels, cafés, gear, and rituals — stand-ins until you publish your
+            Stays, cafés, gear, and rituals I liked — stand-ins until I publish my
             own shortlist.
           </p>
         </div>

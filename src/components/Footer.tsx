@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { site } from "@/data/content";
 
 const social = [
@@ -15,6 +16,14 @@ export function Footer() {
         <div>
           <p className="font-display text-2xl text-ink">{site.name}</p>
           <p className="mt-2 max-w-xs text-sm text-muted">{site.tagline}</p>
+          <p className="mt-3">
+            <Link
+              href="/destinations"
+              className="text-sm font-medium text-ink-soft transition hover:text-terracotta"
+            >
+              Browse destinations →
+            </Link>
+          </p>
         </div>
 
         <nav aria-label="Social">
@@ -39,8 +48,8 @@ export function Footer() {
       <div className="border-t border-sand/60">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-5 text-xs text-muted md:flex-row md:items-center md:justify-between md:px-8">
           <p>
-            © {year} {site.name}. A travel blog for real journeys and notes from
-            the road.
+            © {year} {site.name}. A personal travel blog — places I’ve been,
+            written down.
           </p>
           <p>Social links are placeholders — update in src/data/content.ts</p>
         </div>

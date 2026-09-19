@@ -59,10 +59,10 @@ export function Stories() {
                     {story.blurb}
                   </p>
                   <a
-                    href="#newsletter"
+                    href="/destinations"
                     className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-ink transition hover:text-terracotta"
                   >
-                    Read the story
+                    More destinations
                     <span aria-hidden="true">→</span>
                   </a>
                 </div>

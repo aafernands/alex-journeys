@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { hero } from "@/data/content";
 
 export function Hero() {
@@ -26,14 +27,14 @@ export function Hero() {
             {hero.subtitle}
           </p>
           <div className="animate-fade-up animate-delay-3 mt-8 flex flex-wrap gap-3">
-            <a
-              href="#stories"
+            <Link
+              href="/destinations"
               className="inline-flex items-center justify-center rounded-full bg-terracotta px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-terracotta-deep focus-visible:outline-offset-4"
             >
               {hero.ctaPrimary}
-            </a>
+            </Link>
             <a
-              href="#newsletter"
+              href="#stories"
               className="inline-flex items-center justify-center rounded-full border border-ink/15 bg-surface px-6 py-3 text-sm font-semibold text-ink transition hover:border-terracotta/40 hover:text-terracotta"
             >
               {hero.ctaSecondary}
@@ -55,9 +56,9 @@ export function Hero() {
           </div>
           <div className="absolute -bottom-4 -left-2 hidden rounded-xl border border-sand/80 bg-surface/95 px-4 py-3 shadow-lg backdrop-blur sm:block md:-left-4">
             <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-muted">
-              Currently
+              From the journal
             </p>
-            <p className="font-display text-lg text-ink">Somewhere between trips</p>
+            <p className="font-display text-lg text-ink">Past trips, shared</p>
           </div>
         </div>
       </div>
