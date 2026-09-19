@@ -16,12 +16,18 @@ export function Footer() {
         <div>
           <p className="font-display text-2xl text-ink">{site.name}</p>
           <p className="mt-2 max-w-xs text-sm text-muted">{site.tagline}</p>
-          <p className="mt-3">
+          <p className="mt-3 flex flex-wrap gap-4">
+            <Link
+              href="/blog"
+              className="text-sm font-medium text-ink-soft transition hover:text-terracotta"
+            >
+              Blog →
+            </Link>
             <Link
               href="/destinations"
               className="text-sm font-medium text-ink-soft transition hover:text-terracotta"
             >
-              Browse destinations →
+              Destinations →
             </Link>
           </p>
         </div>

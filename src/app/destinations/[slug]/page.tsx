@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   destinationSlugs,
   getDestinationBySlug,
 } from "@/data/destinations";
+import {
+  formatPostDateShort,
+  getPostsByDestination,
+} from "@/lib/posts";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -31,6 +36,8 @@ export default async function DestinationPage({ params }: PageProps) {
   const dest = getDestinationBySlug(slug);
   if (!dest) notFound();
 
+  const related = getPostsByDestination(slug);
+
   return (
     <main className="border-b border-sand/50 bg-cream">
       <div className="mx-auto max-w-3xl px-5 py-14 md:px-8 md:py-20">
@@ -55,8 +62,7 @@ export default async function DestinationPage({ params }: PageProps) {
           </ol>
         </nav>
 
-        <p className="sample-badge mt-8">Sample content · replace freely</p>
-        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-sage">
+        <p className="mt-8 text-xs font-semibold uppercase tracking-[0.2em] text-sage">
           {dest.continent}
           {dest.region !== dest.continent ? ` · ${dest.region}` : ""}
         </p>
@@ -65,18 +71,65 @@ export default async function DestinationPage({ params }: PageProps) {
         </h1>
         <p className="mt-6 text-lg leading-relaxed text-ink-soft">{dest.blurb}</p>
 
-        <div className="mt-10 rounded-2xl border border-dashed border-sand bg-cream-deep/60 px-6 py-16 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-            Photo space
-          </p>
-          <p className="font-display mt-3 text-2xl text-ink-soft">
-            Room for trip photos later
-          </p>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-muted">
-            Drop images here when you’re ready — galleries, maps, or a single
-            hero shot from the road.
-          </p>
-        </div>
+        {related.length > 0 ? (
+          <section className="mt-12" aria-labelledby="related-posts-heading">
+            <h2
+              id="related-posts-heading"
+              className="font-display text-2xl tracking-tight text-ink md:text-3xl"
+            >
+              Related stories
+            </h2>
+            <ul className="mt-6 flex flex-col gap-4">
+              {related.map((post) => (
+                <li key={post.slug}>
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="group flex gap-4 overflow-hidden rounded-xl border border-sand/70 bg-surface p-3 transition hover:border-terracotta/30 hover:shadow-md sm:p-4"
+                  >
+                    <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-lg bg-cream-deep sm:h-24 sm:w-32">
+                      {post.featuredImage ? (
+                        <Image
+                          src={post.featuredImage.url}
+                          alt=""
+                          fill
+                          sizes="128px"
+                          className="object-cover transition group-hover:scale-[1.03]"
+                        />
+                      ) : null}
+                    </div>
+                    <div className="min-w-0 flex-1 py-0.5">
+                      <time
+                        className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted"
+                        dateTime={post.date}
+                      >
+                        {formatPostDateShort(post.date)}
+                      </time>
+                      <p className="font-display mt-1 text-lg leading-snug text-ink transition group-hover:text-terracotta sm:text-xl">
+                        {post.title}
+                      </p>
+                      <p className="mt-1 line-clamp-2 text-sm text-ink-soft">
+                        {post.excerpt}
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : (
+          <div className="mt-10 rounded-2xl border border-dashed border-sand bg-cream-deep/60 px-6 py-16 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+              Photo space
+            </p>
+            <p className="font-display mt-3 text-2xl text-ink-soft">
+              Room for trip photos later
+            </p>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-muted">
+              More dispatches for {dest.name} will show up here as they&apos;re
+              written.
+            </p>
+          </div>
+        )}
 
         <div className="mt-10 flex flex-wrap gap-3">
           <Link
@@ -86,10 +139,10 @@ export default async function DestinationPage({ params }: PageProps) {
             ← All destinations
           </Link>
           <Link
-            href="/#stories"
+            href="/blog"
             className="inline-flex items-center justify-center rounded-full bg-terracotta px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-terracotta-deep"
           >
-            Recent trip stories
+            Browse the blog
           </Link>
         </div>
       </div>

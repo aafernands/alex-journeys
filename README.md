@@ -10,7 +10,25 @@ Alex’s personal travel blog for real journeys, destinations, and notes from th
 - **Next.js** (App Router) + **TypeScript**
 - **Tailwind CSS** v4
 - **next/font** — Cormorant Garamond (display) + DM Sans (body)
-- Remote images from **Unsplash** (see attribution below)
+- Blog posts as cleaned JSON under `src/content/posts/`
+- Remote images from **WordPress/CDN** (alexjournly.com, i0.wp.com) and Unsplash for the hero
+
+## WordPress migration
+
+Blog content was migrated from the WordPress site **[alexjournly.com](https://alexjournly.com)** (REST API export).
+
+- Source inventory: see `/workspace/wp-migration/` locally (or re-export from WP)
+- Migration script: `scripts/migrate-wp-posts.mjs`
+- Output: `src/content/posts/*.json` (30 posts) + `_index.json`
+- Original publish dates and slugs are preserved
+- HTML is cleaned (scripts, tracking widgets, WP class noise removed; headings, paragraphs, lists, images, and links kept)
+- Featured images remain remote URLs for v1
+
+Re-run the migrator if the source JSON is updated:
+
+```bash
+node scripts/migrate-wp-posts.mjs
+```
 
 ## Design
 
@@ -18,7 +36,6 @@ Alex’s personal travel blog for real journeys, destinations, and notes from th
 - Editorial typography and generous spacing
 - Mobile-first layout, sticky header, restrained hover/fade motion
 - Semantic HTML, visible focus rings, skip link, and `prefers-reduced-motion` support
-- Sample trip content clearly labeled so you can replace it safely
 
 ## Run locally
 
@@ -39,13 +56,14 @@ npm run lint    # ESLint
 
 ## Customize content
 
-Edit placeholder copy, stories, favorites, and social links in:
+| What | Where |
+| --- | --- |
+| Site name, hero, about, favorites | `src/data/content.ts` |
+| Destinations tree | `src/data/destinations.ts` |
+| Blog posts | `src/content/posts/` |
+| Homepage featured posts | `src/content/posts/_index.json` → `featuredHomepage` |
 
-```
-src/data/content.ts
-```
-
-Sections are React components under `src/components/`.
+Sections are React components under `src/components/`. Blog routes: `/blog` and `/blog/[slug]`.
 
 ## Deploy (Vercel)
 
@@ -60,28 +78,22 @@ You can also deploy with the Vercel CLI:
 npx vercel
 ```
 
-## Image attribution (Unsplash)
+## Image attribution
 
-Hero and story images use free Unsplash URLs. Photographers / links (replace with your own assets anytime):
-
-| Use | Unsplash photo |
-| --- | --- |
-| Hero | [Travel journal](https://unsplash.com/photos/X5BWooeOZew) — photo-1488646953014-85cb44e25828 |
-| Kyoto | [Japanese temple](https://unsplash.com/photos/8wTPqxlnKM4) — photo-1493976040374-85c8e12f0c0e |
-| Amalfi | [Positano coastline](https://unsplash.com/photos/U6t80TW_CYM) — photo-1516483638261-f4dbaf036963 |
-| Marrakech | [Moroccan architecture](https://unsplash.com/photos/t7K4aafF4gA) — photo-1539020140153-e479b8c22e70 |
-| Patagonia | [Mountain night](https://unsplash.com/photos/pYYuCDfndD4) — photo-1519681393784-d120267933ba |
-| About | [Traveler alley](https://unsplash.com/photos/M4Xloxnf0b0) — photo-1527631746610-bca00a040d60 |
-
-Unsplash [License](https://unsplash.com/license): free to use; attribution appreciated but not required.
+- **Blog featured / inline images:** hosted on alexjournly.com / Jetpack CDN (`i0.wp.com`) from the WordPress migration.
+- **Hero:** [Travel journal](https://unsplash.com/photos/X5BWooeOZew) on Unsplash (photo-1488646953014-85cb44e25828). Unsplash [License](https://unsplash.com/license): free to use; attribution appreciated but not required.
 
 ## Project structure
 
 ```
 src/
-  app/           # App Router layout + home page
-  components/    # Header, Hero, Stories, About, Favorites, Newsletter, Footer
-  data/          # Site copy and sample content
+  app/             # App Router — home, /blog, /destinations
+  components/      # Header, Hero, Stories, About, blog cards, …
+  content/posts/   # Migrated post JSON
+  data/            # Site copy + destinations
+  lib/posts.ts     # Post loaders
+scripts/
+  migrate-wp-posts.mjs
 ```
 
 ## Notes

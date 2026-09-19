@@ -1,6 +1,6 @@
 /**
  * Past-trip destinations for Fernandes Journeys.
- * Blurbs are sample placeholders — replace with real notes and photos.
+ * Related blog posts are linked via destinations[] on each post.
  */
 
 export type DestinationCountry = {
@@ -36,7 +36,7 @@ export const destinationsTree: DestinationContinent[] = [
         region: "Europe",
         continent: "Europe",
         blurb:
-          "From my trip: ring-road miles, geothermal pools, and light that barely quit. Sample notes for now — I’ll fill in the places that stuck and the photos that tell the story.",
+          "Ring-road miles, geothermal pools, and light that barely quit — notes and photos from a week in the land of fire and ice.",
       },
     ],
   },
@@ -54,7 +54,7 @@ export const destinationsTree: DestinationContinent[] = [
             region: "North America",
             continent: "Americas",
             blurb:
-              "From my trip: wide skies, city weekends, and quiet stretches of road. Sample content — swap in the stops I actually made and the moments worth remembering.",
+              "Wide skies, city weekends, and quiet stretches of road — starting with a packed 48 hours in Toronto.",
           },
           {
             slug: "united-states",
@@ -62,7 +62,7 @@ export const destinationsTree: DestinationContinent[] = [
             region: "North America",
             continent: "Americas",
             blurb:
-              "From my trip: coast-to-coast fragments — neighborhoods, parks, and diners that became landmarks for me. Placeholder notes until the full journal goes up.",
+              "Coast-to-coast fragments — mountain mornings, ski towns, wine weekends, and the roads in between.",
           },
         ],
       },
@@ -76,7 +76,7 @@ export const destinationsTree: DestinationContinent[] = [
             region: "South America",
             continent: "Americas",
             blurb:
-              "From my trip: rhythm, coastline, and cities that keep going after midnight. Sample blurb — I’ll replace this with real dispatches and room for photos.",
+              "Rhythm, coastline, and cities that keep going after midnight — including a two-week Rio itinerary.",
           },
         ],
       },
@@ -90,7 +90,7 @@ export const destinationsTree: DestinationContinent[] = [
             region: "Central America",
             continent: "Americas",
             blurb:
-              "From my trip: markets, plazas, and meals that still show up in my notes. Sample content I can replace — photos and a fuller story coming later.",
+              "Markets, plazas, Caribbean water — including five packed days in Cancún.",
           },
         ],
       },

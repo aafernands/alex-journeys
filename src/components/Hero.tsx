@@ -11,10 +11,7 @@ export function Hero() {
     >
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-12 md:items-center md:gap-12 md:px-8 md:py-20 lg:py-24">
         <div className="md:col-span-6 lg:col-span-5">
-          <p className="animate-fade-up sample-badge mb-5">
-            Sample content · replace freely
-          </p>
-          <p className="animate-fade-up animate-delay-1 text-xs font-semibold uppercase tracking-[0.2em] text-sage">
+          <p className="animate-fade-up text-xs font-semibold uppercase tracking-[0.2em] text-sage">
             {hero.eyebrow}
           </p>
           <h1
@@ -33,12 +30,12 @@ export function Hero() {
             >
               {hero.ctaPrimary}
             </Link>
-            <a
-              href="#stories"
+            <Link
+              href="/blog"
               className="inline-flex items-center justify-center rounded-full border border-ink/15 bg-surface px-6 py-3 text-sm font-semibold text-ink transition hover:border-terracotta/40 hover:text-terracotta"
             >
               {hero.ctaSecondary}
-            </a>
+            </Link>
           </div>
         </div>
 

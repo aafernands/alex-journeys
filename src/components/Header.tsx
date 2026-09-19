@@ -6,7 +6,7 @@ import { site } from "@/data/content";
 import { destinationsTree } from "@/data/destinations";
 
 const links = [
-  { href: "/#stories", label: "Stories" },
+  { href: "/blog", label: "Blog" },
   { href: "/#about", label: "About" },
   { href: "/#favorites", label: "Favorites" },
   { href: "/#newsletter", label: "Newsletter" },

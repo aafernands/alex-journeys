@@ -1,6 +1,7 @@
 /**
- * SAMPLE CONTENT — Trip stories and picks below are placeholders for Fernandes Journeys.
- * Swap destinations, blurbs, and images when real posts are ready.
+ * Site copy for Fernandes Journeys.
+ * Blog posts live in src/content/posts/ (migrated from alexjournly.com).
+ * Homepage featured stories are selected in posts/_index.json.
  */
 
 export const site = {
@@ -93,7 +94,7 @@ export const about = {
   headline: "A journal of places I’ve been",
   paragraphs: [
     "I’m Alex — and Fernandes Journeys is my personal travel blog. I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
-    "Expect trip notes, destination pages, and favorites from the road — not an agency, not a booking service, just a trip journal with room to breathe. Sample stories below until the next write-up goes live.",
+    "Expect trip notes, destination pages, and favorites from the road — not an agency, not a booking service, just a trip journal with room to breathe. Browse the blog for full stories from past trips.",
   ],
 };
 
@@ -103,7 +104,7 @@ export const hero = {
   subtitle:
     "I share places I’ve been — destinations, trip notes, and photos from journeys already behind me. Pull up a chair; this is my journal, not a travel agency.",
   ctaPrimary: "Browse destinations",
-  ctaSecondary: "Read recent trips",
+  ctaSecondary: "Read the blog",
   image:
     "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80",
   imageAlt: "Open travel journal and camera on a sunlit surface",

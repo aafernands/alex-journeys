@@ -1,7 +1,19 @@
 import Image from "next/image";
-import { stories } from "@/data/content";
+import Link from "next/link";
+import { getFeaturedPosts, formatPostDateShort } from "@/lib/posts";
+
+/** Destination label for homepage cards when a post is mapped. */
+const DESTINATION_LABELS: Record<string, string> = {
+  mexico: "Cancún, Mexico",
+  iceland: "Iceland",
+  brazil: "Rio de Janeiro, Brazil",
+  canada: "Toronto, Canada",
+  "united-states": "United States",
+};
 
 export function Stories() {
+  const stories = getFeaturedPosts();
+
   return (
     <section
       id="stories"
@@ -12,7 +24,7 @@ export function Stories() {
         <div className="mb-10 flex flex-col gap-3 md:mb-14 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sage">
-              Featured stories
+              From the journal
             </p>
             <h2
               id="stories-heading"
@@ -22,53 +34,69 @@ export function Stories() {
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-muted md:text-right">
-            <span className="sample-badge mb-2 inline-flex">Sample cards</span>
-            <br className="hidden md:block" />
-            Destinations, blurbs, and dates are placeholders — swap for your own
-            dispatches.
+            Real stories from past journeys.{" "}
+            <Link
+              href="/blog"
+              className="font-semibold text-ink transition hover:text-terracotta"
+            >
+              Browse the full blog →
+            </Link>
           </p>
         </div>
 
         <ul className="grid gap-6 sm:grid-cols-2 lg:gap-8">
-          {stories.map((story, index) => (
-            <li key={story.id}>
-              <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-sand/70 bg-surface shadow-[0_10px_40px_-24px_rgba(28,25,23,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_-24px_rgba(28,25,23,0.4)]">
-                <div className="relative aspect-[16/10] overflow-hidden">
-                  <Image
-                    src={story.image}
-                    alt={story.imageAlt}
-                    fill
-                    sizes="(max-width: 640px) 100vw, 50vw"
-                    className="object-cover transition duration-500 group-hover:scale-[1.03]"
-                    priority={index < 2}
-                  />
-                </div>
-                <div className="flex flex-1 flex-col p-5 md:p-6">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-terracotta">
-                      {story.destination}
-                    </p>
-                    <time className="text-xs text-muted" dateTime={story.date}>
-                      {story.date}
-                    </time>
-                  </div>
-                  <h3 className="font-display mt-2 text-2xl leading-snug text-ink md:text-[1.65rem]">
-                    {story.title}
-                  </h3>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-soft">
-                    {story.blurb}
-                  </p>
-                  <a
-                    href="/destinations"
-                    className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-ink transition hover:text-terracotta"
+          {stories.map((story, index) => {
+            const destSlug = story.destinations[0];
+            const destLabel = destSlug
+              ? DESTINATION_LABELS[destSlug] || destSlug
+              : "Travel";
+            return (
+              <li key={story.slug}>
+                <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-sand/70 bg-surface shadow-[0_10px_40px_-24px_rgba(28,25,23,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_-24px_rgba(28,25,23,0.4)]">
+                  <Link
+                    href={`/blog/${story.slug}`}
+                    className="flex h-full flex-col"
                   >
-                    More destinations
-                    <span aria-hidden="true">→</span>
-                  </a>
-                </div>
-              </article>
-            </li>
-          ))}
+                    <div className="relative aspect-[16/10] overflow-hidden bg-cream-deep">
+                      {story.featuredImage ? (
+                        <Image
+                          src={story.featuredImage.url}
+                          alt={story.featuredImage.alt || story.title}
+                          fill
+                          sizes="(max-width: 640px) 100vw, 50vw"
+                          className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                          priority={index < 2}
+                        />
+                      ) : null}
+                    </div>
+                    <div className="flex flex-1 flex-col p-5 md:p-6">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-terracotta">
+                          {destLabel}
+                        </p>
+                        <time
+                          className="text-xs text-muted"
+                          dateTime={story.date}
+                        >
+                          {formatPostDateShort(story.date)}
+                        </time>
+                      </div>
+                      <h3 className="font-display mt-2 text-2xl leading-snug text-ink transition group-hover:text-terracotta md:text-[1.65rem]">
+                        {story.title}
+                      </h3>
+                      <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-soft line-clamp-3">
+                        {story.excerpt}
+                      </p>
+                      <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-ink transition group-hover:text-terracotta">
+                        Read story
+                        <span aria-hidden="true">→</span>
+                      </span>
+                    </div>
+                  </Link>
+                </article>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </section>
