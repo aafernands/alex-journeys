@@ -50,7 +50,7 @@ export default function RootLayout({
       lang="en"
       className={`${montserrat.variable} ${openSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans">
+      <body id="top" className="min-h-full flex flex-col font-sans">
         <Header latestPost={latestPost} />
         <div className="flex-1">{children}</div>
         <Footer />

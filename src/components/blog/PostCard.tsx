@@ -28,14 +28,14 @@ export function PostCard({ post, priority = false }: Props) {
             </div>
           )}
         </div>
-        <div className="flex flex-1 flex-col p-5">
+        <div className="flex flex-1 flex-col p-5 md:p-6">
           <time
-            className="text-xs font-semibold uppercase tracking-[0.08em] text-muted"
+            className="text-xs font-semibold uppercase tracking-[0.06em] text-muted"
             dateTime={post.date}
           >
             {formatPostDateShort(post.date)}
           </time>
-          <h2 className="font-display mt-2 text-lg font-semibold leading-snug text-heading md:text-xl">
+          <h2 className="font-display mt-2 text-lg font-semibold leading-snug tracking-tight text-heading md:text-xl">
             {post.title}
           </h2>
           {post.excerpt ? (
@@ -43,7 +43,7 @@ export function PostCard({ post, priority = false }: Props) {
               {post.excerpt}
             </p>
           ) : null}
-          <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-link transition group-hover:text-accent">
+          <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-link transition group-hover:text-accent">
             Read story
             <span aria-hidden="true">→</span>
           </span>

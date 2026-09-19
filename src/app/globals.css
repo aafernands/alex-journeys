@@ -4,9 +4,9 @@
   /* Brand — Alex Journly / Fernandes Journeys */
   --accent: #f97316;
   --accent-deep: #ea580c;
-  --bg: #ffffff;
+  --bg: #fafbfc;
   --surface: #e7ebf0;
-  --surface-soft: #eef1f4;
+  --surface-soft: #f3f5f7;
   --text: #333333;
   --heading: #181818;
   --near-black: #0c0d0e;
@@ -68,7 +68,7 @@ body {
   color: var(--text);
   font-family: var(--font-open-sans), system-ui, sans-serif;
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 ::selection {
@@ -85,18 +85,45 @@ body {
   font-family: var(--font-montserrat), system-ui, sans-serif;
 }
 
-/* Type scale */
+/* ——— Shared layout shell (~1280) ——— */
+.section-shell {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 80rem; /* 1280px */
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .section-shell {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Soft product-page ground with faint grid (hero decoration) */
+.page-grid {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--border) 55%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--border) 55%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: center top;
+}
+
+/* Type scale — quieter product hierarchy */
 .text-label {
   font-size: 0.75rem; /* 12 */
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .eyebrow {
   font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--accent);
 }
@@ -108,25 +135,39 @@ body {
 
 .text-body {
   font-size: 1rem;
-  line-height: 1.5;
-}
-
-.text-lead {
-  font-size: 1.125rem;
   line-height: 1.55;
 }
 
+.text-lead {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
 .text-title {
-  font-size: 2rem;
+  font-size: 1.75rem;
   line-height: 1.2;
   font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 768px) {
+  .text-title {
+    font-size: 2rem;
+  }
 }
 
 .text-display {
-  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-size: clamp(1.75rem, 3.8vw, 2.75rem);
   line-height: 1.12;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+}
+
+.text-hero {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 /* Boxed UI language — hairline panels, flat fills */
@@ -158,6 +199,35 @@ body {
 .panel-interactive:hover {
   background: var(--surface-soft);
   border-color: var(--border-strong);
+}
+
+/* Window chrome for product-style preview panels */
+.window-chrome {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-soft);
+  padding: 0.625rem 0.875rem;
+}
+
+.window-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--border-strong);
+}
+
+.window-dot:nth-child(1) {
+  background: #f87171;
+}
+
+.window-dot:nth-child(2) {
+  background: #fbbf24;
+}
+
+.window-dot:nth-child(3) {
+  background: #34d399;
 }
 
 /* Buttons — 8px radius, ~44px tall, hover = fill shift only */
@@ -212,8 +282,8 @@ body {
 }
 
 .section-band {
-  padding-top: 3.5rem;
-  padding-bottom: 3.5rem;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
 }
 
 @media (min-width: 768px) {
@@ -236,7 +306,7 @@ body {
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -245,26 +315,26 @@ body {
 }
 
 .animate-fade-up {
-  animation: fade-up 0.7s ease-out both;
+  animation: fade-up 0.55s ease-out both;
 }
 
 .animate-delay-1 {
-  animation-delay: 0.1s;
+  animation-delay: 0.08s;
 }
 
 .animate-delay-2 {
-  animation-delay: 0.2s;
+  animation-delay: 0.16s;
 }
 
 .animate-delay-3 {
-  animation-delay: 0.3s;
+  animation-delay: 0.24s;
 }
 
 /* Migrated WordPress post body — 18/27 Open Sans */
 .post-prose {
   color: var(--text);
   font-size: 1.125rem;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .post-prose > * + * {

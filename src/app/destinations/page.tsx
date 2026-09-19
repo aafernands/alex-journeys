@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 export default function DestinationsIndexPage() {
   return (
-    <main className="bg-white pt-28 md:pt-32">
-      <div className="mx-auto max-w-6xl px-5 py-10 md:px-8 md:py-14">
+    <main className="bg-white">
+      <div className="section-shell py-10 md:py-14">
         <p className="eyebrow">Destinations</p>
         <h1 className="font-display mt-2 text-display text-heading">
           Places I&apos;ve been.

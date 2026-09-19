@@ -25,7 +25,6 @@ export function Header({ latestPost = null }: Props) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [destOpen, setDestOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [desktopOpenContinent, setDesktopOpenContinent] = useState<
     string | null
   >(null);
@@ -53,13 +52,6 @@ export function Header({ latestPost = null }: Props) {
     setMobileRegion(null);
     closeDest();
   }, [closeDest]);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 48);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     closeAll();
@@ -102,38 +94,17 @@ export function Header({ latestPost = null }: Props) {
     return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen, closeAll]);
 
-  const darkHero =
-    pathname === "/" || /^\/blog\/[^/]+$/.test(pathname);
-  const overHero = darkHero && !scrolled && !mobileOpen;
-  const navLinkClass = overHero
-    ? "text-white/90 hover:text-white"
-    : "text-text hover:text-heading";
-  const chevronClass = overHero ? "text-white/80" : "text-muted";
+  const navLinkClass = "text-text hover:text-heading";
+  const chevronClass = "text-muted";
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-200 ${
-        overHero
-          ? "bg-transparent"
-          : "border-b border-border bg-white/95 backdrop-blur-md"
-      }`}
-    >
+    <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-md">
       {/* Slim metastrip */}
-      <div
-        className={`border-b transition-colors ${
-          overHero
-            ? "border-white/15 bg-black/25"
-            : "border-border bg-surface-soft"
-        }`}
-      >
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-1.5 md:px-8">
+      <div className="border-b border-border bg-surface-soft">
+        <div className="section-shell flex items-center justify-between gap-3 py-1.5">
           <a
             href="#newsletter"
-            className={`inline-flex shrink-0 items-center gap-2 text-sm font-semibold transition ${
-              overHero
-                ? "text-accent hover:text-white"
-                : "text-accent hover:text-accent-deep"
-            }`}
+            className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-accent transition hover:text-accent-deep"
           >
             <BellIcon />
             Get Travel Alerts
@@ -141,11 +112,7 @@ export function Header({ latestPost = null }: Props) {
           {latestPost ? (
             <Link
               href={`/blog/${latestPost.slug}`}
-              className={`min-w-0 truncate text-sm font-semibold sm:max-w-md ${
-                overHero
-                  ? "text-white/85 hover:text-white"
-                  : "text-text hover:text-accent"
-              }`}
+              className="min-w-0 truncate text-sm font-medium text-text transition hover:text-accent sm:max-w-md"
             >
               <span className="hidden sm:inline">Latest from the road: </span>
               <span className="sm:hidden">Latest: </span>
@@ -154,11 +121,7 @@ export function Header({ latestPost = null }: Props) {
           ) : (
             <Link
               href="/blog"
-              className={`hidden text-sm font-semibold uppercase tracking-wide sm:inline ${
-                overHero
-                  ? "text-white/80 hover:text-white"
-                  : "text-text hover:text-accent"
-              }`}
+              className="hidden text-sm font-medium text-text transition hover:text-accent sm:inline"
             >
               Latest from the road
             </Link>
@@ -166,7 +129,7 @@ export function Header({ latestPost = null }: Props) {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 md:px-8 md:py-3.5">
+      <div className="section-shell flex items-center justify-between gap-4 py-3 md:py-3.5">
         <Link
           href="/"
           className="relative z-10 shrink-0"
@@ -179,9 +142,7 @@ export function Header({ latestPost = null }: Props) {
             width={200}
             height={55}
             priority
-            className={`h-8 w-auto transition md:h-10 ${
-              overHero ? "brightness-0 invert" : ""
-            }`}
+            className="h-8 w-auto md:h-10"
           />
         </Link>
 
@@ -385,7 +346,7 @@ export function Header({ latestPost = null }: Props) {
 
           <Link
             href="/plan-your-trip"
-            className="btn btn-primary !min-h-9 !px-4 !py-1.5 text-sm"
+            className="btn btn-ink !min-h-9 !px-4 !py-1.5 text-sm"
           >
             Trip tools
           </Link>

@@ -13,8 +13,8 @@ export default function BlogIndexPage() {
   const posts = getAllPosts();
 
   return (
-    <main className="bg-white pt-28 md:pt-32">
-      <div className="mx-auto max-w-6xl px-5 py-10 md:px-8 md:py-14">
+    <main className="bg-white">
+      <div className="section-shell py-10 md:py-14">
         <nav aria-label="Breadcrumb" className="text-sm text-muted">
           <ol className="flex flex-wrap items-center gap-2">
             <li>
@@ -28,9 +28,7 @@ export default function BlogIndexPage() {
         </nav>
 
         <p className="mt-8 eyebrow">Journal</p>
-        <h1 className="font-display mt-2 text-display text-heading">
-          Blog
-        </h1>
+        <h1 className="font-display mt-2 text-display text-heading">Blog</h1>
         <p className="mt-4 max-w-2xl text-lead text-text">
           {posts.length} stories from the road — destination guides, trip notes,
           and practical travel tips.

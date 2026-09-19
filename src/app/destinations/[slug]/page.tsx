@@ -39,8 +39,9 @@ export default async function DestinationPage({ params }: PageProps) {
   const related = getPostsByDestination(slug);
 
   return (
-    <main className="bg-white pt-28 md:pt-32">
-      <div className="mx-auto max-w-3xl px-5 py-10 md:px-8 md:py-14">
+    <main className="bg-white">
+      <div className="section-shell py-10 md:py-14">
+      <div className="mx-auto max-w-3xl">
         <nav aria-label="Breadcrumb" className="text-sm text-muted">
           <ol className="flex flex-wrap items-center gap-2">
             <li>
@@ -143,6 +144,7 @@ export default async function DestinationPage({ params }: PageProps) {
             Browse the blog
           </Link>
         </div>
+      </div>
       </div>
     </main>
   );
