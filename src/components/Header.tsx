@@ -7,6 +7,10 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { TopicFlyout } from "@/components/header/TopicFlyout";
 import { MobileTopicSection } from "@/components/header/MobileTopicSection";
 import { NavIcon } from "@/components/icons/NavIcon";
+import {
+  SearchInput,
+  type SearchInputHandle,
+} from "@/components/search/SearchInput";
 import { destinationsTree } from "@/data/destinations";
 import { guidesNav } from "@/data/guides";
 
@@ -29,6 +33,8 @@ export function Header({ latestPost = null }: Props) {
   const destMenuId = useId();
   const destWrapRef = useRef<HTMLDivElement>(null);
   const destButtonRef = useRef<HTMLButtonElement>(null);
+  const desktopSearchRef = useRef<SearchInputHandle>(null);
+  const mobileSearchRef = useRef<SearchInputHandle>(null);
 
   const closeDest = useCallback(() => {
     setDestOpen(false);
@@ -82,6 +88,36 @@ export function Header({ latestPost = null }: Props) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen, closeAll]);
+
+  /** Press `/` to focus site search (skip when typing in a field). */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName?.toLowerCase();
+      if (
+        tag === "input" ||
+        tag === "textarea" ||
+        tag === "select" ||
+        target?.isContentEditable
+      ) {
+        return;
+      }
+      e.preventDefault();
+      const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+      if (isDesktop) {
+        desktopSearchRef.current?.focus();
+      } else {
+        setMobileOpen(true);
+        // Focus after drawer paints
+        requestAnimationFrame(() => {
+          mobileSearchRef.current?.focus();
+        });
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
 
   const navLinkClass = "text-text hover:text-heading";
   const chevronClass = "text-muted";
@@ -244,6 +280,13 @@ export function Header({ latestPost = null }: Props) {
             Start here
           </Link>
 
+          <SearchInput
+            ref={desktopSearchRef}
+            variant="header"
+            id="header-search"
+            className="shrink-0"
+          />
+
           <Link href="/tools" className="btn btn-ink !min-h-9 !px-4 !py-1.5 text-sm">
             Tools I use
           </Link>
@@ -281,6 +324,14 @@ export function Header({ latestPost = null }: Props) {
           className="max-h-[min(80vh,32rem)] overflow-y-auto border-t border-border bg-white px-5 py-4 md:hidden"
           aria-label="Mobile"
         >
+          <div className="mb-3">
+            <SearchInput
+              ref={mobileSearchRef}
+              variant="drawer"
+              id="mobile-search"
+              onNavigate={closeAll}
+            />
+          </div>
           <ul className="flex flex-col gap-1">
             <li>
               <button
