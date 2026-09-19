@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { site, about } from "@/data/content";
 
@@ -77,7 +78,7 @@ export function Footer() {
                       className="mt-1 size-4 shrink-0 rounded border-white/30 accent-accent"
                     />
                     <span>
-                      By entering your email, you agree to receive Alex Journly
+                      By entering your email, you agree to receive Fernandes Journeys
                       emails and agree to our{" "}
                       <Link
                         href="/policies"
@@ -103,18 +104,31 @@ export function Footer() {
 
               <div className="mt-10 border-t border-white/10 pt-8 md:col-span-5 md:mt-0 md:border-t-0 md:border-l md:pt-0 md:pl-10">
                 <p className="eyebrow !text-accent">About</p>
-                <h3 className="font-display mt-2 text-xl font-bold text-white">
-                  {about.headline}
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-white/70">
-                  {about.paragraphs[0]}
-                </p>
-                <Link
-                  href="/about"
-                  className="mt-4 inline-flex text-sm font-semibold text-white transition hover:text-accent"
-                >
-                  Learn more →
-                </Link>
+                <div className="mt-3 flex gap-4">
+                  <div className="relative size-14 shrink-0 overflow-hidden rounded-lg border border-white/15 bg-white/5">
+                    <Image
+                      src={site.authorPhoto}
+                      alt={site.authorName}
+                      fill
+                      sizes="56px"
+                      className="object-cover object-top"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-display text-xl font-bold text-white">
+                      {about.headline}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-white/70">
+                      {about.paragraphs[0]}
+                    </p>
+                    <Link
+                      href="/about"
+                      className="mt-3 inline-flex text-sm font-semibold text-white transition hover:text-accent"
+                    >
+                      Learn more →
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -130,8 +144,8 @@ export function Footer() {
                 {site.name}
               </p>
               <p className="mt-2 max-w-xs text-sm leading-relaxed text-white/60">
-                A personal travel journal — also known as {site.journalName}.
-                Places I&apos;ve been, notes from the road.
+                A personal travel journal by {site.authorName}. Places
+                I&apos;ve been, notes from the road.
               </p>
               <nav aria-label="Social" className="mt-6">
                 <ul className="flex flex-wrap gap-2">

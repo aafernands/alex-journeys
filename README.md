@@ -1,6 +1,6 @@
-# Alex Journly / Fernandes Journeys — Travel Blog
+# Fernandes Journeys — Travel Blog
 
-Alex’s personal travel journal — destinations from past trips, trip notes, and photos from the road. Brand wordmark **Alex Journly**; journal voice **Fernandes Journeys**.
+Alex Fernandes’s personal travel journal — destinations from past trips, trip notes, and photos from the road. User-facing brand **Fernandes Journeys** (logo PNG may still show the old alex journly wordmark until replaced).
 
 **Live:** [travel-lifestyle-site.vercel.app](https://travel-lifestyle-site.vercel.app)  
 **Repo:** [github.com/aafernands/travel-lifestyle-site](https://github.com/aafernands/travel-lifestyle-site)

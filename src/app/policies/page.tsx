@@ -6,7 +6,7 @@ import { getPageBySlug } from "@/lib/pages";
 export const metadata: Metadata = {
   title: "Policies & Disclosures",
   description:
-    "Privacy, terms of use, affiliate disclosure, comments policy, and cookies for Alex Journly.",
+    "Privacy, terms of use, affiliate disclosure, comments policy, and cookies for Fernandes Journeys.",
 };
 
 export default function PoliciesPage() {

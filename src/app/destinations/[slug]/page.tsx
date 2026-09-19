@@ -27,7 +27,7 @@ export async function generateMetadata({
   if (!dest) return { title: "Place" };
   return {
     title: dest.name,
-    description: `Notes from my trip to ${dest.name} — Alex Journly.`,
+    description: `Notes from my trip to ${dest.name} — Fernandes Journeys.`,
   };
 }
 

@@ -158,11 +158,11 @@ export function Header({ latestPost = null }: Props) {
           href="/"
           className="relative z-10 shrink-0"
           onClick={closeAll}
-          aria-label="Alex Journly home"
+          aria-label="Fernandes Journeys home"
         >
           <Image
             src="/brand/logo-alex-journly.png"
-            alt="alex journly"
+            alt="Fernandes Journeys"
             width={200}
             height={55}
             priority

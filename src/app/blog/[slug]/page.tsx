@@ -10,6 +10,7 @@ import {
   getPostSlugs,
   getRelatedPosts,
 } from "@/lib/posts";
+import { site } from "@/data/content";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -196,11 +197,14 @@ export default async function BlogPostPage({ params }: PageProps) {
           </div>
 
           <aside className="panel-soft mt-14 flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
-            <div
-              className="flex size-16 shrink-0 items-center justify-center rounded-lg border border-border bg-white font-display text-xl font-bold text-heading"
-              aria-hidden="true"
-            >
-              AF
+            <div className="relative size-16 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-soft">
+              <Image
+                src={site.authorPhoto}
+                alt={site.authorName}
+                fill
+                sizes="64px"
+                className="object-cover object-top"
+              />
             </div>
             <div>
               <p className="font-display text-lg font-bold text-heading">
@@ -208,9 +212,9 @@ export default async function BlogPostPage({ params }: PageProps) {
               </p>
               <p className="mt-2 text-sm leading-relaxed text-text">
                 Explorer passionate about travel and discovery. This journal —
-                Alex Journly / Fernandes Journeys — is where I write down places
-                I&apos;ve been so I don&apos;t forget the light, the food, and
-                the roads in between.
+                Fernandes Journeys — is where I write down places I&apos;ve been
+                so I don&apos;t forget the light, the food, and the roads in
+                between.
               </p>
             </div>
           </aside>

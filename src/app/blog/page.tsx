@@ -6,7 +6,7 @@ import { getAllPosts } from "@/lib/posts";
 export const metadata: Metadata = {
   title: "Stories",
   description:
-    "Trip notes, destination guides, and travel tips from Alex Journly — migrated from alexjournly.com.",
+    "Trip notes, destination guides, and travel tips from Fernandes Journeys.",
 };
 
 export default function BlogIndexPage() {

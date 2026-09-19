@@ -1,6 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Section } from "@/components/ui/Section";
-import { about } from "@/data/content";
+import { about, site } from "@/data/content";
 
 export function AuthorIntro() {
   return (
@@ -12,11 +13,14 @@ export function AuthorIntro() {
       aria-labelledby="author-heading"
     >
       <div className="panel flex flex-col gap-6 p-6 md:flex-row md:items-center md:gap-8 md:p-8">
-        <div
-          className="flex size-16 shrink-0 items-center justify-center rounded-lg border border-border bg-white font-display text-xl font-bold text-heading md:size-20 md:text-2xl"
-          aria-hidden="true"
-        >
-          AF
+        <div className="relative size-16 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-soft md:size-20">
+          <Image
+            src={site.authorPhoto}
+            alt={site.authorName}
+            fill
+            sizes="80px"
+            className="object-cover object-top"
+          />
         </div>
         <div className="min-w-0 flex-1">
           <p className="eyebrow">About the journal</p>

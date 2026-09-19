@@ -21,13 +21,13 @@ const openSans = Open_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "Alex Journly — Travel Journal",
-    template: "%s · Alex Journly",
+    default: "Fernandes Journeys — Travel Journal",
+    template: "%s · Fernandes Journeys",
   },
   description:
-    "Alex Journly is a personal travel journal — destinations from past trips, trip notes, and photos from the road. Also known as Fernandes Journeys.",
+    "Fernandes Journeys is a personal travel journal — destinations from past trips, trip notes, and photos from the road. Written by Alex Fernandes.",
   openGraph: {
-    title: "Alex Journly — Travel Journal",
+    title: "Fernandes Journeys — Travel Journal",
     description:
       "Personal travel journal — destinations from past trips and notes from the road.",
     type: "website",

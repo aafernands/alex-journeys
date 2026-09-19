@@ -1,17 +1,18 @@
 /**
- * Site copy for Alex Journly / Fernandes Journeys.
+ * Site copy for Fernandes Journeys (author: Alex Fernandes).
  * Blog posts live in src/content/posts/ (migrated from alexjournly.com).
  * Homepage featured stories are selected in posts/_index.json.
  */
 
 export const site = {
-  name: "Alex Journly",
-  journalName: "Fernandes Journeys",
+  name: "Fernandes Journeys",
+  authorName: "Alex Fernandes",
+  authorPhoto: "/brand/alex-fernandes.jpg",
   tagline: "Inspire. Capture. Discover.",
-  email: "hello@alexjournly.com",
+  email: "hello@fernandesjourneys.com",
   social: {
-    instagram: "https://instagram.com/",
-    youtube: "https://youtube.com/",
+    instagram: "https://www.instagram.com/fernandesjourneys/",
+    youtube: "https://www.youtube.com/@fernandesjourneys",
     pinterest: "https://pinterest.com/",
     coffee: "https://www.buymeacoffee.com/fernandesjourneys",
     newsletter: "#newsletter",
@@ -21,9 +22,9 @@ export const site = {
 export const about = {
   headline: "Hi, I’m Alex",
   paragraphs: [
-    "I’m Alex Fernandes — traveler, photographer, and the voice behind this journal. Based in New Jersey, I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
+    "I’m Alex Fernandes — traveler, photographer, and the voice behind Fernandes Journeys. Based in New Jersey, I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
     "Expect trip notes, destination pages, and favorites from the road — not an agency, not a booking service. Just a personal trip journal with room to breathe.",
-    "Alex Journly is the name on the masthead; Fernandes Journeys is the same journal — one traveler, one set of stories.",
+    "Fernandes Journeys is my personal trip journal — one traveler, one set of stories.",
   ],
 };
 

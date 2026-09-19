@@ -6,7 +6,7 @@ import { SitePage } from "@/components/pages/SitePage";
 export const metadata: Metadata = {
   title: "Start Here",
   description:
-    "New to Alex Journly? Start with Places, Stories, Guides, and Tools from this personal travel journal.",
+    "New to Fernandes Journeys? Start with Places, Stories, Guides, and Tools from this personal travel journal.",
 };
 
 const steps = [

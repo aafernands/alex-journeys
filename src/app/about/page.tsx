@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { SitePage } from "@/components/pages/SitePage";
 import { about, site } from "@/data/content";
@@ -6,7 +7,7 @@ import { about, site } from "@/data/content";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Meet Alex — the traveler behind Alex Journly / Fernandes Journeys, a personal trip journal of places already visited.",
+    "Meet Alex Fernandes — the traveler behind Fernandes Journeys, a personal trip journal of places already visited.",
 };
 
 export default function AboutPage() {
@@ -20,10 +21,22 @@ export default function AboutPage() {
         { label: "About" },
       ]}
     >
-      <div className="panel mt-10 space-y-5 p-6 text-base leading-relaxed text-text md:mt-12 md:p-8">
-        {about.paragraphs.slice(1).map((p) => (
-          <p key={p.slice(0, 24)}>{p}</p>
-        ))}
+      <div className="mt-10 grid gap-8 md:mt-12 md:grid-cols-[minmax(0,14rem)_1fr] md:items-start md:gap-10">
+        <div className="relative mx-auto aspect-[3/4] w-full max-w-[14rem] overflow-hidden rounded-xl border border-border bg-surface-soft md:mx-0">
+          <Image
+            src={site.authorPhoto}
+            alt={site.authorName}
+            fill
+            sizes="(max-width: 768px) 224px, 224px"
+            className="object-cover object-top"
+            priority
+          />
+        </div>
+        <div className="panel space-y-5 p-6 text-base leading-relaxed text-text md:p-8">
+          {about.paragraphs.slice(1).map((p) => (
+            <p key={p.slice(0, 24)}>{p}</p>
+          ))}
+        </div>
       </div>
 
       <aside className="panel-soft mt-8 p-6 md:p-8">

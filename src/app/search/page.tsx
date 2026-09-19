@@ -6,7 +6,7 @@ import { getSearchIndex } from "@/lib/search-index";
 export const metadata: Metadata = {
   title: "Search",
   description:
-    "Search Stories, Guides, Places, and key pages across Alex Journly.",
+    "Search Stories, Guides, Places, and key pages across Fernandes Journeys.",
 };
 
 type Props = {

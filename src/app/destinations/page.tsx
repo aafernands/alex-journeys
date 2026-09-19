@@ -5,7 +5,7 @@ import { destinationsTree } from "@/data/destinations";
 export const metadata: Metadata = {
   title: "Places",
   description:
-    "Places I’ve been — destinations from past trips on Alex Journly.",
+    "Places I’ve been — destinations from past trips on Fernandes Journeys.",
 };
 
 export default function DestinationsIndexPage() {

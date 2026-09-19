@@ -10,7 +10,7 @@ const STATIC_PAGES: Omit<SearchItem, "haystack" | "id">[] = [
     slug: "about",
     href: "/about",
     excerpt:
-      "Meet Alex — the traveler behind Alex Journly / Fernandes Journeys, a personal trip journal of places already visited.",
+      "Meet Alex Fernandes — the traveler behind Fernandes Journeys, a personal trip journal of places already visited.",
   },
   {
     type: "page",
@@ -18,7 +18,7 @@ const STATIC_PAGES: Omit<SearchItem, "haystack" | "id">[] = [
     slug: "start-here",
     href: "/start-here",
     excerpt:
-      "New to Alex Journly? Start with Places, Stories, Guides, and Tools from this personal travel journal.",
+      "New to Fernandes Journeys? Start with Places, Stories, Guides, and Tools from this personal travel journal.",
   },
   {
     type: "page",
