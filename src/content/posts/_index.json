@@ -1,7 +1,7 @@
 {
   "migratedAt": "2026-09-19T19:52:59.137Z",
   "source": "alexjournly.com WordPress REST API",
-  "count": 32,
+  "count": 30,
   "featuredHomepage": [
     "cancun-5-day-travel-guide",
     "discovering-iceland-a-week-in-the-land-of-fire-and-ice",
@@ -11,26 +11,6 @@
     "best-solo-travel-destinations"
   ],
   "posts": [
-    {
-      "title": "CMS Test: Publishing From Fernandes Journeys",
-      "slug": "cms-testing",
-      "date": "2026-09-19T12:00:00",
-      "excerpt": "A quick publish check from the new in-site CMS — safe to delete after we confirm GitHub + Vercel are wired up.",
-      "featuredImage": null,
-      "destinations": [
-        "united-states"
-      ]
-    },
-    {
-      "title": "CMS Test: Publishing From Fernandes Journeys",
-      "slug": "cms-test",
-      "date": "2026-09-19T12:00:00",
-      "excerpt": "A quick publish check from the new in-site CMS — safe to delete after we confirm GitHub + Vercel are wired up.",
-      "featuredImage": null,
-      "destinations": [
-        "united-states"
-      ]
-    },
     {
       "slug": "cancun-5-day-travel-guide",
       "title": "Cancun in 5 Days: Beaches, Parties, and Island Adventures",
