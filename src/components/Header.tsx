@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { Search as SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
@@ -23,6 +24,7 @@ type Props = {
 export function Header({ latestPost = null }: Props) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [destOpen, setDestOpen] = useState(false);
   const [desktopOpenContinent, setDesktopOpenContinent] = useState<
     string | null
@@ -43,6 +45,7 @@ export function Header({ latestPost = null }: Props) {
 
   const closeAll = useCallback(() => {
     setMobileOpen(false);
+    setMobileSearchOpen(false);
     setMobileDestOpen(false);
     setMobileContinent(null);
     closeDest();
@@ -81,13 +84,13 @@ export function Header({ latestPost = null }: Props) {
   }, [destOpen, closeDest]);
 
   useEffect(() => {
-    if (!mobileOpen) return;
+    if (!mobileOpen && !mobileSearchOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeAll();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [mobileOpen, closeAll]);
+  }, [mobileOpen, mobileSearchOpen, closeAll]);
 
   /** Press `/` to focus site search (skip when typing in a field). */
   useEffect(() => {
@@ -108,8 +111,8 @@ export function Header({ latestPost = null }: Props) {
       if (isDesktop) {
         desktopSearchRef.current?.focus();
       } else {
-        setMobileOpen(true);
-        // Focus after drawer paints
+        setMobileOpen(false);
+        setMobileSearchOpen(true);
         requestAnimationFrame(() => {
           mobileSearchRef.current?.focus();
         });
@@ -153,10 +156,48 @@ export function Header({ latestPost = null }: Props) {
         </div>
       </div>
 
-      <div className="section-shell flex items-center justify-between gap-4 py-3 md:py-3.5">
+      <div className="section-shell relative flex items-center justify-between gap-3 py-3 md:py-3.5">
+        {/* Mobile: search (left) */}
+        <button
+          type="button"
+          className="relative z-10 inline-flex h-10 w-10 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft md:hidden"
+          aria-expanded={mobileSearchOpen}
+          aria-controls="mobile-search-panel"
+          onClick={() => {
+            setMobileOpen(false);
+            setMobileSearchOpen((v) => {
+              const next = !v;
+              if (next) {
+                requestAnimationFrame(() => mobileSearchRef.current?.focus());
+              }
+              return next;
+            });
+          }}
+        >
+          <span className="sr-only">
+            {mobileSearchOpen ? "Close search" : "Open search"}
+          </span>
+          {mobileSearchOpen ? (
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+            </svg>
+          ) : (
+            <SearchIcon className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
+          )}
+        </button>
+
+        {/* Logo: centered on mobile, left on desktop */}
         <Link
           href="/"
-          className="relative z-10 shrink-0"
+          className="absolute left-1/2 z-10 -translate-x-1/2 md:static md:translate-x-0"
           onClick={closeAll}
           aria-label="Fernandes Journeys home"
         >
@@ -166,7 +207,7 @@ export function Header({ latestPost = null }: Props) {
             width={200}
             height={55}
             priority
-            className="h-8 w-auto md:h-10"
+            className="h-7 w-auto sm:h-8 md:h-10"
           />
         </Link>
 
@@ -292,12 +333,16 @@ export function Header({ latestPost = null }: Props) {
           </Link>
         </nav>
 
+        {/* Mobile: menu drawer (right) */}
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-lg bg-accent p-2.5 text-white transition hover:bg-accent-deep md:hidden"
+          className="relative z-10 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-white transition hover:bg-accent-deep md:hidden"
           aria-expanded={mobileOpen}
           aria-controls="mobile-nav"
-          onClick={() => setMobileOpen((v) => !v)}
+          onClick={() => {
+            setMobileSearchOpen(false);
+            setMobileOpen((v) => !v);
+          }}
         >
           <span className="sr-only">{mobileOpen ? "Close menu" : "Open menu"}</span>
           <svg
@@ -318,20 +363,26 @@ export function Header({ latestPost = null }: Props) {
         </button>
       </div>
 
+      {mobileSearchOpen && (
+        <div
+          id="mobile-search-panel"
+          className="border-t border-border bg-white px-4 py-3 md:hidden"
+        >
+          <SearchInput
+            ref={mobileSearchRef}
+            variant="drawer"
+            id="mobile-search"
+            onNavigate={closeAll}
+          />
+        </div>
+      )}
+
       {mobileOpen && (
         <nav
           id="mobile-nav"
           className="max-h-[min(80vh,32rem)] overflow-y-auto border-t border-border bg-white px-5 py-4 md:hidden"
           aria-label="Mobile"
         >
-          <div className="mb-3">
-            <SearchInput
-              ref={mobileSearchRef}
-              variant="drawer"
-              id="mobile-search"
-              onNavigate={closeAll}
-            />
-          </div>
           <ul className="flex flex-col gap-1">
             <li>
               <button
