@@ -18,15 +18,15 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "Alex Journly — Travel & Lifestyle",
-    template: "%s · Alex Journly",
+    default: "Fernandes Journeys — Travel Blog",
+    template: "%s · Fernandes Journeys",
   },
   description:
-    "Editorial travel & lifestyle notes from Alex Journly — destinations, stays, rituals, and letters from the road.",
+    "Fernandes Journeys is Alex’s travel blog — real journeys, destinations, and notes from the road.",
   openGraph: {
-    title: "Alex Journly — Travel & Lifestyle",
+    title: "Fernandes Journeys — Travel Blog",
     description:
-      "Editorial travel & lifestyle notes from Alex Journly — destinations, stays, rituals, and letters from the road.",
+      "Fernandes Journeys is Alex’s travel blog — real journeys, destinations, and notes from the road.",
     type: "website",
     locale: "en_US",
   },

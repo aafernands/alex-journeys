@@ -10,7 +10,7 @@ export function Favorites() {
       <div className="mx-auto max-w-6xl px-5 py-16 md:px-8 md:py-24">
         <div className="mb-10 max-w-2xl md:mb-14">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sand">
-            Lifestyle
+            From the road
           </p>
           <h2
             id="favorites-heading"

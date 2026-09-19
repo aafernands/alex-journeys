@@ -1,5 +1,7 @@
 "use client";
 
+import { site } from "@/data/content";
+
 export function Newsletter() {
   return (
     <section
@@ -30,9 +32,9 @@ export function Newsletter() {
               Letters from the road
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-ink-soft">
-              Occasional notes on destinations, stays worth booking, and the
-              lifestyle details that don’t fit in a caption. Connect your form
-              provider when you’re ready — this UI is a polished placeholder.
+              Occasional notes on destinations, stays worth booking, and trip
+              details that don’t fit in a caption. Connect your form provider
+              when you’re ready — this UI is a polished placeholder.
             </p>
 
             <form
@@ -65,10 +67,10 @@ export function Newsletter() {
             <p className="mt-4 text-xs text-muted">
               Or say hello at{" "}
               <a
-                href="mailto:hello@alexjournly.com"
+                href={`mailto:${site.email}`}
                 className="font-medium text-ink underline decoration-sand underline-offset-4 transition hover:text-terracotta hover:decoration-terracotta"
               >
-                hello@alexjournly.com
+                {site.email}
               </a>{" "}
               <span className="opacity-70">(placeholder address)</span>
             </p>

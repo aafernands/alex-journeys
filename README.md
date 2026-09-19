@@ -1,8 +1,9 @@
-# Alex Journly — Travel & Lifestyle Site
+# Fernandes Journeys — Travel Blog
 
-A polished personal travel & lifestyle website with an editorial, magazine-inspired aesthetic. Built for **Alex Journly** as a finished first version you can deploy and customize.
+Alex’s personal travel blog for real journeys, destinations, and notes from the road. Built as **Fernandes Journeys** — a finished first version you can deploy and customize.
 
-**Live repo:** [github.com/aafernands/travel-lifestyle-site](https://github.com/aafernands/travel-lifestyle-site)
+**Live:** [travel-lifestyle-site.vercel.app](https://travel-lifestyle-site.vercel.app)  
+**Repo:** [github.com/aafernands/travel-lifestyle-site](https://github.com/aafernands/travel-lifestyle-site)
 
 ## Stack
 
@@ -14,10 +15,10 @@ A polished personal travel & lifestyle website with an editorial, magazine-inspi
 ## Design
 
 - Warm ivory / cream canvas with charcoal ink, terracotta accents, and soft sage
-- Editorial typography and generous spacing (travel magazine × personal brand)
+- Editorial typography and generous spacing
 - Mobile-first layout, sticky header, restrained hover/fade motion
 - Semantic HTML, visible focus rings, skip link, and `prefers-reduced-motion` support
-- Sample content clearly labeled so you can replace it safely
+- Sample trip content clearly labeled so you can replace it safely
 
 ## Run locally
 
@@ -86,4 +87,4 @@ src/
 ## Notes
 
 - Newsletter form is UI-only (prevents default submit). Wire to Buttondown, Mailchimp, Resend, etc. when ready.
-- Social links and `hello@alexjournly.com` are placeholders.
+- Social links and `hello@fernandesjourneys.com` are placeholders.

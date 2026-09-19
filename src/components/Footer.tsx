@@ -39,7 +39,8 @@ export function Footer() {
       <div className="border-t border-sand/60">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-5 text-xs text-muted md:flex-row md:items-center md:justify-between md:px-8">
           <p>
-            © {year} {site.name}. Built as a personal travel & lifestyle site.
+            © {year} {site.name}. A travel blog for real journeys and notes from
+            the road.
           </p>
           <p>Social links are placeholders — update in src/data/content.ts</p>
         </div>

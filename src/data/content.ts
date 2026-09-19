@@ -1,12 +1,12 @@
 /**
- * SAMPLE CONTENT — Replace with your own copy, destinations, and links.
- * All stories, favorites, and bio text below are placeholders for Alex Journly.
+ * SAMPLE CONTENT — Trip stories and picks below are placeholders for Fernandes Journeys.
+ * Swap destinations, blurbs, and images when real posts are ready.
  */
 
 export const site = {
-  name: "Alex Journly",
-  tagline: "Travel & lifestyle notes from the road",
-  email: "hello@alexjournly.com",
+  name: "Fernandes Journeys",
+  tagline: "Real journeys, destinations, and notes from the road",
+  email: "hello@fernandesjourneys.com",
   social: {
     instagram: "https://instagram.com/",
     youtube: "https://youtube.com/",
@@ -92,16 +92,16 @@ export const favorites = [
 export const about = {
   headline: "Stories over checklists",
   paragraphs: [
-    "I’m Alex Journly — a travel & lifestyle creator documenting places through atmosphere, food, and the small rituals that make a trip feel like yours.",
-    "This site collects featured journeys, favorite stays and tables, and notes on moving through the world with curiosity and care. Sample content throughout — swap it for your own voice anytime.",
+    "I’m Alex — and Fernandes Journeys is where I post my travelling: the routes I take, the places that stick, and the small details I’d tell a friend before they booked a ticket.",
+    "Expect trip reports, destination notes, and favorites from the road — not a lifestyle magazine, just a travel blog with room to breathe. Sample stories below until the next journey goes live.",
   ],
 };
 
 export const hero = {
-  eyebrow: "Travel · Lifestyle · Notes",
-  title: "Alex Journly",
+  eyebrow: "Travel blog · Journeys · Notes from the road",
+  title: "Fernandes Journeys",
   subtitle:
-    "Editorial dispatches from cities, coasts, and quiet corners — designed for people who travel for feeling as much as for landmarks.",
+    "Real trips, honest notes, and destinations worth the detour — written first-person from wherever the road leads next.",
   ctaPrimary: "Read recent trips",
   ctaSecondary: "Get the newsletter",
   image:

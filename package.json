@@ -1,7 +1,8 @@
 {
-  "name": "travel-lifestyle-site",
+  "name": "fernandes-journeys",
   "version": "0.1.0",
   "private": true,
+  "description": "Fernandes Journeys — Alex’s travel blog for real journeys, destinations, and notes from the road.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
