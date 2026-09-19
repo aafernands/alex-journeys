@@ -427,3 +427,16 @@ body {
   margin-left: auto;
   margin-right: auto;
 }
+
+
+/* CMS TipTap editor */
+.tiptap p.is-editor-empty:first-child::before {
+  color: var(--muted, #8a847a);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+.tiptap:focus {
+  outline: none;
+}

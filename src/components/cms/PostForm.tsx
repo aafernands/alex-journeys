@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { RichTextEditor } from "./RichTextEditor";
 
 export type DestinationOption = { slug: string; name: string };
 
@@ -253,20 +254,14 @@ export function PostForm({ destinations, mode, initial }: Props) {
 
       <div>
         <label htmlFor="cms-content" className="text-sm font-semibold text-heading">
-          Content (HTML) <span className="text-accent">*</span>
+          Content <span className="text-accent">*</span>
         </label>
-        <textarea
+        <RichTextEditor
           id="cms-content"
           value={contentHtml}
-          onChange={(e) => setContentHtml(e.target.value)}
+          onChange={setContentHtml}
           required
-          rows={16}
-          placeholder={"<p>Your story…</p>\n<h2>Section</h2>\n<p>…</p>"}
-          className={`${areaClass} font-mono text-[0.8125rem] leading-relaxed`}
         />
-        <p className="mt-1 text-xs text-muted">
-          Paste cleaned HTML (p, h2, ul, figure…). Stored as contentHtml.
-        </p>
       </div>
 
       {error ? (
