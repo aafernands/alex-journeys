@@ -1,7 +1,7 @@
 {
   "migratedAt": "2026-09-19T19:52:59.137Z",
   "source": "alexjournly.com WordPress REST API",
-  "count": 31,
+  "count": 32,
   "featuredHomepage": [
     "cancun-5-day-travel-guide",
     "discovering-iceland-a-week-in-the-land-of-fire-and-ice",
@@ -11,6 +11,16 @@
     "best-solo-travel-destinations"
   ],
   "posts": [
+    {
+      "title": "CMS Test: Publishing From Fernandes Journeys",
+      "slug": "cms-testing",
+      "date": "2026-09-19T12:00:00",
+      "excerpt": "A quick publish check from the new in-site CMS — safe to delete after we confirm GitHub + Vercel are wired up.",
+      "featuredImage": null,
+      "destinations": [
+        "united-states"
+      ]
+    },
     {
       "title": "CMS Test: Publishing From Fernandes Journeys",
       "slug": "cms-test",
