@@ -14,11 +14,16 @@ export type PostMeta = {
   destinations: string[];
 };
 
+/** WordPress-migrated posts keep the object source; CMS-published posts use "cms". */
+export type PostSource =
+  | "cms"
+  | {
+      site: string;
+      url: string;
+      wpId: number;
+    };
+
 export type Post = PostMeta & {
   contentHtml: string;
-  source: {
-    site: string;
-    url: string;
-    wpId: number;
-  };
+  source: PostSource;
 };

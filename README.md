@@ -57,3 +57,11 @@ npm run build
 ## Deploy
 
 Connected to Vercel from `main`. Push to deploy.
+
+## In-site CMS
+
+Passcode-gated editor at **`/cms`** (not linked in the public header). Publishes posts to GitHub so Vercel redeploys.
+
+1. Set `CMS_PASSCODE` and `CMS_GITHUB_TOKEN` on Vercel (and in local `.env.local`).
+2. Visit `/cms`, unlock, create or edit a post, publish.
+3. Full setup: [`docs/CMS.md`](docs/CMS.md).
