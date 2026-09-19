@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { NewsletterForm } from "@/components/newsletter/NewsletterForm";
 import { site, about } from "@/data/content";
 
 const social = [
@@ -53,54 +54,7 @@ export function Footer() {
                   from the road — no agency pitches, just the journal.
                 </p>
 
-                <form
-                  className="mt-8 max-w-md space-y-3"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                  }}
-                  aria-label="Newsletter signup"
-                >
-                  <label htmlFor="footer-email" className="sr-only">
-                    Email address
-                  </label>
-                  <input
-                    id="footer-email"
-                    name="email"
-                    type="email"
-                    required
-                    placeholder="Enter your email"
-                    autoComplete="email"
-                    className="min-h-11 w-full rounded-lg border border-white/15 bg-white/10 px-4 text-sm text-white placeholder:text-white/45 transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
-                  />
-                  <label className="flex items-start gap-2.5 text-sm leading-snug text-white/65">
-                    <input
-                      type="checkbox"
-                      required
-                      className="mt-1 size-4 shrink-0 rounded border-white/30 accent-accent"
-                    />
-                    <span>
-                      By entering your email, you agree to receive Fernandes Journeys
-                      emails and agree to our{" "}
-                      <Link
-                        href="/policies"
-                        className="text-white underline underline-offset-2 hover:text-accent"
-                      >
-                        Terms and Conditions
-                      </Link>{" "}
-                      and{" "}
-                      <Link
-                        href="/policies"
-                        className="text-white underline underline-offset-2 hover:text-accent"
-                      >
-                        Privacy Policy
-                      </Link>
-                      .
-                    </span>
-                  </label>
-                  <button type="submit" className="btn btn-primary btn-block sm:w-auto">
-                    Subscribe
-                  </button>
-                </form>
+                <NewsletterForm />
               </div>
 
               <div className="mt-10 border-t border-white/10 pt-8 md:col-span-5 md:mt-0 md:border-t-0 md:border-l md:pt-0 md:pl-10">
