@@ -22,20 +22,20 @@ export default function PlanYourTripPage() {
         { label: "Trip Planner" },
       ]}
     >
-      <ul className="mt-12 grid gap-4 sm:grid-cols-2">
+      <ul className="mt-10 grid gap-4 sm:grid-cols-2">
         {tripPlannerTools.map((tool) => (
           <li key={tool.href}>
             <a
               href={tool.href}
               target="_blank"
               rel="noopener noreferrer sponsored"
-              className="group flex h-full gap-4 rounded-xl border border-surface bg-white p-5 transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_16px_40px_-24px_rgba(12,13,14,0.3)]"
+              className="panel-interactive group flex h-full gap-4 p-5"
             >
-              <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-surface-soft text-accent transition group-hover:bg-accent group-hover:text-white">
+              <span className="panel-nested flex size-12 shrink-0 items-center justify-center bg-white text-accent">
                 <NavIcon name={tool.icon} size={22} />
               </span>
               <span className="min-w-0">
-                <span className="font-display block text-lg font-bold text-heading transition group-hover:text-accent">
+                <span className="font-display block text-lg font-bold text-heading">
                   {tool.title}
                 </span>
                 <span className="mt-0.5 block text-sm font-semibold text-muted">

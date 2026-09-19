@@ -22,18 +22,18 @@ export default function ResourcesPage() {
         { label: "Resources" },
       ]}
     >
-      <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {resourcesNav.map((item) => (
           <li key={item.href}>
             <Link
               href={item.href}
-              className="group flex h-full gap-4 rounded-xl border border-surface bg-white p-5 transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_16px_40px_-24px_rgba(12,13,14,0.3)]"
+              className="panel-interactive group flex h-full gap-4 p-5"
             >
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-surface-soft text-accent transition group-hover:bg-accent group-hover:text-white">
+              <span className="panel-nested flex size-11 shrink-0 items-center justify-center bg-white text-accent">
                 <NavIcon name={item.icon} size={20} />
               </span>
               <span>
-                <span className="font-display block text-lg font-bold text-heading transition group-hover:text-accent">
+                <span className="font-display block text-lg font-bold text-heading">
                   {item.title}
                 </span>
                 {item.description ? (

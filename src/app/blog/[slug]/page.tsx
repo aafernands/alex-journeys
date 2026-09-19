@@ -112,7 +112,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
       <article className="mx-auto max-w-3xl px-5 py-10 md:px-8 md:py-14">
         {/* Byline */}
-        <div className="flex flex-wrap items-center gap-4 border-b border-surface pb-8">
+        <div className="flex flex-wrap items-center gap-4 border-b border-border pb-8">
           <div
             className="flex size-14 items-center justify-center rounded-full bg-surface text-lg font-bold text-heading ring-2 ring-accent"
             aria-hidden="true"
@@ -138,7 +138,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
         {/* Affiliates disclosure */}
         <aside
-          className="mt-8 rounded-lg border border-surface bg-surface-soft px-5 py-4"
+          className="panel-nested mt-8 bg-surface-soft px-5 py-4"
           aria-label="Affiliates disclosure"
         >
           <p className="font-display text-sm font-bold text-heading">
@@ -184,7 +184,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         </div>
 
         {/* Author card — stays in flow, no float over body */}
-        <aside className="mt-14 flex flex-col gap-5 rounded-2xl border border-surface bg-surface-soft p-6 sm:flex-row sm:items-start">
+        <aside className="panel-soft mt-14 flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
           <div
             className="flex size-20 shrink-0 items-center justify-center rounded-full bg-white text-2xl font-bold text-heading ring-2 ring-accent"
             aria-hidden="true"
@@ -204,7 +204,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           </div>
         </aside>
 
-        <footer className="mt-12 flex flex-wrap gap-3 border-t border-surface pt-8">
+        <footer className="mt-12 flex flex-wrap gap-3 border-t border-border pt-8">
           <Link
             href="/blog"
             className="inline-flex items-center justify-center rounded-md border border-heading/15 bg-white px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-heading transition hover:border-accent hover:text-accent"
@@ -221,7 +221,7 @@ export default async function BlogPostPage({ params }: PageProps) {
       </article>
 
       {related.length > 0 ? (
-        <div className="border-t border-surface bg-surface-soft">
+        <div className="border-t border-border bg-surface-soft">
           <div className="mx-auto max-w-6xl px-5 py-12 md:px-8 md:py-16">
             <RelatedPosts posts={related} />
           </div>

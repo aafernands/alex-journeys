@@ -10,13 +10,13 @@ export function StartHereCards() {
       aria-labelledby="start-here-cards-heading"
     >
       <div className="mx-auto max-w-6xl px-5 py-14 md:px-8 md:py-16">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-label text-muted">New here?</p>
+        <div className="section-head centered mx-auto">
+          <p className="eyebrow">New here?</p>
           <h2
             id="start-here-cards-heading"
-            className="font-display mt-2 text-display uppercase tracking-tight text-heading"
+            className="font-display mt-2 text-display text-heading"
           >
-            Start here
+            Start here.
           </h2>
           <p className="mt-3 text-base leading-relaxed text-text">
             Three easy ways into the journal — places I&apos;ve been, stories from
@@ -24,24 +24,30 @@ export function StartHereCards() {
           </p>
         </div>
 
-        <ul className="mt-10 grid gap-5 sm:grid-cols-3 sm:gap-6">
-          {startHereCards.map((card) => (
+        <ul className="mt-10 grid gap-4 sm:grid-cols-3 sm:gap-5">
+          {startHereCards.map((card, i) => (
             <li key={card.href}>
               <Link
                 href={card.href}
-                className="group flex h-full flex-col rounded-2xl border border-surface bg-white p-6 transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_16px_40px_-24px_rgba(12,13,14,0.3)]"
+                className="panel-interactive group flex h-full flex-col p-5 md:p-6"
               >
-                <span className="flex size-12 items-center justify-center rounded-xl bg-surface-soft text-accent transition group-hover:bg-accent group-hover:text-white">
-                  <NavIcon name={card.icon} size={22} />
-                </span>
-                <span className="font-display mt-5 text-xl font-bold text-heading transition group-hover:text-accent">
+                <div className="panel-nested flex items-center justify-between gap-3 p-3">
+                  <span className="flex size-10 items-center justify-center rounded-md bg-white text-accent">
+                    <NavIcon name={card.icon} size={20} />
+                  </span>
+                  <span className="font-display text-xs font-bold tracking-[0.14em] text-muted">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                </div>
+                <span className="font-display mt-4 text-lg font-bold text-heading">
                   {card.title}
                 </span>
                 <span className="mt-2 flex-1 text-sm leading-relaxed text-text">
                   {card.description}
                 </span>
-                <span className="mt-4 text-sm font-bold text-link transition group-hover:text-accent">
-                  {card.cta} →
+                <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-link transition group-hover:text-accent">
+                  {card.cta}
+                  <span aria-hidden="true">→</span>
                 </span>
               </Link>
             </li>

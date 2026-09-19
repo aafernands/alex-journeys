@@ -48,7 +48,7 @@ export default function StartHerePage() {
   return (
     <SitePage
       label="Welcome"
-      title="Start here"
+      title="Start here."
       description="This is a personal travel blog — places I’ve been and notes from the road. Pick a path below and dig in."
       narrow={false}
       crumbs={[
@@ -56,29 +56,29 @@ export default function StartHerePage() {
         { label: "Start Here" },
       ]}
     >
-      <ol className="mt-12 grid gap-5 sm:grid-cols-2 lg:gap-6">
+      <ol className="mt-10 grid gap-4 sm:grid-cols-2">
         {steps.map((step) => (
           <li key={step.href}>
             <Link
               href={step.href}
-              className="group flex h-full gap-4 rounded-2xl border border-surface bg-white p-6 transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_16px_40px_-24px_rgba(12,13,14,0.3)]"
+              className="panel-interactive group flex h-full gap-4 p-5 md:p-6"
             >
               <span className="flex flex-col items-center gap-3">
-                <span className="font-display text-xs font-bold tracking-[0.16em] text-muted">
+                <span className="font-display text-xs font-bold tracking-[0.14em] text-muted">
                   {step.n}
                 </span>
-                <span className="flex size-11 items-center justify-center rounded-xl bg-surface-soft text-accent transition group-hover:bg-accent group-hover:text-white">
+                <span className="panel-nested flex size-11 items-center justify-center bg-white text-accent">
                   <NavIcon name={step.icon} size={20} />
                 </span>
               </span>
               <span className="min-w-0 flex-1">
-                <span className="font-display block text-xl font-bold text-heading transition group-hover:text-accent">
+                <span className="font-display block text-xl font-bold text-heading">
                   {step.title}
                 </span>
                 <span className="mt-2 block text-sm leading-relaxed text-text">
                   {step.description}
                 </span>
-                <span className="mt-4 inline-block text-sm font-bold text-link transition group-hover:text-accent">
+                <span className="mt-4 inline-block text-sm font-semibold text-link transition group-hover:text-accent">
                   Go →
                 </span>
               </span>
@@ -87,12 +87,14 @@ export default function StartHerePage() {
         ))}
       </ol>
 
-      <p className="mt-12 text-center text-sm text-muted">
-        Want the short version of who I am?{" "}
-        <Link href="/about" className="font-semibold text-link hover:text-accent">
-          Read About →
-        </Link>
-      </p>
+      <div className="panel-soft mt-12 p-6 text-center">
+        <p className="text-sm text-text">
+          Want the short version of who I am?{" "}
+          <Link href="/about" className="font-semibold text-link hover:text-accent">
+            Read About →
+          </Link>
+        </p>
+      </div>
     </SitePage>
   );
 }

@@ -62,11 +62,11 @@ export default async function DestinationPage({ params }: PageProps) {
           </ol>
         </nav>
 
-        <p className="mt-8 text-label text-muted">
+        <p className="mt-8 eyebrow">
           {dest.continent}
           {dest.region !== dest.continent ? ` · ${dest.region}` : ""}
         </p>
-        <h1 className="font-display mt-2 text-display uppercase tracking-tight text-heading">
+        <h1 className="font-display mt-2 text-display text-heading">
           {dest.name}
         </h1>
         <p className="mt-6 text-lead text-text">{dest.blurb}</p>
@@ -84,16 +84,16 @@ export default async function DestinationPage({ params }: PageProps) {
                 <li key={post.slug}>
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="group flex gap-4 overflow-hidden rounded-xl border border-surface bg-white p-3 transition hover:border-accent/30 hover:shadow-md sm:p-4"
+                    className="panel-interactive group flex gap-4 overflow-hidden p-3 sm:p-4"
                   >
-                    <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-lg bg-surface sm:h-24 sm:w-32">
+                    <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-lg border border-border bg-surface sm:h-24 sm:w-32">
                       {post.featuredImage ? (
                         <Image
                           src={post.featuredImage.url}
                           alt=""
                           fill
                           sizes="128px"
-                          className="object-cover transition group-hover:scale-[1.03]"
+                          className="object-cover"
                         />
                       ) : null}
                     </div>
@@ -117,8 +117,8 @@ export default async function DestinationPage({ params }: PageProps) {
             </ul>
           </section>
         ) : (
-          <div className="mt-10 rounded-2xl border border-dashed border-surface bg-surface-soft px-6 py-16 text-center">
-            <p className="text-label text-muted">Photo space</p>
+          <div className="panel-soft mt-10 border-dashed px-6 py-16 text-center">
+            <p className="eyebrow">Photo space</p>
             <p className="font-display mt-3 text-2xl text-text">
               Room for trip photos later
             </p>
@@ -132,13 +132,13 @@ export default async function DestinationPage({ params }: PageProps) {
         <div className="mt-10 flex flex-wrap gap-3">
           <Link
             href="/destinations"
-            className="inline-flex items-center justify-center rounded-md border border-heading/15 bg-white px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-heading transition hover:border-accent hover:text-accent"
+            className="btn btn-secondary"
           >
             ← All destinations
           </Link>
           <Link
             href="/blog"
-            className="inline-flex items-center justify-center rounded-md bg-accent px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-accent-deep"
+            className="btn btn-primary"
           >
             Browse the blog
           </Link>

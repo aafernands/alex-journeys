@@ -53,12 +53,10 @@ export function SitePage({
         ) : null}
 
         {label ? (
-          <p className={`${crumbs ? "mt-8" : ""} text-label text-muted`}>
-            {label}
-          </p>
+          <p className={`${crumbs ? "mt-8" : ""} eyebrow`}>{label}</p>
         ) : null}
         <h1
-          className={`font-display text-display uppercase tracking-tight text-heading ${
+          className={`font-display text-display text-heading ${
             label || crumbs ? "mt-2" : ""
           }`}
         >

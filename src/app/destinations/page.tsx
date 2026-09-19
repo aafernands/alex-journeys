@@ -12,9 +12,9 @@ export default function DestinationsIndexPage() {
   return (
     <main className="bg-white pt-28 md:pt-32">
       <div className="mx-auto max-w-6xl px-5 py-10 md:px-8 md:py-14">
-        <p className="text-label text-muted">Destinations</p>
-        <h1 className="font-display mt-2 text-display uppercase tracking-tight text-heading">
-          Places I&apos;ve been
+        <p className="eyebrow">Destinations</p>
+        <h1 className="font-display mt-2 text-display text-heading">
+          Places I&apos;ve been.
         </h1>
         <p className="mt-4 max-w-2xl text-lead text-text">
           Whether you&apos;re dreaming of icy adventures in Iceland, beach
@@ -28,6 +28,7 @@ export default function DestinationsIndexPage() {
             <section
               key={continent.id}
               aria-labelledby={`continent-${continent.id}`}
+              className="panel p-5 md:p-6"
             >
               <h2
                 id={`continent-${continent.id}`}
@@ -52,7 +53,7 @@ export default function DestinationsIndexPage() {
 
               {continent.regions?.map((region) => (
                 <div key={region.id} className="mt-8">
-                  <h3 className="text-label text-muted">{region.name}</h3>
+                  <h3 className="eyebrow">{region.name}</h3>
                   <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {region.countries.map((country) => (
                       <li key={country.slug}>
@@ -86,15 +87,17 @@ function DestinationCard({
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col rounded-xl border border-surface bg-white p-5 transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-md"
+      className="panel-nested group flex h-full flex-col bg-white p-4 transition hover:bg-surface-soft"
     >
-      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-accent">
+      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-accent">
         {subtitle}
       </p>
-      <p className="font-display mt-2 text-2xl font-semibold text-heading group-hover:text-accent">
+      <p className="font-display mt-2 text-xl font-semibold text-heading md:text-2xl">
         {title}
       </p>
-      <p className="mt-3 text-sm text-muted">From my trip →</p>
+      <p className="mt-3 text-sm font-semibold text-link transition group-hover:text-accent">
+        From my trip →
+      </p>
     </Link>
   );
 }

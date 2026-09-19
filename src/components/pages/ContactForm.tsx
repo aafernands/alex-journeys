@@ -38,7 +38,7 @@ export function ContactForm() {
             type="text"
             required
             autoComplete="given-name"
-            className="mt-2 min-h-12 w-full rounded-[5px] border border-muted-light bg-white px-4 text-sm text-heading placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
+            className="mt-2 min-h-11 w-full rounded-lg border border-border bg-white px-4 text-sm text-heading placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
           />
         </div>
         <div>
@@ -50,7 +50,7 @@ export function ContactForm() {
             name="last"
             type="text"
             autoComplete="family-name"
-            className="mt-2 min-h-12 w-full rounded-[5px] border border-muted-light bg-white px-4 text-sm text-heading placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
+            className="mt-2 min-h-11 w-full rounded-lg border border-border bg-white px-4 text-sm text-heading placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
           />
         </div>
       </div>
@@ -64,7 +64,7 @@ export function ContactForm() {
           type="email"
           required
           autoComplete="email"
-          className="mt-2 min-h-12 w-full rounded-[5px] border border-muted-light bg-white px-4 text-sm text-heading placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
+          className="mt-2 min-h-11 w-full rounded-lg border border-border bg-white px-4 text-sm text-heading placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
         />
       </div>
       <div>
@@ -76,12 +76,12 @@ export function ContactForm() {
           name="message"
           required
           rows={5}
-          className="mt-2 w-full rounded-[5px] border border-muted-light bg-white px-4 py-3 text-sm text-heading placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
+          className="mt-2 w-full rounded-lg border border-border bg-white px-4 py-3 text-sm text-heading placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
         />
       </div>
       <button
         type="submit"
-        className="min-h-12 w-full rounded-[5px] bg-accent px-6 font-display text-base font-bold uppercase tracking-wide text-white transition hover:bg-accent-deep sm:w-auto sm:px-10"
+        className="btn btn-primary btn-block sm:w-auto"
       >
         Send message
       </button>

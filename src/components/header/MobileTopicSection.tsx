@@ -19,7 +19,7 @@ export function MobileTopicSection({ label, href, items, onNavigate }: Props) {
     <li>
       <button
         type="button"
-        className="flex w-full items-center justify-between py-2.5 text-base font-extrabold uppercase tracking-wide text-heading"
+        className="flex w-full items-center justify-between py-2.5 text-base font-semibold tracking-tight text-heading"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >

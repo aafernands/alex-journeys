@@ -27,8 +27,8 @@ export default function BlogIndexPage() {
           </ol>
         </nav>
 
-        <p className="mt-8 text-label text-muted">Journal</p>
-        <h1 className="font-display mt-2 text-display uppercase tracking-tight text-heading">
+        <p className="mt-8 eyebrow">Journal</p>
+        <h1 className="font-display mt-2 text-display text-heading">
           Blog
         </h1>
         <p className="mt-4 max-w-2xl text-lead text-text">
@@ -36,7 +36,7 @@ export default function BlogIndexPage() {
           and practical travel tips.
         </p>
 
-        <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+        <ul className="mt-10 grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {posts.map((post, i) => (
             <li key={post.slug}>
               <PostCard post={post} priority={i < 3} />

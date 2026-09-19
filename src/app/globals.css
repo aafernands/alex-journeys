@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand — observed from alexjournly.com */
+  /* Brand — Alex Journly / Fernandes Journeys */
   --accent: #f97316;
   --accent-deep: #ea580c;
   --bg: #ffffff;
@@ -10,6 +10,7 @@
   --text: #333333;
   --heading: #181818;
   --near-black: #0c0d0e;
+  --ink: #181818;
   --link: #2192dd;
   --muted: #8a8a8c;
   --muted-light: #c3c3c3;
@@ -18,6 +19,8 @@
   --white: #ffffff;
   --hero-type: #e7ebf0;
   --ring: #f97316;
+  --border: #d5dce4;
+  --border-strong: #c5cdd8;
 }
 
 @theme inline {
@@ -29,12 +32,15 @@
   --color-text: var(--text);
   --color-heading: var(--heading);
   --color-near-black: var(--near-black);
+  --color-ink: var(--ink);
   --color-link: var(--link);
   --color-muted: var(--muted);
   --color-muted-light: var(--muted-light);
   --color-sand: var(--sand);
   --color-steel: var(--steel);
   --color-hero-type: var(--hero-type);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --font-display: var(--font-montserrat);
   --font-sans: var(--font-open-sans);
 }
@@ -79,39 +85,152 @@ body {
   font-family: var(--font-montserrat), system-ui, sans-serif;
 }
 
-/* Type scale: 14 / 16 / 20 / 32 / 56 */
+/* Type scale */
 .text-label {
   font-size: 0.75rem; /* 12 */
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
 .text-sm-tight {
-  font-size: 0.875rem; /* 14 */
+  font-size: 0.875rem;
   line-height: 1.45;
 }
 
 .text-body {
-  font-size: 1rem; /* 16 */
+  font-size: 1rem;
   line-height: 1.5;
 }
 
 .text-lead {
-  font-size: 1.25rem; /* 20 */
-  line-height: 1.45;
+  font-size: 1.125rem;
+  line-height: 1.55;
 }
 
 .text-title {
-  font-size: 2rem; /* 32 */
+  font-size: 2rem;
   line-height: 1.2;
   font-weight: 700;
 }
 
 .text-display {
-  font-size: clamp(2.25rem, 5vw, 3.5rem); /* ~36–56 */
-  line-height: 1.1;
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  line-height: 1.12;
   font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Boxed UI language — hairline panels, flat fills */
+.panel {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem; /* 12px / rounded-xl */
+  background: var(--white);
+}
+
+.panel-soft {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface-soft);
+}
+
+.panel-nested {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem; /* 8px / rounded-lg */
+  background: var(--surface-soft);
+}
+
+.panel-interactive {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--white);
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.panel-interactive:hover {
+  background: var(--surface-soft);
+  border-color: var(--border-strong);
+}
+
+/* Buttons — 8px radius, ~44px tall, hover = fill shift only */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem; /* 44px */
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem; /* 8px */
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  transition: background-color 150ms ease, border-color 150ms ease,
+    color 150ms ease;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--white);
+  border: 1px solid transparent;
+}
+
+.btn-primary:hover {
+  background: var(--accent-deep);
+}
+
+.btn-ink {
+  background: var(--ink);
+  color: var(--white);
+  border: 1px solid transparent;
+}
+
+.btn-ink:hover {
+  background: var(--near-black);
+}
+
+.btn-secondary {
+  background: var(--white);
+  color: var(--heading);
+  border: 1px solid var(--border-strong);
+}
+
+.btn-secondary:hover {
+  background: var(--surface-soft);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.section-band {
+  padding-top: 3.5rem;
+  padding-bottom: 3.5rem;
+}
+
+@media (min-width: 768px) {
+  .section-band {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+.section-head {
+  max-width: 40rem;
+}
+
+.section-head.centered {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
 }
 
 @keyframes fade-up {
@@ -144,8 +263,8 @@ body {
 /* Migrated WordPress post body — 18/27 Open Sans */
 .post-prose {
   color: var(--text);
-  font-size: 1.125rem; /* 18 */
-  line-height: 1.5; /* 27 */
+  font-size: 1.125rem;
+  line-height: 1.5;
 }
 
 .post-prose > * + * {
@@ -191,7 +310,7 @@ body {
 }
 
 .post-prose blockquote {
-  border-left: 3px solid var(--surface);
+  border-left: 3px solid var(--border);
   padding-left: 1em;
   color: var(--muted);
   font-style: italic;
@@ -205,7 +324,8 @@ body {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 0.625rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
 }
 
 .post-prose figcaption {
@@ -223,7 +343,7 @@ body {
 
 .post-prose hr {
   border: none;
-  border-top: 1px solid var(--surface);
+  border-top: 1px solid var(--border);
   margin: 2em 0;
 }
 

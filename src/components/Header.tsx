@@ -106,16 +106,16 @@ export function Header({ latestPost = null }: Props) {
     pathname === "/" || /^\/blog\/[^/]+$/.test(pathname);
   const overHero = darkHero && !scrolled && !mobileOpen;
   const navLinkClass = overHero
-    ? "text-white/95 hover:text-white"
-    : "text-heading hover:text-accent";
+    ? "text-white/90 hover:text-white"
+    : "text-text hover:text-heading";
   const chevronClass = overHero ? "text-white/80" : "text-muted";
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-200 ${
         overHero
           ? "bg-transparent"
-          : "border-b border-surface bg-white/95 shadow-sm backdrop-blur-md"
+          : "border-b border-border bg-white/95 backdrop-blur-md"
       }`}
     >
       {/* Slim metastrip */}
@@ -123,7 +123,7 @@ export function Header({ latestPost = null }: Props) {
         className={`border-b transition-colors ${
           overHero
             ? "border-white/15 bg-black/25"
-            : "border-surface bg-surface-soft"
+            : "border-border bg-surface-soft"
         }`}
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-1.5 md:px-8">
@@ -193,7 +193,7 @@ export function Header({ latestPost = null }: Props) {
             <button
               ref={destButtonRef}
               type="button"
-              className={`inline-flex items-center gap-1.5 font-sans text-sm font-extrabold uppercase tracking-wide transition ${navLinkClass}`}
+              className={`inline-flex items-center gap-1.5 font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
               aria-expanded={destOpen}
               aria-haspopup="true"
               aria-controls={destMenuId}
@@ -214,7 +214,7 @@ export function Header({ latestPost = null }: Props) {
                 id={destMenuId}
                 role="menu"
                 aria-label="Destinations"
-                className="absolute left-0 top-full z-50 mt-3 min-w-[14rem] rounded-xl border border-surface bg-white py-2 shadow-[0_16px_40px_-20px_rgba(12,13,14,0.35)]"
+                className="absolute left-0 top-full z-50 mt-3 min-w-[14rem] rounded-xl border border-border bg-white py-2"
               >
                 <Link
                   href="/destinations"
@@ -256,7 +256,7 @@ export function Header({ latestPost = null }: Props) {
                         {isContinentOpen && (
                           <ul
                             role="menu"
-                            className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-surface bg-white py-2 shadow-[0_16px_40px_-20px_rgba(12,13,14,0.35)]"
+                            className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-border bg-white py-2"
                           >
                             {continent.countries.map((country) => (
                               <li key={country.slug} role="none">
@@ -301,7 +301,7 @@ export function Header({ latestPost = null }: Props) {
                       {isContinentOpen && continent.regions && (
                         <ul
                           role="menu"
-                          className="absolute left-full top-0 ml-1 min-w-[13rem] rounded-xl border border-surface bg-white py-2 shadow-[0_16px_40px_-20px_rgba(12,13,14,0.35)]"
+                          className="absolute left-full top-0 ml-1 min-w-[13rem] rounded-xl border border-border bg-white py-2"
                         >
                           {continent.regions.map((region) => {
                             const isRegionOpen =
@@ -333,7 +333,7 @@ export function Header({ latestPost = null }: Props) {
                                 {isRegionOpen && (
                                   <ul
                                     role="menu"
-                                    className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-surface bg-white py-2 shadow-[0_16px_40px_-20px_rgba(12,13,14,0.35)]"
+                                    className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-border bg-white py-2"
                                   >
                                     {region.countries.map((country) => (
                                       <li key={country.slug} role="none">
@@ -363,7 +363,7 @@ export function Header({ latestPost = null }: Props) {
 
           <Link
             href="/blog"
-            className={`font-sans text-sm font-extrabold uppercase tracking-wide transition ${navLinkClass}`}
+            className={`font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
           >
             Blog
           </Link>
@@ -378,14 +378,14 @@ export function Header({ latestPost = null }: Props) {
 
           <Link
             href="/start-here"
-            className={`font-sans text-sm font-extrabold uppercase tracking-wide transition ${navLinkClass}`}
+            className={`font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
           >
             Start Here
           </Link>
 
           <Link
             href="/plan-your-trip"
-            className="inline-flex items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-accent-deep"
+            className="btn btn-primary !min-h-9 !px-4 !py-1.5 text-sm"
           >
             Trip tools
           </Link>
@@ -393,7 +393,7 @@ export function Header({ latestPost = null }: Props) {
 
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-md bg-accent p-2.5 text-white md:hidden"
+          className="inline-flex items-center justify-center rounded-lg bg-accent p-2.5 text-white transition hover:bg-accent-deep md:hidden"
           aria-expanded={mobileOpen}
           aria-controls="mobile-nav"
           onClick={() => setMobileOpen((v) => !v)}
@@ -420,14 +420,14 @@ export function Header({ latestPost = null }: Props) {
       {mobileOpen && (
         <nav
           id="mobile-nav"
-          className="max-h-[min(80vh,32rem)] overflow-y-auto border-t border-surface bg-white px-5 py-4 md:hidden"
+          className="max-h-[min(80vh,32rem)] overflow-y-auto border-t border-border bg-white px-5 py-4 md:hidden"
           aria-label="Mobile"
         >
           <ul className="flex flex-col gap-1">
             <li>
               <button
                 type="button"
-                className="flex w-full items-center justify-between py-2.5 text-base font-extrabold uppercase tracking-wide text-heading"
+                className="flex w-full items-center justify-between py-2.5 text-base font-semibold tracking-tight text-heading"
                 aria-expanded={mobileDestOpen}
                 onClick={() => setMobileDestOpen((v) => !v)}
               >
@@ -435,7 +435,7 @@ export function Header({ latestPost = null }: Props) {
                 <ChevronDown open={mobileDestOpen} />
               </button>
               {mobileDestOpen && (
-                <ul className="mb-2 ml-3 border-l border-surface pl-3">
+                <ul className="mb-2 ml-3 border-l border-border pl-3">
                   <li>
                     <Link
                       href="/destinations"
@@ -463,7 +463,7 @@ export function Header({ latestPost = null }: Props) {
                           <ChevronDown open={continentOpen} />
                         </button>
                         {continentOpen && (
-                          <ul className="mb-1 ml-2 border-l border-surface pl-3">
+                          <ul className="mb-1 ml-2 border-l border-border pl-3">
                             {continent.countries?.map((country) => (
                               <li key={country.slug}>
                                 <Link
@@ -493,7 +493,7 @@ export function Header({ latestPost = null }: Props) {
                                     <ChevronDown open={regionOpen} />
                                   </button>
                                   {regionOpen && (
-                                    <ul className="mb-1 ml-2 border-l border-surface pl-3">
+                                    <ul className="mb-1 ml-2 border-l border-border pl-3">
                                       {region.countries.map((country) => (
                                         <li key={country.slug}>
                                           <Link
@@ -522,7 +522,7 @@ export function Header({ latestPost = null }: Props) {
             <li>
               <Link
                 href="/blog"
-                className="block py-2.5 text-base font-extrabold uppercase tracking-wide text-heading hover:text-accent"
+                className="block py-2.5 text-base font-semibold tracking-tight text-heading hover:text-accent"
                 onClick={closeAll}
               >
                 Blog
@@ -539,7 +539,7 @@ export function Header({ latestPost = null }: Props) {
             <li>
               <Link
                 href="/start-here"
-                className="block py-2.5 text-base font-extrabold uppercase tracking-wide text-heading hover:text-accent"
+                className="block py-2.5 text-base font-semibold tracking-tight text-heading hover:text-accent"
                 onClick={closeAll}
               >
                 Start Here
@@ -556,7 +556,7 @@ export function Header({ latestPost = null }: Props) {
             <li>
               <Link
                 href="/about"
-                className="block py-2.5 text-base font-extrabold uppercase tracking-wide text-heading hover:text-accent"
+                className="block py-2.5 text-base font-semibold tracking-tight text-heading hover:text-accent"
                 onClick={closeAll}
               >
                 About
@@ -565,7 +565,7 @@ export function Header({ latestPost = null }: Props) {
             <li>
               <Link
                 href="/contact"
-                className="block py-2.5 text-base font-extrabold uppercase tracking-wide text-heading hover:text-accent"
+                className="block py-2.5 text-base font-semibold tracking-tight text-heading hover:text-accent"
                 onClick={closeAll}
               >
                 Contact
@@ -575,7 +575,7 @@ export function Header({ latestPost = null }: Props) {
             <li className="pt-2">
               <Link
                 href="/plan-your-trip"
-                className="inline-flex w-full items-center justify-center rounded-md bg-accent px-4 py-3 text-sm font-bold uppercase tracking-wide text-white"
+                className="btn btn-primary btn-block"
                 onClick={closeAll}
               >
                 Trip tools

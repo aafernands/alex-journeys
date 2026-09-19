@@ -58,7 +58,7 @@ export function TopicFlyout({
       <button
         ref={buttonRef}
         type="button"
-        className={`inline-flex items-center gap-1.5 font-sans text-sm font-extrabold uppercase tracking-wide transition ${navLinkClass}`}
+        className={`inline-flex items-center gap-1.5 font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
         aria-expanded={open}
         aria-controls={menuId}
         aria-haspopup="true"
@@ -82,7 +82,7 @@ export function TopicFlyout({
         <div
           id={menuId}
           role="menu"
-          className="absolute left-1/2 top-full z-50 mt-3 w-[22rem] -translate-x-1/2 rounded-xl border border-surface bg-white py-2 shadow-[0_16px_40px_-20px_rgba(12,13,14,0.35)]"
+          className="absolute left-1/2 top-full z-50 mt-3 w-[22rem] -translate-x-1/2 rounded-xl border border-border bg-white py-2"
         >
           <Link
             href={href}
@@ -107,7 +107,7 @@ export function TopicFlyout({
                     onNavigate?.();
                   }}
                 >
-                  <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-surface-soft text-accent">
+                  <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-surface-soft text-accent">
                     <NavIcon name={item.icon} size={16} />
                   </span>
                   <span>

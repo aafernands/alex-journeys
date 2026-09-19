@@ -21,7 +21,7 @@ export default function ContactPage() {
       ]}
     >
       <ContactForm />
-      <aside className="mt-12 rounded-2xl border border-surface bg-surface-soft p-6">
+      <aside className="panel-soft mt-12 p-6">
         <p className="font-display text-lg font-bold text-heading">Prefer email?</p>
         <p className="mt-2 text-sm leading-relaxed text-text">
           Reach me at{" "}
