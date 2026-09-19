@@ -126,8 +126,8 @@ export function Header({ latestPost = null }: Props) {
   const chevronClass = "text-muted";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-[color-mix(in_srgb,var(--white)_92%,var(--bg))] backdrop-blur-md">
-      <div className="border-b border-dashed border-border bg-surface/80">
+    <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-md">
+      <div className="border-b border-border bg-surface-soft">
         <div className="section-shell flex items-center justify-between gap-3 py-1.5">
           <a
             href="#newsletter"

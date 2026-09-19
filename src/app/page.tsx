@@ -11,7 +11,7 @@ export default function HomePage() {
     <>
       <a
         href="#start-here-cards"
-        className="absolute left-4 top-4 z-[100] -translate-y-16 rounded-sm bg-ink px-4 py-2 text-sm text-white transition focus:translate-y-0"
+        className="absolute left-4 top-4 z-[100] -translate-y-16 rounded-md bg-heading px-4 py-2 text-sm text-white transition focus:translate-y-0"
       >
         Skip to start here
       </a>

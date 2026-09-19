@@ -1,21 +1,21 @@
 import type { Metadata } from "next";
-import { Lora, Source_Sans_3 } from "next/font/google";
+import { Montserrat, Open_Sans } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getLatestPost } from "@/lib/posts";
 import "./globals.css";
 
-const lora = Lora({
-  variable: "--font-lora",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "600", "700", "800", "900"],
   display: "swap",
 });
 
-const sourceSans = Source_Sans_3({
-  variable: "--font-source-sans",
+const openSans = Open_Sans({
+  variable: "--font-open-sans",
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "600", "700", "800"],
   display: "swap",
 });
 
@@ -48,9 +48,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${lora.variable} ${sourceSans.variable} h-full antialiased`}
+      className={`${montserrat.variable} ${openSans.variable} h-full antialiased`}
     >
-      <body id="top" className="journal-page min-h-full flex flex-col font-sans">
+      <body id="top" className="min-h-full flex flex-col font-sans">
         <Header latestPost={latestPost} />
         <div className="flex-1">{children}</div>
         <Footer />

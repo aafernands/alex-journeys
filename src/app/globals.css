@@ -1,27 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  /* Travel journal — paper, ink, terracotta stamp */
-  --accent: #d97706;
-  --accent-deep: #b45309;
-  --bg: #f6f0e6;
-  --surface: #ebe2d3;
-  --surface-soft: #faf6ee;
-  --text: #3f382e;
-  --heading: #1f1a14;
-  --near-black: #14110d;
-  --ink: #2a241c;
-  --link: #9a3412;
-  --muted: #8a7d6b;
-  --muted-light: #c4b8a5;
-  --sand: #d9ccb8;
-  --steel: #6b7c6e;
-  --white: #fffcf7;
-  --hero-type: #f6f0e6;
-  --ring: #d97706;
-  --border: #e0d4c2;
-  --border-strong: #cbbba3;
-  --paper-line: color-mix(in srgb, var(--sand) 55%, transparent);
+  /* Brand — Fernandes Journeys */
+  --accent: #f97316;
+  --accent-deep: #ea580c;
+  --bg: #fafbfc;
+  --surface: #e7ebf0;
+  --surface-soft: #f3f5f7;
+  --text: #333333;
+  --heading: #181818;
+  --near-black: #0c0d0e;
+  --ink: #181818;
+  --link: #2192dd;
+  --muted: #8a8a8c;
+  --muted-light: #c3c3c3;
+  --sand: #ddd3c7;
+  --steel: #5180a0;
+  --white: #ffffff;
+  --hero-type: #e7ebf0;
+  --ring: #f97316;
+  --border: #d5dce4;
+  --border-strong: #c5cdd8;
 }
 
 @theme inline {
@@ -42,9 +41,8 @@
   --color-hero-type: var(--hero-type);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
-  --color-white: var(--white);
-  --font-display: var(--font-lora);
-  --font-sans: var(--font-source-sans);
+  --font-display: var(--font-montserrat);
+  --font-sans: var(--font-open-sans);
 }
 
 html {
@@ -68,42 +66,9 @@ html {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-source-sans), system-ui, sans-serif;
+  font-family: var(--font-open-sans), system-ui, sans-serif;
   font-size: 16px;
-  line-height: 1.6;
-}
-
-/* Soft paper grain + margin line (journal page) */
-.journal-page {
-  background-color: var(--bg);
-  background-image:
-    radial-gradient(ellipse at 10% 0%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 45%),
-    radial-gradient(ellipse at 90% 20%, color-mix(in srgb, var(--sand) 40%, transparent), transparent 40%),
-    linear-gradient(
-      90deg,
-      transparent 0,
-      transparent calc(1.25rem - 1px),
-      color-mix(in srgb, #c45c4a 35%, transparent) calc(1.25rem - 1px),
-      color-mix(in srgb, #c45c4a 35%, transparent) 1.25rem,
-      transparent 1.25rem
-    );
-  background-attachment: fixed;
-}
-
-@media (min-width: 768px) {
-  .journal-page {
-    background-image:
-      radial-gradient(ellipse at 10% 0%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 45%),
-      radial-gradient(ellipse at 90% 20%, color-mix(in srgb, var(--sand) 40%, transparent), transparent 40%),
-      linear-gradient(
-        90deg,
-        transparent 0,
-        transparent calc(2rem - 1px),
-        color-mix(in srgb, #c45c4a 28%, transparent) calc(2rem - 1px),
-        color-mix(in srgb, #c45c4a 28%, transparent) 2rem,
-        transparent 2rem
-      );
-  }
+  line-height: 1.55;
 }
 
 ::selection {
@@ -117,9 +82,7 @@ body {
 }
 
 .font-display {
-  font-family: var(--font-lora), Georgia, "Times New Roman", serif;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: var(--font-montserrat), system-ui, sans-serif;
 }
 
 /* ——— Shared layout shell (~1280) ——— */
@@ -141,11 +104,12 @@ body {
 
 /* Soft product-page ground with faint grid (hero decoration) */
 .page-grid {
-  background-color: transparent;
+  background-color: var(--bg);
   background-image:
-    linear-gradient(to bottom, var(--paper-line) 1px, transparent 1px);
-  background-size: 100% 2rem;
-  background-position: left top;
+    linear-gradient(to right, color-mix(in srgb, var(--border) 55%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--border) 55%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: center top;
 }
 
 /* Type scale — quieter product hierarchy */
@@ -209,10 +173,8 @@ body {
 /* Boxed UI language — hairline panels, flat fills */
 .panel {
   border: 1px solid var(--border);
-  border-radius: 0.25rem;
+  border-radius: 0.75rem; /* 12px / rounded-xl */
   background: var(--white);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--sand) 50%, transparent),
-    0 12px 28px -20px rgba(31, 26, 20, 0.35);
 }
 
 .panel-soft {
@@ -239,18 +201,33 @@ body {
   border-color: var(--border-strong);
 }
 
-/* Journal entry caption bar (was product window chrome) */
+/* Window chrome for product-style preview panels */
 .window-chrome {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-bottom: 1px dashed var(--border-strong);
-  background: color-mix(in srgb, var(--surface) 70%, var(--white));
-  padding: 0.7rem 0.95rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-soft);
+  padding: 0.625rem 0.875rem;
 }
 
 .window-dot {
-  display: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--border-strong);
+}
+
+.window-dot:nth-child(1) {
+  background: #f87171;
+}
+
+.window-dot:nth-child(2) {
+  background: #fbbf24;
+}
+
+.window-dot:nth-child(3) {
+  background: #34d399;
 }
 
 /* Buttons — 8px radius, ~44px tall, hover = fill shift only */
@@ -368,7 +345,7 @@ body {
 .post-prose h3,
 .post-prose h4 {
   color: var(--heading);
-  font-family: var(--font-lora), system-ui, sans-serif;
+  font-family: var(--font-montserrat), system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1.25;
@@ -468,32 +445,4 @@ body {
 /* Newsletter postcard */
 .newsletter-postcard {
   isolation: isolate;
-}
-
-
-/* Journal micro-patterns */
-.journal-entry-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 1px dashed var(--border-strong);
-  background: var(--white);
-  padding: 0.35rem 0.75rem;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--heading);
-}
-
-.journal-tape {
-  background: color-mix(in srgb, var(--accent) 22%, var(--white));
-  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
-  box-shadow: 0 1px 2px rgba(31, 26, 20, 0.08);
-}
-
-.font-display.text-hero,
-.font-display.text-display,
-.font-display.text-title {
-  font-weight: 600;
 }
