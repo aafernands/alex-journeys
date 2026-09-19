@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+:root {
+  --cream: #f7f3ee;
+  --cream-deep: #efe8df;
+  --ink: #1c1917;
+  --ink-soft: #44403c;
+  --muted: #78716c;
+  --terracotta: #c45c26;
+  --terracotta-deep: #a34a1c;
+  --sage: #5c6b5a;
+  --sage-soft: #e4ebe3;
+  --sand: #d6c4b0;
+  --white: #fffcf8;
+  --ring: #c45c26;
+}
+
+@theme inline {
+  --color-cream: var(--cream);
+  --color-cream-deep: var(--cream-deep);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
+  --color-terracotta: var(--terracotta);
+  --color-terracotta-deep: var(--terracotta-deep);
+  --color-sage: var(--sage);
+  --color-sage-soft: var(--sage-soft);
+  --color-sand: var(--sand);
+  --color-surface: var(--white);
+  --font-display: var(--font-cormorant);
+  --font-sans: var(--font-dm-sans);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--terracotta) 28%, transparent);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+.font-display {
+  font-family: var(--font-cormorant), Georgia, "Times New Roman", serif;
+}
+
+.sample-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--cream-deep);
+  border: 1px solid color-mix(in srgb, var(--sand) 70%, transparent);
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s ease-out both;
+}
+
+.animate-delay-1 {
+  animation-delay: 0.1s;
+}
+
+.animate-delay-2 {
+  animation-delay: 0.2s;
+}
+
+.animate-delay-3 {
+  animation-delay: 0.3s;
+}
+
+.grain {
+  position: relative;
+}
+
+.grain::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
