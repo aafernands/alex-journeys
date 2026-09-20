@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-09-20T00:00:00.000Z",
+  "updatedAt": "2026-09-20T20:26:53.133Z",
   "hero": {
-    "image": "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
+    "image": "/media/photo-1745_singular_display_fullpicture-mua3y8bo.jpg",
     "imageAlt": "Sunrise over Maroon Bells reflected in a calm alpine lake",
-    "imageCaption": "Maroon Bells · Colorado",
+    "imageCaption": "Niagara Falls, NY",
     "windowBadge": "Field note",
     "eyebrow": "",
     "tagline": "Inspire. Capture. Discover.",
@@ -42,12 +42,6 @@
         "accent": true
       }
     ]
-  },
-  "seo": {
-    "homeTitleSnippet": ""
-  },
-  "flags": {
-    "showHeroStats": true
   },
   "homeSections": {
     "startHere": {
@@ -118,5 +112,11 @@
         "href": "/start-here"
       }
     }
+  },
+  "seo": {
+    "homeTitleSnippet": ""
+  },
+  "flags": {
+    "showHeroStats": true
   }
 }
