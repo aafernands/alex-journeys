@@ -1,5 +1,7 @@
 "use client";
 
+import { Plane } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -34,7 +36,9 @@ export function OutboundInterstitial({
 
   useEffect(() => {
     const reduced = prefersReducedMotion();
-    const delay = reduced ? OUTBOUND_REDUCED_MOTION_DELAY_MS : OUTBOUND_DELAY_MS;
+    const delay = reduced
+      ? OUTBOUND_REDUCED_MOTION_DELAY_MS
+      : OUTBOUND_DELAY_MS;
     setDelayMs(delay);
     setRemainingMs(delay);
 
@@ -66,8 +70,8 @@ export function OutboundInterstitial({
   const seconds = Math.max(1, Math.ceil(remainingMs / 1000));
 
   return (
-    <main className="relative flex min-h-[70vh] flex-col items-center justify-center bg-bg px-4 py-16 md:py-24">
-      {/* Soft paper grain / journal wash */}
+    <main className="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden bg-bg px-4 py-16 md:py-24">
+      {/* Soft paper wash */}
       <div
         className="pointer-events-none absolute inset-0 opacity-60"
         style={{
@@ -77,10 +81,21 @@ export function OutboundInterstitial({
         aria-hidden="true"
       />
 
+      {/* Oversized plane watermark */}
+      <div
+        className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
+        aria-hidden="true"
+      >
+        <Plane
+          className="h-[min(90vw,42rem)] w-[min(90vw,42rem)] -rotate-[18deg] text-heading opacity-[0.05] dark:opacity-[0.07]"
+          strokeWidth={0.75}
+        />
+      </div>
+
       <div className="relative z-10 w-full max-w-md">
         <p className="eyebrow text-center">Departure</p>
         <h1 className="font-display mt-2 text-center text-2xl font-bold tracking-tight text-heading sm:text-3xl">
-          Leaving {site.name}
+          Leaving the journal
         </h1>
 
         <div className="panel mt-8 p-6 sm:p-8">
@@ -107,7 +122,6 @@ export function OutboundInterstitial({
             </p>
           )}
 
-          {/* Progress / countdown */}
           <div className="mt-6" aria-hidden={delayMs < 500}>
             <div
               className="h-1.5 overflow-hidden rounded-full bg-surface"
@@ -127,13 +141,11 @@ export function OutboundInterstitial({
                 Continuing in {seconds}s…
               </p>
             ) : (
-              <p className="mt-2 text-center text-xs text-muted">
-                Continuing…
-              </p>
+              <p className="mt-2 text-center text-xs text-muted">Continuing…</p>
             )}
           </div>
 
-          <div className="mt-6 flex flex-col items-stretch gap-3">
+          <div className="mt-6">
             <a
               href={destinationUrl}
               onClick={(e) => {
@@ -145,22 +157,23 @@ export function OutboundInterstitial({
             >
               Continue to {hostname || "site"}
             </a>
-            <button
-              type="button"
-              onClick={continueNow}
-              className="text-center text-sm font-medium text-link transition hover:text-accent"
-            >
-              Continue now
-            </button>
           </div>
         </div>
 
-        <footer className="mt-10 flex flex-col items-center gap-2 text-center">
+        <footer className="mt-10 flex flex-col items-center gap-3 text-center">
           <Link
             href="/"
-            className="font-display text-sm font-bold tracking-tight text-heading transition hover:text-accent"
+            className="inline-flex opacity-90 transition hover:opacity-100"
+            aria-label={`${site.name} home`}
           >
-            {site.name}
+            <Image
+              src="/brand/logo-alex-journly.png"
+              alt={site.name}
+              width={160}
+              height={48}
+              className="h-10 w-auto dark:brightness-110"
+              priority
+            />
           </Link>
           <p className="text-xs text-muted">
             <Link href="/" className="text-link hover:text-accent">
