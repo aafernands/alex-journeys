@@ -1,6 +1,6 @@
 # In-site CMS
 
-Passcode- and OAuth-gated editor at **`/cms`** for publishing blog posts, CMS pages, destinations (map + climate), the media library, and the author photo to GitHub. There is **no public header link** — bookmark `/cms` directly.
+Passcode- and OAuth-gated editor at **`/cms`** for publishing blog posts, CMS pages, destinations (map + climate), the media library, and the author photo to GitHub. Signed-in admins also get **Admin console** in the header avatar menu (hidden for non-admin readers).
 
 Auth lives in `src/auth.ts` (Auth.js / next-auth v5) and `src/lib/cms/auth.ts` (CMS gate that ORs OAuth admin + optional passcode).
 
@@ -33,7 +33,7 @@ Admins sign in with Google and/or GitHub. Only emails listed in **`CMS_ADMIN_EMA
 | `AUTH_TRUST_HOST` | Recommended on Vercel | Set to `true` so Auth.js trusts the `Host` / `X-Forwarded-Host` headers. |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | For Google | OAuth 2.0 client from Google Cloud Console. |
 | `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | For GitHub | OAuth App credentials. |
-| `CMS_ADMIN_EMAILS` | Yes for OAuth | e.g. `hello@alexjournly.com` |
+| `CMS_ADMIN_EMAILS` | Yes for OAuth | Comma-separated allowlist, e.g. `fernandesjourneys@gmail.com` (must include this address on Vercel for Admin console to appear in the header menu). |
 
 Redirect URIs: `https://www.fernandesjourneys.com/api/auth/callback/{google\|github}` and local `http://localhost:3000/api/auth/callback/...`.
 
@@ -105,7 +105,7 @@ Post editor: featured image **Choose from library**; rich text **Image** opens t
 
 ## Security notes
 
-- OAuth: Google is open to **public readers**; CMS still requires `CMS_ADMIN_EMAILS` (`session.user.isAdmin`) or passcode. Reader sessions alone never unlock `/cms`.
+- OAuth: Google is open to **public readers**; CMS still requires `CMS_ADMIN_EMAILS` (`session.user.isAdmin`) or passcode. Reader sessions alone never unlock `/cms`. The header **Admin console** item is shown only when `session.user.isAdmin` is true — ensure `CMS_ADMIN_EMAILS` includes `fernandesjourneys@gmail.com` on Vercel.
 - Passcode: server-only check; httpOnly cookie, HMAC-signed; never logged.
 - `isCmsAuthenticated()` = OAuth admin **or** passcode session.
 - Slugs sanitized (kebab-case); path traversal rejected.

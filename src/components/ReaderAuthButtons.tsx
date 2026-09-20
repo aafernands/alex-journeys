@@ -1,7 +1,8 @@
 "use client";
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
+import { UserMenu } from "@/components/UserMenu";
 
 type Props = {
   /** Compact styling for the sticky header. */
@@ -14,9 +15,8 @@ type Props = {
 };
 
 /**
- * Public reader auth: Sign in with Google / Sign out.
- * Does not expose CMS; admins still use /cms.
- * Profile / saves live under /account (nav link).
+ * Public reader auth: Sign in with Google, or avatar UserMenu when signed in.
+ * Admin console appears in the menu only when session.user.isAdmin.
  */
 export function ReaderAuthButtons({
   variant = "header",
@@ -44,7 +44,7 @@ export function ReaderAuthButtons({
       <span
         className={
           variant === "mobile"
-            ? "py-2.5 text-sm text-muted"
+            ? "inline-flex h-9 w-9 items-center justify-center text-sm text-muted"
             : "px-2 text-sm text-muted"
         }
         aria-hidden="true"
@@ -55,24 +55,7 @@ export function ReaderAuthButtons({
   }
 
   if (signedIn) {
-    return (
-      <button
-        type="button"
-        className={buttonClass}
-        disabled={pending}
-        onClick={async () => {
-          setPending(true);
-          try {
-            await signOut({ callbackUrl: "/" });
-          } finally {
-            setPending(false);
-            onNavigate?.();
-          }
-        }}
-      >
-        {pending ? "Signing out…" : "Sign out"}
-      </button>
-    );
+    return <UserMenu variant={variant} onNavigate={onNavigate} />;
   }
 
   return (

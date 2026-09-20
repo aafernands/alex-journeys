@@ -310,13 +310,6 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             Stories
           </Link>
 
-          <Link
-            href="/account"
-            className={`font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
-          >
-            Account
-          </Link>
-
           <TopicFlyout
             label="Guides"
             href="/guides"
@@ -482,17 +475,6 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
               >
                 <NavIcon name="book-open" size={18} className="text-accent" />
                 Stories
-              </Link>
-            </li>
-
-            <li>
-              <Link
-                href="/account"
-                className="flex items-center gap-2.5 py-2.5 text-base font-semibold tracking-tight text-heading hover:text-accent"
-                onClick={closeAll}
-              >
-                <NavIcon name="user" size={18} className="text-accent" />
-                Account
               </Link>
             </li>
 

@@ -6,7 +6,7 @@ Public readers can **Sign in with Google** (header) and **Save** blog posts. Sav
 
 | Surface | Behavior |
 | --- | --- |
-| Header | Sign in / Sign out; **Account** → `/account` (no standalone Saved nav item) |
+| Header | Signed out: **Sign in**. Signed in: avatar menu (photo + name on desktop, photo only on mobile) → Account dashboard, Logout; admins also see **Admin console** → `/cms`. Standalone Account nav link removed (use the menu). |
 | Blog post | **Save** / **Saved** toggle; signed-out tap → Google sign-in |
 | `/account` | Reader dashboard: Google profile, saved posts (with Remove / Clear all), explore links, sign out |
 | `/saved` | Permanent redirect → `/account` (saves are Account-only) |
@@ -65,7 +65,7 @@ Until then, non-test Google accounts will fail sign-in even though the site UI s
 - `src/lib/firebase-admin.ts` — Admin init
 - `src/lib/saved-posts.ts` — list / add / remove
 - `src/app/api/saved/route.ts` — GET / POST / DELETE
-- `src/components/ReaderAuthButtons.tsx`, `SavePostButton.tsx`, `AccountAuthActions.tsx`, `SavedPostsList.tsx`
+- `src/components/ReaderAuthButtons.tsx`, `UserMenu.tsx`, `SavePostButton.tsx`, `AccountAuthActions.tsx`, `SavedPostsList.tsx`
 - `src/app/account/page.tsx` — reader dashboard (profile + saves + explore)
 - `src/auth.ts` — Google open to all; `session.user.id` + `isAdmin` for CMS
 
