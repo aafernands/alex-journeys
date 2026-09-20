@@ -9,6 +9,8 @@ type Props = {
   users: UserPublic[];
 };
 
+type PendingAction = "toggle" | "delete" | "send-reset";
+
 function formatWhen(iso: string | null): string {
   if (!iso) return "—";
   const d = new Date(iso);
@@ -23,7 +25,11 @@ export function UsersList({ users }: Props) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -37,9 +43,20 @@ export function UsersList({ users }: Props) {
     );
   }, [users, query]);
 
-  async function toggleDisabled(user: UserPublic) {
+  function beginAction(userId: string, action: PendingAction) {
     setError(null);
-    setPendingId(user.id);
+    setSuccess(null);
+    setPendingId(userId);
+    setPendingAction(action);
+  }
+
+  function endAction() {
+    setPendingId(null);
+    setPendingAction(null);
+  }
+
+  async function toggleDisabled(user: UserPublic) {
+    beginAction(user.id, "toggle");
     try {
       const res = await fetch(`/api/cms/users/${encodeURIComponent(user.id)}`, {
         method: "PATCH",
@@ -49,14 +66,14 @@ export function UsersList({ users }: Props) {
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
         setError(data.error || "Update failed.");
-        setPendingId(null);
+        endAction();
         return;
       }
       router.refresh();
-      setPendingId(null);
+      endAction();
     } catch {
       setError("Network error. Try again.");
-      setPendingId(null);
+      endAction();
     }
   }
 
@@ -68,8 +85,7 @@ export function UsersList({ users }: Props) {
     ) {
       return;
     }
-    setError(null);
-    setPendingId(user.id);
+    beginAction(user.id, "delete");
     try {
       const res = await fetch(`/api/cms/users/${encodeURIComponent(user.id)}`, {
         method: "DELETE",
@@ -77,14 +93,45 @@ export function UsersList({ users }: Props) {
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
         setError(data.error || "Delete failed.");
-        setPendingId(null);
+        endAction();
         return;
       }
       router.refresh();
-      setPendingId(null);
+      endAction();
     } catch {
       setError("Network error. Try again.");
-      setPendingId(null);
+      endAction();
+    }
+  }
+
+  async function sendResetLink(user: UserPublic) {
+    if (!user.email?.trim()) {
+      setError("This user has no email address.");
+      setSuccess(null);
+      return;
+    }
+    beginAction(user.id, "send-reset");
+    try {
+      const res = await fetch(
+        `/api/cms/users/${encodeURIComponent(user.id)}/send-reset`,
+        { method: "POST" },
+      );
+      const data = (await res.json()) as {
+        error?: string;
+        message?: string;
+        email?: string;
+      };
+      if (!res.ok) {
+        setError(data.error || "Could not send reset email.");
+        endAction();
+        return;
+      }
+      const emailed = data.email || user.email;
+      setSuccess(data.message || `Reset email sent to ${emailed}.`);
+      endAction();
+    } catch {
+      setError("Network error. Try again.");
+      endAction();
     }
   }
 
@@ -110,6 +157,12 @@ export function UsersList({ users }: Props) {
         </p>
       ) : null}
 
+      {success ? (
+        <p className="text-sm font-medium text-emerald-800" role="status">
+          {success}
+        </p>
+      ) : null}
+
       {filtered.length === 0 ? (
         <div className="panel p-6">
           <p className="text-sm text-muted">
@@ -132,76 +185,98 @@ export function UsersList({ users }: Props) {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((u) => (
-                <tr key={u.id} className="border-b border-border last:border-0">
-                  <td className="px-4 py-3">
-                    <p className="font-semibold text-heading">
-                      {u.name?.trim() || "—"}
-                    </p>
-                    <p className="text-xs text-muted">{u.email || "No email"}</p>
-                    <p className="mt-0.5 max-w-[12rem] truncate font-mono text-[10px] text-muted">
-                      {u.id}
-                    </p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {u.providers.length === 0 ? (
-                        <span className="text-xs text-muted">—</span>
+              {filtered.map((u) => {
+                const busy = pendingId === u.id;
+                const sending =
+                  busy && pendingAction === "send-reset";
+                return (
+                  <tr key={u.id} className="border-b border-border last:border-0">
+                    <td className="px-4 py-3">
+                      <p className="font-semibold text-heading">
+                        {u.name?.trim() || "—"}
+                      </p>
+                      <p className="text-xs text-muted">
+                        {u.email || "No email"}
+                      </p>
+                      <p className="mt-0.5 max-w-[12rem] truncate font-mono text-[10px] text-muted">
+                        {u.id}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-1">
+                        {u.providers.length === 0 ? (
+                          <span className="text-xs text-muted">—</span>
+                        ) : (
+                          u.providers.map((p) => (
+                            <span
+                              key={p}
+                              className="rounded-full bg-surface-soft px-2 py-0.5 text-xs font-medium text-heading"
+                            >
+                              {p}
+                            </span>
+                          ))
+                        )}
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-muted">
+                      {formatWhen(u.createdAt)}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-muted">
+                      {formatWhen(u.lastLoginAt)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {u.disabled ? (
+                        <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700">
+                          Disabled
+                        </span>
                       ) : (
-                        u.providers.map((p) => (
-                          <span
-                            key={p}
-                            className="rounded-full bg-surface-soft px-2 py-0.5 text-xs font-medium text-heading"
-                          >
-                            {p}
-                          </span>
-                        ))
+                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                          Active
+                        </span>
                       )}
-                    </div>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-muted">
-                    {formatWhen(u.createdAt)}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-muted">
-                    {formatWhen(u.lastLoginAt)}
-                  </td>
-                  <td className="px-4 py-3">
-                    {u.disabled ? (
-                      <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700">
-                        Disabled
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
-                        Active
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        className="btn btn-secondary !min-h-8 !px-3 !py-1 text-xs"
-                        disabled={pendingId === u.id}
-                        onClick={() => void toggleDisabled(u)}
-                      >
-                        {pendingId === u.id
-                          ? "…"
-                          : u.disabled
-                            ? "Enable"
-                            : "Disable"}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-secondary !min-h-8 !px-3 !py-1 text-xs text-red-700"
-                        disabled={pendingId === u.id}
-                        onClick={() => void removeUser(u)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          className="btn btn-secondary !min-h-8 !px-3 !py-1 text-xs"
+                          disabled={busy || u.disabled || !u.email?.trim()}
+                          title={
+                            u.disabled
+                              ? "Enable the account before sending a reset link"
+                              : !u.email?.trim()
+                                ? "User has no email"
+                                : "Email a 1-hour password reset link (same as forgot-password)"
+                          }
+                          onClick={() => void sendResetLink(u)}
+                        >
+                          {sending ? "Sending…" : "Send reset link"}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-secondary !min-h-8 !px-3 !py-1 text-xs"
+                          disabled={busy}
+                          onClick={() => void toggleDisabled(u)}
+                        >
+                          {busy && pendingAction === "toggle"
+                            ? "…"
+                            : u.disabled
+                              ? "Enable"
+                              : "Disable"}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-secondary !min-h-8 !px-3 !py-1 text-xs text-red-700"
+                          disabled={busy}
+                          onClick={() => void removeUser(u)}
+                        >
+                          {busy && pendingAction === "delete" ? "…" : "Delete"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

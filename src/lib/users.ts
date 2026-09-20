@@ -483,18 +483,34 @@ export async function invalidateResetTokensForUser(
   if (writes > 0) await batch.commit();
 }
 
+export type CreatePasswordResetTokenOptions = {
+  /**
+   * When true (CMS admin send-reset), allow users with no passwordHash
+   * (e.g. Google-only) so the link can *set* a password. Self-serve
+   * forgot-password leaves this false/undefined.
+   */
+  allowWithoutPassword?: boolean;
+};
+
 /**
- * Create a password-reset token for a credentials user.
+ * Create a password-reset token for a user.
  * Returns the raw token (for the email link) — store only the hash.
+ *
+ * By default requires an existing `passwordHash` (self-serve forgot-password).
+ * Pass `{ allowWithoutPassword: true }` for admin-initiated set-password links.
  */
 export async function createPasswordResetToken(
   user: UserProfile,
+  options?: CreatePasswordResetTokenOptions,
 ): Promise<{ rawToken: string; expiresAt: string }> {
-  if (!user.passwordHash) {
+  if (!user.passwordHash && !options?.allowWithoutPassword) {
     throw new Error("This account uses Google sign-in. No password to reset.");
   }
   if (user.disabled) {
     throw new Error("This account is disabled.");
+  }
+  if (!normalizeEmail(user.email)) {
+    throw new Error("This account has no email address.");
   }
 
   await invalidateResetTokensForUser(user.id);

@@ -99,10 +99,11 @@ Email/password is enabled when `AUTH_SECRET` **and** Firebase are set. Build sti
 Admin-only (existing CMS auth gate):
 
 - List: name, email, providers, created, last login, disabled
+- **Send reset link** — emails the same 1-hour reset URL as self-serve forgot-password (Resend). Works for Google-only users too (link *sets* a password). Disabled users / missing email → clear error. Token is never returned in the API response.
 - **Disable / Enable** — blocks future credentials and Google sign-in
 - **Delete** — removes the user **document** only (confirm in UI). `saved` subcollections may remain as Firestore orphans
 
-APIs: `GET /api/cms/users`, `PATCH|DELETE /api/cms/users/[id]`.
+APIs: `GET /api/cms/users`, `PATCH|DELETE /api/cms/users/[id]`, `POST /api/cms/users/[id]/send-reset`.
 
 ## Code map
 
@@ -116,7 +117,7 @@ APIs: `GET /api/cms/users`, `PATCH|DELETE /api/cms/users/[id]`.
 - `src/app/api/auth/reset-password/route.ts`
 - `src/app/api/auth/change-password/route.ts`
 - `src/app/cms/users/page.tsx`, `src/components/cms/UsersList.tsx`
-- `src/app/api/cms/users/` — CMS user management
+- `src/app/api/cms/users/` — CMS user management (incl. `…/[id]/send-reset`)
 
 ## Out of scope (follow-ups)
 
@@ -143,3 +144,4 @@ APIs: `GET /api/cms/users`, `PATCH|DELETE /api/cms/users/[id]`.
 4. Submit a **Google-only** email on forgot-password → expect a message to use Google (no “email sent” claim).
 5. With `RESEND_API_KEY` unset → forgot-password returns a clear 503-style error; site still builds.
 6. Signed-in credentials user: `/account` → **Change password** with current + new.
+7. As CMS admin on `/cms/users` → **Send reset link** for a user with an email → expect success “Reset email sent to …” and the same Resend inbox / dashboard delivery as forgot-password. Try a Google-only user (no password yet) → link should still arrive and allow setting a password. Disabled / no-email rows should refuse clearly.
