@@ -7,12 +7,10 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { TopicFlyout } from "@/components/header/TopicFlyout";
-import { MobileTopicSection } from "@/components/header/MobileTopicSection";
-import { NavIcon } from "@/components/icons/NavIcon";
+import { MobileBottomNav } from "@/components/header/MobileBottomNav";
+import { MobileNavDrawer } from "@/components/header/MobileNavDrawer";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
-import { OutboundLink } from "@/components/outbound/OutboundLink";
-import { site } from "@/data/content";
 import {
   SearchInput,
   type SearchInputHandle,
@@ -35,8 +33,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
   const [desktopOpenContinent, setDesktopOpenContinent] = useState<
     string | null
   >(null);
-  const [mobileDestOpen, setMobileDestOpen] = useState(false);
-  const [mobileContinent, setMobileContinent] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const destMenuId = useId();
   const destWrapRef = useRef<HTMLDivElement>(null);
@@ -52,10 +49,12 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
   const closeAll = useCallback(() => {
     setMobileOpen(false);
     setMobileSearchOpen(false);
-    setMobileDestOpen(false);
-    setMobileContinent(null);
     closeDest();
   }, [closeDest]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     closeAll();
@@ -141,489 +140,268 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
   const chevronClass = "text-muted";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-md">
-      <div className="border-b border-border bg-surface-soft">
-        <div className="section-shell flex items-center justify-between gap-3 py-1.5">
-          <a
-            href="#newsletter"
-            className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-accent transition hover:text-accent-deep"
-          >
-            <BellIcon />
-            Get Travel Alerts
-          </a>
-          {latestPost ? (
-            <Link
-              href={`/${latestPost.slug}`}
-              className="min-w-0 truncate text-sm font-medium text-text transition hover:text-accent sm:max-w-md"
+    <>
+      <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-md">
+        <div className="border-b border-border bg-surface-soft">
+          <div className="section-shell flex items-center justify-between gap-3 py-1.5">
+            <a
+              href="#newsletter"
+              className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-accent transition hover:text-accent-deep"
             >
-              <span className="hidden sm:inline">Latest from the road: </span>
-              <span className="sm:hidden">Latest: </span>
-              {latestPost.title}
-            </Link>
-          ) : (
-            <Link
-              href="/blog"
-              className="hidden text-sm font-medium text-text transition hover:text-accent sm:inline"
-            >
-              Latest from the road
-            </Link>
-          )}
-        </div>
-      </div>
-
-      <div className="section-shell relative flex h-[4.5rem] items-center md:h-20 justify-between gap-3 md:justify-start md:gap-4 lg:gap-6">
-        {/* Mobile: search (left) */}
-        <button
-          type="button"
-          className="relative z-10 inline-flex h-10 w-10 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft md:hidden"
-          aria-expanded={mobileSearchOpen}
-          aria-controls="mobile-search-panel"
-          onClick={() => {
-            setMobileOpen(false);
-            setMobileSearchOpen((v) => {
-              const next = !v;
-              if (next) {
-                requestAnimationFrame(() => mobileSearchRef.current?.focus());
-              }
-              return next;
-            });
-          }}
-        >
-          <span className="sr-only">
-            {mobileSearchOpen ? "Close search" : "Open search"}
-          </span>
-          {mobileSearchOpen ? (
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
-            >
-              <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
-            </svg>
-          ) : (
-            <SearchIcon className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
-          )}
-        </button>
-
-        {/* Logo: centered on mobile, left on desktop — image only (wordmark is in the asset) */}
-        <div className="absolute left-1/2 z-10 flex -translate-x-1/2 items-center md:static md:shrink-0 md:translate-x-0">
-          <BrandLogo
-            className="h-12 w-auto sm:h-14 md:h-16"
-            width={260}
-            height={78}
-            priority
-            onClick={closeAll}
-          />
-        </div>
-
-        {/* Desktop: primary nav (center zone) */}
-        <nav
-          className="hidden min-w-0 flex-1 items-center justify-center gap-5 lg:gap-6 md:flex"
-          aria-label="Primary"
-        >
-          <div className="relative" ref={destWrapRef}>
-            <button
-              ref={destButtonRef}
-              type="button"
-              className={`inline-flex items-center gap-1.5 font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
-              aria-expanded={destOpen}
-              aria-haspopup="true"
-              aria-controls={destMenuId}
-              onClick={() => {
-                setDestOpen((v) => !v);
-                setDesktopOpenContinent(null);
-              }}
-            >
-              Places
-              <span className={chevronClass}>
-                <ChevronDown open={destOpen} />
-              </span>
-            </button>
-
-            {destOpen && (
-              <div
-                id={destMenuId}
-                role="menu"
-                aria-label="Places"
-                className="absolute left-0 top-full z-50 mt-3 min-w-[14rem] rounded-xl border border-border bg-white py-2"
+              <BellIcon />
+              Get Travel Alerts
+            </a>
+            {latestPost ? (
+              <Link
+                href={`/${latestPost.slug}`}
+                className="min-w-0 truncate text-sm font-medium text-text transition hover:text-accent sm:max-w-md"
               >
-                <Link
-                  href="/destinations"
-                  role="menuitem"
-                  className="block px-4 py-2 text-sm font-semibold text-heading transition hover:bg-surface-soft hover:text-accent"
-                  onClick={closeDest}
-                >
-                  All places
-                </Link>
-                <div className="my-1 border-t border-surface" />
-
-                {destinationsTree.map((continent) => {
-                  const isContinentOpen = desktopOpenContinent === continent.id;
-                  return (
-                    <div key={continent.id} className="relative">
-                      <button
-                        type="button"
-                        role="menuitem"
-                        aria-expanded={isContinentOpen}
-                        aria-haspopup="true"
-                        className="flex w-full items-center justify-between gap-4 px-4 py-2 text-left text-sm text-text transition hover:bg-surface-soft hover:text-accent"
-                        onClick={() => {
-                          setDesktopOpenContinent(
-                            isContinentOpen ? null : continent.id,
-                          );
-                        }}
-                        onMouseEnter={() => {
-                          setDesktopOpenContinent(continent.id);
-                        }}
-                      >
-                        {continent.name}
-                        <ChevronRight />
-                      </button>
-                      {isContinentOpen && (
-                        <ul
-                          role="menu"
-                          className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-border bg-white py-2"
-                        >
-                          {continent.countries.map((country) => (
-                            <li key={country.slug} role="none">
-                              <Link
-                                href={`/${country.slug}`}
-                                role="menuitem"
-                                className="block px-4 py-2 text-sm text-text transition hover:bg-surface-soft hover:text-accent"
-                                onClick={closeDest}
-                              >
-                                {country.name}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                <span className="hidden sm:inline">Latest from the road: </span>
+                <span className="sm:hidden">Latest: </span>
+                {latestPost.title}
+              </Link>
+            ) : (
+              <Link
+                href="/blog"
+                className="hidden text-sm font-medium text-text transition hover:text-accent sm:inline"
+              >
+                Latest from the road
+              </Link>
             )}
           </div>
-
-          <Link
-            href="/blog"
-            className={`font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
-          >
-            Stories
-          </Link>
-
-          <TopicFlyout
-            label="Guides"
-            href="/guides"
-            items={guidesNav}
-            navLinkClass={navLinkClass}
-            chevronClass={chevronClass}
-          />
-
-          <Link
-            href="/start-here"
-            className={`font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
-          >
-            Start here
-          </Link>
-        </nav>
-
-        {/* Desktop: right actions (search + auth + theme + CTA) */}
-        <div className="hidden shrink-0 items-center gap-2 lg:gap-3 md:flex">
-          <SearchInput
-            ref={desktopSearchRef}
-            variant="header"
-            id="header-search"
-            className="w-44 max-w-xs shrink-0 lg:w-52"
-          />
-
-          <ReaderAuthButtons
-            variant="header"
-            googleConfigured={googleConfigured}
-          />
-
-          <ThemeToggle />
-
-          <Link
-            href="/tools"
-            className="btn btn-ink !min-h-9 shrink-0 !px-4 !py-1.5 text-sm"
-          >
-            Tools I use
-          </Link>
         </div>
 
-        {/* Mobile: theme + menu drawer (right) */}
-        <div className="relative z-10 flex items-center gap-1 md:hidden">
-          <ThemeToggle />
-        <button
-          type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-on-solid transition hover:bg-accent-deep"
-          aria-expanded={mobileOpen}
-          aria-controls="mobile-nav"
-          onClick={() => {
-            setMobileSearchOpen(false);
-            setMobileOpen((v) => !v);
-          }}
-        >
-          <span className="sr-only">{mobileOpen ? "Close menu" : "Open menu"}</span>
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            aria-hidden="true"
-          >
-            {mobileOpen ? (
-              <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
-            ) : (
-              <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
-            )}
-          </svg>
-        </button>
-        </div>
-      </div>
-
-      {mobileSearchOpen && (
-        <div
-          id="mobile-search-panel"
-          className="border-t border-border bg-white px-4 py-3 md:hidden"
-        >
-          <SearchInput
-            ref={mobileSearchRef}
-            variant="drawer"
-            id="mobile-search"
-            onNavigate={closeAll}
-          />
-        </div>
-      )}
-
-      {mobileOpen
-        ? createPortal(
-        <div className="fixed inset-0 z-[200] md:hidden" role="dialog" aria-modal="true" aria-label="Site menu">
-          {/* Scrim — tap the thin right gap to close */}
+        <div className="section-shell relative flex h-[4.5rem] items-center md:h-20 justify-between gap-3 md:justify-start md:gap-4 lg:gap-6">
+          {/* Mobile: search (left) */}
           <button
             type="button"
-            className="absolute inset-0 bg-heading/40 backdrop-blur-[1px]"
-            aria-label="Close menu"
-            onClick={closeAll}
-          />
-
-          {/* Near-full-width drawer, small gap on the right */}
-          <nav
-            id="mobile-nav"
-            className="absolute inset-y-0 left-0 flex w-[calc(100%-0.75rem)] max-w-[28rem] flex-col bg-bg shadow-xl"
-            aria-label="Mobile"
+            className="relative z-10 inline-flex h-10 w-10 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft md:hidden"
+            aria-expanded={mobileSearchOpen}
+            aria-controls="mobile-search-panel"
+            onClick={() => {
+              setMobileOpen(false);
+              setMobileSearchOpen((v) => {
+                const next = !v;
+                if (next) {
+                  requestAnimationFrame(() => mobileSearchRef.current?.focus());
+                }
+                return next;
+              });
+            }}
           >
-            <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-              <BrandLogo className="h-9 w-auto" priority onClick={closeAll} />
-              <button
-                type="button"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-on-solid transition hover:bg-accent-deep"
-                aria-label="Close menu"
-                onClick={closeAll}
+            <span className="sr-only">
+              {mobileSearchOpen ? "Close search" : "Open search"}
+            </span>
+            {mobileSearchOpen ? (
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                  <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
-                </svg>
+                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <SearchIcon
+                className="h-5 w-5"
+                strokeWidth={2}
+                aria-hidden="true"
+              />
+            )}
+          </button>
+
+          {/* Logo: centered on mobile, left on desktop */}
+          <div className="absolute left-1/2 z-10 flex -translate-x-1/2 items-center md:static md:shrink-0 md:translate-x-0">
+            <BrandLogo
+              className="h-12 w-auto sm:h-14 md:h-16"
+              width={260}
+              height={78}
+              priority
+              onClick={closeAll}
+            />
+          </div>
+
+          {/* Desktop: primary nav */}
+          <nav
+            className="hidden min-w-0 flex-1 items-center justify-center gap-5 lg:gap-6 md:flex"
+            aria-label="Primary"
+          >
+            <div className="relative" ref={destWrapRef}>
+              <button
+                ref={destButtonRef}
+                type="button"
+                className={`inline-flex items-center gap-1.5 font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
+                aria-expanded={destOpen}
+                aria-haspopup="true"
+                aria-controls={destMenuId}
+                onClick={() => {
+                  setDestOpen((v) => !v);
+                  setDesktopOpenContinent(null);
+                }}
+              >
+                Places
+                <span className={chevronClass}>
+                  <ChevronDown open={destOpen} />
+                </span>
               </button>
-            </div>
 
-            <div className="flex-1 overflow-y-auto px-4 py-3">
-              <ul className="flex flex-col gap-0.5">
-                <li>
-                  <button
-                    type="button"
-                    className="flex w-full items-center justify-between rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft"
-                    aria-expanded={mobileDestOpen}
-                    onClick={() => setMobileDestOpen((v) => !v)}
+              {destOpen && (
+                <div
+                  id={destMenuId}
+                  role="menu"
+                  aria-label="Places"
+                  className="absolute left-0 top-full z-50 mt-3 min-w-[14rem] rounded-xl border border-border bg-white py-2"
+                >
+                  <Link
+                    href="/destinations"
+                    role="menuitem"
+                    className="block px-4 py-2 text-sm font-semibold text-heading transition hover:bg-surface-soft hover:text-accent"
+                    onClick={closeDest}
                   >
-                    <span className="inline-flex items-center gap-2.5">
-                      <NavIcon name="map-pin" size={18} className="text-accent" />
-                      Places
-                    </span>
-                    <ChevronDown open={mobileDestOpen} />
-                  </button>
-                  {mobileDestOpen && (
-                    <ul className="mb-2 ml-3 border-l border-border pl-3">
-                      <li>
-                        <Link
-                          href="/destinations"
-                          className="block py-1.5 text-sm text-text hover:text-accent"
-                          onClick={closeAll}
+                    All places
+                  </Link>
+                  <div className="my-1 border-t border-surface" />
+
+                  {destinationsTree.map((continent) => {
+                    const isContinentOpen =
+                      desktopOpenContinent === continent.id;
+                    return (
+                      <div key={continent.id} className="relative">
+                        <button
+                          type="button"
+                          role="menuitem"
+                          aria-expanded={isContinentOpen}
+                          aria-haspopup="true"
+                          className="flex w-full items-center justify-between gap-4 px-4 py-2 text-left text-sm text-text transition hover:bg-surface-soft hover:text-accent"
+                          onClick={() => {
+                            setDesktopOpenContinent(
+                              isContinentOpen ? null : continent.id,
+                            );
+                          }}
+                          onMouseEnter={() => {
+                            setDesktopOpenContinent(continent.id);
+                          }}
                         >
-                          All places
-                        </Link>
-                      </li>
-                      {destinationsTree.map((continent) => {
-                        const continentOpen = mobileContinent === continent.id;
-                        return (
-                          <li key={continent.id}>
-                            <button
-                              type="button"
-                              className="flex w-full items-center justify-between py-1.5 text-sm font-semibold text-heading"
-                              aria-expanded={continentOpen}
-                              onClick={() =>
-                                setMobileContinent(
-                                  continentOpen ? null : continent.id,
-                                )
-                              }
-                            >
-                              {continent.name}
-                              <ChevronDown open={continentOpen} />
-                            </button>
-                            {continentOpen && (
-                              <ul className="mb-1 ml-2 border-l border-border pl-3">
-                                {continent.countries.map((country) => (
-                                  <li key={country.slug}>
-                                    <Link
-                                      href={`/${country.slug}`}
-                                      className="block py-1.5 text-sm text-text hover:text-accent"
-                                      onClick={closeAll}
-                                    >
-                                      {country.name}
-                                    </Link>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </li>
-
-                <li>
-                  <Link
-                    href="/blog"
-                    className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent"
-                    onClick={closeAll}
-                  >
-                    <NavIcon name="book-open" size={18} className="text-accent" />
-                    Stories
-                  </Link>
-                </li>
-
-                <MobileTopicSection
-                  label="Guides"
-                  href="/guides"
-                  items={guidesNav}
-                  icon="book-marked"
-                  onNavigate={closeAll}
-                />
-
-                <li>
-                  <Link
-                    href="/start-here"
-                    className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent"
-                    onClick={closeAll}
-                  >
-                    <NavIcon name="compass" size={18} className="text-accent" />
-                    Start here
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    href="/tools"
-                    className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent"
-                    onClick={closeAll}
-                  >
-                    <NavIcon name="wrench" size={18} className="text-accent" />
-                    Tools I use
-                  </Link>
-                </li>
-
-                <li className="mt-3 border-t border-border pt-3">
-                  <Link
-                    href="/about"
-                    className="block rounded-lg px-2 py-2 text-sm font-semibold text-text hover:bg-surface-soft hover:text-accent"
-                    onClick={closeAll}
-                  >
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/contact"
-                    className="block rounded-lg px-2 py-2 text-sm font-semibold text-text hover:bg-surface-soft hover:text-accent"
-                    onClick={closeAll}
-                  >
-                    Contact
-                  </Link>
-                </li>
-
-                <li className="mt-4 border-t border-border pt-4">
-                  <p className="px-2 text-xs font-semibold uppercase tracking-wide text-muted">
-                    Follow along
-                  </p>
-                  <ul className="mt-2 flex flex-row flex-wrap items-center gap-2 px-2" aria-label="Social">
-                    <li>
-                      <OutboundLink
-                        href={site.social.instagram}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-surface-soft text-heading transition hover:border-accent hover:text-accent"
-                        aria-label="Instagram"
-                        onClick={closeAll}
-                      >
-                        <SocialInstagramIcon />
-                      </OutboundLink>
-                    </li>
-                    <li>
-                      <OutboundLink
-                        href={site.social.youtube}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-surface-soft text-heading transition hover:border-accent hover:text-accent"
-                        aria-label="YouTube"
-                        onClick={closeAll}
-                      >
-                        <SocialYouTubeIcon />
-                      </OutboundLink>
-                    </li>
-                    <li>
-                      <OutboundLink
-                        href={site.social.pinterest}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-surface-soft text-heading transition hover:border-accent hover:text-accent"
-                        aria-label="Pinterest"
-                        onClick={closeAll}
-                      >
-                        <SocialPinterestIcon />
-                      </OutboundLink>
-                    </li>
-                    <li>
-                      <OutboundLink
-                        href={site.social.coffee}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-accent/40 bg-accent/10 text-accent transition hover:bg-accent/20"
-                        aria-label="Buy me a coffee"
-                        onClick={closeAll}
-                      >
-                        <SocialCoffeeIcon />
-                      </OutboundLink>
-                    </li>
-                  </ul>
-                </li>
-                {googleConfigured ? (
-                  <li className="mt-3 border-t border-border pt-3 px-2">
-                    <ReaderAuthButtons
-                      variant="mobile"
-                      googleConfigured={googleConfigured}
-                      onNavigate={closeAll}
-                    />
-                  </li>
-                ) : null}
-              </ul>
+                          {continent.name}
+                          <ChevronRight />
+                        </button>
+                        {isContinentOpen && (
+                          <ul
+                            role="menu"
+                            className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-border bg-white py-2"
+                          >
+                            {continent.countries.map((country) => (
+                              <li key={country.slug} role="none">
+                                <Link
+                                  href={`/${country.slug}`}
+                                  role="menuitem"
+                                  className="block px-4 py-2 text-sm text-text transition hover:bg-surface-soft hover:text-accent"
+                                  onClick={closeDest}
+                                >
+                                  {country.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
+
+            <Link
+              href="/blog"
+              className={`font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
+            >
+              Stories
+            </Link>
+
+            <TopicFlyout
+              label="Guides"
+              href="/guides"
+              items={guidesNav}
+              navLinkClass={navLinkClass}
+              chevronClass={chevronClass}
+            />
+
+            <Link
+              href="/start-here"
+              className={`font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
+            >
+              Start here
+            </Link>
           </nav>
+
+          {/* Desktop: right actions */}
+          <div className="hidden shrink-0 items-center gap-2 lg:gap-3 md:flex">
+            <SearchInput
+              ref={desktopSearchRef}
+              variant="header"
+              id="header-search"
+              className="w-44 max-w-xs shrink-0 lg:w-52"
+            />
+
+            <ReaderAuthButtons
+              variant="header"
+              googleConfigured={googleConfigured}
+            />
+
+            <ThemeToggle />
+
+            <Link
+              href="/tools"
+              className="btn btn-ink !min-h-9 shrink-0 !px-4 !py-1.5 text-sm"
+            >
+              Tools I use
+            </Link>
+          </div>
+
+          {/* Mobile: theme only (menu lives in bottom tab bar) */}
+          <div className="relative z-10 flex items-center gap-1 md:hidden">
+            <ThemeToggle />
+          </div>
         </div>
-          ,
-          document.body,
-        )
-      : null}
-    </header>
+
+        {mobileSearchOpen && (
+          <div
+            id="mobile-search-panel"
+            className="border-t border-border bg-white px-4 py-3 md:hidden"
+          >
+            <SearchInput
+              ref={mobileSearchRef}
+              variant="drawer"
+              id="mobile-search"
+              onNavigate={closeAll}
+            />
+          </div>
+        )}
+      </header>
+
+      {mounted
+        ? createPortal(
+            <>
+              <MobileBottomNav
+                menuOpen={mobileOpen}
+                onOpenMenu={() => {
+                  setMobileSearchOpen(false);
+                  setMobileOpen((v) => !v);
+                }}
+              />
+              <MobileNavDrawer
+                open={mobileOpen}
+                onClose={closeAll}
+                googleConfigured={googleConfigured}
+              />
+            </>,
+            document.body,
+          )
+        : null}
+    </>
   );
 }
 
@@ -681,79 +459,6 @@ function ChevronRight() {
       aria-hidden="true"
     >
       <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function SocialInstagramIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="3" y="3" width="18" height="18" rx="5" />
-      <circle cx="12" cy="12" r="4" />
-      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-function SocialYouTubeIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M2.5 8.5A3.5 3.5 0 0 1 6 5h12a3.5 3.5 0 0 1 3.5 3.5v7A3.5 3.5 0 0 1 18 19H6a3.5 3.5 0 0 1-3.5-3.5v-7Z" />
-      <path d="m10 9.5 5 2.5-5 2.5v-5Z" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-function SocialPinterestIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path d="M12 2C6.5 2 2 6.3 2 11.6c0 4 2.5 7.4 6.1 8.7-.1-.7-.2-1.9 0-2.7.2-.7 1.2-5 1.2-5s-.3-.6-.3-1.5c0-1.4.8-2.4 1.8-2.4.9 0 1.3.6 1.3 1.4 0 .9-.6 2.2-.9 3.4-.3 1 0.5 1.8 1.5 1.8 1.8 0 3.1-2.2 3.1-4.8 0-2-1.4-3.5-3.9-3.5-2.8 0-4.5 2.1-4.5 4.4 0 .9.3 1.8.7 2.3.1.1.1.2.1.3l-.3 1c0 .1-.1.2-.3.1-1.2-.5-1.8-1.9-1.8-3.4 0-2.6 2.2-5.7 6.6-5.7 3.5 0 5.8 2.5 5.8 5.3 0 3.6-2 6.3-5 6.3-1 0-1.9-.5-2.2-1.2l-.6 2.3c-.2.8-.8 1.8-1.2 2.4.9.3 1.9.4 2.9.4 5.5 0 10-4.3 10-9.6C22 6.3 17.5 2 12 2Z" />
-    </svg>
-  );
-}
-
-function SocialCoffeeIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M3 8h13v7a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8Z" />
-      <path d="M16 8h2.5a3.5 3.5 0 0 1 0 7H16" />
-      <path d="M6 2v2M10 2v2M14 2v2" />
     </svg>
   );
 }
