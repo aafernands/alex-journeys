@@ -1,0 +1,75 @@
+{
+  "title": "Niagara Falls in 2 days: mist, tunnels, and a night under the lights",
+  "slug": "niagara-falls",
+  "date": "2026-09-20T12:00:00",
+  "excerpt": "A short two-day loop from the Canadian side — Table Rock, the tunnels behind the falls, Clifton Hill at night, and a quieter morning across the Niagara Parkway.",
+  "featuredImage": {
+    "url": "/media/photo-1745_singular_display_fullpicture-mua3y8bo.jpg",
+    "alt": "Niagara Falls"
+  },
+  "destinations": [
+    "canada"
+  ],
+  "guideHubs": [
+    "plan-a-trip"
+  ],
+  "contentHtml": "<p>I finally made it to Niagara with a simple plan: don’t rush the falls, and don’t pretend Clifton Hill is subtle. Two days on the Canadian side was enough to feel the spray, walk the tunnels, and still leave wanting one more sunrise.</p><p>This isn’t a checklist of every ticket — just what we actually did, and what I’d repeat.</p>",
+  "source": "cms",
+  "itinerary": {
+    "enabled": true,
+    "title": "2 days on the Canadian side",
+    "intro": "Built around the Horseshoe Falls, with one loud night and one quieter morning on the Parkway.",
+    "days": [
+      {
+        "id": "day-b6febf6a",
+        "label": "Arrival & the roar",
+        "title": "Arrive, Table Rock, and the first look",
+        "blocks": [
+          {
+            "id": "block-e4816507",
+            "time": "Afternoon",
+            "place": "Table Rock Centre",
+            "body": "Dropped bags, walked straight to the rail at Horseshoe Falls. Stood longer than planned. Mist on the lens within five minutes."
+          },
+          {
+            "id": "block-eaa07a1e",
+            "time": "Late afternoon",
+            "place": "Journey Behind the Falls",
+            "body": "Took the elevator down into the tunnels. The wall of water at the open portals is louder than any photo suggests. Poncho earned its keep."
+          },
+          {
+            "id": "block-ad426188",
+            "time": "Evening",
+            "place": "Clifton Hill",
+            "body": "Neon, fudge shops, and people-watching. Grabbed dinner nearby and walked back when the falls were lit. One slow loop along the rail before bed."
+          }
+        ]
+      },
+      {
+        "id": "day-63b433cc",
+        "label": "Parkway morning, then home",
+        "title": "Quieter light and a last look",
+        "blocks": [
+          {
+            "id": "block-e3cb0fbd",
+            "time": "Morning",
+            "place": "Niagara Parkway",
+            "body": "Early coffee, then a short drive/walk along the Parkway for calmer views upriver. Fewer crowds than Table Rock at midday."
+          },
+          {
+            "id": "block-064de2f6",
+            "time": "Mid morning",
+            "place": "Horseshoe Falls overlook",
+            "body": "One last stop at the main overlook for photos in softer light. Bought a too-expensive fridge magnet without shame."
+          },
+          {
+            "id": "block-b8698e7d",
+            "time": "Afternoon",
+            "place": "Road home",
+            "body": "Headed out before the afternoon crush. Already talking about coming back in winter for the ice."
+          }
+        ]
+      }
+    ]
+  }
+}
