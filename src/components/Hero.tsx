@@ -9,7 +9,6 @@ import {
   Trees,
   type LucideIcon,
 } from "lucide-react";
-import { site } from "@/data/content";
 import { getSiteDesign, type HeroStat } from "@/lib/site-design";
 
 const NATURE_ICONS: LucideIcon[] = [Sun, Camera, Compass];
@@ -123,29 +122,9 @@ export function Hero() {
         <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12 xl:gap-16">
           {/* Copy column */}
           <div className="lg:col-span-5 xl:col-span-5">
-            <p className="animate-fade-up inline-flex items-center gap-2 text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-heading">
-              <Leaf
-                size={15}
-                strokeWidth={2}
-                className="shrink-0 text-accent"
-                aria-hidden="true"
-              />
-              <span className="text-heading">{site.name}</span>
-              {hero.eyebrow ? (
-                <>
-                  <span className="font-normal text-muted-light" aria-hidden="true">
-                    ·
-                  </span>
-                  <span className="font-medium normal-case tracking-normal text-muted">
-                    {hero.eyebrow}
-                  </span>
-                </>
-              ) : null}
-            </p>
-
             <h1
               id="hero-heading"
-              className="animate-fade-up animate-delay-1 font-display text-hero mt-6 text-heading"
+              className="animate-fade-up font-display text-hero text-heading"
             >
               {hero.tagline}
             </h1>
