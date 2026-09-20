@@ -133,8 +133,8 @@ export function ForgotPasswordForm({ credentialsConfigured }: Props) {
 
           <button
             type="submit"
-            disabled={pending}
-            className="btn btn-primary btn-block disabled:opacity-60"
+            disabled={pending || (widgetEnabled && !turnstileToken)}
+            className="btn btn-primary btn-block disabled:cursor-not-allowed disabled:opacity-60 disabled:grayscale"
           >
             {pending ? "Sending…" : "Send reset link"}
           </button>

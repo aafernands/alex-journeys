@@ -103,7 +103,8 @@ export function ContactForm() {
       />
       <button
         type="submit"
-        className="btn btn-primary btn-block sm:w-auto"
+        disabled={widgetEnabled && !turnstileToken}
+        className="btn btn-primary btn-block sm:w-auto disabled:cursor-not-allowed disabled:opacity-60 disabled:grayscale"
       >
         Send message
       </button>

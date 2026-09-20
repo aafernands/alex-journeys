@@ -102,6 +102,11 @@ export function ReaderLoginForm({
           setTurnstileToken(null);
           return;
         }
+
+        // Registration consumed the Turnstile token. Require a fresh challenge
+        // if the follow-up credentials sign-in needs to be retried.
+        turnstileRef.current?.reset();
+        setTurnstileToken(null);
       }
 
       const result = await signIn("credentials", {
@@ -261,8 +266,12 @@ export function ReaderLoginForm({
 
           <button
             type="submit"
-            disabled={pending || oauthPending}
-            className="btn btn-primary btn-block disabled:opacity-60"
+            disabled={
+              pending ||
+              oauthPending ||
+              (mode === "signup" && widgetEnabled && !turnstileToken)
+            }
+            className="btn btn-primary btn-block disabled:cursor-not-allowed disabled:opacity-60 disabled:grayscale"
           >
             {pending
               ? mode === "signup"

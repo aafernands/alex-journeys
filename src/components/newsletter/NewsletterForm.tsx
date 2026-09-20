@@ -117,8 +117,12 @@ export function NewsletterForm({ className }: Props) {
       />
       <button
         type="submit"
-        disabled={status === "loading" || status === "success"}
-        className="btn btn-primary btn-block sm:w-auto disabled:opacity-60"
+        disabled={
+          status === "loading" ||
+          status === "success" ||
+          (widgetEnabled && !turnstileToken)
+        }
+        className="btn btn-primary btn-block sm:w-auto disabled:cursor-not-allowed disabled:opacity-60 disabled:grayscale"
       >
         {status === "loading"
           ? "Subscribing…"

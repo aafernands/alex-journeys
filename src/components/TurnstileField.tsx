@@ -46,6 +46,10 @@ export type TurnstileFieldHandle = {
 type Props = {
   onToken: (token: string | null) => void;
   className?: string;
+  /** Called when Turnstile provides a valid token. */
+  onSuccess?: (token: string) => void;
+  /** Called when the token expires. */
+  onExpire?: () => void;
   /** Called when the widget fails to load or errors. */
   onError?: () => void;
 };
@@ -87,17 +91,24 @@ function loadTurnstileScript(): Promise<void> {
  * Renders only when `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is set.
  */
 export const TurnstileField = forwardRef<TurnstileFieldHandle, Props>(
-  function TurnstileField({ onToken, className, onError }, ref) {
+  function TurnstileField(
+    { onToken, className, onSuccess, onExpire, onError },
+    ref,
+  ) {
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || "";
     const containerRef = useRef<HTMLDivElement>(null);
     const widgetIdRef = useRef<string | null>(null);
     const tokenRef = useRef<string | null>(null);
     const onTokenRef = useRef(onToken);
+    const onSuccessRef = useRef(onSuccess);
+    const onExpireRef = useRef(onExpire);
     const onErrorRef = useRef(onError);
     const reactId = useId();
     const containerId = `cf-turnstile-${reactId.replace(/:/g, "")}`;
 
     onTokenRef.current = onToken;
+    onSuccessRef.current = onSuccess;
+    onExpireRef.current = onExpire;
     onErrorRef.current = onError;
 
     const setToken = useCallback((token: string | null) => {
@@ -149,7 +160,10 @@ export const TurnstileField = forwardRef<TurnstileFieldHandle, Props>(
             theme: "auto",
             size: "normal",
             callback: (token: string) => {
-              if (!cancelled) setToken(token);
+              if (!cancelled) {
+                setToken(token);
+                onSuccessRef.current?.(token);
+              }
             },
             "error-callback": () => {
               if (!cancelled) {
@@ -158,7 +172,10 @@ export const TurnstileField = forwardRef<TurnstileFieldHandle, Props>(
               }
             },
             "expired-callback": () => {
-              if (!cancelled) setToken(null);
+              if (!cancelled) {
+                setToken(null);
+                onExpireRef.current?.();
+              }
             },
             "timeout-callback": () => {
               if (!cancelled) {
