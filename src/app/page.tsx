@@ -1,5 +1,6 @@
 import { Hero } from "@/components/Hero";
 import { AuthorIntro } from "@/components/home/AuthorIntro";
+import { FeaturedFieldNote } from "@/components/home/FeaturedFieldNote";
 import { OauthAppNote } from "@/components/home/OauthAppNote";
 import { GuidesHubStrip } from "@/components/home/GuidesHubStrip";
 import { StartHereCards } from "@/components/home/StartHereCards";
@@ -23,6 +24,7 @@ export default function HomePage() {
       </a>
       <main className="flex-1">
         <Hero />
+        <FeaturedFieldNote />
         <StartHereCards />
         <DestinationPills />
         <LatestPosts />
