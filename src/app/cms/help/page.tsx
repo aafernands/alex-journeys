@@ -40,8 +40,9 @@ export default async function CmsHelpPage() {
           <li>
             Fill title (slug auto-fills), date, excerpt (~150–160 chars for SEO),
             optional featured image + destinations (Place pages), optional Guides
-            → Plan a trip, then body. Use the itinerary template when writing a
-            day-by-day trip.
+            → Plan a trip, then story Content. For day-by-day trips, enable{" "}
+            <strong>Trip timeline</strong> below Content (structured data, not
+            HTML in the editor).
           </li>
           <li>
             <strong>Save draft</strong> writes{" "}
@@ -62,16 +63,24 @@ export default async function CmsHelpPage() {
 
       <section className="panel space-y-3 p-5 md:p-6">
         <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
-          Write an itinerary
+          Write an itinerary (Trip timeline)
         </h2>
         <ol className="list-decimal space-y-2 pl-5 text-sm text-text">
           <li>
             <Link href="/cms/new" className="text-link hover:text-accent">
               New post
             </Link>
-            → under <strong>Templates</strong>, choose{" "}
-            <strong>Day-by-day itinerary</strong>, set the number of days, then{" "}
-            <strong>Insert template</strong>.
+            → write the story in <strong>Content</strong> (intro, photos,
+            reflections).
+          </li>
+          <li>
+            Scroll to <strong>Trip timeline</strong> → check{" "}
+            <strong>This post includes a day-by-day itinerary</strong>.
+          </li>
+          <li>
+            Add an itinerary title + intro, then days (reorder with Up/Down).
+            Inside each day, add Morning / Afternoon / Evening blocks (or a
+            custom time), optional place, and what you did.
           </li>
           <li>
             Check the matching <strong>Destination</strong> (e.g. Canada) so the
@@ -86,14 +95,16 @@ export default async function CmsHelpPage() {
             </code>
             .
           </li>
-          <li>Fill the placeholders, then Publish.</li>
+          <li>Publish — the public post shows a visual timeline after the story.</li>
         </ol>
         <p className="text-sm text-muted">
-          Example (Niagara): Create post → Itinerary template → check{" "}
-          <strong>Canada</strong> → check <strong>Plan a trip</strong> → publish.
-          Appears on{" "}
+          Example (Niagara): Create post → story in Content → enable Trip
+          timeline → check <strong>Canada</strong> → check{" "}
+          <strong>Plan a trip</strong> → publish. Timeline appears on{" "}
+          <code className="rounded bg-surface-soft px-1 text-xs">/&#123;slug&#125;</code>
+          ; the post also lists on{" "}
           <code className="rounded bg-surface-soft px-1 text-xs">/canada</code>{" "}
-          related posts and{" "}
+          and{" "}
           <code className="rounded bg-surface-soft px-1 text-xs">
             /guides/plan-a-trip
           </code>

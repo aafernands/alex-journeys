@@ -64,7 +64,7 @@ export default async function GuideHubPage({ params }: PageProps) {
     const slugFromHref = link.href.replace(/^\//, "").replace(/^blog\//, "");
     const post = getPostBySlug(slugFromHref);
     if (post) {
-      const { contentHtml: _c, source: _s, ...meta } = post;
+      const { contentHtml: _c, source: _s, itinerary: _i, ...meta } = post;
       postsBySlug.set(meta.slug, meta);
     }
   }

@@ -5,7 +5,7 @@ export function getTopicPosts(topic: Topic): PostMeta[] {
   return topic.postSlugs
     .map((slug) => getPostBySlug(slug))
     .filter((p): p is Post => Boolean(p))
-    .map(({ contentHtml: _c, source: _s, ...meta }) => meta);
+    .map(({ contentHtml: _c, source: _s, itinerary: _i, ...meta }) => meta);
 }
 
 export { getTopic, getTopicsBySection };

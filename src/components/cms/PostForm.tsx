@@ -9,6 +9,11 @@ import {
   type FormEvent,
 } from "react";
 import { useRouter } from "next/navigation";
+import type { PostItinerary } from "@/lib/post-types";
+import {
+  ItineraryEditor,
+  itineraryFromInitial,
+} from "./ItineraryEditor";
 import { MediaPicker } from "./MediaPicker";
 import { RichTextEditor } from "./RichTextEditor";
 
@@ -24,6 +29,7 @@ export type PostFormInitial = {
   featuredImageAlt: string;
   destinations: string[];
   guideHubs?: string[];
+  itinerary?: PostItinerary;
 };
 
 type Props = {
@@ -33,8 +39,6 @@ type Props = {
   /** When editing a file under src/content/drafts */
   isDraft?: boolean;
 };
-
-type TemplateKind = "blank" | "itinerary";
 
 const PLAN_A_TRIP = "plan-a-trip";
 
@@ -51,34 +55,6 @@ function slugify(title: string): string {
 function todayDateInput(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function isContentEmpty(html: string): boolean {
-  const text = html
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  return text.length === 0;
-}
-
-function buildItineraryTemplate(days: number): string {
-  const n = Math.min(14, Math.max(1, Math.floor(days) || 3));
-  const parts: string[] = [
-    "<p>Introduce the trip — where you went, when, and the vibe in a sentence or two…</p>",
-  ];
-  for (let i = 1; i <= n; i++) {
-    parts.push(`<h2>Day ${i} — [Morning / place]</h2>`);
-    for (const period of ["Morning", "Afternoon", "Evening"] as const) {
-      parts.push(`<h3>${period}</h3>`);
-      parts.push("<p>What you did…</p>");
-    }
-  }
-  parts.push("<h2>Tips</h2>");
-  parts.push(
-    "<ul><li>Book early for popular spots…</li><li>Pack layers for changing weather…</li><li>Leave room for one spontaneous detour…</li></ul>",
-  );
-  return parts.join("\n");
 }
 
 const fieldClass =
@@ -117,8 +93,9 @@ export function PostForm({
   const [selectedGuideHubs, setSelectedGuideHubs] = useState<string[]>(
     initial?.guideHubs ?? [],
   );
-  const [templateKind, setTemplateKind] = useState<TemplateKind>("blank");
-  const [itineraryDays, setItineraryDays] = useState(3);
+  const [itinerary, setItinerary] = useState<PostItinerary>(() =>
+    itineraryFromInitial(initial?.itinerary),
+  );
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{
     commitUrl: string;
@@ -167,23 +144,6 @@ export function PostForm({
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [dirty, pending, success]);
 
-  const insertItineraryTemplate = useCallback(() => {
-    const days = Math.min(14, Math.max(1, itineraryDays || 3));
-    if (!isContentEmpty(contentHtml)) {
-      const ok = window.confirm(
-        "Replace the current content with the day-by-day itinerary template?",
-      );
-      if (!ok) return;
-    }
-    setContentHtml(buildItineraryTemplate(days));
-    if (!title.trim()) {
-      const suggestion = `${days}-day itinerary: [Place]`;
-      setTitle(suggestion);
-      if (!slugTouched) setSlug(slugify(suggestion));
-    }
-    markDirty();
-  }, [contentHtml, itineraryDays, markDirty, slugTouched, title]);
-
   const submit = useCallback(
     async (asDraft: boolean) => {
       setError(null);
@@ -203,6 +163,7 @@ export function PostForm({
             featuredImageAlt: featuredImageAlt || title,
             destinations: selectedDestinations,
             guideHubs: selectedGuideHubs,
+            itinerary: itinerary.enabled ? itinerary : { enabled: false },
             update: mode === "edit" && !isDraft && !asDraft,
             draft: asDraft,
           }),
@@ -241,6 +202,7 @@ export function PostForm({
       featuredImageUrl,
       finalSlug,
       isDraft,
+      itinerary,
       mode,
       router,
       selectedDestinations,
@@ -512,84 +474,13 @@ export function PostForm({
           </fieldset>
 
           <div>
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <label htmlFor="cms-content" className="text-sm font-semibold text-heading">
-                Content <span className="text-accent">*</span>
-              </label>
-            </div>
-
-            <div className="mt-2 rounded-lg border border-border bg-surface-soft p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted">
-                Templates
-              </p>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <div
-                  className="inline-flex rounded-lg border border-border bg-white p-0.5"
-                  role="group"
-                  aria-label="Content template"
-                >
-                  <button
-                    type="button"
-                    className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                      templateKind === "blank"
-                        ? "bg-accent/15 text-heading"
-                        : "text-muted hover:text-heading"
-                    }`}
-                    onClick={() => setTemplateKind("blank")}
-                  >
-                    Blank
-                  </button>
-                  <button
-                    type="button"
-                    className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                      templateKind === "itinerary"
-                        ? "bg-accent/15 text-heading"
-                        : "text-muted hover:text-heading"
-                    }`}
-                    onClick={() => setTemplateKind("itinerary")}
-                  >
-                    Day-by-day itinerary
-                  </button>
-                </div>
-
-                {templateKind === "itinerary" ? (
-                  <>
-                    <label className="flex items-center gap-2 text-xs text-heading">
-                      Days
-                      <input
-                        type="number"
-                        min={1}
-                        max={14}
-                        value={itineraryDays}
-                        onChange={(e) => {
-                          const n = Number(e.target.value);
-                          setItineraryDays(
-                            Number.isFinite(n)
-                              ? Math.min(14, Math.max(1, n))
-                              : 3,
-                          );
-                        }}
-                        className="min-h-9 w-16 rounded-md border border-border bg-white px-2 text-sm"
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      className="btn btn-secondary text-xs"
-                      onClick={insertItineraryTemplate}
-                    >
-                      Insert template
-                    </button>
-                  </>
-                ) : null}
-              </div>
-              {templateKind === "itinerary" ? (
-                <p className="mt-2 text-xs text-muted">
-                  Inserts intro + Day 1…N (Morning / Afternoon / Evening) + Tips.
-                  Replaces content only if empty, or after you confirm.
-                </p>
-              ) : null}
-            </div>
-
+            <label htmlFor="cms-content" className="text-sm font-semibold text-heading">
+              Content <span className="text-accent">*</span>
+            </label>
+            <p className="mt-1 text-xs text-muted">
+              Story prose — intro, photos, tips. Day-by-day plans belong in Trip
+              timeline below, not here.
+            </p>
             <RichTextEditor
               id="cms-content"
               value={contentHtml}
@@ -600,6 +491,14 @@ export function PostForm({
               required
             />
           </div>
+
+          <ItineraryEditor
+            value={itinerary}
+            onChange={(next) => {
+              setItinerary(next);
+              markDirty();
+            }}
+          />
         </div>
 
         {showPreview ? (
@@ -626,6 +525,27 @@ export function PostForm({
                   contentHtml || "<p class='text-muted'>Start writing…</p>",
               }}
             />
+            {itinerary.enabled && itinerary.days.length > 0 ? (
+              <div className="mt-4 border-t border-border pt-4">
+                <p className="text-xs font-bold uppercase tracking-wide text-muted">
+                  Timeline
+                </p>
+                <p className="mt-1 font-display text-base font-semibold text-heading">
+                  {itinerary.title?.trim() || "Itinerary"}
+                </p>
+                <ul className="mt-2 space-y-2 text-xs text-text">
+                  {itinerary.days.map((d) => (
+                    <li key={d.id}>
+                      <span className="font-semibold">{d.label}</span>
+                      {d.title ? ` — ${d.title}` : ""}
+                      {d.blocks.length
+                        ? ` (${d.blocks.length} block${d.blocks.length === 1 ? "" : "s"})`
+                        : ""}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>

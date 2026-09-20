@@ -197,6 +197,7 @@ export async function publishPost(
       : {}),
     contentHtml: validated.contentHtml,
     source: "cms" as const,
+    ...(validated.itinerary ? { itinerary: validated.itinerary } : {}),
   } satisfies Post;
 
   const postPath = `${POSTS_PATH}/${validated.slug}.json`;
@@ -442,6 +443,7 @@ export async function publishDraft(
       : {}),
     contentHtml: validated.contentHtml,
     source: "cms" as const,
+    ...(validated.itinerary ? { itinerary: validated.itinerary } : {}),
   };
 
   const draftPath = `${DRAFTS_PATH}/${validated.slug}.json`;

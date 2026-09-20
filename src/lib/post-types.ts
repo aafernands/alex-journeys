@@ -16,6 +16,29 @@ export type PostMeta = {
   guideHubs?: string[];
 };
 
+/** Day-by-day trip timeline stored separately from contentHtml. */
+export type PostItineraryBlock = {
+  id: string;
+  time?: string;
+  place?: string;
+  body: string;
+};
+
+export type PostItineraryDay = {
+  id: string;
+  label: string;
+  title: string;
+  summary?: string;
+  blocks: PostItineraryBlock[];
+};
+
+export type PostItinerary = {
+  enabled: boolean;
+  title?: string;
+  intro?: string;
+  days: PostItineraryDay[];
+};
+
 /** WordPress-migrated posts keep the object source; CMS-published posts use "cms". */
 export type PostSource =
   | "cms"
@@ -28,4 +51,6 @@ export type PostSource =
 export type Post = PostMeta & {
   contentHtml: string;
   source: PostSource;
+  /** Optional structured day-by-day timeline (not HTML in content). */
+  itinerary?: PostItinerary;
 };

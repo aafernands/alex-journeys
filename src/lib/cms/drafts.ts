@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { FeaturedImage } from "@/lib/post-types";
+import type { FeaturedImage, PostItinerary } from "@/lib/post-types";
 
 export type DraftPost = {
   slug: string;
@@ -12,6 +12,7 @@ export type DraftPost = {
   destinations: string[];
   guideHubs?: string[];
   contentHtml: string;
+  itinerary?: PostItinerary;
   source?: unknown;
 };
 
