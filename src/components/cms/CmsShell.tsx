@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   MapPin,
   Menu,
+  MessageSquare,
   Palette,
   PenLine,
   Users,
@@ -21,6 +22,7 @@ import { LogoutButton } from "./LogoutButton";
 const NAV = [
   { href: "/cms", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/cms/posts", label: "Posts", icon: PenLine },
+  { href: "/cms/comments", label: "Comments", icon: MessageSquare },
   { href: "/cms/pages", label: "Pages", icon: FileText },
   { href: "/cms/destinations", label: "Destinations", icon: MapPin },
   { href: "/cms/media", label: "Media", icon: ImageIcon },
@@ -44,21 +46,55 @@ function isActive(pathname: string, href: string, exact?: boolean): boolean {
 type Props = {
   children: ReactNode;
   oauthSession?: boolean;
+  pendingComments?: number;
 };
 
-export function CmsShell({ children, oauthSession = false }: Props) {
+export function CmsShell({
+  children,
+  oauthSession = false,
+  pendingComments = 0,
+}: Props) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(pendingComments);
 
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    setPending(pendingComments);
+  }, [pendingComments]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function refreshBadge() {
+      try {
+        const res = await fetch("/api/cms/comments?pendingCount=1");
+        if (!res.ok) return;
+        const data = (await res.json()) as { pendingCount?: number };
+        if (!cancelled && typeof data.pendingCount === "number") {
+          setPending(data.pendingCount);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    void refreshBadge();
+    const id = window.setInterval(() => void refreshBadge(), 60_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, []);
 
   const nav = (
     <nav className="flex flex-col gap-1" aria-label="CMS">
       {NAV.map((item) => {
         const active = isActive(pathname, item.href, "exact" in item && item.exact);
         const Icon = item.icon;
+        const showBadge =
+          item.href === "/cms/comments" && pending > 0;
         return (
           <Link
             key={item.href}
@@ -70,7 +106,12 @@ export function CmsShell({ children, oauthSession = false }: Props) {
             }`}
           >
             <Icon className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
-            {item.label}
+            <span className="flex-1">{item.label}</span>
+            {showBadge ? (
+              <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-bold text-on-solid">
+                {pending > 99 ? "99+" : pending}
+              </span>
+            ) : null}
           </Link>
         );
       })}
