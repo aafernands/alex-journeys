@@ -81,14 +81,14 @@ export function OutboundInterstitial({
         aria-hidden="true"
       />
 
-      {/* Oversized plane watermark */}
+      {/* Plane watermark — upper right, nose forward like in flight */}
       <div
-        className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
+        className="pointer-events-none absolute -right-8 top-6 overflow-hidden sm:-right-4 sm:top-10 md:right-6 md:top-12"
         aria-hidden="true"
       >
         <Plane
-          className="h-[min(90vw,42rem)] w-[min(90vw,42rem)] -rotate-[18deg] text-heading opacity-[0.05] dark:opacity-[0.07]"
-          strokeWidth={0.75}
+          className="h-40 w-40 rotate-90 text-heading opacity-[0.08] sm:h-52 sm:w-52 md:h-64 md:w-64 dark:opacity-[0.1]"
+          strokeWidth={1.25}
         />
       </div>
 
