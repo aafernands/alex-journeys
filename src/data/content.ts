@@ -16,7 +16,7 @@ export const site = {
   social: {
     instagram: "https://www.instagram.com/fernandesjourneys/",
     youtube: "https://www.youtube.com/@fernandesjourneys",
-    pinterest: "https://www.pinterest.com/fernandesjourneys/",
+    pinterest: "https://pinterest.com/",
     coffee: "https://www.buymeacoffee.com/fernandesjourneys",
     newsletter: "#newsletter",
   },

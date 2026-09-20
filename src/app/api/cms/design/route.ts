@@ -31,46 +31,6 @@ function parseDataUrl(
   };
 }
 
-function parseOptionalUpload(
-  dataUrl: unknown,
-  filename: unknown,
-  label: string,
-):
-  | { ok: true; upload?: { base64: string; contentType: string; filename?: string } }
-  | { ok: false; error: string } {
-  if (typeof dataUrl !== "string" || !dataUrl.trim()) {
-    return { ok: true, upload: undefined };
-  }
-  const parsed = parseDataUrl(dataUrl);
-  if (!parsed) {
-    return {
-      ok: false,
-      error: `Invalid ${label} data URL. Use data:image/...;base64,...`,
-    };
-  }
-  if (!ALLOWED.has(parsed.contentType)) {
-    return {
-      ok: false,
-      error: `Unsupported ${label} type. Use JPEG, PNG, WebP, or GIF.`,
-    };
-  }
-  const approxBytes = Math.floor((parsed.base64.length * 3) / 4);
-  if (approxBytes > MAX_BYTES) {
-    return {
-      ok: false,
-      error: `${label} too large. Max is about ${MAX_MEDIA_UPLOAD_LABEL}.`,
-    };
-  }
-  return {
-    ok: true,
-    upload: {
-      base64: parsed.base64,
-      contentType: parsed.contentType,
-      filename: typeof filename === "string" ? filename : undefined,
-    },
-  };
-}
-
 export async function GET() {
   if (!(await isCmsAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -101,10 +61,7 @@ export async function PUT(request: Request) {
 
   if (!body || typeof body !== "object") {
     return NextResponse.json(
-      {
-        error:
-          "Expected JSON { design, dataUrl?, logoOnLightDataUrl?, logoOnDarkDataUrl? }.",
-      },
+      { error: "Expected JSON { design, dataUrl? }." },
       { status: 400 },
     );
   }
@@ -113,10 +70,6 @@ export async function PUT(request: Request) {
     design?: unknown;
     dataUrl?: unknown;
     filename?: unknown;
-    logoOnLightDataUrl?: unknown;
-    logoOnLightFilename?: unknown;
-    logoOnDarkDataUrl?: unknown;
-    logoOnDarkFilename?: unknown;
   };
 
   const validated = validateSiteDesignInput(payload.design);
@@ -124,45 +77,49 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: validated.error }, { status: 400 });
   }
 
-  const heroParsed = parseOptionalUpload(
-    payload.dataUrl,
-    payload.filename,
-    "Hero image",
-  );
-  if (!heroParsed.ok) {
-    return NextResponse.json({ error: heroParsed.error }, { status: 400 });
-  }
+  let imageUpload:
+    | { base64: string; contentType: string; filename?: string }
+    | undefined;
 
-  const lightParsed = parseOptionalUpload(
-    payload.logoOnLightDataUrl,
-    payload.logoOnLightFilename,
-    "Logo (on light)",
-  );
-  if (!lightParsed.ok) {
-    return NextResponse.json({ error: lightParsed.error }, { status: 400 });
-  }
-
-  const darkParsed = parseOptionalUpload(
-    payload.logoOnDarkDataUrl,
-    payload.logoOnDarkFilename,
-    "Logo (on dark)",
-  );
-  if (!darkParsed.ok) {
-    return NextResponse.json({ error: darkParsed.error }, { status: 400 });
+  if (typeof payload.dataUrl === "string" && payload.dataUrl.trim()) {
+    const parsed = parseDataUrl(payload.dataUrl);
+    if (!parsed) {
+      return NextResponse.json(
+        { error: "Invalid data URL. Use data:image/...;base64,..." },
+        { status: 400 },
+      );
+    }
+    if (!ALLOWED.has(parsed.contentType)) {
+      return NextResponse.json(
+        { error: "Unsupported image type. Use JPEG, PNG, WebP, or GIF." },
+        { status: 400 },
+      );
+    }
+    const approxBytes = Math.floor((parsed.base64.length * 3) / 4);
+    if (approxBytes > MAX_BYTES) {
+      return NextResponse.json(
+        { error: `Image too large. Max is about ${MAX_MEDIA_UPLOAD_LABEL}.` },
+        { status: 400 },
+      );
+    }
+    imageUpload = {
+      base64: parsed.base64,
+      contentType: parsed.contentType,
+      filename:
+        typeof payload.filename === "string" ? payload.filename : undefined,
+    };
   }
 
   try {
     const result = await updateSiteDesign({
       design: validated.design,
-      imageUpload: heroParsed.upload,
-      logoOnLightUpload: lightParsed.upload,
-      logoOnDarkUpload: darkParsed.upload,
+      imageUpload,
     });
     return NextResponse.json({
       ok: true,
       design: result.design,
       commitUrl: result.commitUrl,
-      note: "Committed to main. Branding and homepage design update after the Vercel redeploy finishes.",
+      note: "Committed to main. Homepage hero updates after the Vercel redeploy finishes.",
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Save failed.";

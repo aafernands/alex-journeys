@@ -149,7 +149,7 @@ export function Footer() {
         <div className="section-shell py-12 md:py-14">
           <div className="grid gap-10 md:grid-cols-12 md:gap-8">
             <div className="md:col-span-4">
-              <BrandLogo className="h-10 w-auto" variant="onDark" />
+              <BrandLogo className="h-10 w-auto" />
               <p className="mt-2 max-w-xs text-sm leading-relaxed text-hero-type/60">
                 A personal travel journal by {site.authorName}. Places
                 I&apos;ve been, notes from the road.

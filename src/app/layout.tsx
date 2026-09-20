@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     images: [
       {
         url: siteConfig.ogImage,
-        alt: "Sunrise over Maroon Bells reflected in a calm alpine lake",
+        alt: `${siteConfig.name} logo`,
       },
     ],
   },
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [{ url: "/icon.png", type: "image/png" }, { url: "/favicon.ico" }],
+    icon: "/favicon.ico",
   },
 };
 

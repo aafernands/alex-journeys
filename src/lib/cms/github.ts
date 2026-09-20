@@ -636,94 +636,17 @@ const MEDIA_UPLOAD_TYPES: Record<string, string> = {
 
 const SITE_DESIGN_PATH = "src/data/site-design.json";
 
-type DesignImageUpload = {
-  base64: string;
-  contentType: string;
-  filename?: string;
-};
-
-async function commitBrandLogoUpload(
-  upload: DesignImageUpload,
-  slot: "logoOnLight" | "logoOnDark",
-): Promise<{ publicUrl: string; commitUrl: string }> {
-  const contentType = (
-    upload.contentType.trim().toLowerCase().split(";")[0] || ""
-  ).trim();
-  const ext = MEDIA_UPLOAD_TYPES[contentType];
-  if (!ext) {
-    throw new Error(
-      "Unsupported image type. Use JPEG, PNG, WebP, or GIF.",
-    );
-  }
-  const base64 = upload.base64.replace(/\s/g, "");
-  if (!base64) throw new Error("Empty image data.");
-  const decodedBytes = Buffer.from(base64, "base64");
-  if (decodedBytes.length === 0) {
-    throw new Error("Could not decode image data.");
-  }
-  if (decodedBytes.length > MAX_MEDIA_UPLOAD_BYTES) {
-    throw new Error(
-      `Image too large (${(decodedBytes.length / (1024 * 1024)).toFixed(1)}MB). Max is about ${MAX_MEDIA_UPLOAD_LABEL}.`,
-    );
-  }
-
-  const basename =
-    slot === "logoOnLight" ? `logo-on-light${ext}` : `logo-on-dark${ext}`;
-  const imagePath = `${AUTHOR_PHOTO_DIR}/${basename}`;
-  const publicUrl = `/brand/${basename}`;
-  const existingSha = await getFileSha(imagePath);
-  const imageResult = await putBinaryFile(
-    imagePath,
-    base64,
-    `cms: update brand ${slot} (${basename})`,
-    existingSha,
-  );
-  return { publicUrl, commitUrl: imageResult.commitUrl };
-}
-
 export async function updateSiteDesign(options: {
   design: SiteDesign;
   /** Optional new hero image upload (base64, no data: prefix) */
-  imageUpload?: DesignImageUpload;
-  /** Optional logo for light backgrounds (dark mark) */
-  logoOnLightUpload?: DesignImageUpload;
-  /** Optional logo for dark backgrounds (white mark) */
-  logoOnDarkUpload?: DesignImageUpload;
+  imageUpload?: {
+    base64: string;
+    contentType: string;
+    filename?: string;
+  };
 }): Promise<{ commitUrl: string; design: SiteDesign }> {
   let design = options.design;
   let imageCommitUrl = "";
-
-  if (options.logoOnLightUpload) {
-    const result = await commitBrandLogoUpload(
-      options.logoOnLightUpload,
-      "logoOnLight",
-    );
-    imageCommitUrl = result.commitUrl || imageCommitUrl;
-    design = {
-      ...design,
-      branding: {
-        ...design.branding,
-        logoOnLight: result.publicUrl,
-      },
-      updatedAt: new Date().toISOString(),
-    };
-  }
-
-  if (options.logoOnDarkUpload) {
-    const result = await commitBrandLogoUpload(
-      options.logoOnDarkUpload,
-      "logoOnDark",
-    );
-    imageCommitUrl = result.commitUrl || imageCommitUrl;
-    design = {
-      ...design,
-      branding: {
-        ...design.branding,
-        logoOnDark: result.publicUrl,
-      },
-      updatedAt: new Date().toISOString(),
-    };
-  }
 
   if (options.imageUpload) {
     const contentType = (
