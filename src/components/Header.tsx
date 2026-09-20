@@ -365,7 +365,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           <div className="relative z-10 flex items-center md:hidden">
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
+              className="inline-flex h-12 w-12 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
               aria-expanded={mobileOpen}
               aria-controls="mobile-nav"
               onClick={() => {
@@ -377,12 +377,12 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
                 {mobileOpen ? "Close menu" : "Menu"}
               </span>
               <svg
-                width="20"
-                height="20"
+                width="26"
+                height="26"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="2.25"
                 aria-hidden="true"
               >
                 {mobileOpen ? (

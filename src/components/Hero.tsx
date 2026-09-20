@@ -24,13 +24,6 @@ export function Hero() {
           className="object-cover"
           style={{ objectPosition: hero.objectPosition || "center" }}
         />
-        {/* Light mode: strong wash so dark heading text reads */}
-        <div className="absolute inset-0 bg-gradient-to-r from-bg/95 via-bg/75 to-bg/40 dark:hidden" />
-        <div className="absolute inset-0 bg-black/25 dark:hidden" />
-        <div className="absolute inset-y-0 left-0 w-full max-w-3xl bg-gradient-to-r from-bg/80 via-bg/40 to-transparent dark:hidden" />
-        {/* Dark mode: deeper scrim */}
-        <div className="absolute inset-0 hidden bg-gradient-to-r from-bg/90 via-bg/70 to-black/50 dark:block" />
-        <div className="absolute inset-0 hidden bg-black/45 dark:block" />
       </div>
 
       {/* Corner caption — not window chrome */}
@@ -63,7 +56,7 @@ export function Hero() {
             </Link>
             <Link
               href={hero.ctaSecondary.href}
-              className="btn btn-block border border-border-strong bg-white/90 text-heading backdrop-blur-sm hover:bg-white sm:w-auto sm:min-w-[11rem] dark:border-white/25 dark:bg-white/15 dark:text-heading dark:hover:bg-white/25"
+              className="btn btn-secondary btn-block sm:w-auto sm:min-w-[11rem]"
             >
               {hero.ctaSecondary.label}
             </Link>
