@@ -3,8 +3,10 @@ import { Outfit, Inter } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Providers } from "@/components/Providers";
 import { Footer } from "@/components/Footer";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { JsonLd } from "@/components/JsonLd";
 import { isReaderAuthConfigured } from "@/auth";
+import { getGoogleSiteVerification } from "@/lib/analytics";
 import { getLatestPost } from "@/lib/posts";
 import {
   absoluteUrl,
@@ -13,6 +15,8 @@ import {
   websiteJsonLd,
 } from "@/lib/seo";
 import "./globals.css";
+
+const googleSiteVerification = getGoogleSiteVerification();
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -74,6 +78,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
+  ...(googleSiteVerification
+    ? { verification: { google: googleSiteVerification } }
+    : {}),
 };
 
 const themeInitScript = `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
@@ -112,6 +119,7 @@ export default function RootLayout({
             <Footer />
           </div>
         </Providers>
+        <GoogleAnalytics />
       </body>
     </html>
   );

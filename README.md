@@ -73,6 +73,10 @@ Post pages include **Share**, **Comments** (jump), and a moderated comment threa
 
 Public forms (newsletter, contact, register, forgot password) use Cloudflare Turnstile when configured — see [`docs/TURNSTILE.md`](docs/TURNSTILE.md).
 
+## Analytics
+
+Google Analytics 4 (gtag) loads only when `NEXT_PUBLIC_GA_MEASUREMENT_ID` (or alias `NEXT_PUBLIC_GA_ID`) is set at build time. Optional Search Console HTML-tag verification uses `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`. Setup, Vercel Production, and redeploy steps: [`docs/ANALYTICS.md`](docs/ANALYTICS.md).
+
 ## In-site CMS
 
 Passcode-gated editor at **`/cms`** (not linked in the public header). Publishes posts to GitHub so Vercel redeploys.
