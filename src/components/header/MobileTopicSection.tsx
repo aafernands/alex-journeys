@@ -21,7 +21,7 @@ export function MobileTopicSection({ label, href, items, onNavigate, icon = "boo
     <li>
       <button
         type="button"
-        className="flex w-full items-center justify-between py-2.5 text-base font-semibold tracking-tight text-heading"
+        className="flex w-full items-center justify-between rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
