@@ -140,14 +140,6 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
 
           {post.featuredImage ? (
             <div className="panel mx-auto mt-10 max-w-4xl overflow-hidden shadow-sm">
-              <div className="window-chrome">
-                <span className="window-dot" aria-hidden="true" />
-                <span className="window-dot" aria-hidden="true" />
-                <span className="window-dot" aria-hidden="true" />
-                <span className="ml-2 truncate text-xs font-semibold text-muted">
-                  Field photo
-                </span>
-              </div>
               <div className="relative aspect-[16/10] bg-surface">
                 <Image
                   src={post.featuredImage.url}
