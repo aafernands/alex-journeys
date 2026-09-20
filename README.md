@@ -61,7 +61,7 @@ Connected to Vercel from `main`. Push to deploy.
 
 ## Reader accounts & saved posts
 
-Public **Sign in with Google** in the header; readers can save posts to Firestore (`/saved`). Setup: [`docs/READER-SAVED-POSTS.md`](docs/READER-SAVED-POSTS.md).
+Public **Sign in with Google** in the header; readers manage saved posts on **Account** (`/account`). Setup: [`docs/READER-SAVED-POSTS.md`](docs/READER-SAVED-POSTS.md).
 
 ## In-site CMS
 

@@ -1,25 +1,51 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { User } from "lucide-react";
+import {
+  BookOpen,
+  Compass,
+  ExternalLink,
+  MapPin,
+  User,
+} from "lucide-react";
 import { auth, isGoogleAuthConfigured, isOauthConfigured } from "@/auth";
 import { AccountAuthActions } from "@/components/AccountAuthActions";
-import { formatPostDate } from "@/lib/dates";
+import {
+  SavedPostsList,
+  type SavedPostRow,
+} from "@/components/SavedPostsList";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
+import { getPostBySlug } from "@/lib/posts";
 import {
   listSavedPosts,
   SavedPostsUnavailableError,
-  type SavedPost,
 } from "@/lib/saved-posts";
 
 export const metadata: Metadata = {
   title: "Account",
-  description: "Your Fernandes Journeys account — profile and saved stories.",
+  description:
+    "Your Fernandes Journeys dashboard — profile, saved stories, and quick links.",
   robots: { index: false, follow: false },
   alternates: { canonical: "/account" },
 };
 
 export const dynamic = "force-dynamic";
+
+function enrichSavedPosts(
+  posts: Awaited<ReturnType<typeof listSavedPosts>>,
+): SavedPostRow[] {
+  return posts.map((p) => {
+    const live = getPostBySlug(p.slug);
+    return {
+      slug: p.slug,
+      title: live?.title ?? p.title,
+      savedAt: p.savedAt,
+      href: p.href,
+      imageUrl: live?.featuredImage?.url ?? null,
+      imageAlt: live?.featuredImage?.alt ?? p.title,
+    };
+  });
+}
 
 export default async function AccountPage() {
   const session = await auth();
@@ -28,7 +54,7 @@ export default async function AccountPage() {
   const signedIn = Boolean(session?.user && userId);
   const user = session?.user;
 
-  let posts: SavedPost[] = [];
+  let posts: SavedPostRow[] = [];
   let loadError: string | null = null;
   let firebaseOk = isFirebaseConfigured();
 
@@ -38,7 +64,7 @@ export default async function AccountPage() {
         "Saved posts are not configured yet. Ask the site owner to enable Firestore.";
     } else {
       try {
-        posts = await listSavedPosts(userId);
+        posts = enrichSavedPosts(await listSavedPosts(userId));
       } catch (err) {
         if (err instanceof SavedPostsUnavailableError) {
           firebaseOk = false;
@@ -57,16 +83,13 @@ export default async function AccountPage() {
       <header className="border-b border-border bg-white">
         <div className="section-shell py-10 md:py-14">
           <div className="mx-auto max-w-3xl">
-            <p className="eyebrow">Your account</p>
+            <p className="eyebrow">Your dashboard</p>
             <h1 className="font-display text-display mt-2 text-heading">
               Account
             </h1>
             <p className="mt-3 max-w-xl text-sm text-muted md:text-base">
-              Profile and saved stories. Sign in with Google — CMS stays at{" "}
-              <Link href="/cms" className="text-accent hover:underline">
-                /cms
-              </Link>
-              .
+              Profile, saved stories, and shortcuts. Sign in with Google to keep
+              bookmarks across devices.
             </p>
           </div>
         </div>
@@ -87,7 +110,7 @@ export default async function AccountPage() {
                     Sign in with Google
                   </h2>
                   <p className="mt-2 text-sm leading-relaxed text-text">
-                    Save stories across devices and see them here. Signing in
+                    Save stories across devices and manage them here. Signing in
                     does not grant CMS access.
                   </p>
                   <div className="mt-5">
@@ -101,7 +124,10 @@ export default async function AccountPage() {
             </div>
           ) : (
             <>
-              <section className="panel p-6 md:p-8" aria-labelledby="account-profile">
+              <section
+                className="panel p-6 md:p-8"
+                aria-labelledby="account-profile"
+              >
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-4">
                     {user?.image ? (
@@ -136,25 +162,19 @@ export default async function AccountPage() {
                   </div>
                   <AccountAuthActions mode="sign-out" googleConfigured />
                 </div>
-                <p className="mt-5 text-sm text-muted">
-                  More account settings later.
-                </p>
               </section>
 
-              <section aria-labelledby="account-saved">
-                <div className="mb-4 flex items-baseline justify-between gap-3">
+              <section id="saved" aria-labelledby="account-saved">
+                <div className="mb-4">
                   <h2
                     id="account-saved"
                     className="font-display text-xl font-bold text-heading"
                   >
                     Saved posts
                   </h2>
-                  <Link
-                    href="/saved"
-                    className="text-sm font-semibold text-accent hover:underline"
-                  >
-                    Open Saved
-                  </Link>
+                  <p className="mt-1 text-sm text-muted">
+                    Bookmarks you save while reading. Remove any item anytime.
+                  </p>
                 </div>
 
                 {loadError ? (
@@ -166,38 +186,102 @@ export default async function AccountPage() {
                       Browse stories
                     </Link>
                   </div>
-                ) : posts.length === 0 ? (
-                  <div className="panel p-6 md:p-8">
-                    <p className="text-sm leading-relaxed text-text">
-                      Nothing saved yet. Open any story and tap{" "}
-                      <strong>Save</strong> to add it here.
-                    </p>
-                    <Link href="/blog" className="btn btn-primary mt-6">
-                      Browse stories
-                    </Link>
-                  </div>
                 ) : (
-                  <ul className="divide-y divide-border rounded-xl border border-border bg-white">
-                    {posts.map((post) => (
-                      <li key={post.slug}>
-                        <Link
-                          href={post.href}
-                          className="flex flex-col gap-1 px-5 py-4 transition hover:bg-surface-soft sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
-                        >
-                          <span className="font-semibold text-heading">
-                            {post.title}
-                          </span>
-                          <time
-                            dateTime={post.savedAt}
-                            className="shrink-0 text-sm text-muted"
-                          >
-                            Saved {formatPostDate(post.savedAt)}
-                          </time>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                  <SavedPostsList posts={posts} />
                 )}
+              </section>
+
+              <section aria-labelledby="account-explore">
+                <h2
+                  id="account-explore"
+                  className="font-display mb-4 text-xl font-bold text-heading"
+                >
+                  Explore
+                </h2>
+                <ul className="grid gap-3 sm:grid-cols-3">
+                  <li>
+                    <Link
+                      href="/destinations"
+                      className="panel-interactive flex items-center gap-3 p-4"
+                    >
+                      <MapPin
+                        className="h-5 w-5 shrink-0 text-accent"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      />
+                      <span className="font-semibold text-heading">
+                        Destinations
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/blog"
+                      className="panel-interactive flex items-center gap-3 p-4"
+                    >
+                      <BookOpen
+                        className="h-5 w-5 shrink-0 text-accent"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      />
+                      <span className="font-semibold text-heading">
+                        Stories
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/guides"
+                      className="panel-interactive flex items-center gap-3 p-4"
+                    >
+                      <Compass
+                        className="h-5 w-5 shrink-0 text-accent"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      />
+                      <span className="font-semibold text-heading">Guides</span>
+                    </Link>
+                  </li>
+                </ul>
+              </section>
+
+              <section
+                className="panel p-6 md:p-8"
+                aria-labelledby="account-utilities"
+              >
+                <h2
+                  id="account-utilities"
+                  className="font-display text-xl font-bold text-heading"
+                >
+                  Account
+                </h2>
+                <ul className="mt-4 space-y-3 text-sm text-text">
+                  <li>
+                    <AccountAuthActions mode="sign-out" googleConfigured />
+                  </li>
+                  <li>
+                    <a
+                      href="https://myaccount.google.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 font-semibold text-accent hover:underline"
+                    >
+                      Open Google Account
+                      <ExternalLink
+                        className="h-3.5 w-3.5"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      />
+                    </a>
+                  </li>
+                  <li className="pt-2 text-muted">
+                    Publishing tools for authors live at{" "}
+                    <code className="rounded bg-surface-soft px-1.5 py-0.5 text-xs text-heading">
+                      /cms
+                    </code>{" "}
+                    — not part of the reader account.
+                  </li>
+                </ul>
               </section>
             </>
           )}

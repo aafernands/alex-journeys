@@ -37,7 +37,7 @@ export const CODE_ONLY_PAGE_ROUTES = [
   { path: "/destinations", note: "Destinations index (data-driven tree)" },
   { path: "/blog", note: "Blog index (posts JSON)" },
   { path: "/search", note: "Search (React)" },
-  { path: "/saved", note: "Saved posts (reader account)" },
+  { path: "/account", note: "Reader account dashboard (profile + saves)" },
 ] as const;
 
 /** Public path for a CMS content page slug. */

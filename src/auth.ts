@@ -5,7 +5,7 @@ import Google from "next-auth/providers/google";
 /**
  * Auth.js (next-auth v5).
  *
- * - Google: any signed-in user is a public reader (save posts, /saved).
+ * - Google: any signed-in user is a public reader (save posts on /account).
  * - CMS access still requires email in CMS_ADMIN_EMAILS (or passcode) —
  *   see src/lib/cms/auth.ts. Reader sessions alone never unlock /cms.
  * - GitHub OAuth remains available for CMS admins only.

@@ -42,6 +42,13 @@ const nextConfig: NextConfig = {
         destination: "/:slug",
         permanent: true,
       },
+      // Saves live on Account — no standalone Saved page
+      { source: "/saved", destination: "/account", permanent: true },
+      {
+        source: "/saved/:path*",
+        destination: "/account",
+        permanent: true,
+      },
     ];
   },
 };

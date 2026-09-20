@@ -1,15 +1,15 @@
 # Reader Google login & saved posts
 
-Public readers can **Sign in with Google** (header) and **Save** blog posts. Data lives in **Cloud Firestore** on the existing Firebase project. CMS admin access is unchanged: allowlisted `CMS_ADMIN_EMAILS` or passcode only.
+Public readers can **Sign in with Google** (header) and **Save** blog posts. Saved posts live on the **Account** dashboard (`/account`). Data is stored in **Cloud Firestore** on the existing Firebase project. CMS admin access is unchanged: allowlisted `CMS_ADMIN_EMAILS` or passcode only.
 
 ## What readers get
 
 | Surface | Behavior |
 | --- | --- |
-| Header | Sign in / Sign out; **Saved** → `/saved`; **Account** → `/account` |
+| Header | Sign in / Sign out; **Account** → `/account` (no standalone Saved nav item) |
 | Blog post | **Save** / **Saved** toggle; signed-out tap → Google sign-in |
-| `/saved` | Dedicated saves list (title, saved date, link); empty state if none |
-| `/account` | Signed-in hub: Google profile, saved posts, sign out; guests get Sign in with Google |
+| `/account` | Reader dashboard: Google profile, saved posts (with Remove / Clear all), explore links, sign out |
+| `/saved` | Permanent redirect → `/account` (saves are Account-only) |
 
 Reader sessions **do not** unlock `/cms`.
 
@@ -65,9 +65,8 @@ Until then, non-test Google accounts will fail sign-in even though the site UI s
 - `src/lib/firebase-admin.ts` — Admin init
 - `src/lib/saved-posts.ts` — list / add / remove
 - `src/app/api/saved/route.ts` — GET / POST / DELETE
-- `src/components/ReaderAuthButtons.tsx`, `SavePostButton.tsx`, `AccountAuthActions.tsx`
-- `src/app/account/page.tsx` — reader account hub (profile + saves)
-- `src/app/saved/page.tsx` — dedicated saves list
+- `src/components/ReaderAuthButtons.tsx`, `SavePostButton.tsx`, `AccountAuthActions.tsx`, `SavedPostsList.tsx`
+- `src/app/account/page.tsx` — reader dashboard (profile + saves + explore)
 - `src/auth.ts` — Google open to all; `session.user.id` + `isAdmin` for CMS
 
 ## Named Firestore database (AI Studio)
