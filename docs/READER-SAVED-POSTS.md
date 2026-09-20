@@ -66,3 +66,11 @@ Until then, non-test Google accounts will fail sign-in even though the site UI s
 - `src/app/api/saved/route.ts` — GET / POST / DELETE
 - `src/components/ReaderAuthButtons.tsx`, `SavePostButton.tsx`
 - `src/auth.ts` — Google open to all; `session.user.id` + `isAdmin` for CMS
+
+## Named Firestore database (AI Studio)
+
+If Firebase Console shows a database id other than `(default)` (e.g. `ai-studio-…`), set:
+
+`FIREBASE_FIRESTORE_DATABASE_ID=<that-exact-id>`
+
+Leave unset to use `(default)`.

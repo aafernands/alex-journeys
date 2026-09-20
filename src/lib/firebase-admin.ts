@@ -72,6 +72,8 @@ export function getFirestoreDb(): Firestore | null {
     cachedDb = null;
     return null;
   }
-  cachedDb = getFirestore(app);
+  // AI Studio / multi-DB projects often use a named DB, not "(default)".
+  const databaseId = process.env.FIREBASE_FIRESTORE_DATABASE_ID?.trim();
+  cachedDb = databaseId ? getFirestore(app, databaseId) : getFirestore(app);
   return cachedDb;
 }
