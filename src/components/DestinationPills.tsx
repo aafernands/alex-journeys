@@ -52,10 +52,10 @@ export function DestinationPills() {
                 />
                 <span
                   aria-hidden="true"
-                  className="absolute inset-0 bg-gradient-to-t from-near-black/70 via-near-black/20 to-transparent"
+                  className="absolute inset-0 bg-gradient-to-t from-near-black/80 via-near-black/30 to-transparent"
                 />
                 <span className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-start px-5 pb-5 pt-16">
-                  <span className="font-sans text-sm font-normal text-hero-type/90 [text-shadow:0_1px_2px_rgba(0,0,0,0.45)]">
+                  <span className="font-sans text-[0.9375rem] font-normal text-hero-type [text-shadow:0_1px_2px_rgba(0,0,0,0.55)]">
                     {dest.name}
                   </span>
                   <span className="mt-0.5 inline-flex items-center gap-1.5 text-hero-type">
