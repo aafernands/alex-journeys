@@ -1,7 +1,7 @@
 "use client";
 
 import { Plane } from "lucide-react";
-import Image from "next/image";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -166,14 +166,7 @@ export function OutboundInterstitial({
             className="inline-flex opacity-90 transition hover:opacity-100"
             aria-label={`${site.name} home`}
           >
-            <Image
-              src="/brand/logo-alex-journly.png"
-              alt={site.name}
-              width={160}
-              height={48}
-              className="h-10 w-auto dark:brightness-110"
-              priority
-            />
+            <BrandLogo className="h-10 w-auto" priority />
           </Link>
           <p className="text-xs text-muted">
             <Link href="/" className="text-link hover:text-accent">

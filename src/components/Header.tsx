@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Search as SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -204,14 +204,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           onClick={closeAll}
           aria-label="Fernandes Journeys home"
         >
-          <Image
-            src="/brand/logo-alex-journly.png"
-            alt="Fernandes Journeys"
-            width={200}
-            height={55}
-            priority
-            className="h-10 w-auto max-w-[min(42vw,11rem)] object-contain sm:h-11 sm:max-w-[12rem] md:h-11 md:max-w-[12.5rem]"
-          />
+          <BrandLogo className="h-8 w-auto sm:h-9" priority />
         </Link>
 
         {/* Desktop: primary nav (center zone) */}
