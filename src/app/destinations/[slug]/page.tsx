@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DestinationClimate } from "@/components/destinations/DestinationClimate";
 import {
   destinationSlugs,
   getDestinationBySlug,
@@ -139,6 +140,13 @@ export default async function DestinationPage({ params }: PageProps) {
                 ))}
               </ul>
             </section>
+          ) : null}
+
+          {dest.climate ? (
+            <DestinationClimate
+              destinationName={dest.name}
+              climate={dest.climate}
+            />
           ) : null}
 
           {coverImages ? (
