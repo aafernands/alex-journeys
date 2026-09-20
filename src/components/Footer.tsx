@@ -90,7 +90,7 @@ export function Footer() {
                     what I&apos;m actually packing and booking.
                   </p>
 
-                  <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
+                  <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-white/55">
                     <span className="size-1.5 rounded-full bg-accent" />
                     Postmark · free · unsubscribe anytime
                   </div>

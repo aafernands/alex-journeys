@@ -85,7 +85,7 @@ export function SectionHead({
           {title}
         </h2>
         {description ? (
-          <p className="mt-3 text-base leading-relaxed text-text md:text-[1.0625rem]">
+          <p className="mt-3 text-lead text-text">
             {description}
           </p>
         ) : null}

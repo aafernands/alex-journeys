@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand — Fernandes Journeys */
-  --accent: #f97316;
-  --accent-deep: #ea580c;
-  --bg: #fafbfc;
-  --surface: #e7ebf0;
-  --surface-soft: #f3f5f7;
-  --text: #333333;
-  --heading: #181818;
-  --near-black: #0c0d0e;
-  --ink: #181818;
-  --link: #2192dd;
-  --muted: #8a8a8c;
-  --muted-light: #c3c3c3;
-  --sand: #ddd3c7;
-  --steel: #5180a0;
-  --white: #ffffff;
-  --hero-type: #e7ebf0;
-  --ring: #f97316;
-  --border: #d5dce4;
-  --border-strong: #c5cdd8;
+  /* Brand — warm paper / ink */
+  --accent: #d97706;
+  --accent-deep: #b45309;
+  --bg: #f6f0e6;
+  --surface: #ebe2d3;
+  --surface-soft: #faf6ee;
+  --text: #3f382e;
+  --heading: #1f1a14;
+  --near-black: #14110d;
+  --ink: #2a241c;
+  --link: #9a3412;
+  --muted: #8a7d6b;
+  --muted-light: #c4b8a5;
+  --sand: #d9ccb8;
+  --steel: #6b7c6e;
+  --white: #fffcf7;
+  --hero-type: #f6f0e6;
+  --ring: #d97706;
+  --border: #e0d4c2;
+  --border-strong: #cbbba3;
 }
 
 @theme inline {
@@ -41,8 +41,9 @@
   --color-hero-type: var(--hero-type);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
-  --font-display: var(--font-montserrat);
-  --font-sans: var(--font-open-sans);
+  --color-white: var(--white);
+  --font-display: var(--font-outfit);
+  --font-sans: var(--font-inter);
 }
 
 html {
@@ -66,9 +67,9 @@ html {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-open-sans), system-ui, sans-serif;
-  font-size: 16px;
-  line-height: 1.55;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
 }
 
 ::selection {
@@ -82,7 +83,7 @@ body {
 }
 
 .font-display {
-  font-family: var(--font-montserrat), system-ui, sans-serif;
+  font-family: var(--font-outfit), system-ui, sans-serif;
 }
 
 /* ——— Shared layout shell (~1280) ——— */
@@ -112,62 +113,63 @@ body {
   background-position: center top;
 }
 
-/* Type scale — quieter product hierarchy */
-.text-label {
-  font-size: 0.75rem; /* 12 */
+/* Type scale — larger, clearer hierarchy */
+.text-label,
+.kicker {
+  font-size: 0.8125rem; /* 13 */
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
 .eyebrow {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--accent);
 }
 
 .text-sm-tight {
-  font-size: 0.875rem;
-  line-height: 1.45;
+  font-size: 0.9375rem;
+  line-height: 1.5;
 }
 
 .text-body {
-  font-size: 1rem;
-  line-height: 1.55;
+  font-size: 1.0625rem;
+  line-height: 1.65;
 }
 
 .text-lead {
-  font-size: 1.0625rem;
-  line-height: 1.6;
+  font-size: 1.2rem;
+  line-height: 1.65;
 }
 
 .text-title {
-  font-size: 1.75rem;
+  font-size: 2rem;
   line-height: 1.2;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
 }
 
 @media (min-width: 768px) {
   .text-title {
-    font-size: 2rem;
+    font-size: 2.35rem;
   }
 }
 
 .text-display {
-  font-size: clamp(1.75rem, 3.8vw, 2.75rem);
+  font-size: clamp(2rem, 4vw, 3.25rem);
   line-height: 1.12;
   font-weight: 700;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
 }
 
 .text-hero {
-  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-size: clamp(2.35rem, 5.5vw, 3.75rem);
   line-height: 1.08;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
 }
 
 /* Boxed UI language — hairline panels, flat fills */
@@ -239,7 +241,7 @@ body {
   min-height: 2.75rem; /* 44px */
   padding: 0.625rem 1.25rem;
   border-radius: 0.5rem; /* 8px */
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   line-height: 1.25;
   transition: background-color 150ms ease, border-color 150ms ease,
@@ -330,7 +332,7 @@ body {
   animation-delay: 0.24s;
 }
 
-/* Migrated WordPress post body — 18/27 Open Sans */
+/* Migrated WordPress post body */
 .post-prose {
   color: var(--text);
   font-size: 1.125rem;
@@ -345,7 +347,7 @@ body {
 .post-prose h3,
 .post-prose h4 {
   color: var(--heading);
-  font-family: var(--font-montserrat), system-ui, sans-serif;
+  font-family: var(--font-outfit), system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1.25;

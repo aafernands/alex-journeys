@@ -13,7 +13,7 @@ export function Hero() {
         <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12 xl:gap-16">
           {/* Copy column */}
           <div className="lg:col-span-5 xl:col-span-5">
-            <p className="animate-fade-up inline-flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-heading">
+            <p className="animate-fade-up inline-flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-1.5 text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-heading">
               <span
                 className="size-1.5 rounded-full bg-accent"
                 aria-hidden="true"
@@ -34,7 +34,7 @@ export function Hero() {
               {hero.tagline}
             </h1>
 
-            <p className="animate-fade-up animate-delay-2 mt-5 max-w-md text-base leading-relaxed text-text md:text-[1.0625rem]">
+            <p className="animate-fade-up animate-delay-2 mt-5 max-w-md text-lead text-text">
               {hero.subtitle}
             </p>
 
@@ -90,10 +90,10 @@ export function Hero() {
                 <span className="window-dot" aria-hidden="true" />
                 <span className="window-dot" aria-hidden="true" />
                 <span className="window-dot" aria-hidden="true" />
-                <span className="ml-2 truncate text-xs font-semibold text-muted">
+                <span className="ml-2 truncate text-sm-tight font-semibold text-muted">
                   Maroon Bells · Colorado
                 </span>
-                <span className="ml-auto hidden rounded-md border border-border bg-white px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-muted sm:inline">
+                <span className="ml-auto hidden rounded-md border border-border bg-white px-2 py-0.5 text-[0.8125rem] font-semibold uppercase tracking-wide text-muted sm:inline">
                   Field note
                 </span>
               </div>
@@ -109,7 +109,7 @@ export function Hero() {
               </div>
               <div className="grid grid-cols-3 divide-x divide-border border-t border-border bg-white text-center">
                 <div className="px-3 py-3">
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-muted">
+                  <p className="text-[0.8125rem] font-semibold uppercase tracking-wide text-muted">
                     Light
                   </p>
                   <p className="mt-0.5 text-sm font-semibold text-heading">
@@ -117,7 +117,7 @@ export function Hero() {
                   </p>
                 </div>
                 <div className="px-3 py-3">
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-muted">
+                  <p className="text-[0.8125rem] font-semibold uppercase tracking-wide text-muted">
                     Season
                   </p>
                   <p className="mt-0.5 text-sm font-semibold text-heading">
@@ -125,7 +125,7 @@ export function Hero() {
                   </p>
                 </div>
                 <div className="px-3 py-3">
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-muted">
+                  <p className="text-[0.8125rem] font-semibold uppercase tracking-wide text-muted">
                     Journal
                   </p>
                   <p className="mt-0.5 text-sm font-semibold text-accent">
