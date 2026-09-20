@@ -1,7 +1,16 @@
 {
-  "updatedAt": "2026-09-20T05:21:07.345182+00:00",
-  "count": 75,
+  "updatedAt": "2026-09-20T05:26:14.027Z",
+  "count": 76,
   "items": [
+    {
+      "id": "f9a9ff8c-1bcf-49b9-9540-c27a59c444f5-mu9dihc9",
+      "slug": "f9a9ff8c-1bcf-49b9-9540-c27a59c444f5-mu9dihc9",
+      "url": "/media/f9a9ff8c-1bcf-49b9-9540-c27a59c444f5-mu9dihc9.jpg",
+      "alt": "",
+      "source": "upload",
+      "usedBy": [],
+      "createdAt": "2026-09-20T05:26:14.027Z"
+    },
     {
       "id": "2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499",
       "slug": "2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499",
