@@ -18,5 +18,7 @@ declare module "next-auth/jwt" {
     isAdmin?: boolean;
     /** Profile image (Auth.js often uses `picture`). */
     picture?: string | null;
+    /** Last time email/name/image were refreshed from Firestore (ms). */
+    profileSyncedAt?: number;
   }
 }

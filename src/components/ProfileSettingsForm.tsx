@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import { useRef, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 export type ProfileSettingsFormProps = {
   initialName: string;
@@ -64,6 +65,7 @@ export function ProfileSettingsForm({
   emailConfigured,
 }: ProfileSettingsFormProps) {
   const { data: session, update } = useSession();
+  const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState(initialName);
@@ -83,8 +85,28 @@ export function ProfileSettingsForm({
   const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
   const [emailPending, setEmailPending] = useState(false);
   const [pendingNewEmail, setPendingNewEmail] = useState(initialPending);
+  /** Server Firestore email; kept in sync when Account RSC re-renders. */
+  const [serverEmail, setServerEmail] = useState(initialEmail);
 
-  const displayEmail = session?.user?.email ?? initialEmail;
+  useEffect(() => {
+    setServerEmail(initialEmail);
+    setPendingNewEmail(initialPending);
+  }, [initialEmail, initialPending]);
+
+  useEffect(() => {
+    setName(initialName);
+  }, [initialName]);
+
+  useEffect(() => {
+    setPreview(initialImage);
+    setImageUrl(
+      initialImage && !initialImage.startsWith("data:") ? initialImage : "",
+    );
+  }, [initialImage]);
+
+  // Prefer server Firestore email (initialEmail) over a stale client JWT.
+  // Session is only a fallback when the server did not supply an email.
+  const displayEmail = serverEmail || session?.user?.email || "";
   const displayName = session?.user?.name ?? name;
   const displayImage = session?.user?.image ?? preview;
 
@@ -141,6 +163,7 @@ export function ProfileSettingsForm({
         name: data.name ?? name.trim(),
         image: data.image ?? preview,
       });
+      router.refresh();
       setProfilePending(false);
     } catch {
       setProfileError("Network error. Try again.");

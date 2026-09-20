@@ -2,8 +2,10 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
+import { isFirebaseConfigured } from "@/lib/firebase-admin";
 import {
   authorizeCredentials,
+  getUserById,
   isCredentialsStoreReady,
   upsertOauthUser,
 } from "@/lib/users";
@@ -159,6 +161,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
         if (patch.image !== undefined) {
           token.picture = patch.image;
+        }
+      }
+
+      // Keep JWT email/name/image aligned with Firestore (esp. after email
+      // change / emailManagedLocally). Refresh on login, on session.update,
+      // and lightly on subsequent JWT touches (~60s). Failures keep token.
+      const sub = typeof token.sub === "string" ? token.sub : "";
+      if (sub && isFirebaseConfigured()) {
+        const lastSync =
+          typeof token.profileSyncedAt === "number"
+            ? token.profileSyncedAt
+            : 0;
+        const shouldRefresh =
+          Boolean(user) ||
+          trigger === "update" ||
+          !lastSync ||
+          Date.now() - lastSync > 60_000;
+        if (shouldRefresh) {
+          try {
+            const profile = await getUserById(sub);
+            if (profile) {
+              if (profile.email) {
+                token.email = profile.email;
+              }
+              if (profile.name !== undefined) {
+                token.name = profile.name;
+              }
+              if (profile.image !== undefined) {
+                token.picture = profile.image;
+              }
+              token.profileSyncedAt = Date.now();
+            }
+          } catch (err) {
+            console.warn("[auth] profile sync from Firestore failed:", err);
+          }
         }
       }
 

@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export function ConfirmEmailClient({ token }: { token: string | null }) {
   const { data: session, update, status } = useSession();
+  const router = useRouter();
   const sessionRef = useRef(session);
   sessionRef.current = session;
   const statusRef = useRef(status);
@@ -59,9 +61,13 @@ export function ConfirmEmailClient({ token }: { token: string | null }) {
               image: data.image,
             });
           } catch {
-            /* session refresh is best-effort; page still shows success */
+            /* session refresh is best-effort; still navigate to account */
           }
         }
+        if (cancelled) return;
+        // Reload Account RSC so Firestore email drives Profile settings.
+        router.push("/account");
+        router.refresh();
       } catch {
         if (cancelled) return;
         setState("error");
@@ -100,8 +106,7 @@ export function ConfirmEmailClient({ token }: { token: string | null }) {
             ) : null}
           </p>
           <p className="text-sm text-muted">
-            If the header still shows the old address, refresh the page or sign
-            out and back in.
+            Taking you back to your account…
           </p>
           <Link href="/account" className="btn btn-secondary inline-flex">
             Back to account
