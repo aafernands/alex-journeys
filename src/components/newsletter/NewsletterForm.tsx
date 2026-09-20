@@ -58,28 +58,28 @@ export function NewsletterForm({ className }: Props) {
         placeholder="Enter your email"
         autoComplete="email"
         disabled={status === "loading" || status === "success"}
-        className="min-h-11 w-full rounded-lg border border-white/15 bg-white/10 px-4 text-sm text-white placeholder:text-white/45 transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:opacity-60"
+        className="min-h-11 w-full rounded-lg border border-hero-type/15 bg-hero-type/10 px-4 text-sm text-hero-type placeholder:text-hero-type/45 transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:opacity-60"
       />
-      <label className="flex items-start gap-2.5 text-sm leading-snug text-white/65">
+      <label className="flex items-start gap-2.5 text-sm leading-snug text-hero-type/65">
         <input
           type="checkbox"
           required
           disabled={status === "loading" || status === "success"}
-          className="mt-1 size-4 shrink-0 rounded border-white/30 accent-accent"
+          className="mt-1 size-4 shrink-0 rounded border-hero-type/30 accent-accent"
         />
         <span>
           By entering your email, you agree to receive Fernandes Journeys emails
           and agree to our{" "}
           <Link
             href="/policies"
-            className="text-white underline underline-offset-2 hover:text-accent"
+            className="text-hero-type underline underline-offset-2 hover:text-accent"
           >
             Terms and Conditions
           </Link>{" "}
           and{" "}
           <Link
             href="/policies"
-            className="text-white underline underline-offset-2 hover:text-accent"
+            className="text-hero-type underline underline-offset-2 hover:text-accent"
           >
             Privacy Policy
           </Link>

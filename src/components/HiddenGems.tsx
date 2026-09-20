@@ -37,14 +37,14 @@ export function HiddenGems() {
             priority
           />
           <div
-            className="absolute inset-0 bg-heading/50"
+            className="absolute inset-0 bg-near-black/50"
             aria-hidden="true"
           />
           <div className="relative z-10 flex h-full min-h-[11rem] flex-col items-start justify-end px-6 py-7 md:min-h-[13rem] md:px-8 md:py-9">
             <p className="text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-accent">
               Featured tray
             </p>
-            <p className="font-display mt-1 text-2xl font-bold tracking-tight text-white md:text-3xl">
+            <p className="font-display mt-1 text-2xl font-bold tracking-tight text-hero-type md:text-3xl">
               Stories that stayed with me
             </p>
           </div>

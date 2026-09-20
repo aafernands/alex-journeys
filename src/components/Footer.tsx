@@ -42,7 +42,7 @@ export function Footer() {
         aria-labelledby="newsletter-heading"
       >
         <div className="section-shell py-12 md:py-16">
-          <div className="newsletter-postcard relative overflow-hidden rounded-xl bg-heading text-white shadow-[0_20px_50px_-28px_rgba(0,0,0,0.55)]">
+          <div className="newsletter-postcard relative overflow-hidden rounded-xl bg-near-black text-hero-type shadow-[0_20px_50px_-28px_rgba(0,0,0,0.55)]">
             {/* Airmail stripe frame */}
             <div
               className="pointer-events-none absolute inset-0 rounded-xl opacity-90"
@@ -59,7 +59,7 @@ export function Footer() {
             />
 
             {/* Giant postmark watermark */}
-            <PostmarkWatermark className="pointer-events-none absolute -right-16 -top-10 h-[22rem] w-[22rem] rotate-[-18deg] text-white/25 md:-right-10 md:top-1/2 md:h-[26rem] md:w-[26rem] md:-translate-y-1/2" />
+            <PostmarkWatermark className="pointer-events-none absolute -right-16 -top-10 h-[22rem] w-[22rem] rotate-[-18deg] text-hero-type/25 md:-right-10 md:top-1/2 md:h-[26rem] md:w-[26rem] md:-translate-y-1/2" />
 
             {/* Soft paper glow */}
             <div
@@ -84,13 +84,13 @@ export function Footer() {
 
               <div className="mt-8 md:grid md:grid-cols-12 md:gap-12 md:items-start">
                 <div className="md:col-span-7">
-                  <p className="max-w-lg text-base leading-relaxed text-white/80">
+                  <p className="max-w-lg text-base leading-relaxed text-hero-type/80">
                     Drop your email like a postcard home. Trip notes, hidden
                     corners, and journal dispatches — no agency pitches, just
                     what I&apos;m actually packing and booking.
                   </p>
 
-                  <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-white/55">
+                  <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-hero-type/15 bg-hero-type/5 px-3 py-1 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-hero-type/55">
                     <span className="size-1.5 rounded-full bg-accent" />
                     Postmark · free · unsubscribe anytime
                   </div>
@@ -98,10 +98,10 @@ export function Footer() {
                   <NewsletterForm />
                 </div>
 
-                <div className="mt-10 border-t border-white/10 pt-8 md:col-span-5 md:mt-0 md:border-t-0 md:border-l md:border-white/10 md:pt-0 md:pl-10">
+                <div className="mt-10 border-t border-hero-type/10 pt-8 md:col-span-5 md:mt-0 md:border-t-0 md:border-l md:border-hero-type/10 md:pt-0 md:pl-10">
                   <p className="eyebrow !text-accent">About the sender</p>
                   <div className="mt-3 flex gap-4">
-                    <div className="relative size-14 shrink-0 overflow-hidden rounded-lg border border-white/15 bg-white/5 ring-2 ring-accent/30 ring-offset-2 ring-offset-heading">
+                    <div className="relative size-14 shrink-0 overflow-hidden rounded-lg border border-hero-type/15 bg-hero-type/5 ring-2 ring-accent/30 ring-offset-2 ring-offset-near-black">
                       <Image
                         src={site.authorPhoto}
                         alt={site.authorName}
@@ -111,15 +111,15 @@ export function Footer() {
                       />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-display text-xl font-bold text-white">
+                      <h3 className="font-display text-xl font-bold text-hero-type">
                         {about.headline}
                       </h3>
-                      <p className="mt-2 text-sm leading-relaxed text-white/70">
+                      <p className="mt-2 text-sm leading-relaxed text-hero-type/70">
                         {about.paragraphs[0]}
                       </p>
                       <Link
                         href="/about"
-                        className="mt-3 inline-flex text-sm font-semibold text-white transition hover:text-accent"
+                        className="mt-3 inline-flex text-sm font-semibold text-hero-type transition hover:text-accent"
                       >
                         Learn more →
                       </Link>
@@ -133,14 +133,14 @@ export function Footer() {
       </section>
 
       {/* Full-bleed dark footer */}
-      <div className="bg-near-black text-white">
+      <div className="bg-near-black text-hero-type">
         <div className="section-shell py-12 md:py-14">
           <div className="grid gap-10 md:grid-cols-12 md:gap-8">
             <div className="md:col-span-4">
               <p className="font-display text-lg font-bold tracking-tight">
                 {site.name}
               </p>
-              <p className="mt-2 max-w-xs text-sm leading-relaxed text-white/60">
+              <p className="mt-2 max-w-xs text-sm leading-relaxed text-hero-type/60">
                 A personal travel journal by {site.authorName}. Places
                 I&apos;ve been, notes from the road.
               </p>
@@ -150,7 +150,7 @@ export function Footer() {
                     <li key={item.label}>
                       <a
                         href={item.href}
-                        className="inline-flex rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-sm font-semibold text-white/90 transition hover:bg-white/10"
+                        className="inline-flex rounded-lg border border-hero-type/15 bg-hero-type/5 px-3 py-1.5 text-sm font-semibold text-hero-type/90 transition hover:bg-hero-type/10"
                         rel="noopener noreferrer"
                         target="_blank"
                       >
@@ -173,13 +173,13 @@ export function Footer() {
             </div>
 
             <div className="md:col-span-3">
-              <p className="text-label text-white/45">Explore</p>
+              <p className="text-label text-hero-type/45">Explore</p>
               <ul className="mt-3 space-y-2">
                 {explore.map((item) => (
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="text-sm text-white/70 transition hover:text-accent"
+                      className="text-sm text-hero-type/70 transition hover:text-accent"
                     >
                       {item.label}
                     </Link>
@@ -189,13 +189,13 @@ export function Footer() {
             </div>
 
             <div className="md:col-span-3">
-              <p className="text-label text-white/45">Journal</p>
+              <p className="text-label text-hero-type/45">Journal</p>
               <ul className="mt-3 space-y-2">
                 {company.map((item) => (
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="text-sm text-white/70 transition hover:text-accent"
+                      className="text-sm text-hero-type/70 transition hover:text-accent"
                     >
                       {item.label}
                     </Link>
@@ -205,10 +205,10 @@ export function Footer() {
             </div>
 
             <div className="md:col-span-2">
-              <p className="text-label text-white/45">Contact</p>
+              <p className="text-label text-hero-type/45">Contact</p>
               <a
                 href={`mailto:${site.email}`}
-                className="mt-3 inline-block text-sm text-white/70 transition hover:text-accent"
+                className="mt-3 inline-block text-sm text-hero-type/70 transition hover:text-accent"
               >
                 {site.email}
               </a>
@@ -216,14 +216,14 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/10">
-          <div className="section-shell flex flex-col gap-3 py-5 text-sm text-white/45 md:flex-row md:items-center md:justify-between">
+        <div className="border-t border-hero-type/10">
+          <div className="section-shell flex flex-col gap-3 py-5 text-sm text-hero-type/45 md:flex-row md:items-center md:justify-between">
             <p>
               © {year} {site.name}. Personal travel journal.
             </p>
             <Link
               href="#top"
-              className="inline-flex items-center gap-1.5 self-start rounded-lg border border-white/15 px-3 py-1.5 text-white/70 transition hover:bg-white/5 hover:text-white md:self-auto"
+              className="inline-flex items-center gap-1.5 self-start rounded-lg border border-hero-type/15 px-3 py-1.5 text-hero-type/70 transition hover:bg-hero-type/5 hover:text-hero-type md:self-auto"
             >
               Back to top
               <span aria-hidden="true">↑</span>

@@ -67,7 +67,7 @@ export function BlogFilters({ posts }: Props) {
               aria-selected={active}
               className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                 active
-                  ? "border-heading bg-heading text-white"
+                  ? "border-ink bg-ink text-on-solid"
                   : "border-border bg-white text-text hover:border-heading/30 hover:bg-surface-soft"
               }`}
               onClick={() => {

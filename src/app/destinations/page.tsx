@@ -153,9 +153,9 @@ function PlaceText({
 
   return (
     <span className="absolute bottom-3 left-3 right-3 md:bottom-4 md:left-4">
-      <span className="flex flex-col items-start gap-1 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]">
+      <span className="flex flex-col items-start gap-1 text-hero-type drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]">
         <span
-          className={`font-sans font-medium uppercase tracking-[0.14em] text-white/85 ${countryClass}`}
+          className={`font-sans font-medium uppercase tracking-[0.14em] text-hero-type/85 ${countryClass}`}
         >
           {country}
         </span>
@@ -163,7 +163,7 @@ function PlaceText({
           <NavIcon
             name="map-pin"
             size={pin}
-            className="shrink-0 text-white"
+            className="shrink-0 text-hero-type"
           />
           <span className={`font-sans tracking-tight ${title}`}>
             {destination}

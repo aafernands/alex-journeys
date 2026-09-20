@@ -108,7 +108,7 @@ export function PostageStamp({ className = "" }: { className?: string }) {
       className={`relative select-none ${className}`}
       aria-hidden="true"
     >
-      <div className="relative overflow-hidden rounded-sm border-2 border-dashed border-white/35 bg-accent/90 px-3 py-2 text-center shadow-lg shadow-black/20">
+      <div className="relative overflow-hidden rounded-sm border-2 border-dashed border-hero-type/35 bg-accent/90 px-3 py-2 text-center shadow-lg shadow-black/20">
         <p className="font-display text-[10px] font-bold uppercase tracking-[0.2em] text-heading">
           Air Mail
         </p>

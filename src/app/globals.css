@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   /* Brand — warm paper / ink */
   --accent: #d97706;
@@ -21,7 +23,35 @@
   --ring: #d97706;
   --border: #e0d4c2;
   --border-strong: #cbbba3;
+  --on-solid: #fffcf7;
 }
+
+html.dark {
+  color-scheme: dark;
+
+  /* Warm charcoal paper / cream ink */
+  --accent: #f59e0b;
+  --accent-deep: #d97706;
+  --bg: #1a1612;
+  --surface: #242018;
+  --surface-soft: #2c261e;
+  --text: #e8e0d4;
+  --heading: #f6f0e6;
+  --near-black: #0c0a08;
+  --ink: #14110d;
+  --link: #e8a07a;
+  --muted: #a89884;
+  --muted-light: #6b5f50;
+  --sand: #3d3428;
+  --steel: #8a9a8c;
+  --white: #221e18;
+  --hero-type: #f6f0e6;
+  --ring: #f59e0b;
+  --border: #3d3428;
+  --border-strong: #524636;
+  --on-solid: #fffcf7;
+}
+
 
 @theme inline {
   --color-accent: var(--accent);
@@ -42,6 +72,7 @@
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-white: var(--white);
+  --color-on-solid: var(--on-solid);
   --font-display: var(--font-outfit);
   --font-sans: var(--font-inter);
 }
@@ -251,7 +282,7 @@ body {
 
 .btn-primary {
   background: var(--accent);
-  color: var(--white);
+  color: var(--on-solid);
   border: 1px solid transparent;
 }
 
@@ -261,7 +292,7 @@ body {
 
 .btn-ink {
   background: var(--ink);
-  color: var(--white);
+  color: var(--on-solid);
   border: 1px solid transparent;
 }
 

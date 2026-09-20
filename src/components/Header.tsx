@@ -8,6 +8,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { TopicFlyout } from "@/components/header/TopicFlyout";
 import { MobileTopicSection } from "@/components/header/MobileTopicSection";
 import { NavIcon } from "@/components/icons/NavIcon";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   SearchInput,
   type SearchInputHandle,
@@ -328,15 +329,19 @@ export function Header({ latestPost = null }: Props) {
             className="shrink-0"
           />
 
+          <ThemeToggle />
+
           <Link href="/tools" className="btn btn-ink !min-h-9 !px-4 !py-1.5 text-sm">
             Tools I use
           </Link>
         </nav>
 
-        {/* Mobile: menu drawer (right) */}
+        {/* Mobile: theme + menu drawer (right) */}
+        <div className="relative z-10 flex items-center gap-1 md:hidden">
+          <ThemeToggle />
         <button
           type="button"
-          className="relative z-10 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-white transition hover:bg-accent-deep md:hidden"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-on-solid transition hover:bg-accent-deep"
           aria-expanded={mobileOpen}
           aria-controls="mobile-nav"
           onClick={() => {
@@ -361,6 +366,7 @@ export function Header({ latestPost = null }: Props) {
             )}
           </svg>
         </button>
+        </div>
       </div>
 
       {mobileSearchOpen && (
