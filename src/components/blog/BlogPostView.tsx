@@ -57,7 +57,11 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
       <JsonLd data={jsonLd} />
       {/* Product-style article header — no magazine dark hero */}
       <header className="border-b border-border bg-white">
-        <div className="section-shell py-10 md:py-14">
+        <div
+          className={`section-shell pt-10 md:pt-14 ${
+            post.featuredImage ? "" : "pb-10 md:pb-14"
+          }`}
+        >
           <div className="mx-auto max-w-3xl">
             <nav aria-label="Breadcrumb" className="text-sm text-muted">
               <ol className="flex flex-wrap items-center gap-2">
@@ -137,22 +141,20 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
               <SavePostButton slug={slug} />
             </div>
           </div>
-
-          {post.featuredImage ? (
-            <div className="panel mx-auto mt-10 max-w-4xl overflow-hidden shadow-sm">
-              <div className="relative aspect-[16/10] bg-surface">
-                <Image
-                  src={post.featuredImage.url}
-                  alt={post.featuredImage.alt || post.title}
-                  fill
-                  priority
-                  sizes="(max-width: 896px) 100vw, 896px"
-                  className="object-cover object-center"
-                />
-              </div>
-            </div>
-          ) : null}
         </div>
+
+        {post.featuredImage ? (
+          <div className="relative mt-10 aspect-[16/10] w-full bg-surface">
+            <Image
+              src={post.featuredImage.url}
+              alt={post.featuredImage.alt || post.title}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center"
+            />
+          </div>
+        ) : null}
       </header>
 
       <article className="section-shell py-10 md:py-14">
