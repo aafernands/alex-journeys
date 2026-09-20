@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import { isCmsAuthenticated } from "@/lib/cms/auth";
 import {
-  deleteDraft,
-  deletePost,
+  deletePage,
   isGithubConfigured,
-  publishDraft,
-  publishPost,
+  publishPage,
 } from "@/lib/cms/github";
-import { sanitizeSlug, validatePostInput } from "@/lib/cms/validate";
+import { sanitizeSlug } from "@/lib/cms/validate";
+import { validatePageInput } from "@/lib/cms/validate-page";
 
 export const runtime = "nodejs";
 
@@ -37,33 +36,21 @@ export async function POST(request: Request) {
       ? (body as Record<string, unknown>)
       : {};
 
-  const validated = validatePostInput(input);
+  const validated = validatePageInput(input);
   if (!validated.ok) {
     return NextResponse.json({ error: validated.error }, { status: 400 });
   }
 
   const update = Boolean(input.update);
-  const asDraft = Boolean(input.draft);
 
   try {
-    if (asDraft) {
-      const result = await publishDraft(validated.data);
-      return NextResponse.json({
-        ok: true,
-        draft: true,
-        slug: result.slug,
-        commitUrl: result.commitUrl,
-        note: "Draft saved to src/content/drafts. It is not on the public blog until you publish.",
-      });
-    }
-
-    const result = await publishPost(validated.data, { update });
+    const result = await publishPage(validated.data, { update });
     return NextResponse.json({
       ok: true,
       slug: result.slug,
       created: result.created,
       commitUrl: result.commitUrl,
-      note: "Committed to main. Vercel will redeploy shortly — the post appears on /blog after deploy finishes.",
+      note: "Committed to main. Vercel will redeploy shortly — the page updates after deploy finishes.",
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Publish failed.";
@@ -103,33 +90,14 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Valid slug is required." }, { status: 400 });
   }
 
-  const asDraft = Boolean(input.draft);
-
   try {
-    if (asDraft) {
-      const result = await deleteDraft(slug);
-      if (!result) {
-        return NextResponse.json(
-          { error: `Draft "${slug}" not found on GitHub.` },
-          { status: 404 },
-        );
-      }
-      return NextResponse.json({
-        ok: true,
-        draft: true,
-        slug,
-        commitUrl: result.commitUrl,
-        note: "Draft deleted from GitHub.",
-      });
-    }
-
-    const result = await deletePost(slug);
+    const result = await deletePage(slug);
     return NextResponse.json({
       ok: true,
       slug,
       commitUrl: result.commitUrl,
       commitSha: result.commitSha,
-      note: "Post deleted from GitHub. Vercel will redeploy shortly.",
+      note: "Page deleted from GitHub. Vercel will redeploy shortly.",
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Delete failed.";

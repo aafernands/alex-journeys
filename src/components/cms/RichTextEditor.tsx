@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import {
   Bold,
@@ -14,6 +15,7 @@ import {
   ListOrdered,
   Quote,
   Link2,
+  ImageIcon,
   Undo2,
   Redo2,
   Code2,
@@ -75,6 +77,13 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
           target: "_blank",
         },
       }),
+      Image.configure({
+        inline: false,
+        allowBase64: false,
+        HTMLAttributes: {
+          class: "rounded-lg max-w-full h-auto my-4",
+        },
+      }),
       Placeholder.configure({
         placeholder:
           "Write your story… Use the toolbar for headings, lists, and links.",
@@ -122,6 +131,16 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
       return;
     }
     editor.chain().focus().extendMarkRange("link").setLink({ href: trimmed }).run();
+  };
+
+  const setImage = () => {
+    if (!editor) return;
+    const url = window.prompt("Image URL", "https://");
+    if (url === null) return;
+    const trimmed = url.trim();
+    if (!trimmed) return;
+    const alt = window.prompt("Alt text (optional)", "") || "";
+    editor.chain().focus().setImage({ src: trimmed, alt }).run();
   };
 
   if (!editor) {
@@ -188,6 +207,9 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
         </ToolbarButton>
         <ToolbarButton label="Link" active={editor.isActive("link")} onClick={setLink}>
           <Link2 className="h-4 w-4" />
+        </ToolbarButton>
+        <ToolbarButton label="Image" onClick={setImage}>
+          <ImageIcon className="h-4 w-4" />
         </ToolbarButton>
         <span className="mx-1 h-5 w-px bg-border" aria-hidden />
         <ToolbarButton

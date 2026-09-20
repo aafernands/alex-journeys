@@ -3,12 +3,40 @@ import { redirect } from "next/navigation";
 import { PostForm } from "@/components/cms/PostForm";
 import { getAllDestinations } from "@/data/destinations";
 import { isCmsAuthenticated } from "@/lib/cms/auth";
+import { getDraftBySlug } from "@/lib/cms/drafts";
+import { sanitizeSlug } from "@/lib/cms/validate";
+import { getPostBySlug } from "@/lib/posts";
 
 export const dynamic = "force-dynamic";
 
-export default async function CmsNewPostPage() {
+type PageProps = {
+  searchParams: Promise<{ duplicate?: string; fromDraft?: string }>;
+};
+
+export default async function CmsNewPostPage({ searchParams }: PageProps) {
   if (!(await isCmsAuthenticated())) {
     redirect("/cms");
+  }
+
+  const { duplicate, fromDraft } = await searchParams;
+  const dupSlug = duplicate ? sanitizeSlug(duplicate) : null;
+  let initial: Parameters<typeof PostForm>[0]["initial"] | undefined;
+
+  if (dupSlug) {
+    const source =
+      fromDraft === "1" ? getDraftBySlug(dupSlug) : getPostBySlug(dupSlug);
+    if (source) {
+      initial = {
+        title: `${source.title} (copy)`,
+        slug: "",
+        date: source.date,
+        excerpt: source.excerpt,
+        contentHtml: source.contentHtml,
+        featuredImageUrl: source.featuredImage?.url ?? "",
+        featuredImageAlt: source.featuredImage?.alt ?? "",
+        destinations: source.destinations,
+      };
+    }
   }
 
   const destinations = getAllDestinations().map((d) => ({
@@ -20,24 +48,28 @@ export default async function CmsNewPostPage() {
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
         <Link
-          href="/cms"
+          href="/cms/posts"
           className="text-sm text-link transition hover:text-accent"
         >
-          ← Dashboard
+          ← Posts
         </Link>
         <p className="eyebrow mt-6 text-accent">Create</p>
         <h1 className="font-display mt-2 text-display text-heading">
-          New post
+          {dupSlug ? "Duplicate post" : "New post"}
         </h1>
         <p className="mt-3 text-sm text-muted">
           Publishing writes{" "}
           <code className="rounded bg-surface-soft px-1.5 py-0.5 text-xs">
             src/content/posts/&#123;slug&#125;.json
           </code>{" "}
-          and updates the posts index on GitHub.
+          and updates the posts index on GitHub. Use Save draft to keep work in{" "}
+          <code className="rounded bg-surface-soft px-1.5 py-0.5 text-xs">
+            drafts/
+          </code>
+          .
         </p>
       </div>
-      <PostForm destinations={destinations} mode="create" />
+      <PostForm destinations={destinations} mode="create" initial={initial} />
     </div>
   );
 }
