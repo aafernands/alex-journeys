@@ -6,51 +6,14 @@
   "excerpt": "A short two-day loop from the Canadian side — Table Rock, the tunnels behind the falls, Clifton Hill at night, and a quieter morning across the Niagara Parkway.",
   "featuredImage": {
     "url": "/media/photo-1745_singular_display_fullpicture-mua3y8bo.jpg",
-    "alt": "Niagara Falls"
+    "alt": "Niagara Falls in 2 days: mist, tunnels, and a night under the lights"
   },
   "destinations": [
-    "canada"
+    "united-states"
   ],
   "guideHubs": [
     "plan-a-trip"
   ],
   "contentHtml": "<p>I finally made it to Niagara with a simple plan: don’t rush the falls, and don’t pretend Clifton Hill is subtle. Two days on the Canadian side was enough to feel the spray, walk the tunnels, and still leave wanting one more sunrise.</p><p>This isn’t a checklist of every ticket — just what we actually did, and what I’d repeat.</p>",
-  "source": "cms",
-  "itinerary": {
-    "enabled": true,
-    "title": "2 days on the Canadian side",
-    "days": [
-      {
-        "id": "day-52cd0bad",
-        "label": "Arrival & the roar",
-        "title": "Arrive, Table Rock, and the first look",
-        "blocks": [
-          {
-            "id": "block-60c6a85d",
-            "time": "Afternoon",
-            "place": "Table Rock Centre",
-            "body": "Dropped bags, walked straight to the rail at Horseshoe Falls. Stood longer than planned. Mist on the lens within five minutes."
-          },
-          {
-            "id": "block-c681208b",
-            "time": "Afternoon",
-            "place": "Journey Behind the Falls",
-            "body": "Took the elevator down into the tunnels. The wall of water at the open portals is louder than any photo suggests. Poncho earned its keep."
-          },
-          {
-            "id": "block-285c48ef",
-            "time": "Evening",
-            "place": "Clifton Hill",
-            "body": "Neon, fudge shops, and people-watching. Grabbed dinner nearby and walked back when the falls were lit. One slow loop along the rail before bed."
-          }
-        ]
-      },
-      {
-        "id": "day-c491efd3",
-        "label": "Parkway morning, then home",
-        "title": "Quieter light and a last look",
-        "blocks": []
-      }
-    ]
-  }
+  "source": "cms"
 }
