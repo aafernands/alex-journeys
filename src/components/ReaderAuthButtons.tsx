@@ -1,7 +1,5 @@
 "use client";
 
-import { Bookmark } from "lucide-react";
-import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 
@@ -14,7 +12,7 @@ type Props = {
 };
 
 /**
- * Public reader auth: Sign in with Google / Sign out + link to /saved.
+ * Public reader auth: Sign in with Google / Sign out.
  * Does not expose CMS; admins still use /cms.
  */
 export function ReaderAuthButtons({
@@ -31,11 +29,6 @@ export function ReaderAuthButtons({
 
   const signedIn = status === "authenticated" && Boolean(session?.user);
   const loading = status === "loading";
-
-  const linkClass =
-    variant === "mobile"
-      ? "flex items-center gap-2.5 py-2.5 text-base font-semibold tracking-tight text-heading hover:text-accent"
-      : "inline-flex items-center gap-1.5 font-sans text-sm font-semibold tracking-tight text-text transition hover:text-heading";
 
   const buttonClass =
     variant === "mobile"
@@ -59,42 +52,22 @@ export function ReaderAuthButtons({
 
   if (signedIn) {
     return (
-      <div
-        className={
-          variant === "mobile"
-            ? "flex flex-col gap-0"
-            : "flex items-center gap-1"
-        }
+      <button
+        type="button"
+        className={buttonClass}
+        disabled={pending}
+        onClick={async () => {
+          setPending(true);
+          try {
+            await signOut({ callbackUrl: "/" });
+          } finally {
+            setPending(false);
+            onNavigate?.();
+          }
+        }}
       >
-        <Link href="/saved" className={linkClass} onClick={onNavigate}>
-          <Bookmark
-            className={
-              variant === "mobile"
-                ? "h-[18px] w-[18px] text-accent"
-                : "h-4 w-4"
-            }
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-          Saved
-        </Link>
-        <button
-          type="button"
-          className={buttonClass}
-          disabled={pending}
-          onClick={async () => {
-            setPending(true);
-            try {
-              await signOut({ callbackUrl: "/" });
-            } finally {
-              setPending(false);
-              onNavigate?.();
-            }
-          }}
-        >
-          {pending ? "Signing out…" : "Sign out"}
-        </button>
-      </div>
+        {pending ? "Signing out…" : "Sign out"}
+      </button>
     );
   }
 
