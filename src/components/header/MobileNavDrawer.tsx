@@ -24,8 +24,8 @@ type Props = {
 };
 
 /**
- * Secondary mobile drawer (opened from bottom Menu tab).
- * Primary Places/Stories/Guides/Saved live in the bottom bar — drawer holds the rest.
+ * Secondary mobile drawer (opened from header hamburger).
+ * Primary Places/Stories/Guides/Saved live in the scroll-reveal bottom bar — drawer holds the rest.
  */
 export function MobileNavDrawer({
   open,
@@ -39,7 +39,7 @@ export function MobileNavDrawer({
 
   return (
     <div
-      className="fixed inset-x-0 top-0 z-[200] bottom-[calc(3.5rem+env(safe-area-inset-bottom,0px))] md:hidden"
+      className="mobile-nav-drawer-shell fixed inset-x-0 top-0 bottom-0 z-[200] md:hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Site menu"
