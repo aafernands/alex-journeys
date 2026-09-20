@@ -1,7 +1,19 @@
 import type { Metadata } from "next";
 import { site as contentSite } from "@/data/content";
+import { getSiteDesign } from "@/lib/site-design";
 
 const DEFAULT_SITE_URL = "https://www.fernandesjourneys.com";
+
+/** Prefer CMS branding.logoOnLight; falls back if design JSON is incomplete. */
+function designLogoOnLight(): string {
+  try {
+    const logo = getSiteDesign().branding.logoOnLight?.trim();
+    if (logo) return logo;
+  } catch {
+    // ignore — use hardcoded default below
+  }
+  return "/brand/logo-fernandes-journeys.png";
+}
 
 function normalizeSiteUrl(raw: string): string {
   return raw.replace(/\/+$/, "");
@@ -26,8 +38,8 @@ export const siteConfig = {
   /** Default share / OG image — Maroon Bells trip photo */
   ogImage:
     "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
-  /** Organization JSON-LD logo — brand wordmark */
-  logo: "/brand/logo-fernandes-journeys.png",
+  /** Organization JSON-LD logo — prefers CMS branding.logoOnLight (updates after redeploy, like hero). */
+  logo: designLogoOnLight(),
   authorPhoto: contentSite.authorPhoto,
   keywords: [
     "travel journal",

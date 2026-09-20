@@ -1,5 +1,9 @@
 {
   "updatedAt": "2026-09-20T00:00:00.000Z",
+  "branding": {
+    "logoOnLight": "/brand/logo-fernandes-journeys.png",
+    "logoOnDark": "/brand/logo-fernandes-journeys-white.png"
+  },
   "hero": {
     "image": "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
     "imageAlt": "Sunrise over Maroon Bells reflected in a calm alpine lake",

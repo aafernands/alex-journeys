@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/data/content";
+import { getSiteDesign } from "@/lib/site-design";
 
 type Props = {
   /** Tailwind height class for the image, e.g. h-8 or h-10 */
@@ -19,7 +20,8 @@ type Props = {
 };
 
 /**
- * Site wordmark — color logo in light mode, white logo in dark mode.
+ * Site wordmark — dark logo on light UI, white logo on dark UI.
+ * Paths come from CMS Website design → branding (getSiteDesign).
  * Switches via `html.dark` (no client JS needed). Links to the site URL by default.
  */
 export function BrandLogo({
@@ -31,10 +33,14 @@ export function BrandLogo({
   href = site.url,
   onClick,
 }: Props) {
+  const { branding } = getSiteDesign();
+  const logoOnLight = branding.logoOnLight;
+  const logoOnDark = branding.logoOnDark;
+
   const mark = (
     <span className="relative inline-flex items-center">
       <Image
-        src="/brand/logo-fernandes-journeys.png"
+        src={logoOnLight}
         alt={site.name}
         width={width}
         height={height}
@@ -42,7 +48,7 @@ export function BrandLogo({
         priority={priority}
       />
       <Image
-        src="/brand/logo-fernandes-journeys-white.png"
+        src={logoOnDark}
         alt={site.name}
         width={width}
         height={height}

@@ -77,8 +77,16 @@ export type HomeSections = {
   };
 };
 
+export type BrandingDesign = {
+  /** Dark / black mark for light backgrounds */
+  logoOnLight: string;
+  /** White / light mark for dark backgrounds */
+  logoOnDark: string;
+};
+
 export type SiteDesign = {
   updatedAt: string;
+  branding: BrandingDesign;
   hero: HeroDesign;
   homeSections: HomeSections;
   seo: {
@@ -140,6 +148,10 @@ const DEFAULT_HOME_SECTIONS: HomeSections = {
 
 export const DEFAULT_SITE_DESIGN: SiteDesign = {
   updatedAt: "2026-09-20T00:00:00.000Z",
+  branding: {
+    logoOnLight: "/brand/logo-fernandes-journeys.png",
+    logoOnDark: "/brand/logo-fernandes-journeys-white.png",
+  },
   homeSections: structuredClone(DEFAULT_HOME_SECTIONS),
   hero: {
     image: contentHero.image,
@@ -233,6 +245,31 @@ function normalizeFromTheRoad(
     label: asString(o.label, fallback.label).trim() || fallback.label,
     items: items.length ? items : [...fallback.items],
   };
+}
+
+
+function isAllowedAssetPath(value: string): boolean {
+  const v = value.trim();
+  if (!v) return false;
+  if (/^https?:\/\//i.test(v)) return true;
+  if (v.startsWith("/brand/") || v.startsWith("/media/")) return true;
+  return false;
+}
+
+function normalizeBranding(
+  raw: unknown,
+  fallback: BrandingDesign,
+): BrandingDesign {
+  if (!raw || typeof raw !== "object") {
+    return { ...fallback };
+  }
+  const o = raw as Record<string, unknown>;
+  const logoOnLight =
+    asString(o.logoOnLight, fallback.logoOnLight).trim() ||
+    fallback.logoOnLight;
+  const logoOnDark =
+    asString(o.logoOnDark, fallback.logoOnDark).trim() || fallback.logoOnDark;
+  return { logoOnLight, logoOnDark };
 }
 
 /** Merge partial/unknown JSON into a full SiteDesign with safe defaults. */
@@ -404,8 +441,11 @@ function normalizeHomeSections(raw: unknown, fallback: HomeSections): HomeSectio
     base.homeSections,
   );
 
+  const branding = normalizeBranding(root.branding, base.branding);
+
   return {
     updatedAt: asString(root.updatedAt, base.updatedAt),
+    branding,
     hero,
     homeSections,
     seo: {
@@ -502,11 +542,37 @@ export function validateSiteDesignInput(raw: unknown): SiteDesignValidation {
     return { ok: false, error: "Secondary CTA label is required." };
   }
 
+  const { branding } = design;
+  if (!branding.logoOnLight.trim()) {
+    return { ok: false, error: "Logo (on light) is required." };
+  }
+  if (!isAllowedAssetPath(branding.logoOnLight)) {
+    return {
+      ok: false,
+      error:
+        "Logo (on light) must be /brand/…, /media/…, or an https URL.",
+    };
+  }
+  if (!branding.logoOnDark.trim()) {
+    return { ok: false, error: "Logo (on dark) is required." };
+  }
+  if (!isAllowedAssetPath(branding.logoOnDark)) {
+    return {
+      ok: false,
+      error:
+        "Logo (on dark) must be /brand/…, /media/…, or an https URL.",
+    };
+  }
+
   return {
     ok: true,
     design: {
       ...design,
       updatedAt: new Date().toISOString(),
+      branding: {
+        logoOnLight: branding.logoOnLight.trim(),
+        logoOnDark: branding.logoOnDark.trim(),
+      },
       hero: {
         ...hero,
         image: hero.image.trim(),
