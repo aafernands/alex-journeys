@@ -13,7 +13,7 @@ export function Hero() {
       className="relative flex min-h-[100dvh] items-center overflow-hidden border-b border-border"
       aria-labelledby="hero-heading"
     >
-      {/* Full-bleed Maroon Bells background */}
+      {/* Full-bleed Maroon Bells — plain photo, no full-frame vignette */}
       <div className="absolute inset-0" aria-hidden="true">
         <Image
           src={hero.image}
@@ -26,23 +26,23 @@ export function Hero() {
         />
       </div>
 
-      {/* Corner caption — not window chrome */}
       {hero.imageCaption ? (
-        <p className="absolute bottom-4 right-4 z-10 max-w-[14rem] text-right text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-heading/70 drop-shadow-sm sm:bottom-6 sm:right-6 dark:text-white/70">
+        <p className="absolute bottom-4 right-4 z-10 max-w-[14rem] text-right text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-white/80 drop-shadow-sm sm:bottom-6 sm:right-6">
           {hero.imageCaption}
         </p>
       ) : null}
 
       <div className="section-shell relative z-10 w-full py-20 md:py-24 lg:py-28">
-        <div className="max-w-xl xl:max-w-2xl">
+        {/* ~20% dark shade behind white copy only — keeps the photo plain elsewhere */}
+        <div className="max-w-xl rounded-2xl bg-black/20 px-5 py-6 shadow-sm backdrop-blur-[2px] sm:px-7 sm:py-8 xl:max-w-2xl">
           <h1
             id="hero-heading"
-            className="animate-fade-up font-display text-hero text-heading"
+            className="animate-fade-up font-display text-hero text-white"
           >
             {hero.tagline}
           </h1>
 
-          <p className="animate-fade-up animate-delay-2 mt-5 max-w-md text-lead text-text">
+          <p className="animate-fade-up animate-delay-2 mt-5 max-w-md text-lead text-white/90">
             {hero.subtitle}
           </p>
 
@@ -56,7 +56,7 @@ export function Hero() {
             </Link>
             <Link
               href={hero.ctaSecondary.href}
-              className="btn btn-secondary btn-block sm:w-auto sm:min-w-[11rem]"
+              className="btn btn-secondary btn-block border-white/40 bg-white/90 sm:w-auto sm:min-w-[11rem]"
             >
               {hero.ctaSecondary.label}
             </Link>
@@ -64,7 +64,7 @@ export function Hero() {
 
           {hero.showFromTheRoad ? (
             <div className="animate-fade-up animate-delay-3 mt-8 hidden sm:block">
-              <p className="inline-flex items-center gap-2 text-label text-heading">
+              <p className="inline-flex items-center gap-2 text-label text-white">
                 <Trees
                   size={14}
                   strokeWidth={2}
@@ -73,12 +73,12 @@ export function Hero() {
                 />
                 {hero.fromTheRoad.label}
               </p>
-              <ul className="mt-3 flex flex-wrap items-center gap-x-1 gap-y-2 text-sm text-text">
+              <ul className="mt-3 flex flex-wrap items-center gap-x-1 gap-y-2 text-sm text-white/85">
                 {hero.fromTheRoad.items.map((item, i) => (
                   <li key={item} className="inline-flex items-center gap-2">
                     {i > 0 ? (
                       <span
-                        className="mx-1.5 text-muted-light"
+                        className="mx-1.5 text-white/50"
                         aria-hidden="true"
                       >
                         ·
@@ -87,7 +87,7 @@ export function Hero() {
                     <Leaf
                       size={12}
                       strokeWidth={2}
-                      className="shrink-0 text-accent/80"
+                      className="shrink-0 text-accent"
                       aria-hidden="true"
                     />
                     {item}
