@@ -24,8 +24,8 @@ export default function HomePage() {
       </a>
       <main className="flex-1">
         <Hero />
-        <FeaturedFieldNote />
         <StartHereCards />
+        <FeaturedFieldNote />
         <DestinationPills />
         <LatestPosts />
         <GuidesHubStrip />
