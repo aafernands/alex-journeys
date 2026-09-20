@@ -159,7 +159,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
         </div>
       </div>
 
-      <div className="section-shell relative flex items-center justify-between gap-3 py-3 md:py-3.5">
+      <div className="section-shell relative flex h-16 items-center justify-between gap-3 md:justify-start md:gap-4 lg:gap-6">
         {/* Mobile: search (left) */}
         <button
           type="button"
@@ -197,10 +197,10 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           )}
         </button>
 
-        {/* Logo: centered on mobile, left on desktop */}
+        {/* Logo: centered on mobile, left on desktop — image only (wordmark is in the asset) */}
         <Link
           href="/"
-          className="absolute left-1/2 z-10 flex -translate-x-1/2 items-center gap-2.5 md:static md:translate-x-0"
+          className="absolute left-1/2 z-10 flex -translate-x-1/2 items-center md:static md:shrink-0 md:translate-x-0"
           onClick={closeAll}
           aria-label="Fernandes Journeys home"
         >
@@ -210,15 +210,13 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             width={200}
             height={55}
             priority
-            className="h-11 w-auto max-w-[min(42vw,11rem)] -my-1 object-contain sm:h-12 sm:max-w-[13rem] md:h-[3.25rem] md:max-w-[14rem] md:-my-1.5"
+            className="h-10 w-auto max-w-[min(42vw,11rem)] object-contain sm:h-11 sm:max-w-[12rem] md:h-11 md:max-w-[12.5rem]"
           />
-          <span className="font-display hidden text-base font-bold tracking-tight text-heading sm:inline md:text-lg">
-            Fernandes Journeys
-          </span>
         </Link>
 
+        {/* Desktop: primary nav (center zone) */}
         <nav
-          className="hidden items-center gap-6 lg:gap-7 md:flex"
+          className="hidden min-w-0 flex-1 items-center justify-center gap-5 lg:gap-6 md:flex"
           aria-label="Primary"
         >
           <div className="relative" ref={destWrapRef}>
@@ -333,12 +331,15 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           >
             Start here
           </Link>
+        </nav>
 
+        {/* Desktop: right actions (search + auth + theme + CTA) */}
+        <div className="hidden shrink-0 items-center gap-2 lg:gap-3 md:flex">
           <SearchInput
             ref={desktopSearchRef}
             variant="header"
             id="header-search"
-            className="shrink-0"
+            className="w-44 max-w-xs shrink-0 lg:w-52"
           />
 
           <ReaderAuthButtons
@@ -348,10 +349,13 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
 
           <ThemeToggle />
 
-          <Link href="/tools" className="btn btn-ink !min-h-9 !px-4 !py-1.5 text-sm">
+          <Link
+            href="/tools"
+            className="btn btn-ink !min-h-9 shrink-0 !px-4 !py-1.5 text-sm"
+          >
             Tools I use
           </Link>
-        </nav>
+        </div>
 
         {/* Mobile: theme + menu drawer (right) */}
         <div className="relative z-10 flex items-center gap-1 md:hidden">

@@ -85,7 +85,7 @@ export const SearchInput = forwardRef<SearchInputHandle, Props>(
 
     const sizeClass =
       variant === "header"
-        ? "h-9 w-44 text-sm lg:w-52"
+        ? "h-9 w-full max-w-xs text-sm"
         : variant === "drawer"
           ? "h-11 w-full text-base"
           : "h-12 w-full text-base";
