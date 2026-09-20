@@ -282,14 +282,28 @@ export function validatePostInput(
   const imageAlt = asString(input.featuredImageAlt) || title;
   let featuredImage: FeaturedImage | null = null;
   if (imageUrl) {
-    try {
-      const u = new URL(imageUrl);
-      if (u.protocol !== "https:" && u.protocol !== "http:") {
-        return { ok: false, error: "Featured image URL must be http(s)." };
-      }
+    // Media library returns site-relative paths (/media/...); remote URLs must be http(s).
+    const isSitePath =
+      imageUrl.startsWith("/") &&
+      !imageUrl.startsWith("//") &&
+      !imageUrl.includes("\") &&
+      imageUrl.length <= 500;
+    if (isSitePath) {
       featuredImage = { url: imageUrl, alt: imageAlt };
-    } catch {
-      return { ok: false, error: "Featured image URL is invalid." };
+    } else {
+      try {
+        const u = new URL(imageUrl);
+        if (u.protocol !== "https:" && u.protocol !== "http:") {
+          return { ok: false, error: "Featured image URL must be http(s)." };
+        }
+        featuredImage = { url: imageUrl, alt: imageAlt };
+      } catch {
+        return {
+          ok: false,
+          error:
+            "Featured image URL is invalid. Use a library image (/media/...) or a full http(s) link.",
+        };
+      }
     }
   }
 
