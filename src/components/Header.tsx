@@ -5,6 +5,7 @@ import { Search as SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { TopicFlyout } from "@/components/header/TopicFlyout";
 import { MobileTopicSection } from "@/components/header/MobileTopicSection";
 import { NavIcon } from "@/components/icons/NavIcon";
@@ -399,8 +400,9 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
         </div>
       )}
 
-      {mobileOpen && (
-        <div className="fixed inset-0 z-[80] md:hidden" role="dialog" aria-modal="true" aria-label="Site menu">
+      {mobileOpen
+        ? createPortal(
+        <div className="fixed inset-0 z-[200] md:hidden" role="dialog" aria-modal="true" aria-label="Site menu">
           {/* Scrim — tap the thin right gap to close */}
           <button
             type="button"
@@ -568,7 +570,10 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             </div>
           </nav>
         </div>
-      )}
+          ,
+          document.body,
+        )
+      : null}
     </header>
   );
 }
