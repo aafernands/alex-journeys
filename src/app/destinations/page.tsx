@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { NavIcon } from "@/components/icons/NavIcon";
 import { SitePage } from "@/components/pages/SitePage";
 import {
   destinationsTree,
@@ -56,10 +57,13 @@ export default function DestinationsIndexPage() {
               />
               <span className="absolute inset-0 bg-gradient-to-t from-heading/70 via-heading/10 to-transparent" />
               <span className="absolute bottom-3 left-3 right-3 md:bottom-4 md:left-4">
-                <span className="font-display text-lg font-bold text-white drop-shadow md:text-xl">
-                  {dest.name}
+                <span className="inline-flex items-center gap-1.5 text-white drop-shadow">
+                  <NavIcon name="map-pin" size={18} className="shrink-0 text-white" />
+                  <span className="font-display text-lg font-bold md:text-xl">
+                    {dest.name}
+                  </span>
                 </span>
-                <span className="mt-0.5 block text-xs font-medium text-white/80">
+                <span className="mt-0.5 block pl-[1.625rem] text-xs font-medium text-white/80">
                   {dest.region}
                 </span>
               </span>
@@ -157,8 +161,11 @@ function DestinationCard({ country }: { country: DestinationCountry }) {
           {country.region}
         </span>
         <span className="absolute bottom-3 left-3 right-3">
-          <span className="font-display block text-2xl font-bold text-white drop-shadow">
-            {country.name}
+          <span className="inline-flex items-center gap-2 text-white drop-shadow">
+            <NavIcon name="map-pin" size={20} className="shrink-0 text-white" />
+            <span className="font-display text-2xl font-bold">
+              {country.name}
+            </span>
           </span>
         </span>
       </div>
