@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DestinationClimate } from "@/components/destinations/DestinationClimate";
+import { DestinationMap } from "@/components/destinations/DestinationMap";
 import {
   destinationSlugs,
   getDestinationBySlug,
@@ -147,6 +148,10 @@ export default async function DestinationPage({ params }: PageProps) {
               destinationName={dest.name}
               climate={dest.climate}
             />
+          ) : null}
+
+          {dest.map ? (
+            <DestinationMap destinationName={dest.name} map={dest.map} />
           ) : null}
 
           {coverImages ? (

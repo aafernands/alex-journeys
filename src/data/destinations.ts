@@ -38,6 +38,19 @@ export type DestinationClimate = {
   months: ClimateMonth[];
 };
 
+export type DestinationMapPin = {
+  name: string;
+  lat: number;
+  lng: number;
+  note?: string;
+};
+
+export type DestinationMapData = {
+  center: [number, number];
+  zoom: number;
+  pins: DestinationMapPin[];
+};
+
 export type DestinationCountry = {
   slug: string;
   name: string;
@@ -56,6 +69,8 @@ export type DestinationCountry = {
   featuredPostSlug?: string;
   /** Static monthly climate norms (not a live forecast). */
   climate?: DestinationClimate;
+  /** Visited places for the Leaflet map (from trip notes only). */
+  map?: DestinationMapData;
 };
 
 export type DestinationContinent = {
@@ -106,6 +121,42 @@ export const destinationsTree: DestinationContinent[] = [
             { month: 10, label: "Stormy fall", icon: "rain", avgC: 5, quality: "mixed" },
             { month: 11, label: "Dark & wet", icon: "cloud", avgC: 2, quality: "poor" },
             { month: 12, label: "Deep winter", icon: "snow", avgC: 0, quality: "poor" },
+          ],
+        },
+        map: {
+          center: [64.0, -19.5],
+          zoom: 6,
+          pins: [
+            {
+              name: "Reykjavík",
+              lat: 64.1466,
+              lng: -21.9426,
+              note: "Downtown base and dinner at Kopar by the old harbor",
+            },
+            {
+              name: "Blue Lagoon",
+              lat: 63.8804,
+              lng: -22.4495,
+              note: "Geothermal soak after landing",
+            },
+            {
+              name: "Reynisfjara / Vík",
+              lat: 63.4049,
+              lng: -19.0687,
+              note: "South-coast black beach and waterfalls",
+            },
+            {
+              name: "Glacier Lagoon",
+              lat: 64.0784,
+              lng: -16.2306,
+              note: "Jökulsárlón on the south coast",
+            },
+            {
+              name: "Þingvellir",
+              lat: 64.2551,
+              lng: -21.1292,
+              note: "Golden Circle — Thingvellir, geysers, volcano country",
+            },
           ],
         },
         coverImages: [
@@ -171,6 +222,36 @@ export const destinationsTree: DestinationContinent[] = [
             { month: 12, label: "Early winter", icon: "snow", avgC: -1, quality: "poor" },
           ],
         },
+        map: {
+          center: [43.66, -79.39],
+          zoom: 12,
+          pins: [
+            {
+              name: "Casa Loma",
+              lat: 43.678,
+              lng: -79.4094,
+              note: "Gothic Revival castle, rooms, and gardens",
+            },
+            {
+              name: "Nathan Phillips Square",
+              lat: 43.6525,
+              lng: -79.3839,
+              note: "Toronto sign selfie stop",
+            },
+            {
+              name: "Hockey Hall of Fame",
+              lat: 43.647,
+              lng: -79.3777,
+              note: "Stop on the city loop",
+            },
+            {
+              name: "CN Tower",
+              lat: 43.6426,
+              lng: -79.3871,
+              note: "Dinner high above the skyline",
+            },
+          ],
+        },
         coverImages: [
           {
             src: "https://i0.wp.com/fernandesjourneys.com/wp-content/uploads/2022/04/IMG_1446-768x1024.webp?resize=640%2C853&ssl=1",
@@ -227,6 +308,24 @@ export const destinationsTree: DestinationContinent[] = [
             { month: 12, label: "Hard freeze", icon: "snow", avgC: -6, quality: "poor" },
           ],
         },
+        map: {
+          center: [39.2, -107.1],
+          zoom: 9,
+          pins: [
+            {
+              name: "Carbondale",
+              lat: 39.4022,
+              lng: -107.2112,
+              note: "4:30 AM drive start for Maroon Bells sunrise",
+            },
+            {
+              name: "Maroon Bells",
+              lat: 39.0708,
+              lng: -106.989,
+              note: "Lake reflection before the crowds",
+            },
+          ],
+        },
       },
       {
         slug: "mexico",
@@ -263,6 +362,36 @@ export const destinationsTree: DestinationContinent[] = [
             { month: 10, label: "Late rains", icon: "rain", avgC: 27, quality: "mixed" },
             { month: 11, label: "Clearing up", icon: "partly-cloudy", avgC: 26, quality: "good" },
             { month: 12, label: "Dry return", icon: "sun", avgC: 25, quality: "best" },
+          ],
+        },
+        map: {
+          center: [20.9, -87.5],
+          zoom: 7,
+          pins: [
+            {
+              name: "Cancún Hotel Zone",
+              lat: 21.1325,
+              lng: -86.7469,
+              note: "Base at Emporio Cancun",
+            },
+            {
+              name: "Chichen Itza",
+              lat: 20.6843,
+              lng: -88.5678,
+              note: "Day trip to El Castillo",
+            },
+            {
+              name: "Xplor Park",
+              lat: 20.5786,
+              lng: -87.1212,
+              note: "Ziplines, caverns, and jungle rivers",
+            },
+            {
+              name: "Isla Mujeres",
+              lat: 21.2322,
+              lng: -86.7314,
+              note: "Ferry day trip from Cancún",
+            },
           ],
         },
         coverImages: [
@@ -320,6 +449,54 @@ export const destinationsTree: DestinationContinent[] = [
             { month: 10, label: "Warmer days", icon: "partly-cloudy", avgC: 23, quality: "good" },
             { month: 11, label: "Humid build", icon: "rain", avgC: 24, quality: "mixed" },
             { month: 12, label: "Summer start", icon: "storm", avgC: 26, quality: "mixed" },
+          ],
+        },
+        map: {
+          center: [-22.95, -43.25],
+          zoom: 10,
+          pins: [
+            {
+              name: "Copacabana Beach",
+              lat: -22.9711,
+              lng: -43.1823,
+              note: "Sunset stroll along the shore",
+            },
+            {
+              name: "Christ the Redeemer",
+              lat: -22.9519,
+              lng: -43.2105,
+              note: "Corcovado viewpoint",
+            },
+            {
+              name: "Santa Teresa",
+              lat: -22.9205,
+              lng: -43.1875,
+              note: "Bohemian hillside neighborhood",
+            },
+            {
+              name: "Sugarloaf Mountain",
+              lat: -22.9494,
+              lng: -43.1545,
+              note: "Sunset from Urca",
+            },
+            {
+              name: "Tijuca National Park",
+              lat: -22.9508,
+              lng: -43.2875,
+              note: "Hikes and waterfalls",
+            },
+            {
+              name: "Niterói",
+              lat: -22.8832,
+              lng: -43.1034,
+              note: "Day trip across the bay",
+            },
+            {
+              name: "Ilha Grande",
+              lat: -23.1528,
+              lng: -44.23,
+              note: "Island day trip",
+            },
           ],
         },
       },
