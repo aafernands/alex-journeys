@@ -128,7 +128,7 @@ Optional: `POST /api/auth/change-email/cancel` clears pending tokens for the sig
 | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Required for email/password + user profiles + reset tokens |
 | `FIREBASE_FIRESTORE_DATABASE_ID` | Optional named DB |
 | `RESEND_API_KEY` | **Required to send** reset + email-change emails via Resend HTTP API |
-| `EMAIL_FROM` | Optional. Default for testing: `Fernandes Journeys <onboarding@resend.dev>` (Resend’s shared sender). With that default, Resend **only sends to the Resend account owner email** until you verify a domain and set `EMAIL_FROM` to an address on it (e.g. `Fernandes Journeys <hello@fernandesjourneys.com>`). |
+| `EMAIL_FROM` | Optional. Default for testing: `Fernandes Journeys <onboarding@resend.dev>` (Resend’s shared sender). With that default, Resend **only sends to the Resend account owner email** until you verify a domain and set `EMAIL_FROM` to an address on it (e.g. `Fernandes Journeys <contact@fernandesjourneys.com>`). |
 | `CMS_ADMIN_EMAILS` / `CMS_PASSCODE` | CMS only (unchanged). Admin matching is by email string — after an email change, update the allowlist if needed. |
 
 Email/password is enabled when `AUTH_SECRET` **and** Firebase are set. Build still succeeds without them (and without Resend).

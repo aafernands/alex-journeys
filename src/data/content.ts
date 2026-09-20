@@ -11,7 +11,7 @@ export const site = {
   authorName: "Alex Fernandes",
   authorPhoto: `${authorPhotoMeta.src}?v=${encodeURIComponent(authorPhotoMeta.updatedAt)}`,
   tagline: "Inspire. Capture. Discover.",
-  email: "hello@fernandesjourneys.com",
+  email: "contact@fernandesjourneys.com",
   social: {
     instagram: "https://www.instagram.com/fernandesjourneys/",
     youtube: "https://www.youtube.com/@fernandesjourneys",
