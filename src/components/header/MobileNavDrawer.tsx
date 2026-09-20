@@ -11,6 +11,7 @@ import {
 } from "@/components/icons/SocialIcons";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
+import { ThemeAppearanceControl } from "@/components/ThemeToggle";
 import { site } from "@/data/content";
 import { destinationsTree } from "@/data/destinations";
 import { guidesNav } from "@/data/guides";
@@ -197,8 +198,10 @@ export function MobileNavDrawer({
           </ul>
         </div>
 
-        {/* Sticky footer: auth above clean social icon row */}
-        <div className="shrink-0 px-4 pb-3 pt-2">
+        {/* Sticky footer: appearance, auth, then social icons */}
+        <div className="shrink-0 border-t border-border px-4 pb-3 pt-3">
+          <ThemeAppearanceControl className="mb-3" />
+
           {googleConfigured ? (
             <div className="mb-3 px-2">
               <ReaderAuthButtons

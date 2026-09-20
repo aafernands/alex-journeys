@@ -194,8 +194,8 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             </span>
             {mobileSearchOpen ? (
               <svg
-                width="22"
-                height="22"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -361,9 +361,8 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             </Link>
           </div>
 
-          {/* Mobile: theme + hamburger (opens drawer; bottom bar has Places/Stories/Guides/Saved) */}
-          <div className="relative z-10 flex items-center gap-1 md:hidden">
-            <ThemeToggle />
+          {/* Mobile: hamburger only (theme lives in drawer; bottom bar has Places/Stories/Guides/Saved) */}
+          <div className="relative z-10 flex items-center md:hidden">
             <button
               type="button"
               className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
@@ -378,8 +377,8 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
                 {mobileOpen ? "Close menu" : "Menu"}
               </span>
               <svg
-                width="22"
-                height="22"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"

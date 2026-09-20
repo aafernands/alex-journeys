@@ -1,6 +1,6 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
+import { Monitor, Moon, Sun } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 export type ThemePreference = "light" | "dark" | "system";
@@ -39,7 +39,16 @@ function readPreference(): ThemePreference {
   return "system";
 }
 
-export function ThemeToggle({ className = "" }: { className?: string }) {
+function persistPreference(next: ThemePreference) {
+  try {
+    localStorage.setItem(STORAGE_KEY, next);
+  } catch {
+    /* ignore */
+  }
+  applyTheme(next);
+}
+
+function useThemePreference() {
   const [preference, setPreference] = useState<ThemePreference>("system");
   const [systemDark, setSystemDark] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -63,22 +72,29 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     return () => mq.removeEventListener("change", onChange);
   }, [mounted, preference]);
 
+  const setTheme = useCallback((next: ThemePreference) => {
+    persistPreference(next);
+    setPreference(next);
+  }, []);
+
   const cycle = useCallback(() => {
     setPreference((current) => {
       const idx = CYCLE.indexOf(current);
       const next = CYCLE[(idx + 1) % CYCLE.length] ?? "system";
-      try {
-        localStorage.setItem(STORAGE_KEY, next);
-      } catch {
-        /* ignore */
-      }
-      applyTheme(next);
+      persistPreference(next);
       return next;
     });
   }, []);
 
   const isDark =
     preference === "dark" || (preference === "system" && systemDark);
+
+  return { preference, systemDark, mounted, isDark, setTheme, cycle };
+}
+
+/** Compact cycle button for desktop header. */
+export function ThemeToggle({ className = "" }: { className?: string }) {
+  const { preference, mounted, isDark, cycle } = useThemePreference();
 
   const label =
     preference === "light"
@@ -104,5 +120,62 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         <Sun className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
       )}
     </button>
+  );
+}
+
+const APPEARANCE_OPTIONS: {
+  value: ThemePreference;
+  label: string;
+  Icon: typeof Sun;
+}[] = [
+  { value: "light", label: "Light", Icon: Sun },
+  { value: "dark", label: "Dark", Icon: Moon },
+  { value: "system", label: "Device settings", Icon: Monitor },
+];
+
+/** Labeled Light / Dark / Device settings control for the mobile drawer. */
+export function ThemeAppearanceControl({
+  className = "",
+}: {
+  className?: string;
+}) {
+  const { preference, mounted, setTheme } = useThemePreference();
+  const selected = mounted ? preference : "system";
+
+  return (
+    <div className={className}>
+      <p
+        id="appearance-label"
+        className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-muted"
+      >
+        Appearance
+      </p>
+      <div
+        role="radiogroup"
+        aria-labelledby="appearance-label"
+        className="grid grid-cols-3 gap-1 rounded-xl bg-surface-soft p-1"
+      >
+        {APPEARANCE_OPTIONS.map(({ value, label, Icon }) => {
+          const isSelected = selected === value;
+          return (
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              onClick={() => setTheme(value)}
+              className={`inline-flex flex-col items-center justify-center gap-1 rounded-lg px-1.5 py-2 text-center text-[11px] font-semibold leading-tight transition ${
+                isSelected
+                  ? "bg-white text-heading shadow-sm"
+                  : "text-text hover:text-heading"
+              }`}
+            >
+              <Icon className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+              <span>{label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
