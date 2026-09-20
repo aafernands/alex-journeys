@@ -35,6 +35,7 @@ export default async function CmsNewPostPage({ searchParams }: PageProps) {
         featuredImageUrl: source.featuredImage?.url ?? "",
         featuredImageAlt: source.featuredImage?.alt ?? "",
         destinations: source.destinations,
+        guideHubs: "guideHubs" in source ? (source.guideHubs ?? []) : [],
       };
     }
   }

@@ -39,7 +39,9 @@ export default async function CmsHelpPage() {
           </li>
           <li>
             Fill title (slug auto-fills), date, excerpt (~150–160 chars for SEO),
-            optional featured image + destinations, then body.
+            optional featured image + destinations (Place pages), optional Guides
+            → Plan a trip, then body. Use the itinerary template when writing a
+            day-by-day trip.
           </li>
           <li>
             <strong>Save draft</strong> writes{" "}
@@ -55,6 +57,47 @@ export default async function CmsHelpPage() {
         <p className="text-sm text-muted">
           Tip: ⌘/Ctrl+S saves a draft on create, or publishes when editing a live
           post. Leaving with unsaved changes shows a browser warning.
+        </p>
+      </section>
+
+      <section className="panel space-y-3 p-5 md:p-6">
+        <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
+          Write an itinerary
+        </h2>
+        <ol className="list-decimal space-y-2 pl-5 text-sm text-text">
+          <li>
+            <Link href="/cms/new" className="text-link hover:text-accent">
+              New post
+            </Link>
+            → under <strong>Templates</strong>, choose{" "}
+            <strong>Day-by-day itinerary</strong>, set the number of days, then{" "}
+            <strong>Insert template</strong>.
+          </li>
+          <li>
+            Check the matching <strong>Destination</strong> (e.g. Canada) so the
+            story appears on that Place page&apos;s related posts. Destinations are
+            Place pages — not WordPress categories.
+          </li>
+          <li>
+            Optionally check <strong>List under Guides → Plan a trip</strong> so
+            it also shows on{" "}
+            <code className="rounded bg-surface-soft px-1 text-xs">
+              /guides/plan-a-trip
+            </code>
+            .
+          </li>
+          <li>Fill the placeholders, then Publish.</li>
+        </ol>
+        <p className="text-sm text-muted">
+          Example (Niagara): Create post → Itinerary template → check{" "}
+          <strong>Canada</strong> → check <strong>Plan a trip</strong> → publish.
+          Appears on{" "}
+          <code className="rounded bg-surface-soft px-1 text-xs">/canada</code>{" "}
+          related posts and{" "}
+          <code className="rounded bg-surface-soft px-1 text-xs">
+            /guides/plan-a-trip
+          </code>
+          .
         </p>
       </section>
 

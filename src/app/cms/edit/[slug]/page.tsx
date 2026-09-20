@@ -69,6 +69,7 @@ export default async function CmsEditPostPage({ params, searchParams }: PageProp
           featuredImageUrl: source.featuredImage?.url ?? "",
           featuredImageAlt: source.featuredImage?.alt ?? "",
           destinations: source.destinations,
+          guideHubs: "guideHubs" in source ? (source.guideHubs ?? []) : [],
         }}
       />
     </div>

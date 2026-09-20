@@ -8,7 +8,11 @@ import {
   getGuideHub,
   getGuideHubSlugs,
 } from "@/data/guides";
-import { getPostBySlug, type PostMeta } from "@/lib/posts";
+import {
+  getPostBySlug,
+  getPostsByGuideHub,
+  type PostMeta,
+} from "@/lib/posts";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -45,7 +49,7 @@ export default async function GuideHubPage({ params }: PageProps) {
   const hub = getGuideHub(slug);
   if (!hub) notFound();
 
-  const posts: PostMeta[] = [];
+  const postsBySlug = new Map<string, PostMeta>();
   const pages: { title: string; href: string; description?: string }[] = [];
 
   for (const link of hub.links) {
@@ -57,13 +61,23 @@ export default async function GuideHubPage({ params }: PageProps) {
       });
       continue;
     }
-    const slugFromHref = link.href.replace(/^\/blog\//, "");
+    const slugFromHref = link.href.replace(/^\//, "").replace(/^blog\//, "");
     const post = getPostBySlug(slugFromHref);
     if (post) {
       const { contentHtml: _c, source: _s, ...meta } = post;
-      posts.push(meta);
+      postsBySlug.set(meta.slug, meta);
     }
   }
+
+  for (const meta of getPostsByGuideHub(slug)) {
+    if (!postsBySlug.has(meta.slug)) {
+      postsBySlug.set(meta.slug, meta);
+    }
+  }
+
+  const posts = [...postsBySlug.values()].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
 
   return (
     <SitePage

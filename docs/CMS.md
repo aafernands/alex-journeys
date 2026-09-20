@@ -58,7 +58,7 @@ Never commit secrets. Never put them in client code. The dashboard only shows co
 
 ### Posts (stories)
 
-1. **New post** → title (slug auto), date, excerpt (counter + ~150–160 SEO guidance), featured image preview, destinations, rich text (headings, lists, links, images, undo, HTML mode).
+1. **New post** → title (slug auto), date, excerpt (counter + ~150–160 SEO guidance), featured image preview, destinations (Place pages), optional **Guides → Plan a trip**, rich text (headings, lists, links, images, undo, HTML mode). Use **Templates → Day-by-day itinerary** to scaffold multi-day content.
 2. **Save draft** → `src/content/drafts/{slug}.json`.
 3. **Publish** → `src/content/posts/{slug}.json` + `_index.json`; matching draft is removed when present.
 4. Vercel redeploys → live at `/{slug}`.

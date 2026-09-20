@@ -1,8 +1,10 @@
 import { destinationSlugs } from "@/data/destinations";
+import { getGuideHubSlugs } from "@/data/guides";
 import type { FeaturedImage, Post, PostMeta } from "@/lib/post-types";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const ALLOWED_DESTINATIONS = new Set(destinationSlugs);
+const ALLOWED_GUIDE_HUBS = new Set(getGuideHubSlugs());
 
 export type PostInput = {
   title?: unknown;
@@ -13,6 +15,7 @@ export type PostInput = {
   featuredImageUrl?: unknown;
   featuredImageAlt?: unknown;
   destinations?: unknown;
+  guideHubs?: unknown;
 };
 
 export type ValidatedPost = {
@@ -23,10 +26,24 @@ export type ValidatedPost = {
   contentHtml: string;
   featuredImage: FeaturedImage | null;
   destinations: string[];
+  guideHubs: string[];
 };
 
 function asString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function asStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((d) => asString(d)).filter(Boolean);
+  }
+  if (typeof value === "string" && value) {
+    return value
+      .split(",")
+      .map((d) => d.trim())
+      .filter(Boolean);
+  }
+  return [];
 }
 
 /** Sanitize + validate kebab-case slug; reject path traversal. */
@@ -98,20 +115,17 @@ export function validatePostInput(
     }
   }
 
-  let destinations: string[] = [];
-  if (Array.isArray(input.destinations)) {
-    destinations = input.destinations
-      .map((d) => asString(d))
-      .filter(Boolean);
-  } else if (typeof input.destinations === "string" && input.destinations) {
-    destinations = input.destinations
-      .split(",")
-      .map((d) => d.trim())
-      .filter(Boolean);
-  }
+  const destinations = asStringArray(input.destinations);
   for (const d of destinations) {
     if (!ALLOWED_DESTINATIONS.has(d)) {
       return { ok: false, error: `Unknown destination slug: ${d}` };
+    }
+  }
+
+  const guideHubs = asStringArray(input.guideHubs);
+  for (const h of guideHubs) {
+    if (!ALLOWED_GUIDE_HUBS.has(h)) {
+      return { ok: false, error: `Unknown guide hub slug: ${h}` };
     }
   }
 
@@ -125,6 +139,7 @@ export function validatePostInput(
       contentHtml,
       featuredImage,
       destinations,
+      guideHubs,
     },
   };
 }
@@ -137,6 +152,7 @@ export function toPostJson(data: ValidatedPost): Post {
     excerpt: data.excerpt,
     featuredImage: data.featuredImage,
     destinations: data.destinations,
+    ...(data.guideHubs.length > 0 ? { guideHubs: data.guideHubs } : {}),
     contentHtml: data.contentHtml,
     source: "cms",
   };
@@ -150,5 +166,6 @@ export function toPostMeta(data: ValidatedPost): PostMeta {
     excerpt: data.excerpt,
     featuredImage: data.featuredImage,
     destinations: data.destinations,
+    ...(data.guideHubs.length > 0 ? { guideHubs: data.guideHubs } : {}),
   };
 }

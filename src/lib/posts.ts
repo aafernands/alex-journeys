@@ -46,6 +46,11 @@ export function getPostsByDestination(destinationSlug: string): PostMeta[] {
   );
 }
 
+/** Posts tagged with a Guides hub via CMS `guideHubs` (optional field). */
+export function getPostsByGuideHub(hubSlug: string): PostMeta[] {
+  return getAllPosts().filter((p) => (p.guideHubs ?? []).includes(hubSlug));
+}
+
 /** Newest post by date (index is already newest-first). */
 export function getLatestPost(): PostMeta | null {
   const posts = getAllPosts();

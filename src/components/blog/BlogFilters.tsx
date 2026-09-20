@@ -18,6 +18,7 @@ type FilterPost = {
     height?: number;
   } | null;
   destinations: string[];
+  guideHubs?: string[];
 };
 
 type Mode = "all" | "place" | "guide";
@@ -37,9 +38,11 @@ export function BlogFilters({ posts }: Props) {
       return posts.filter((p) => p.destinations.includes(placeSlug));
     }
     if (mode === "guide" && guideSlug) {
-      return posts.filter((p) =>
-        (postGuideTopics[p.slug] || []).includes(guideSlug),
-      );
+      return posts.filter((p) => {
+        const fromHubs = (p.guideHubs ?? []).includes(guideSlug);
+        const fromCurated = (postGuideTopics[p.slug] || []).includes(guideSlug);
+        return fromHubs || fromCurated;
+      });
     }
     return posts;
   }, [mode, placeSlug, guideSlug, posts]);

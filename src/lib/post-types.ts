@@ -12,6 +12,8 @@ export type PostMeta = {
   excerpt: string;
   featuredImage: FeaturedImage | null;
   destinations: string[];
+  /** Optional guide hub slugs (e.g. "plan-a-trip") — lists the post on that Guides page. */
+  guideHubs?: string[];
 };
 
 /** WordPress-migrated posts keep the object source; CMS-published posts use "cms". */

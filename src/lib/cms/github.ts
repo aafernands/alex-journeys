@@ -192,6 +192,9 @@ export async function publishPost(
     excerpt: validated.excerpt,
     featuredImage: validated.featuredImage,
     destinations: validated.destinations,
+    ...(validated.guideHubs.length > 0
+      ? { guideHubs: validated.guideHubs }
+      : {}),
     contentHtml: validated.contentHtml,
     source: "cms" as const,
   } satisfies Post;
@@ -434,6 +437,9 @@ export async function publishDraft(
     excerpt: validated.excerpt,
     featuredImage: validated.featuredImage,
     destinations: validated.destinations,
+    ...(validated.guideHubs.length > 0
+      ? { guideHubs: validated.guideHubs }
+      : {}),
     contentHtml: validated.contentHtml,
     source: "cms" as const,
   };

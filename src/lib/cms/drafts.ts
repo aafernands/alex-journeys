@@ -10,6 +10,7 @@ export type DraftPost = {
   excerpt: string;
   featuredImage: FeaturedImage | null;
   destinations: string[];
+  guideHubs?: string[];
   contentHtml: string;
   source?: unknown;
 };
