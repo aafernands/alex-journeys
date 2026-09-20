@@ -466,11 +466,12 @@ export function DestinationForm({ mode, continents, initial }: Props) {
             </label>
             <input
               id="dest-image"
-              type="url"
+              type="text"
+              inputMode="url"
               value={image}
               onChange={(e) => setImage(e.target.value)}
               required
-              placeholder="https://…"
+              placeholder="/media/… or https://…"
               className={fieldClass}
             />
           </div>

@@ -359,13 +359,14 @@ export function PostForm({
               </div>
               <input
                 id="cms-image-url"
-                type="url"
+                type="text"
+                inputMode="url"
                 value={featuredImageUrl}
                 onChange={(e) => {
                   setFeaturedImageUrl(e.target.value);
                   markDirty();
                 }}
-                placeholder="https://…"
+                placeholder="/media/… or https://…"
                 className={fieldClass}
               />
             </div>
