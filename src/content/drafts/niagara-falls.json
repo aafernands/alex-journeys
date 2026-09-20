@@ -1,19 +1,31 @@
 {
   "slug": "niagara-falls",
-  "title": "Niagara Falls in 2 days: mist, tunnels, and a night under the lights",
+  "title": "5-day itinerary: Niagara Falls",
   "date": "2026-09-20T12:00:00",
   "status": "draft",
-  "excerpt": "A short two-day loop from the Canadian side — Table Rock, the tunnels behind the falls, Clifton Hill at night, and a quieter morning across the Niagara Parkway.",
+  "excerpt": "Introduce the trip — where you went, when, and the vibe in a sentence or two…",
   "featuredImage": {
     "url": "/media/photo-1745_singular_display_fullpicture-mua3y8bo.jpg",
-    "alt": "Niagara Falls in 2 days: mist, tunnels, and a night under the lights"
+    "alt": "Niagara Falls"
   },
   "destinations": [
-    "united-states"
+    "canada"
   ],
   "guideHubs": [
     "plan-a-trip"
   ],
   "contentHtml": "<p>I finally made it to Niagara with a simple plan: don’t rush the falls, and don’t pretend Clifton Hill is subtle. Two days on the Canadian side was enough to feel the spray, walk the tunnels, and still leave wanting one more sunrise.</p><p>This isn’t a checklist of every ticket — just what we actually did, and what I’d repeat.</p>",
-  "source": "cms"
+  "source": "cms",
+  "itinerary": {
+    "enabled": true,
+    "title": "2 days on the Canadian side",
+    "days": [
+      {
+        "id": "day-b6febf6a",
+        "label": "Day 1",
+        "title": "Arrive, Table Rock, and the first look",
+        "blocks": []
+      }
+    ]
+  }
 }
