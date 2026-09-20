@@ -6,10 +6,14 @@ import {
   uploadMediaFile,
 } from "@/lib/cms/github";
 import { getAllMedia, readMediaIndex } from "@/lib/cms/media";
+import {
+  MAX_MEDIA_UPLOAD_BYTES,
+  MAX_MEDIA_UPLOAD_LABEL,
+} from "@/lib/cms/media-limits";
 
 export const runtime = "nodejs";
 
-const MAX_BYTES = Math.floor(2.5 * 1024 * 1024);
+const MAX_BYTES = MAX_MEDIA_UPLOAD_BYTES;
 const ALLOWED = new Set([
   "image/jpeg",
   "image/png",
@@ -71,7 +75,7 @@ export async function POST(request: Request) {
       }
       if (file.size > MAX_BYTES) {
         return NextResponse.json(
-          { error: "Image too large. Max is about 2.5MB." },
+          { error: `Image too large. Max is about ${MAX_MEDIA_UPLOAD_LABEL}.` },
           { status: 400 },
         );
       }
@@ -126,7 +130,7 @@ export async function POST(request: Request) {
       const approxBytes = Math.floor((parsed.base64.length * 3) / 4);
       if (approxBytes > MAX_BYTES) {
         return NextResponse.json(
-          { error: "Image too large. Max is about 2.5MB." },
+          { error: `Image too large. Max is about ${MAX_MEDIA_UPLOAD_LABEL}.` },
           { status: 400 },
         );
       }

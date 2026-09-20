@@ -97,7 +97,7 @@ Edits commit `src/content/destinations/tree.json` (`cms: update destinations`). 
 | Browse / search / filter | Library tab — by source (upload / external) and used-in |
 | Copy URL / edit alt / see used-by | Click a thumbnail in the detail panel |
 | Add by URL | Form on Library tab → commits index via GitHub |
-| Upload file | Same form → `public/media/{filename}` + index entry |
+| Upload file | Same form → client-side compress (longest edge ~2048px, JPEG/WebP ~0.82) then `public/media/{filename}` + index entry · hard max ~8MB |
 | Rescan | **Rescan posts → index** rebuilds `usedBy` from current posts/pages |
 | Seed locally | `npm run seed:media` |
 

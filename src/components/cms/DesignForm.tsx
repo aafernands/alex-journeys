@@ -3,13 +3,17 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { MediaPicker } from "./MediaPicker";
+import {
+  MAX_MEDIA_UPLOAD_BYTES,
+  MAX_MEDIA_UPLOAD_LABEL,
+} from "@/lib/cms/media-limits";
 import type { SiteDesign } from "@/lib/site-design";
 
 type Props = {
   initial: SiteDesign;
 };
 
-const MAX_BYTES = Math.floor(2.5 * 1024 * 1024);
+const MAX_BYTES = MAX_MEDIA_UPLOAD_BYTES;
 
 const fieldClass =
   "mt-1.5 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm text-heading placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25";
@@ -72,7 +76,7 @@ export function DesignForm({ initial }: Props) {
             let filename: string | undefined;
             if (pendingFile) {
               if (pendingFile.size > MAX_BYTES) {
-                setError("Image too large. Max is about 2.5MB.");
+                setError(`Image too large. Max is about ${MAX_MEDIA_UPLOAD_LABEL}.`);
                 setPending(false);
                 return;
               }
@@ -147,7 +151,7 @@ export function DesignForm({ initial }: Props) {
             <p className="text-sm text-muted">
               Photo behind / beside the Fernandes Journeys headline. Pick from
               the media library or upload a new file (JPEG, PNG, WebP, GIF · max
-              ~2.5MB).
+              ~{MAX_MEDIA_UPLOAD_LABEL}).
             </p>
             <div className="overflow-hidden rounded-xl border border-border bg-surface-soft">
               {/* eslint-disable-next-line @next/next/no-img-element */}

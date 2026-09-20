@@ -11,6 +11,10 @@ import {
 } from "@/lib/cms/media";
 import { toPostMeta, type ValidatedPost } from "@/lib/cms/validate";
 import type { SiteDesign } from "@/lib/site-design";
+import {
+  MAX_MEDIA_UPLOAD_BYTES,
+  MAX_MEDIA_UPLOAD_LABEL,
+} from "@/lib/cms/media-limits";
 
 const DEFAULT_REPO = "aafernands/fernandes-journeys";
 const DEFAULT_BRANCH = "main";
@@ -583,7 +587,6 @@ export async function deletePage(
 
 export const MEDIA_INDEX_PATH = "src/content/media/_index.json";
 const MEDIA_UPLOAD_DIR = "public/media";
-const MAX_MEDIA_UPLOAD_BYTES = Math.floor(2.5 * 1024 * 1024);
 
 const MEDIA_UPLOAD_TYPES: Record<string, string> = {
   "image/jpeg": ".jpg",
@@ -625,7 +628,7 @@ export async function updateSiteDesign(options: {
     }
     if (decodedBytes.length > MAX_MEDIA_UPLOAD_BYTES) {
       throw new Error(
-        `Image too large (${(decodedBytes.length / (1024 * 1024)).toFixed(1)}MB). Max is about 2.5MB.`,
+        `Image too large (${(decodedBytes.length / (1024 * 1024)).toFixed(1)}MB). Max is about ${MAX_MEDIA_UPLOAD_LABEL}.`,
       );
     }
 
@@ -813,7 +816,7 @@ export async function uploadMediaFile(options: {
   if (decodedBytes.length === 0) throw new Error("Could not decode image data.");
   if (decodedBytes.length > MAX_MEDIA_UPLOAD_BYTES) {
     throw new Error(
-      `Image too large (${(decodedBytes.length / (1024 * 1024)).toFixed(1)}MB). Max is about 2.5MB.`,
+      `Image too large (${(decodedBytes.length / (1024 * 1024)).toFixed(1)}MB). Max is about ${MAX_MEDIA_UPLOAD_LABEL}.`,
     );
   }
 

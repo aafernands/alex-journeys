@@ -5,10 +5,14 @@ import {
   getSiteDesign,
   validateSiteDesignInput,
 } from "@/lib/site-design";
+import {
+  MAX_MEDIA_UPLOAD_BYTES,
+  MAX_MEDIA_UPLOAD_LABEL,
+} from "@/lib/cms/media-limits";
 
 export const runtime = "nodejs";
 
-const MAX_BYTES = Math.floor(2.5 * 1024 * 1024);
+const MAX_BYTES = MAX_MEDIA_UPLOAD_BYTES;
 const ALLOWED = new Set([
   "image/jpeg",
   "image/png",
@@ -94,7 +98,7 @@ export async function PUT(request: Request) {
     const approxBytes = Math.floor((parsed.base64.length * 3) / 4);
     if (approxBytes > MAX_BYTES) {
       return NextResponse.json(
-        { error: "Image too large. Max is about 2.5MB." },
+        { error: `Image too large. Max is about ${MAX_MEDIA_UPLOAD_LABEL}.` },
         { status: 400 },
       );
     }

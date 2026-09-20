@@ -2,15 +2,20 @@
 
 import { useRouter } from "next/navigation";
 import { useId, useRef, useState } from "react";
+import { compressImageForUpload } from "@/lib/cms/compress-image";
+import {
+  MAX_MEDIA_UPLOAD_BYTES,
+  MAX_MEDIA_UPLOAD_LABEL,
+} from "@/lib/cms/media-limits";
 import type { MediaItem } from "@/lib/cms/media-types";
 
 type Props = {
   onAdded?: (item: MediaItem) => void;
 };
 
-const MAX_BYTES = Math.floor(2.5 * 1024 * 1024);
+const MAX_BYTES = MAX_MEDIA_UPLOAD_BYTES;
 const ACCEPT =
-  "image/jpeg,image/png,image/webp,image/gif,image/*";
+  "image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif,image/*";
 const ALLOWED = new Set([
   "image/jpeg",
   "image/png",
@@ -18,7 +23,13 @@ const ALLOWED = new Set([
   "image/gif",
 ]);
 
-type FileStatus = "queued" | "uploading" | "done" | "error" | "skipped";
+type FileStatus =
+  | "processing"
+  | "queued"
+  | "uploading"
+  | "done"
+  | "error"
+  | "skipped";
 
 type SelectedFile = {
   key: string;
@@ -26,19 +37,9 @@ type SelectedFile = {
   previewUrl: string;
   status: FileStatus;
   message?: string;
+  originalSize: number;
+  compressed: boolean;
 };
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") resolve(reader.result);
-      else reject(new Error("Could not read file."));
-    };
-    reader.onerror = () => reject(new Error("Could not read file."));
-    reader.readAsDataURL(file);
-  });
-}
 
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
@@ -52,6 +53,12 @@ function isAllowedType(file: File): boolean {
   // Some browsers leave type empty; fall back to extension.
   const name = file.name.toLowerCase();
   return /\.(jpe?g|png|webp|gif)$/.test(name);
+}
+
+function isHeicLike(file: File): boolean {
+  const type = (file.type || "").toLowerCase();
+  if (type === "image/heic" || type === "image/heif") return true;
+  return /\.hei[cf]$/i.test(file.name);
 }
 
 const fieldClass =
@@ -86,31 +93,119 @@ export function AddMediaForm({ onAdded }: Props) {
 
   function addFiles(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
-    const next: SelectedFile[] = [];
+    const batch: { key: string; file: File }[] = [];
+    const placeholders: SelectedFile[] = [];
+
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList[i];
       const key = `${file.name}-${file.size}-${file.lastModified}-${i}-${Date.now()}`;
-      let status: FileStatus = "queued";
-      let message: string | undefined;
-      if (!isAllowedType(file)) {
-        status = "skipped";
-        message = "Unsupported type — use JPEG, PNG, WebP, or GIF.";
-      } else if (file.size > MAX_BYTES) {
-        status = "skipped";
-        message = `Too large (${formatBytes(file.size)}; max ~2.5MB).`;
-      }
-      next.push({
+      batch.push({ key, file });
+      placeholders.push({
         key,
         file,
         previewUrl: URL.createObjectURL(file),
-        status,
-        message,
+        status: "processing",
+        message: "Preparing…",
+        originalSize: file.size,
+        compressed: false,
       });
     }
-    setSelected((prev) => [...prev, ...next]);
+
+    setSelected((prev) => [...prev, ...placeholders]);
     setError(null);
     setSuccess(null);
     if (fileRef.current) fileRef.current.value = "";
+
+    void (async () => {
+      for (const { key, file } of batch) {
+        const result = await compressImageForUpload(file);
+
+        if (!result.ok) {
+          setSelected((prev) =>
+            prev.map((f) => {
+              if (f.key !== key) return f;
+              return {
+                ...f,
+                status: "skipped",
+                message: result.message,
+                originalSize: result.originalSize,
+                compressed: false,
+              };
+            }),
+          );
+          continue;
+        }
+
+        const out = result.file;
+        const allowed =
+          isAllowedType(out) ||
+          // HEIC decoded → JPEG/WebP; original may have been heic-like
+          (isHeicLike(file) &&
+            (out.type === "image/jpeg" || out.type === "image/webp"));
+
+        if (!allowed) {
+          setSelected((prev) =>
+            prev.map((f) => {
+              if (f.key !== key) return f;
+              if (f.previewUrl.startsWith("blob:")) {
+                URL.revokeObjectURL(f.previewUrl);
+              }
+              return {
+                ...f,
+                file: out,
+                previewUrl: URL.createObjectURL(out),
+                status: "skipped",
+                message: "Unsupported type — use JPEG, PNG, WebP, or GIF.",
+                originalSize: result.originalSize,
+                compressed: result.compressed,
+              };
+            }),
+          );
+          continue;
+        }
+
+        if (out.size > MAX_BYTES) {
+          setSelected((prev) =>
+            prev.map((f) => {
+              if (f.key !== key) return f;
+              if (f.previewUrl.startsWith("blob:")) {
+                URL.revokeObjectURL(f.previewUrl);
+              }
+              return {
+                ...f,
+                file: out,
+                previewUrl: URL.createObjectURL(out),
+                status: "skipped",
+                message: `Too large (${formatBytes(out.size)}; max ~${MAX_MEDIA_UPLOAD_LABEL}).`,
+                originalSize: result.originalSize,
+                compressed: result.compressed,
+              };
+            }),
+          );
+          continue;
+        }
+
+        setSelected((prev) =>
+          prev.map((f) => {
+            if (f.key !== key) return f;
+            if (f.previewUrl.startsWith("blob:")) {
+              URL.revokeObjectURL(f.previewUrl);
+            }
+            return {
+              ...f,
+              file: out,
+              previewUrl: URL.createObjectURL(out),
+              status: "queued",
+              message: result.compressed
+                ? `Compressed ${formatBytes(result.originalSize)} → ${formatBytes(out.size)}`
+                : undefined,
+              originalSize: result.originalSize,
+              compressed: result.compressed,
+            };
+          }),
+        );
+      }
+    })();
   }
 
   function removeSelected(key: string) {
@@ -128,15 +223,13 @@ export function AddMediaForm({ onAdded }: Props) {
     sharedAlt: string,
   ): Promise<{ ok: boolean; item?: MediaItem; message: string }> {
     try {
-      const dataUrl = await readFileAsDataUrl(entry.file);
+      // Multipart avoids base64 inflation (important for travel JPEGs).
+      const form = new FormData();
+      form.append("file", entry.file);
+      form.append("alt", sharedAlt);
       const res = await fetch("/api/cms/media", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          dataUrl,
-          filename: entry.file.name,
-          alt: sharedAlt,
-        }),
+        body: form,
       });
       const data = (await res.json()) as {
         error?: string;
@@ -192,6 +285,12 @@ export function AddMediaForm({ onAdded }: Props) {
             setAlt("");
             setPreview(null);
             router.refresh();
+            return;
+          }
+
+          if (selected.some((f) => f.status === "processing")) {
+            setError("Still preparing images — wait a moment, then try again.");
+            setPending(false);
             return;
           }
 
@@ -363,8 +462,10 @@ export function AddMediaForm({ onAdded }: Props) {
             onChange={(e) => addFiles(e.target.files)}
           />
           <p className="mt-1 text-xs text-muted">
-            JPEG, PNG, WebP, or GIF · max ~2.5MB each · select multiple · commits
-            to <code className="rounded bg-surface-soft px-1">public/media</code>
+            JPEG, PNG, WebP, or GIF · iPhone photos compressed in-browser (max
+            edge ~2048px) · hard max ~{MAX_MEDIA_UPLOAD_LABEL} each · select
+            multiple · commits to{" "}
+            <code className="rounded bg-surface-soft px-1">public/media</code>
           </p>
 
           {selected.length > 0 ? (
@@ -404,16 +505,22 @@ export function AddMediaForm({ onAdded }: Props) {
                         {entry.file.name}
                       </p>
                       <p className="text-xs text-muted">
-                        {formatBytes(entry.file.size)}
-                        {entry.status === "uploading"
-                          ? " · uploading…"
-                          : entry.status === "done"
-                            ? " · done"
-                            : entry.status === "error"
-                              ? " · error"
-                              : entry.status === "skipped"
-                                ? " · skipped"
-                                : ""}
+                        {entry.compressed
+                          ? `${formatBytes(entry.originalSize)} → ${formatBytes(entry.file.size)}`
+                          : formatBytes(entry.file.size)}
+                        {entry.status === "processing"
+                          ? " · preparing…"
+                          : entry.status === "uploading"
+                            ? " · uploading…"
+                            : entry.status === "done"
+                              ? " · done"
+                              : entry.status === "error"
+                                ? " · error"
+                                : entry.status === "skipped"
+                                  ? " · skipped"
+                                  : entry.compressed
+                                    ? " · compressed"
+                                    : ""}
                       </p>
                       {entry.message ? (
                         <p
