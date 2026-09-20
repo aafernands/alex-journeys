@@ -126,25 +126,68 @@ export default async function BlogPostPage({ params }: PageProps) {
             </h1>
 
             <div className="mt-6 flex flex-wrap items-center gap-4">
-              <div className="relative size-11 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-soft">
-                <Image
-                  src={site.authorPhoto}
-                  alt={site.authorName}
-                  fill
-                  sizes="44px"
-                  className="object-cover object-top"
-                />
-              </div>
+              <a
+                href={site.social.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative shrink-0 rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] p-[2.5px] shadow-sm transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                aria-label={`${site.authorName} on Instagram`}
+              >
+                <span className="relative block size-11 overflow-hidden rounded-full bg-white p-[2px] dark:bg-bg">
+                  <span className="relative block size-full overflow-hidden rounded-full bg-surface-soft">
+                    <Image
+                      src={site.authorPhoto}
+                      alt=""
+                      fill
+                      sizes="44px"
+                      className="object-cover object-top transition duration-300 group-hover:scale-105"
+                    />
+                  </span>
+                </span>
+              </a>
               <div>
                 <p className="text-sm font-semibold text-heading">
-                  By {site.authorName}
+                  By{" "}
+                  <a
+                    href={site.social.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition hover:text-accent"
+                  >
+                    {site.authorName}
+                  </a>
                 </p>
-                <time
-                  className="text-sm text-muted"
-                  dateTime={post.date}
-                >
-                  Updated {formatPostDate(post.date)}
-                </time>
+                <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted">
+                  <time dateTime={post.date}>
+                    Updated {formatPostDate(post.date)}
+                  </time>
+                  <span aria-hidden="true" className="text-muted-light">
+                    ·
+                  </span>
+                  <a
+                    href={site.social.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 font-medium text-link transition hover:text-accent"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="14"
+                      height="14"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="5" />
+                      <circle cx="12" cy="12" r="4" />
+                      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                    </svg>
+                    Instagram
+                  </a>
+                </p>
               </div>
             </div>
           </div>
