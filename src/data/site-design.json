@@ -3,11 +3,11 @@
   "hero": {
     "image": "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
     "imageAlt": "Sunrise over Maroon Bells reflected in a calm alpine lake",
-    "imageCaption": "Maroon Bells \u00b7 Colorado",
+    "imageCaption": "Maroon Bells · Colorado",
     "windowBadge": "Field note",
     "eyebrow": "",
     "tagline": "Inspire. Capture. Discover.",
-    "subtitle": "A personal travel blog sharing places I\u2019ve been and notes from the road \u2014 places, stories, guides, and photos from journeys already behind me.",
+    "subtitle": "A personal travel blog sharing places I’ve been and notes from the road — places, stories, guides, and photos from journeys already behind me.",
     "ctaPrimary": {
       "label": "Explore places",
       "href": "/destinations"
@@ -17,7 +17,7 @@
       "href": "/blog"
     },
     "objectPosition": "center",
-    "overlay": false,
+    "overlay": true,
     "showFromTheRoad": true,
     "fromTheRoad": {
       "label": "From the road",
@@ -53,13 +53,13 @@
     "startHere": {
       "eyebrow": "New here?",
       "title": "Start here.",
-      "description": "Three easy ways into the journal \u2014 places I've been, stories from the road, and practical notes I still use.",
+      "description": "Three easy ways into the journal — places I've been, stories from the road, and practical notes I still use.",
       "cards": [
         {
           "title": "Places",
           "href": "/destinations",
           "icon": "map-pin",
-          "description": "Browse places I\u2019ve actually visited \u2014 country pages and trip notes tied to real itineraries.",
+          "description": "Browse places I’ve actually visited — country pages and trip notes tied to real itineraries.",
           "cta": "See places"
         },
         {
@@ -73,7 +73,7 @@
           "title": "Guides",
           "href": "/guides",
           "icon": "compass",
-          "description": "Plan, money, packing, smarter travel, stays, and experiences \u2014 six hubs of notes I still use.",
+          "description": "Plan, money, packing, smarter travel, stays, and experiences — six hubs of notes I still use.",
           "cta": "Open guides"
         }
       ]
@@ -81,7 +81,7 @@
     "places": {
       "eyebrow": "Places",
       "title": "Places from the journal.",
-      "description": "Photo-led stops from trips already taken \u2014 tap a place to browse related stories."
+      "description": "Photo-led stops from trips already taken — tap a place to browse related stories."
     },
     "latest": {
       "eyebrow": "From the journal",
@@ -91,24 +91,24 @@
     "guides": {
       "eyebrow": "Guides",
       "title": "Guides worth opening.",
-      "description": "Six hubs of notes I still use \u2014 planning, money, packing, smarter travel, stays, and experiences.",
+      "description": "Six hubs of notes I still use — planning, money, packing, smarter travel, stays, and experiences.",
       "ctaLabel": "All guides"
     },
     "tools": {
       "eyebrow": "Tools",
       "title": "Tools I use.",
-      "description": "Partners I actually open when planning \u2014 stays, flights, insurance, and connectivity.",
+      "description": "Partners I actually open when planning — stays, flights, insurance, and connectivity.",
       "ctaLabel": "See all tools"
     },
     "oauthNote": {
       "eyebrow": "About this site & Google Sign-In",
       "title": "",
-      "body": "This is a personal travel journal. Public content is viewable without login. Google Sign-In is only for optional reader saved posts and for the owner's private content management system (/cms) \u2014 not a consumer login product."
+      "body": "This is a personal travel journal. Public content is viewable without login. Google Sign-In is only for optional reader saved posts and for the owner's private content management system (/cms) — not a consumer login product."
     },
     "author": {
       "eyebrow": "About the journal",
-      "headline": "Hi, I\u2019m Alex",
-      "body": "I\u2019m Alex Fernandes \u2014 traveler, photographer, and the voice behind Fernandes Journeys. Based in New Jersey, I share destinations from trips I\u2019ve already taken: the routes, the neighborhoods, and the small details I\u2019d tell a friend over coffee.",
+      "headline": "Hi, I’m Alex",
+      "body": "I’m Alex Fernandes — traveler, photographer, and the voice behind Fernandes Journeys. Based in New Jersey, I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
       "primaryCta": {
         "label": "About me",
         "href": "/about"

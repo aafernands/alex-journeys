@@ -158,7 +158,7 @@ export const DEFAULT_SITE_DESIGN: SiteDesign = {
       href: "/blog",
     },
     objectPosition: "center",
-    overlay: false,
+    overlay: true,
     showFromTheRoad: true,
     fromTheRoad: {
       label: "From the road",
