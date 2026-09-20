@@ -8,6 +8,7 @@ import authorPhotoMeta from "@/data/author-photo.json";
 
 export const site = {
   name: "Fernandes Journeys",
+  url: "https://www.fernandesjourneys.com",
   authorName: "Alex Fernandes",
   authorPhoto: `${authorPhotoMeta.src}?v=${encodeURIComponent(authorPhotoMeta.updatedAt)}`,
   tagline: "Inspire. Capture. Discover.",

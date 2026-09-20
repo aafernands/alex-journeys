@@ -161,13 +161,7 @@ export function OutboundInterstitial({
         </div>
 
         <footer className="mt-10 flex flex-col items-center gap-3 text-center">
-          <Link
-            href="/"
-            className="inline-flex opacity-90 transition hover:opacity-100"
-            aria-label={`${site.name} home`}
-          >
-            <BrandLogo className="h-14 w-auto sm:h-16" width={280} height={84} priority />
-          </Link>
+          <BrandLogo className="h-14 w-auto sm:h-16" width={280} height={84} priority />
           <p className="text-xs text-muted">
             <Link href="/" className="text-link hover:text-accent">
               Stay in the journal

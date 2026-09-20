@@ -208,14 +208,15 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
         </button>
 
         {/* Logo: centered on mobile, left on desktop — image only (wordmark is in the asset) */}
-        <Link
-          href="/"
-          className="absolute left-1/2 z-10 flex -translate-x-1/2 items-center md:static md:shrink-0 md:translate-x-0"
-          onClick={closeAll}
-          aria-label="Fernandes Journeys home"
-        >
-          <BrandLogo className="h-12 w-auto sm:h-14 md:h-16" width={260} height={78} priority />
-        </Link>
+        <div className="absolute left-1/2 z-10 flex -translate-x-1/2 items-center md:static md:shrink-0 md:translate-x-0">
+          <BrandLogo
+            className="h-12 w-auto sm:h-14 md:h-16"
+            width={260}
+            height={78}
+            priority
+            onClick={closeAll}
+          />
+        </div>
 
         {/* Desktop: primary nav (center zone) */}
         <nav
@@ -418,9 +419,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             aria-label="Mobile"
           >
             <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-              <Link href="/" onClick={closeAll} aria-label="Fernandes Journeys home">
-                <BrandLogo className="h-9 w-auto" priority />
-              </Link>
+              <BrandLogo className="h-9 w-auto" priority onClick={closeAll} />
               <button
                 type="button"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-on-solid transition hover:bg-accent-deep"
