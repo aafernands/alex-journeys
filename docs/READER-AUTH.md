@@ -12,7 +12,8 @@ Reader sessions **never** unlock `/cms`. CMS still requires `CMS_ADMIN_EMAILS` (
 | `/login` | Sign in / Create account (name, email, password ≥ 8) + Continue with Google + **Forgot password?** |
 | `/forgot-password` | Request a time-limited reset email (Resend) |
 | `/reset-password?token=…` | Set a new password, then sign in |
-| `/account` | Dashboard; credentials users also get **Change password** |
+| `/account` | Dashboard; **Profile settings** (name, photo, email change) + **Change password** for credentials users |
+| `/account/confirm-email?token=…` | Confirm a pending email change |
 | Blog **Save** | Signed-out → `/login?callbackUrl=…` |
 
 ## Firestore `users` collection
@@ -29,12 +30,15 @@ Fields:
 
 ```
 email, name, passwordHash | null, providers: ["google"|"github"|"credentials"],
-image, createdAt, updatedAt, lastLoginAt, disabled
+image, createdAt, updatedAt, lastLoginAt, disabled,
+emailManagedLocally, nameManagedLocally, imageManagedLocally
 ```
 
 - Passwords are **bcrypt** hashes via `bcryptjs`. Never stored plaintext.
 - `passwordHash` is **never** returned from CMS/list APIs or register responses.
 - Google sign-in **upserts** the profile and **never clears** `passwordHash`.
+- When `emailManagedLocally` / `nameManagedLocally` / `imageManagedLocally` is true, OAuth upsert **does not overwrite** that field (so a verified email change or custom name/photo sticks).
+- **Changing email never recreates the Firestore doc id** (saved posts stay under the same `users/{id}`).
 - `disabled: true` → credentials `authorize` fails; Google `signIn` callback denies.
 
 ## Password reset tokens
@@ -79,6 +83,41 @@ Generic success copy:
 
 Credentials users on `/account` can change password via `POST /api/auth/change-password` `{ currentPassword, newPassword }` (session required). Outstanding reset tokens for that user are invalidated.
 
+## Email change (verified)
+
+**Collection:** `emailChangeTokens/{tokenHash}` (same hashing pattern as password reset).
+
+| Field | Notes |
+| --- | --- |
+| Doc id / `tokenHash` | SHA-256 hex of the **raw** URL token |
+| `userId` | Firestore user id (**unchanged** when email updates) |
+| `newEmail` / `oldEmail` | Normalized |
+| `expiresAt` | ~1 hour |
+| `usedAt` | `null` until confirmed or cancelled |
+| `createdAt` | ISO timestamp |
+
+### Flow
+
+1. Signed-in user on `/account` → **Profile settings** → new email (+ current password if credentials).
+2. `POST /api/auth/change-email/request` validates format, rejects same-as-current, rejects taken emails (`Email already in use.`), creates token (invalidates prior pending for that user).
+3. Resend emails the **new** address a link: `{AUTH_URL}/account/confirm-email?token=…`.
+4. Best-effort notify the **old** address (“a request was made…”).
+5. `/account/confirm-email` → `POST /api/auth/change-email/confirm` → updates `users/{id}.email`, sets `emailManagedLocally: true`, consumes token.
+6. Client calls Auth.js `session.update({ email })` so the JWT/session shows the new address without a full re-login (fallback: sign out/in).
+
+Optional: `POST /api/auth/change-email/cancel` clears pending tokens for the signed-in user.
+
+**Admin note:** CMS admin matching uses `CMS_ADMIN_EMAILS`. Changing away from an allowlisted address removes admin until the allowlist is updated (help text on `/account`).
+
+## Profile name + photo
+
+`PATCH /api/account/profile` (session required):
+
+- JSON `{ name?, image? | imageUrl?, clearImage? }` or multipart (`name`, `file`, `imageUrl`, `clearImage`).
+- Photo: https URL, or small JPEG/PNG/WebP upload stored as a data URL on the user doc (max ~400KB). Firebase Storage is not required.
+- Sets `nameManagedLocally` / `imageManagedLocally` so Google login keeps custom values.
+- Client refreshes session via `useSession().update({ name, image })`.
+
 ## Env vars
 
 | Variable | Notes |
@@ -88,9 +127,9 @@ Credentials users on `/account` can change password via `POST /api/auth/change-p
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google button on `/login` |
 | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Required for email/password + user profiles + reset tokens |
 | `FIREBASE_FIRESTORE_DATABASE_ID` | Optional named DB |
-| `RESEND_API_KEY` | **Required to send** reset emails via Resend HTTP API |
+| `RESEND_API_KEY` | **Required to send** reset + email-change emails via Resend HTTP API |
 | `EMAIL_FROM` | Optional. Default for testing: `Fernandes Journeys <onboarding@resend.dev>` (Resend’s shared sender). With that default, Resend **only sends to the Resend account owner email** until you verify a domain and set `EMAIL_FROM` to an address on it (e.g. `Fernandes Journeys <hello@fernandesjourneys.com>`). |
-| `CMS_ADMIN_EMAILS` / `CMS_PASSCODE` | CMS only (unchanged) |
+| `CMS_ADMIN_EMAILS` / `CMS_PASSCODE` | CMS only (unchanged). Admin matching is by email string — after an email change, update the allowlist if needed. |
 
 Email/password is enabled when `AUTH_SECRET` **and** Firebase are set. Build still succeeds without them (and without Resend).
 
@@ -107,22 +146,27 @@ APIs: `GET /api/cms/users`, `PATCH|DELETE /api/cms/users/[id]`, `POST /api/cms/u
 
 ## Code map
 
-- `src/lib/users.ts` — register, authorize, upsert OAuth, list, disable, delete, **password reset / change helpers**
+- `src/lib/users.ts` — register, authorize, upsert OAuth, list, disable, delete, **password reset / change**, **email-change tokens**, **profile update**
 - `src/lib/email.ts` — Resend HTTP send + `publicSiteOrigin()`
-- `src/auth.ts` — Credentials + Google + GitHub; `pages.signIn = /login`
+- `src/auth.ts` — Credentials + Google + GitHub; JWT `trigger: "update"` for live session name/email/image
 - `src/app/login/page.tsx`, `src/components/ReaderLoginForm.tsx`
 - `src/app/forgot-password/`, `src/app/reset-password/`
+- `src/app/account/`, `src/app/account/confirm-email/`
+- `src/components/ProfileSettingsForm.tsx`, `src/components/ConfirmEmailClient.tsx`
 - `src/app/api/auth/register/route.ts`
 - `src/app/api/auth/forgot-password/route.ts`
 - `src/app/api/auth/reset-password/route.ts`
 - `src/app/api/auth/change-password/route.ts`
+- `src/app/api/auth/change-email/{request,confirm,cancel}/route.ts`
+- `src/app/api/account/profile/route.ts`
 - `src/app/cms/users/page.tsx`, `src/components/cms/UsersList.tsx`
 - `src/app/api/cms/users/` — CMS user management (incl. `…/[id]/send-reset`)
 
 ## Out of scope (follow-ups)
 
-- Email verification
+- Signup email verification (separate from change-email)
 - Magic links
+- Firebase Storage for profile photos (data URL / https URL for now)
 - Merging two separate accounts that already have different doc ids and save trees
 
 ## How to test
@@ -145,3 +189,10 @@ APIs: `GET /api/cms/users`, `PATCH|DELETE /api/cms/users/[id]`, `POST /api/cms/u
 5. With `RESEND_API_KEY` unset → forgot-password returns a clear 503-style error; site still builds.
 6. Signed-in credentials user: `/account` → **Change password** with current + new.
 7. As CMS admin on `/cms/users` → **Send reset link** for a user with an email → expect success “Reset email sent to …” and the same Resend inbox / dashboard delivery as forgot-password. Try a Google-only user (no password yet) → link should still arrive and allow setting a password. Disabled / no-email rows should refuse clearly.
+
+### Email change + profile
+
+1. **Credentials:** sign in → `/account` → Profile settings → change name/photo → confirm header updates. Request email change with current password → check **new** inbox for confirm link (+ optional notify on old) → open `/account/confirm-email?token=…` → session email updates; Firestore doc id unchanged; saved posts still list.
+2. **Google-only:** same flow without password; after confirm, `emailManagedLocally` is set — sign out, Continue with Google, email should **not** revert to the Google address.
+3. Taken email → “Email already in use.” Same-as-current → clear validation error. Cancel pending from `/account`.
+4. Without `RESEND_API_KEY` → request returns clear 503; profile name/photo still work.

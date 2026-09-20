@@ -11,13 +11,18 @@ import {
 import { auth, isReaderAuthConfigured } from "@/auth";
 import { AccountAuthActions } from "@/components/AccountAuthActions";
 import { ChangePasswordForm } from "@/components/ChangePasswordForm";
+import { ProfileSettingsForm } from "@/components/ProfileSettingsForm";
 import {
   SavedPostsList,
   type SavedPostRow,
 } from "@/components/SavedPostsList";
+import { isEmailConfigured } from "@/lib/email";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
 import { getPostBySlug } from "@/lib/posts";
-import { getUserById } from "@/lib/users";
+import {
+  getPendingEmailChangeForUser,
+  getUserById,
+} from "@/lib/users";
 import {
   listSavedPosts,
   SavedPostsUnavailableError,
@@ -49,6 +54,48 @@ function enrichSavedPosts(
   });
 }
 
+function ProfileAvatar({
+  src,
+  name,
+}: {
+  src: string | null | undefined;
+  name: string | null | undefined;
+}) {
+  if (!src) {
+    return (
+      <span
+        className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-surface-soft text-accent"
+        aria-hidden="true"
+      >
+        <User className="h-7 w-7" strokeWidth={1.75} />
+      </span>
+    );
+  }
+  const isData = src.startsWith("data:");
+  const isGoogle = src.includes("googleusercontent.com");
+  if (isData || !isGoogle) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return (
+      <img
+        src={src}
+        alt={name?.trim() ? `${name} avatar` : ""}
+        width={64}
+        height={64}
+        className="h-16 w-16 rounded-full border border-border object-cover"
+      />
+    );
+  }
+  return (
+    <Image
+      src={src}
+      alt={name?.trim() ? `${name} avatar` : ""}
+      width={64}
+      height={64}
+      className="h-16 w-16 rounded-full border border-border object-cover"
+    />
+  );
+}
+
 export default async function AccountPage() {
   const session = await auth();
   const googleConfigured = isReaderAuthConfigured();
@@ -60,11 +107,22 @@ export default async function AccountPage() {
   let loadError: string | null = null;
   let firebaseOk = isFirebaseConfigured();
   let hasPassword = false;
+  let pendingNewEmail: string | null = null;
+  let profileName = user?.name?.trim() || "";
+  let profileImage = user?.image ?? null;
+  let profileEmail = user?.email ?? "";
 
   if (signedIn && userId && firebaseOk) {
     try {
       const profile = await getUserById(userId);
       hasPassword = Boolean(profile?.passwordHash);
+      if (profile) {
+        profileName = profile.name?.trim() || profileName;
+        profileImage = profile.image ?? profileImage;
+        profileEmail = profile.email || profileEmail;
+      }
+      const pending = await getPendingEmailChangeForUser(userId);
+      pendingNewEmail = pending?.newEmail ?? null;
     } catch (err) {
       console.warn("[account] profile lookup failed:", err);
     }
@@ -89,6 +147,8 @@ export default async function AccountPage() {
       }
     }
   }
+
+  const emailConfigured = isEmailConfigured();
 
   return (
     <main className="bg-bg">
@@ -142,38 +202,49 @@ export default async function AccountPage() {
               >
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-4">
-                    {user?.image ? (
-                      <Image
-                        src={user.image}
-                        alt=""
-                        width={64}
-                        height={64}
-                        className="h-16 w-16 rounded-full border border-border object-cover"
-                      />
-                    ) : (
-                      <span
-                        className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-surface-soft text-accent"
-                        aria-hidden="true"
-                      >
-                        <User className="h-7 w-7" strokeWidth={1.75} />
-                      </span>
-                    )}
+                    <ProfileAvatar src={profileImage} name={profileName} />
                     <div className="min-w-0">
                       <h2
                         id="account-profile"
                         className="font-display text-xl font-bold text-heading"
                       >
-                        {user?.name?.trim() || "Reader"}
+                        {profileName || "Reader"}
                       </h2>
-                      {user?.email ? (
+                      {profileEmail ? (
                         <p className="mt-0.5 truncate text-sm text-muted">
-                          {user.email}
+                          {profileEmail}
+                          {pendingNewEmail
+                            ? ` · pending → ${pendingNewEmail}`
+                            : ""}
                         </p>
                       ) : null}
                     </div>
                   </div>
                   <AccountAuthActions mode="sign-out" googleConfigured />
                 </div>
+              </section>
+
+              <section
+                className="panel p-6 md:p-8"
+                aria-labelledby="account-settings"
+              >
+                <h2
+                  id="account-settings"
+                  className="font-display text-xl font-bold text-heading"
+                >
+                  Profile settings
+                </h2>
+                <p className="mt-1 text-sm text-muted">
+                  Update your display name, photo, and account email.
+                </p>
+                <ProfileSettingsForm
+                  initialName={profileName}
+                  initialEmail={profileEmail}
+                  initialImage={profileImage}
+                  hasPassword={hasPassword}
+                  pendingNewEmail={pendingNewEmail}
+                  emailConfigured={emailConfigured}
+                />
               </section>
 
               <section id="saved" aria-labelledby="account-saved">

@@ -14,8 +14,10 @@
  * Profile fields live on the parent; never expose `passwordHash` to clients.
  *
  * Password reset tokens live in a separate collection
- * `passwordResetTokens/{tokenHash}` (SHA-256 of the raw URL token). See
- * docs/READER-AUTH.md.
+ * `passwordResetTokens/{tokenHash}` (SHA-256 of the raw URL token).
+ * Email-change tokens live in `emailChangeTokens/{tokenHash}` (same hashing).
+ * Changing email never recreates the user doc id (saved-posts stay valid).
+ * See docs/READER-AUTH.md.
  */
 import { createHash, randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
@@ -119,6 +121,9 @@ function docToProfile(
     updatedAt,
     lastLoginAt: toIso(data.lastLoginAt),
     disabled: data.disabled === true,
+    emailManagedLocally: data.emailManagedLocally === true,
+    nameManagedLocally: data.nameManagedLocally === true,
+    imageManagedLocally: data.imageManagedLocally === true,
   };
 }
 
@@ -322,24 +327,35 @@ export async function upsertOauthUser(
     const providers = parseProviders(priorData.providers);
     if (!providers.includes(input.provider)) providers.push(input.provider);
 
+    const emailManagedLocally = priorData.emailManagedLocally === true;
+    const nameManagedLocally = priorData.nameManagedLocally === true;
+    const imageManagedLocally = priorData.imageManagedLocally === true;
+
     const patch: Record<string, unknown> = {
       providers,
       updatedAt: now,
       lastLoginAt: now,
     };
-    if (email) patch.email = email;
-    if (input.name != null && String(input.name).trim()) {
-      patch.name = String(input.name).trim();
-    } else if (!prior.exists) {
-      patch.name = null;
+    if (email && !emailManagedLocally) patch.email = email;
+    if (!nameManagedLocally) {
+      if (input.name != null && String(input.name).trim()) {
+        patch.name = String(input.name).trim();
+      } else if (!prior.exists) {
+        patch.name = null;
+      }
     }
-    if (input.image != null && String(input.image).trim()) {
-      patch.image = String(input.image).trim();
+    if (!imageManagedLocally) {
+      if (input.image != null && String(input.image).trim()) {
+        patch.image = String(input.image).trim();
+      }
     }
     if (!prior.exists) {
       patch.createdAt = now;
       patch.passwordHash = null;
       patch.disabled = false;
+      patch.emailManagedLocally = false;
+      patch.nameManagedLocally = false;
+      patch.imageManagedLocally = false;
       if (!email) patch.email = "";
       if (patch.name === undefined) patch.name = null;
       if (patch.image === undefined) patch.image = null;
@@ -645,4 +661,328 @@ export async function changePasswordForUser(
   const publicUser = await setPasswordForUser(user.id, newPassword);
   await invalidateResetTokensForUser(user.id);
   return publicUser;
+}
+
+// ---------------------------------------------------------------------------
+// Profile updates (name / image) — signed-in account settings
+// ---------------------------------------------------------------------------
+
+export type UpdateUserProfileInput = {
+  name?: string | null;
+  image?: string | null;
+};
+
+/**
+ * Update display name and/or profile image. Sets managed-locally flags so
+ * OAuth upsert does not overwrite custom values. Does not change email or
+ * document id.
+ */
+export async function updateUserProfile(
+  userId: string,
+  input: UpdateUserProfileInput,
+): Promise<UserPublic> {
+  const id = userId.trim();
+  if (!id || id.includes("/")) {
+    throw new Error("Invalid user.");
+  }
+
+  const ref = usersCollection().doc(id);
+  const snap = await ref.get();
+  if (!snap.exists) throw new Error("Account not found.");
+  const prior = snap.data() ?? {};
+  if (prior.disabled === true) throw new Error("This account is disabled.");
+
+  const patch: Record<string, unknown> = {
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (input.name !== undefined) {
+    const name =
+      input.name == null ? null : String(input.name).trim() || null;
+    if (name !== null && name.length > 80) {
+      throw new Error("Name must be 80 characters or fewer.");
+    }
+    patch.name = name;
+    patch.nameManagedLocally = true;
+  }
+
+  if (input.image !== undefined) {
+    const image =
+      input.image == null ? null : String(input.image).trim() || null;
+    if (image !== null) {
+      if (image.length > 600_000) {
+        throw new Error("Image is too large. Use a smaller photo or a URL.");
+      }
+      const isHttps = /^https:\/\//i.test(image);
+      const isData =
+        /^data:image\/(jpeg|jpg|png|webp|gif);base64,/i.test(image);
+      if (!isHttps && !isData) {
+        throw new Error(
+          "Image must be an https URL or a JPEG/PNG/WebP data URL.",
+        );
+      }
+    }
+    patch.image = image;
+    patch.imageManagedLocally = true;
+  }
+
+  if (Object.keys(patch).length <= 1) {
+    throw new Error("Nothing to update.");
+  }
+
+  await ref.set(patch, { merge: true });
+  const updated = await getUserById(id);
+  if (!updated) throw new Error("Could not update profile.");
+  return toUserPublic(updated);
+}
+
+// ---------------------------------------------------------------------------
+// Email-change tokens — collection `emailChangeTokens/{tokenHash}`
+//
+// Doc id = SHA-256 hex of the raw URL token (never store the raw token).
+// Fields: tokenHash, userId, newEmail, oldEmail, expiresAt, usedAt, createdAt.
+// Changing email never recreates users/{id}.
+// ---------------------------------------------------------------------------
+
+const EMAIL_CHANGE_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
+const EMAIL_CHANGE_COLLECTION = "emailChangeTokens";
+
+export type EmailChangeTokenRecord = {
+  id: string;
+  tokenHash: string;
+  userId: string;
+  newEmail: string;
+  oldEmail: string;
+  expiresAt: string;
+  usedAt: string | null;
+  createdAt: string;
+};
+
+function emailChangeTokensCollection() {
+  return requireDb().collection(EMAIL_CHANGE_COLLECTION);
+}
+
+export function hashEmailChangeToken(rawToken: string): string {
+  return createHash("sha256").update(rawToken).digest("hex");
+}
+
+export function generateRawEmailChangeToken(): string {
+  return randomBytes(32).toString("base64url");
+}
+
+function docToEmailChangeToken(
+  id: string,
+  data: DocumentData,
+): EmailChangeTokenRecord {
+  return {
+    id,
+    tokenHash: typeof data.tokenHash === "string" ? data.tokenHash : id,
+    userId: typeof data.userId === "string" ? data.userId : "",
+    newEmail:
+      typeof data.newEmail === "string" ? normalizeEmail(data.newEmail) : "",
+    oldEmail:
+      typeof data.oldEmail === "string" ? normalizeEmail(data.oldEmail) : "",
+    expiresAt: toIso(data.expiresAt) ?? new Date(0).toISOString(),
+    usedAt: toIso(data.usedAt),
+    createdAt: toIso(data.createdAt) ?? new Date(0).toISOString(),
+  };
+}
+
+/** Mark every unused email-change token for this user as used (best-effort). */
+export async function invalidateEmailChangeTokensForUser(
+  userId: string,
+): Promise<void> {
+  const id = userId.trim();
+  if (!id) return;
+  const snap = await emailChangeTokensCollection()
+    .where("userId", "==", id)
+    .limit(50)
+    .get();
+  if (snap.empty) return;
+  const now = new Date().toISOString();
+  const batch = requireDb().batch();
+  let writes = 0;
+  for (const doc of snap.docs) {
+    const usedAt = toIso(doc.data().usedAt);
+    if (usedAt) continue;
+    batch.set(doc.ref, { usedAt: now }, { merge: true });
+    writes += 1;
+  }
+  if (writes > 0) await batch.commit();
+}
+
+export type PendingEmailChange = {
+  newEmail: string;
+  expiresAt: string;
+  createdAt: string;
+};
+
+/** Latest unused, unexpired email-change request for a user (if any). */
+export async function getPendingEmailChangeForUser(
+  userId: string,
+): Promise<PendingEmailChange | null> {
+  const id = userId.trim();
+  if (!id) return null;
+  const snap = await emailChangeTokensCollection()
+    .where("userId", "==", id)
+    .limit(20)
+    .get();
+  if (snap.empty) return null;
+  const now = Date.now();
+  const pending = snap.docs
+    .map((d) => docToEmailChangeToken(d.id, d.data()))
+    .filter((r) => !r.usedAt && Date.parse(r.expiresAt) > now && r.newEmail)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const top = pending[0];
+  if (!top) return null;
+  return {
+    newEmail: top.newEmail,
+    expiresAt: top.expiresAt,
+    createdAt: top.createdAt,
+  };
+}
+
+export type RequestEmailChangeInput = {
+  userId: string;
+  newEmail: string;
+  /** Required when the account has a passwordHash. */
+  currentPassword?: string;
+};
+
+/**
+ * Validate and create an email-change token. Returns the raw token for the
+ * verification email. Does not send mail — caller uses Resend.
+ */
+export async function requestEmailChange(
+  input: RequestEmailChangeInput,
+): Promise<{
+  rawToken: string;
+  expiresAt: string;
+  oldEmail: string;
+  newEmail: string;
+  user: UserProfile;
+}> {
+  const user = await getUserById(input.userId);
+  if (!user || user.disabled) {
+    throw new Error("Account not found.");
+  }
+
+  const newEmail = normalizeEmail(input.newEmail);
+  if (!newEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+    throw new Error("Enter a valid email address.");
+  }
+  if (newEmail === normalizeEmail(user.email)) {
+    throw new Error("That is already your current email.");
+  }
+
+  if (user.passwordHash) {
+    const password =
+      typeof input.currentPassword === "string" ? input.currentPassword : "";
+    if (!password) {
+      throw new Error("Current password is required to change email.");
+    }
+    const ok = await verifyPassword(password, user.passwordHash);
+    if (!ok) throw new Error("Current password is incorrect.");
+  }
+
+  const taken = await getUserByEmail(newEmail);
+  if (taken && taken.id !== user.id) {
+    throw new Error("Email already in use.");
+  }
+
+  await invalidateEmailChangeTokensForUser(user.id);
+
+  const rawToken = generateRawEmailChangeToken();
+  const tokenHash = hashEmailChangeToken(rawToken);
+  const now = new Date();
+  const expiresAt = new Date(
+    now.getTime() + EMAIL_CHANGE_TOKEN_TTL_MS,
+  ).toISOString();
+  const createdAt = now.toISOString();
+  const oldEmail = normalizeEmail(user.email);
+
+  await emailChangeTokensCollection()
+    .doc(tokenHash)
+    .set({
+      tokenHash,
+      userId: user.id,
+      newEmail,
+      oldEmail,
+      expiresAt,
+      usedAt: null,
+      createdAt,
+    });
+
+  return { rawToken, expiresAt, oldEmail, newEmail, user };
+}
+
+export async function getValidEmailChangeToken(
+  rawToken: string,
+): Promise<EmailChangeTokenRecord | null> {
+  const raw = rawToken.trim();
+  if (!raw || raw.length < 20) return null;
+  const tokenHash = hashEmailChangeToken(raw);
+  const snap = await emailChangeTokensCollection().doc(tokenHash).get();
+  if (!snap.exists) return null;
+  const record = docToEmailChangeToken(snap.id, snap.data() ?? {});
+  if (record.usedAt) return null;
+  if (Date.parse(record.expiresAt) <= Date.now()) return null;
+  if (!record.userId || !record.newEmail) return null;
+  return record;
+}
+
+/**
+ * Consume email-change token: update users/{id}.email (same doc id), set
+ * emailManagedLocally for OAuth safety, mark token used, invalidate siblings.
+ */
+export async function confirmEmailChange(
+  rawToken: string,
+): Promise<UserPublic> {
+  const record = await getValidEmailChangeToken(rawToken);
+  if (!record) {
+    throw new Error("This confirmation link is invalid or has expired.");
+  }
+
+  const user = await getUserById(record.userId);
+  if (!user || user.disabled) {
+    throw new Error("This confirmation link is invalid or has expired.");
+  }
+
+  const newEmail = normalizeEmail(record.newEmail);
+  const taken = await getUserByEmail(newEmail);
+  if (taken && taken.id !== user.id) {
+    throw new Error("Email already in use.");
+  }
+
+  const now = new Date().toISOString();
+
+  await usersCollection()
+    .doc(user.id)
+    .set(
+      {
+        email: newEmail,
+        updatedAt: now,
+        // Always set after a verified change so future OAuth logins keep it.
+        emailManagedLocally: true,
+      },
+      { merge: true },
+    );
+
+  await emailChangeTokensCollection()
+    .doc(record.tokenHash)
+    .set({ usedAt: now }, { merge: true });
+  await invalidateEmailChangeTokensForUser(user.id);
+
+  const updated = await getUserById(user.id);
+  if (!updated) throw new Error("Could not update email.");
+  return toUserPublic(updated);
+}
+
+/** Cancel outstanding email-change requests for the signed-in user. */
+export async function cancelPendingEmailChange(
+  userId: string,
+): Promise<void> {
+  const user = await getUserById(userId);
+  if (!user) throw new Error("Account not found.");
+  await invalidateEmailChangeTokensForUser(user.id);
 }

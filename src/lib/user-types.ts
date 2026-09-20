@@ -13,4 +13,13 @@ export type UserPublic = {
   updatedAt: string;
   lastLoginAt: string | null;
   disabled: boolean;
+  /**
+   * When true, OAuth upsert must not overwrite `email` (user changed email
+   * locally and verified). Doc id stays stable.
+   */
+  emailManagedLocally: boolean;
+  /** When true, OAuth upsert must not overwrite `name`. */
+  nameManagedLocally: boolean;
+  /** When true, OAuth upsert must not overwrite `image` (custom photo). */
+  imageManagedLocally: boolean;
 };

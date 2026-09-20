@@ -16,5 +16,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     isAdmin?: boolean;
+    /** Profile image (Auth.js often uses `picture`). */
+    picture?: string | null;
   }
 }

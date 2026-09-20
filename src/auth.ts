@@ -136,16 +136,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/login",
   },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
       if (user?.id) {
         token.sub = user.id;
       } else if (account?.providerAccountId) {
         token.sub = account.providerAccountId;
       }
 
+      // Client `useSession().update({ name, email, image })` after profile /
+      // email-change so the UI reflects Firestore without a full re-login.
+      if (trigger === "update" && session && typeof session === "object") {
+        const patch = session as {
+          name?: string | null;
+          email?: string | null;
+          image?: string | null;
+        };
+        if (patch.name !== undefined) {
+          token.name = patch.name;
+        }
+        if (patch.email !== undefined && typeof patch.email === "string") {
+          token.email = patch.email.trim().toLowerCase();
+        }
+        if (patch.image !== undefined) {
+          token.picture = patch.image;
+        }
+      }
+
       const email =
+        (typeof token.email === "string" ? token.email : undefined) ??
         user?.email ??
-        (typeof token.email === "string" ? token.email : undefined);
+        undefined;
       token.isAdmin = isAdminEmail(email);
       return token;
     },
@@ -153,6 +173,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         if (typeof token.sub === "string" && token.sub) {
           session.user.id = token.sub;
+        }
+        if (typeof token.email === "string") {
+          session.user.email = token.email;
+        }
+        if (typeof token.name === "string" || token.name === null) {
+          session.user.name = token.name as string | null;
+        }
+        if (typeof token.picture === "string" || token.picture === null) {
+          session.user.image = token.picture as string | null;
         }
         session.user.isAdmin = Boolean(token.isAdmin);
       }
