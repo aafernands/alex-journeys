@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
+import {
+  TurnstileField,
+  isTurnstileWidgetEnabled,
+  type TurnstileFieldHandle,
+} from "@/components/TurnstileField";
 
 type Props = {
   credentialsConfigured: boolean;
@@ -12,6 +17,9 @@ export function ForgotPasswordForm({ credentialsConfigured }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileFieldHandle>(null);
+  const widgetEnabled = isTurnstileWidgetEnabled();
 
   if (!credentialsConfigured) {
     return (
@@ -34,12 +42,21 @@ export function ForgotPasswordForm({ credentialsConfigured }: Props) {
     e.preventDefault();
     setError(null);
     setSuccess(null);
+
+    if (widgetEnabled && !turnstileToken) {
+      setError("Please complete the security check before submitting.");
+      return;
+    }
+
     setPending(true);
     try {
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email,
+          ...(turnstileToken ? { turnstileToken } : {}),
+        }),
       });
       const data = (await res.json()) as {
         error?: string;
@@ -49,6 +66,8 @@ export function ForgotPasswordForm({ credentialsConfigured }: Props) {
       if (!res.ok) {
         setError(data.error || "Could not send reset email.");
         setPending(false);
+        turnstileRef.current?.reset();
+        setTurnstileToken(null);
         return;
       }
       setSuccess(
@@ -56,9 +75,13 @@ export function ForgotPasswordForm({ credentialsConfigured }: Props) {
           "If an account with that email exists and can reset a password, you will receive a reset link shortly.",
       );
       setPending(false);
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
     } catch {
       setError("Network error. Try again.");
       setPending(false);
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
     }
   }
 
@@ -102,6 +125,11 @@ export function ForgotPasswordForm({ credentialsConfigured }: Props) {
               className="mt-2 min-h-11 w-full rounded-lg border border-border bg-white px-4 text-sm text-heading transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
             />
           </div>
+
+          <TurnstileField
+            ref={turnstileRef}
+            onToken={setTurnstileToken}
+          />
 
           <button
             type="submit"

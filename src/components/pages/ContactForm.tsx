@@ -1,16 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { site } from "@/data/content";
+import {
+  TurnstileField,
+  isTurnstileWidgetEnabled,
+  type TurnstileFieldHandle,
+} from "@/components/TurnstileField";
 
 export function ContactForm() {
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileFieldHandle>(null);
+  const widgetEnabled = isTurnstileWidgetEnabled();
 
   return (
     <form
       className="mt-10 space-y-5"
       onSubmit={(e) => {
         e.preventDefault();
+        setError(null);
+
+        if (widgetEnabled && !turnstileToken) {
+          setError("Please complete the security check before submitting.");
+          return;
+        }
+
         const fd = new FormData(e.currentTarget);
         const first = String(fd.get("first") || "").trim();
         const last = String(fd.get("last") || "").trim();
@@ -24,6 +40,8 @@ export function ContactForm() {
         );
         window.location.href = `mailto:${site.email}?subject=${subject}&body=${body}`;
         setSent(true);
+        turnstileRef.current?.reset();
+        setTurnstileToken(null);
       }}
       aria-label="Contact form"
     >
@@ -79,12 +97,21 @@ export function ContactForm() {
           className="mt-2 w-full rounded-lg border border-border bg-white px-4 py-3 text-sm text-heading placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
         />
       </div>
+      <TurnstileField
+        ref={turnstileRef}
+        onToken={setTurnstileToken}
+      />
       <button
         type="submit"
         className="btn btn-primary btn-block sm:w-auto"
       >
         Send message
       </button>
+      {error ? (
+        <p className="text-sm font-medium text-red-600" role="alert">
+          {error}
+        </p>
+      ) : null}
       {sent ? (
         <p className="text-sm text-text" role="status">
           Opening your email app to send to {site.email}…

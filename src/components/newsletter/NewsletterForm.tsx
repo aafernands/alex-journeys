@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
+import {
+  TurnstileField,
+  isTurnstileWidgetEnabled,
+  type TurnstileFieldHandle,
+} from "@/components/TurnstileField";
 
 type Props = {
   className?: string;
@@ -13,29 +18,48 @@ export function NewsletterForm({ className }: Props) {
     "idle",
   );
   const [message, setMessage] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileFieldHandle>(null);
+  const widgetEnabled = isTurnstileWidgetEnabled();
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setStatus("loading");
     setMessage(null);
+
+    if (widgetEnabled && !turnstileToken) {
+      setStatus("error");
+      setMessage("Please complete the security check before submitting.");
+      return;
+    }
+
+    setStatus("loading");
     try {
       const res = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email,
+          ...(turnstileToken ? { turnstileToken } : {}),
+        }),
       });
       const data = (await res.json()) as { error?: string; message?: string };
       if (!res.ok) {
         setStatus("error");
         setMessage(data.error || "Something went wrong. Please try again.");
+        turnstileRef.current?.reset();
+        setTurnstileToken(null);
         return;
       }
       setStatus("success");
       setMessage(data.message || "You're subscribed — thank you!");
       setEmail("");
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
     } catch {
       setStatus("error");
       setMessage("Network error. Check your connection and try again.");
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
     }
   }
 
@@ -86,6 +110,11 @@ export function NewsletterForm({ className }: Props) {
           .
         </span>
       </label>
+      <TurnstileField
+        ref={turnstileRef}
+        onToken={setTurnstileToken}
+        className="pt-1"
+      />
       <button
         type="submit"
         disabled={status === "loading" || status === "success"}

@@ -68,6 +68,8 @@ Connected to Vercel from `main`. Push to deploy.
 
 Public **Sign in** (email/password or Google) in the header; readers manage saved posts on **Account** (`/account`). Password reset uses Resend — see [`docs/READER-AUTH.md`](docs/READER-AUTH.md). Saved posts setup: [`docs/READER-SAVED-POSTS.md`](docs/READER-SAVED-POSTS.md).
 
+Public forms (newsletter, contact, register, forgot password) use Cloudflare Turnstile when configured — see [`docs/TURNSTILE.md`](docs/TURNSTILE.md).
+
 ## In-site CMS
 
 Passcode-gated editor at **`/cms`** (not linked in the public header). Publishes posts to GitHub so Vercel redeploys.

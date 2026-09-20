@@ -14,6 +14,10 @@ import {
   getUserByEmail,
   UsersUnavailableError,
 } from "@/lib/users";
+import {
+  clientIpFromRequest,
+  verifyTurnstileToken,
+} from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 
@@ -75,6 +79,21 @@ export async function POST(request: Request) {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json(
       { error: "Enter a valid email address." },
+      { status: 400 },
+    );
+  }
+
+  const turnstileToken =
+    typeof (body as { turnstileToken?: unknown }).turnstileToken === "string"
+      ? (body as { turnstileToken: string }).turnstileToken
+      : undefined;
+  const turnstile = await verifyTurnstileToken(
+    turnstileToken,
+    clientIpFromRequest(request),
+  );
+  if (!turnstile.ok) {
+    return NextResponse.json(
+      { error: turnstile.error || "Security check failed." },
       { status: 400 },
     );
   }

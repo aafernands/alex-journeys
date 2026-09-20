@@ -5,6 +5,10 @@ import {
   registerCredentialsUser,
   UsersUnavailableError,
 } from "@/lib/users";
+import {
+  clientIpFromRequest,
+  verifyTurnstileToken,
+} from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 
@@ -49,10 +53,24 @@ export async function POST(request: Request) {
     name?: unknown;
     email?: unknown;
     password?: unknown;
+    turnstileToken?: unknown;
   };
   const name = typeof record.name === "string" ? record.name : "";
   const email = typeof record.email === "string" ? record.email : "";
   const password = typeof record.password === "string" ? record.password : "";
+  const turnstileToken =
+    typeof record.turnstileToken === "string" ? record.turnstileToken : undefined;
+
+  const turnstile = await verifyTurnstileToken(
+    turnstileToken,
+    clientIpFromRequest(request),
+  );
+  if (!turnstile.ok) {
+    return NextResponse.json(
+      { error: turnstile.error || "Security check failed." },
+      { status: 400 },
+    );
+  }
 
   try {
     const user = await registerCredentialsUser({ name, email, password });

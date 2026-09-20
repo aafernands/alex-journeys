@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useRef, useState, type FormEvent } from "react";
+import {
+  TurnstileField,
+  isTurnstileWidgetEnabled,
+  type TurnstileFieldHandle,
+} from "@/components/TurnstileField";
 
 type Mode = "signin" | "signup";
 
@@ -37,6 +42,9 @@ export function ReaderLoginForm({
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [oauthPending, setOauthPending] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileFieldHandle>(null);
+  const widgetEnabled = isTurnstileWidgetEnabled();
 
   const anyAuth = googleConfigured || credentialsConfigured;
 
@@ -66,18 +74,32 @@ export function ReaderLoginForm({
     e.preventDefault();
     if (!credentialsConfigured) return;
     setError(null);
+
+    // Require Turnstile on signup when the widget is configured.
+    if (mode === "signup" && widgetEnabled && !turnstileToken) {
+      setError("Please complete the security check before submitting.");
+      return;
+    }
+
     setPending(true);
     try {
       if (mode === "signup") {
         const res = await fetch("/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password }),
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+            ...(turnstileToken ? { turnstileToken } : {}),
+          }),
         });
         const data = (await res.json()) as { error?: string };
         if (!res.ok) {
           setError(data.error || "Could not create account.");
           setPending(false);
+          turnstileRef.current?.reset();
+          setTurnstileToken(null);
           return;
         }
       }
@@ -129,6 +151,8 @@ export function ReaderLoginForm({
             onClick={() => {
               setMode("signin");
               setError(null);
+              turnstileRef.current?.reset();
+              setTurnstileToken(null);
             }}
           >
             Sign in
@@ -143,6 +167,8 @@ export function ReaderLoginForm({
             onClick={() => {
               setMode("signup");
               setError(null);
+              turnstileRef.current?.reset();
+              setTurnstileToken(null);
             }}
           >
             Create account
@@ -225,6 +251,13 @@ export function ReaderLoginForm({
               </p>
             )}
           </div>
+
+          {mode === "signup" ? (
+            <TurnstileField
+              ref={turnstileRef}
+              onToken={setTurnstileToken}
+            />
+          ) : null}
 
           <button
             type="submit"

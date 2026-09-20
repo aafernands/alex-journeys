@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { createHash } from "crypto";
+import {
+  clientIpFromRequest,
+  verifyTurnstileToken,
+} from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 
 type Body = {
   email?: string;
   firstName?: string;
+  turnstileToken?: string;
 };
 
 type MergeField = {
@@ -128,6 +133,17 @@ export async function POST(req: Request) {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json(
       { error: "Please enter a valid email address." },
+      { status: 400 },
+    );
+  }
+
+  const turnstile = await verifyTurnstileToken(
+    body.turnstileToken,
+    clientIpFromRequest(req),
+  );
+  if (!turnstile.ok) {
+    return NextResponse.json(
+      { error: turnstile.error || "Security check failed." },
       { status: 400 },
     );
   }
