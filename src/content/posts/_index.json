@@ -1,7 +1,7 @@
 {
   "migratedAt": "2026-09-19T19:52:59.137Z",
   "source": "alexjournly.com WordPress REST API",
-  "count": 30,
+  "count": 31,
   "featuredHomepage": [
     "cancun-5-day-travel-guide",
     "discovering-iceland-a-week-in-the-land-of-fire-and-ice",
@@ -11,6 +11,22 @@
     "best-solo-travel-destinations"
   ],
   "posts": [
+    {
+      "title": "Niagara Falls in 2 days: mist, tunnels, and a night under the lights",
+      "slug": "niagara-falls",
+      "date": "2026-09-20T12:00:00",
+      "excerpt": "A short two-day loop from the Canadian side — Table Rock, the tunnels behind the falls, Clifton Hill at night, and a quieter morning across the Niagara Parkway.",
+      "featuredImage": {
+        "url": "/media/photo-1745_singular_display_fullpicture-mua3y8bo.jpg",
+        "alt": "Niagara Falls"
+      },
+      "destinations": [
+        "canada"
+      ],
+      "guideHubs": [
+        "plan-a-trip"
+      ]
+    },
     {
       "slug": "cancun-5-day-travel-guide",
       "title": "Cancun in 5 Days: Beaches, Parties, and Island Adventures",
