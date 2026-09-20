@@ -34,7 +34,7 @@ export function BrandLogo({
   const mark = (
     <span className="relative inline-flex items-center">
       <Image
-        src="/brand/logo-alex-journly.png"
+        src="/brand/logo-fernandes-journeys.png"
         alt={site.name}
         width={width}
         height={height}
@@ -42,7 +42,7 @@ export function BrandLogo({
         priority={priority}
       />
       <Image
-        src="/brand/logo-alex-journly-white.png"
+        src="/brand/logo-fernandes-journeys-white.png"
         alt={site.name}
         width={width}
         height={height}

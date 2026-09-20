@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 220" role="img" aria-label="Fernandes Journeys">
+  <title>Fernandes Journeys</title>
+  <text x="360" y="92" text-anchor="middle" font-family="Georgia, 'Times New Roman', Times, serif" font-size="64" font-weight="600" letter-spacing="0.04em" fill="#1a1a1a">Fernandes</text>
+  <text x="360" y="168" text-anchor="middle" font-family="Georgia, 'Times New Roman', Times, serif" font-size="52" font-weight="400" letter-spacing="0.28em" fill="#1a1a1a">JOURNEYS</text>
+  <line x1="220" y1="118" x2="500" y2="118" stroke="#1a1a1a" stroke-width="1.5" opacity="0.45"/>
+</svg>

@@ -23,8 +23,11 @@ export const siteConfig = {
   twitter: undefined as string | undefined,
   instagram: contentSite.social.instagram,
   youtube: contentSite.social.youtube,
-  /** Default share image — brand logo under public/brand */
-  ogImage: "/brand/logo-alex-journly.png",
+  /** Default share / OG image — Maroon Bells trip photo */
+  ogImage:
+    "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
+  /** Organization JSON-LD logo — brand wordmark */
+  logo: "/brand/logo-fernandes-journeys.png",
   authorPhoto: contentSite.authorPhoto,
   keywords: [
     "travel journal",
@@ -101,7 +104,7 @@ export function organizationJsonLd() {
     name: siteConfig.name,
     url: siteConfig.url,
     email: siteConfig.email,
-    logo: absoluteUrl(siteConfig.ogImage),
+    logo: absoluteUrl(siteConfig.logo),
     founder: {
       "@type": "Person",
       name: siteConfig.author,
@@ -122,7 +125,7 @@ export function websiteJsonLd() {
       name: siteConfig.name,
       logo: {
         "@type": "ImageObject",
-        url: absoluteUrl(siteConfig.ogImage),
+        url: absoluteUrl(siteConfig.logo),
       },
     },
     potentialAction: {
@@ -169,7 +172,7 @@ export function blogPostingJsonLd({
       name: siteConfig.name,
       logo: {
         "@type": "ImageObject",
-        url: absoluteUrl(siteConfig.ogImage),
+        url: absoluteUrl(siteConfig.logo),
       },
     },
     mainEntityOfPage: {
