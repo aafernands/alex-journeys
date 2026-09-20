@@ -43,6 +43,44 @@
       }
     ]
   },
+  "featuredSlideshow": {
+    "enabled": true,
+    "eyebrow": "Field notes",
+    "title": "A field note worth opening.",
+    "autoplay": true,
+    "intervalMs": 8000,
+    "secondaryCta": {
+      "label": "New here? Start here",
+      "href": "/start-here"
+    },
+    "slides": [
+      {
+        "id": "slide-featured-seed",
+        "image": "/media/img_5141-muaa0na5.jpg",
+        "imageAlt": "Sunrise over Maroon Bells reflected in a calm alpine lake",
+        "caption": "Niagara Falls, NY",
+        "note": "Sunrise at Niagara Falls, NY — cold air, quiet lake, and the kind of light that makes you glad you left before dawn. Start here for places, stories, and guides from trips already behind me.",
+        "windowBadge": "Field note",
+        "stats": [
+          {
+            "label": "Light",
+            "value": "Sunrise"
+          },
+          {
+            "label": "Season",
+            "value": "Alpine"
+          },
+          {
+            "label": "Journal",
+            "value": "Featured",
+            "accent": true
+          }
+        ],
+        "href": "/marron-bells",
+        "ctaLabel": "Read the sunrise story"
+      }
+    ]
+  },
   "homeSections": {
     "startHere": {
       "eyebrow": "New here?",

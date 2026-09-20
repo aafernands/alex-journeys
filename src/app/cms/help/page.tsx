@@ -121,7 +121,8 @@ export default async function CmsHelpPage() {
             <Link href="/cms/design" className="text-link hover:text-accent">
               Website design
             </Link>{" "}
-            controls the homepage hero <strong>and</strong> major homepage section
+            controls the homepage hero (headline photo only), the featured
+            field-note slideshow, <strong>and</strong> major homepage section
             chrome (Start here, Places, Latest, Guides, Tools, OAuth note, Author
             intro) via{" "}
             <code className="rounded bg-surface-soft px-1 text-xs">
