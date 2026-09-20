@@ -30,14 +30,14 @@ export default function DestinationsIndexPage() {
         { label: "Places" },
       ]}
     >
-      {/* Hero mosaic */}
-      <div className="relative mt-10 overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
-        <div className="grid grid-cols-2 gap-1.5 p-1.5 md:grid-cols-4">
+      {/* Hero mosaic — prior photo layout */}
+      <div className="relative mt-10 overflow-hidden rounded-2xl border border-border bg-surface">
+        <div className="grid grid-cols-2 gap-1 md:grid-cols-4 md:gap-1.5 md:p-1.5">
           {featured.map((dest, i) => (
             <Link
               key={dest.slug}
               href={`/destinations/${dest.slug}`}
-              className={`group relative block overflow-hidden rounded-xl bg-surface ${
+              className={`group relative block overflow-hidden bg-surface ${
                 i === 0
                   ? "col-span-2 aspect-[16/10] md:col-span-2 md:row-span-2 md:aspect-auto md:min-h-[22rem]"
                   : "aspect-[4/3] md:aspect-auto md:min-h-[10.75rem]"
@@ -55,11 +55,22 @@ export default function DestinationsIndexPage() {
                 }
                 className="object-cover transition duration-500 group-hover:scale-[1.04]"
               />
-              <span className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-              <PlaceLabel name={dest.name} size={i === 0 ? "lg" : "md"} />
+              <span className="absolute inset-0 bg-gradient-to-t from-heading/70 via-heading/10 to-transparent" />
+              <PlaceText
+                country={dest.name}
+                destination={dest.name}
+                size={i === 0 ? "lg" : "md"}
+              />
             </Link>
           ))}
         </div>
+
+        <p
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-2 top-3 select-none font-display text-[clamp(3.5rem,12vw,7rem)] font-bold leading-none tracking-tight text-heading/[0.06] md:top-6 md:right-4"
+        >
+          Places
+        </p>
       </div>
 
       <nav aria-label="Continents" className="mt-8 flex flex-wrap gap-2">
@@ -85,23 +96,30 @@ export default function DestinationsIndexPage() {
             aria-labelledby={`continent-${continent.id}`}
             className="scroll-mt-28"
           >
-            <h2
-              id={`continent-${continent.id}`}
-              className="font-display text-center text-3xl font-semibold tracking-tight text-heading md:text-4xl"
-            >
-              {continent.name}
-            </h2>
-
-            <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:max-w-4xl lg:mx-auto">
-              {continent.countries.map((country) => (
-                <li
-                  key={country.slug}
-                  className={
-                    continent.countries.length === 1
-                      ? "sm:col-span-2 lg:mx-auto lg:w-full lg:max-w-xl"
-                      : ""
-                  }
+            <div className="relative mb-6 flex items-end justify-between gap-4 border-b border-border pb-4">
+              <div>
+                <p className="eyebrow">
+                  {continent.countries.length}{" "}
+                  {continent.countries.length === 1 ? "place" : "places"}
+                </p>
+                <h2
+                  id={`continent-${continent.id}`}
+                  className="font-display mt-1 text-title text-heading"
                 >
+                  {continent.name}
+                </h2>
+              </div>
+              <span
+                aria-hidden="true"
+                className="hidden select-none font-display text-5xl font-bold leading-none text-heading/[0.07] sm:block"
+              >
+                {continent.name.slice(0, 2)}
+              </span>
+            </div>
+
+            <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {continent.countries.map((country) => (
+                <li key={country.slug}>
                   <DestinationCard country={country} />
                 </li>
               ))}
@@ -113,31 +131,43 @@ export default function DestinationsIndexPage() {
   );
 }
 
-function PlaceLabel({
-  name,
+/** Country small on top; pin + destination name bolder underneath. */
+function PlaceText({
+  country,
+  destination,
   size = "lg",
 }: {
-  name: string;
+  country: string;
+  destination: string;
   size?: "md" | "lg";
 }) {
-  const icon = size === "lg" ? 22 : 18;
-  const text =
+  const pin = size === "lg" ? 20 : 16;
+  const title =
     size === "lg"
-      ? "text-[1.35rem] md:text-[1.6rem]"
-      : "text-base md:text-lg";
+      ? "text-xl font-bold md:text-2xl"
+      : "text-base font-bold md:text-lg";
+  const countryClass =
+    size === "lg"
+      ? "text-[0.7rem] md:text-xs"
+      : "text-[0.65rem] md:text-[0.7rem]";
 
   return (
-    <span className="absolute bottom-4 left-4 right-4 md:bottom-5 md:left-5">
-      <span className="inline-flex items-center gap-2 text-white">
-        <NavIcon
-          name="map-pin"
-          size={icon}
-          className="shrink-0 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]"
-        />
+    <span className="absolute bottom-3 left-3 right-3 md:bottom-4 md:left-4">
+      <span className="flex flex-col items-start gap-1 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]">
         <span
-          className={`font-sans font-bold tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)] ${text}`}
+          className={`font-sans font-medium uppercase tracking-[0.14em] text-white/85 ${countryClass}`}
         >
-          {name}
+          {country}
+        </span>
+        <span className="inline-flex items-center gap-2">
+          <NavIcon
+            name="map-pin"
+            size={pin}
+            className="shrink-0 text-white"
+          />
+          <span className={`font-sans tracking-tight ${title}`}>
+            {destination}
+          </span>
         </span>
       </span>
     </span>
@@ -148,18 +178,28 @@ function DestinationCard({ country }: { country: DestinationCountry }) {
   return (
     <Link
       href={`/destinations/${country.slug}`}
-      className="group relative block aspect-[16/10] overflow-hidden rounded-2xl bg-surface shadow-[0_10px_30px_-18px_rgba(31,26,20,0.45)] ring-1 ring-black/5 transition hover:shadow-[0_16px_36px_-16px_rgba(31,26,20,0.5)]"
-      aria-label={`${country.name} — ${country.blurb}`}
+      className="panel-interactive group flex h-full flex-col overflow-hidden"
     >
-      <Image
-        src={country.image}
-        alt={country.imageAlt}
-        fill
-        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 28rem"
-        className="object-cover transition duration-500 group-hover:scale-[1.03]"
-      />
-      <span className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent" />
-      <PlaceLabel name={country.name} size="lg" />
+      <div className="relative aspect-[4/5] overflow-hidden bg-surface sm:aspect-[5/4]">
+        <Image
+          src={country.image}
+          alt={country.imageAlt}
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover transition duration-500 group-hover:scale-[1.03]"
+        />
+        <span className="absolute inset-0 bg-gradient-to-t from-heading/55 via-transparent to-transparent opacity-80" />
+        <PlaceText country={country.name} destination={country.name} />
+      </div>
+      <div className="flex flex-1 flex-col p-4 md:p-5">
+        <p className="flex-1 text-sm leading-relaxed text-text">
+          {country.blurb}
+        </p>
+        <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-link transition group-hover:gap-2.5 group-hover:text-accent">
+          Open place
+          <span aria-hidden="true">→</span>
+        </span>
+      </div>
     </Link>
   );
 }
