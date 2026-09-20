@@ -26,7 +26,7 @@ const PAGES_DIR = path.join(process.cwd(), "src/content/pages");
 
 /** Marketing / hub routes that are React code only (not JSON-editable). */
 export const CODE_ONLY_PAGE_ROUTES = [
-  { path: "/", note: "Homepage" },
+  { path: "/", note: "Homepage (hero via CMS → Website design)" },
   { path: "/about", note: "About (React)" },
   { path: "/contact", note: "Contact form (React)" },
   { path: "/start-here", note: "Start here hub (React)" },

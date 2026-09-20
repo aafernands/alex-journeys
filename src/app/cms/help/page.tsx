@@ -86,7 +86,43 @@ export default async function CmsHelpPage() {
             is the post image library (search, add by URL/upload, picker in the
             editor) plus the author photo tab.
           </li>
+          <li>
+            <Link href="/cms/design" className="text-link hover:text-accent">
+              Website design
+            </Link>{" "}
+            controls the homepage hero image, location label, tagline, subtitle,
+            CTAs, and “From the road” strip (commits{" "}
+            <code className="rounded bg-surface-soft px-1 text-xs">
+              src/data/site-design.json
+            </code>
+            ).
+          </li>
         </ul>
+      </section>
+
+      <section className="panel space-y-3 p-5 md:p-6">
+        <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
+          Change the homepage hero
+        </h2>
+        <ol className="list-decimal space-y-2 pl-5 text-sm text-text">
+          <li>
+            Open{" "}
+            <Link href="/cms/design" className="text-link hover:text-accent">
+              Website design
+            </Link>
+            .
+          </li>
+          <li>
+            Under <strong>Homepage hero image</strong>, choose from the media
+            library or upload a new photo. Set alt text and the window chrome
+            location label (e.g. Maroon Bells · Colorado).
+          </li>
+          <li>
+            Edit tagline, subtitle, and CTAs as needed, then{" "}
+            <strong>Save website design</strong>.
+          </li>
+          <li>Wait for the Vercel deploy — the live homepage updates automatically.</li>
+        </ol>
       </section>
 
       <section className="panel space-y-3 p-5 md:p-6">

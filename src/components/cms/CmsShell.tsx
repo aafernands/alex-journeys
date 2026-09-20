@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   MapPin,
   Menu,
+  Palette,
   PenLine,
   Users,
   X,
@@ -23,6 +24,7 @@ const NAV = [
   { href: "/cms/pages", label: "Pages", icon: FileText },
   { href: "/cms/destinations", label: "Destinations", icon: MapPin },
   { href: "/cms/media", label: "Media", icon: ImageIcon },
+  { href: "/cms/design", label: "Website design", icon: Palette },
   { href: "/cms/users", label: "Users", icon: Users },
   { href: "/cms/help", label: "Help", icon: HelpCircle },
 ] as const;

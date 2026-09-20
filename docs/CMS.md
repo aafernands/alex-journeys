@@ -1,6 +1,6 @@
 # In-site CMS
 
-Passcode- and OAuth-gated editor at **`/cms`** for publishing blog posts, CMS pages, destinations (map + climate), the media library, and the author photo to GitHub. Signed-in admins also get **Admin console** in the header avatar menu (hidden for non-admin readers).
+Passcode- and OAuth-gated editor at **`/cms`** for publishing blog posts, CMS pages, destinations (map + climate), the media library, homepage website design (hero), and the author photo to GitHub. Signed-in admins also get **Admin console** in the header avatar menu (hidden for non-admin readers).
 
 Auth lives in `src/auth.ts` (Auth.js / next-auth v5) and `src/lib/cms/auth.ts` (CMS gate that ORs OAuth admin + optional passcode).
 
@@ -16,6 +16,7 @@ After sign-in, the shell provides:
 | Pages | `/cms/pages` | List/create/edit/delete JSON pages under `src/content/pages` |
 | Destinations | `/cms/destinations` | Countries, map, climate, itinerary → `tree.json` |
 | Media | `/cms/media` | Post image library + author photo |
+| Website design | `/cms/design` | Homepage hero image, copy, CTAs, “From the road” strip |
 | Help | `/cms/help` | Short publish checklist |
 
 CMS layout sets `robots: noindex`.
@@ -103,6 +104,22 @@ Post editor: featured image **Choose from library**; rich text **Image** opens t
 
 **Media → Author photo** tab → upload JPEG/PNG/WebP → commits `public/brand/alex-fernandes.*` + `src/data/author-photo.json`.
 
+### Website design (homepage hero)
+
+**Website design** (`/cms/design`) edits `src/data/site-design.json` (Git-backed like the author photo).
+
+| Control | Notes |
+| --- | --- |
+| Hero image | Choose from media library or upload → `public/media/hero-…` |
+| Alt + location label | Window chrome text (e.g. `Maroon Bells · Colorado`) |
+| Eyebrow, tagline, subtitle | Copy beside the photo |
+| Primary / secondary CTAs | Label + href |
+| Object position / overlay | Fine-tune crop and soft darken |
+| “From the road” strip | Show/hide + labels |
+| Photo stats row | Show/hide + three label/value pairs |
+
+Theme tokens (fonts/colors) UI is intentionally out of scope for now — stub note on the Design page.
+
 ## Security notes
 
 - OAuth: Google is open to **public readers**; CMS still requires `CMS_ADMIN_EMAILS` (`session.user.isAdmin`) or passcode. Reader sessions alone never unlock `/cms`. The header **Admin console** item is shown only when `session.user.isAdmin` is true — ensure `CMS_ADMIN_EMAILS` includes `fernandesjourneys@gmail.com` on Vercel.
@@ -117,5 +134,5 @@ Public reader save/bookmarks: see [`READER-SAVED-POSTS.md`](./READER-SAVED-POSTS
 
 1. Env vars on Vercel (Auth.js + allowlist, optional passcode, GitHub token).
 2. Go to `https://www.fernandesjourneys.com/cms` → sign in.
-3. Dashboard → check publish readiness → **New post** or open Posts/Pages/Destinations/Media.
+3. Dashboard → check publish readiness → **New post**, Posts/Pages/Destinations/Media, or **Website design** for the homepage hero.
 4. Publish → wait for Vercel → open the live URL.

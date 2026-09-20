@@ -10,6 +10,7 @@ import {
   uploadPathFromUrl,
 } from "@/lib/cms/media";
 import { toPostMeta, type ValidatedPost } from "@/lib/cms/validate";
+import type { SiteDesign } from "@/lib/site-design";
 
 const DEFAULT_REPO = "aafernands/fernandes-journeys";
 const DEFAULT_BRANCH = "main";
@@ -582,6 +583,97 @@ const MEDIA_UPLOAD_TYPES: Record<string, string> = {
   "image/webp": ".webp",
   "image/gif": ".gif",
 };
+
+
+const SITE_DESIGN_PATH = "src/data/site-design.json";
+
+export async function updateSiteDesign(options: {
+  design: SiteDesign;
+  /** Optional new hero image upload (base64, no data: prefix) */
+  imageUpload?: {
+    base64: string;
+    contentType: string;
+    filename?: string;
+  };
+}): Promise<{ commitUrl: string; design: SiteDesign }> {
+  let design = options.design;
+  let imageCommitUrl = "";
+
+  if (options.imageUpload) {
+    const contentType = (
+      options.imageUpload.contentType.trim().toLowerCase().split(";")[0] || ""
+    ).trim();
+    const ext = MEDIA_UPLOAD_TYPES[contentType];
+    if (!ext) {
+      throw new Error(
+        "Unsupported image type. Use JPEG, PNG, WebP, or GIF.",
+      );
+    }
+    const base64 = options.imageUpload.base64.replace(/\s/g, "");
+    if (!base64) throw new Error("Empty image data.");
+    const decodedBytes = Buffer.from(base64, "base64");
+    if (decodedBytes.length === 0) {
+      throw new Error("Could not decode image data.");
+    }
+    if (decodedBytes.length > MAX_MEDIA_UPLOAD_BYTES) {
+      throw new Error(
+        `Image too large (${(decodedBytes.length / (1024 * 1024)).toFixed(1)}MB). Max is about 2.5MB.`,
+      );
+    }
+
+    const rawName = (options.imageUpload.filename || `hero${ext}`)
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80);
+    const stem = rawName.replace(/\.[a-z0-9]+$/i, "") || "hero";
+    const stamp = Date.now().toString(36);
+    const filename = `hero-${stem}-${stamp}${ext}`;
+    const imagePath = `${MEDIA_UPLOAD_DIR}/${filename}`;
+    const publicUrl = `/media/${filename}`;
+
+    const imageResult = await putBinaryFile(
+      imagePath,
+      base64,
+      `cms: upload hero image ${filename}`,
+      null,
+    );
+    imageCommitUrl = imageResult.commitUrl;
+
+    // Best-effort: index in media library (ignore failures so design still saves)
+    try {
+      await addMediaByUrl({
+        url: publicUrl,
+        alt: design.hero.imageAlt || "Homepage hero",
+      });
+    } catch {
+      // non-fatal
+    }
+
+    design = {
+      ...design,
+      hero: {
+        ...design.hero,
+        image: publicUrl,
+      },
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  const existingSha = await getFileSha(SITE_DESIGN_PATH);
+  const metaResult = await putFile(
+    SITE_DESIGN_PATH,
+    `${JSON.stringify(design, null, 2)}\n`,
+    "cms: update site design",
+    existingSha,
+  );
+
+  return {
+    commitUrl: metaResult.commitUrl || imageCommitUrl,
+    design,
+  };
+}
+
 
 function emptyMediaIndex(): MediaIndex {
   return { updatedAt: new Date().toISOString(), count: 0, items: [] };

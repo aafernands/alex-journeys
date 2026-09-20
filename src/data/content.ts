@@ -31,6 +31,7 @@ export const about = {
   ],
 };
 
+/** Fallback hero defaults — live homepage values come from site-design.json (CMS → Website design). */
 export const hero = {
   tagline: "Inspire. Capture. Discover.",
   subtitle:

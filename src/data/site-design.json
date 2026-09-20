@@ -1,0 +1,52 @@
+{
+  "updatedAt": "2026-09-20T00:00:00.000Z",
+  "hero": {
+    "image": "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
+    "imageAlt": "Sunrise over Maroon Bells reflected in a calm alpine lake",
+    "imageCaption": "Maroon Bells · Colorado",
+    "windowBadge": "Field note",
+    "eyebrow": "Personal travel journal",
+    "tagline": "Inspire. Capture. Discover.",
+    "subtitle": "A personal travel blog sharing places I’ve been and notes from the road — places, stories, guides, and photos from journeys already behind me.",
+    "ctaPrimary": {
+      "label": "Explore places",
+      "href": "/destinations"
+    },
+    "ctaSecondary": {
+      "label": "Read stories",
+      "href": "/blog"
+    },
+    "objectPosition": "center",
+    "overlay": false,
+    "showFromTheRoad": true,
+    "fromTheRoad": {
+      "label": "From the road",
+      "items": [
+        "Places visited",
+        "Trip notes & photos",
+        "Tools I still use"
+      ]
+    },
+    "stats": [
+      {
+        "label": "Light",
+        "value": "Sunrise"
+      },
+      {
+        "label": "Season",
+        "value": "Alpine"
+      },
+      {
+        "label": "Journal",
+        "value": "Featured",
+        "accent": true
+      }
+    ]
+  },
+  "seo": {
+    "homeTitleSnippet": ""
+  },
+  "flags": {
+    "showHeroStats": true
+  }
+}
