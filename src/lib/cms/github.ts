@@ -19,6 +19,8 @@ import {
 const DEFAULT_REPO = "aafernands/fernandes-journeys";
 const DEFAULT_BRANCH = "main";
 const POSTS_PATH = "src/content/posts";
+const PAGES_PATH = "src/content/pages";
+const DRAFTS_PATH = "src/content/drafts";
 export const DESTINATIONS_TREE_PATH = "src/content/destinations/tree.json";
 
 type GhFileResponse = {
@@ -259,6 +261,38 @@ export async function fetchPostFromGithub(
   return file?.data ?? null;
 }
 
+/** Live draft JSON from GitHub Contents API (avoids stale Vercel deploy FS). */
+export async function fetchDraftFromGithub(
+  slug: string,
+): Promise<{
+  slug: string;
+  title: string;
+  date: string;
+  status?: "draft";
+  excerpt: string;
+  featuredImage: Post["featuredImage"];
+  destinations: string[];
+  guideHubs?: string[];
+  contentHtml: string;
+  itinerary?: Post["itinerary"];
+  source?: unknown;
+} | null> {
+  const file = await getFileJson<{
+    slug: string;
+    title: string;
+    date: string;
+    status?: "draft";
+    excerpt: string;
+    featuredImage: Post["featuredImage"];
+    destinations: string[];
+    guideHubs?: string[];
+    contentHtml: string;
+    itinerary?: Post["itinerary"];
+    source?: unknown;
+  }>(`${DRAFTS_PATH}/${slug}.json`);
+  return file?.data ?? null;
+}
+
 const AUTHOR_PHOTO_META_PATH = "src/data/author-photo.json";
 const AUTHOR_PHOTO_DIR = "public/brand";
 const MAX_AUTHOR_PHOTO_BYTES = Math.floor(2.5 * 1024 * 1024);
@@ -346,9 +380,6 @@ export async function publishDestinationsTree(
     existingSha,
   );
 }
-
-const PAGES_PATH = "src/content/pages";
-const DRAFTS_PATH = "src/content/drafts";
 
 type PagesIndexFile = {
   migratedAt?: string;

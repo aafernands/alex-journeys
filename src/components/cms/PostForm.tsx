@@ -188,7 +188,11 @@ export function PostForm({
           draft: Boolean(data.draft || asDraft),
         });
         setPending(null);
-        router.refresh();
+        // Draft saves: keep success banner + in-memory form (edit page loads
+        // drafts from GitHub on next navigation/refresh). Publish still refreshes.
+        if (!asDraft) {
+          router.refresh();
+        }
       } catch {
         setError("Network error. Try again.");
         setPending(null);

@@ -3,8 +3,14 @@ import { notFound, redirect } from "next/navigation";
 import { PostForm } from "@/components/cms/PostForm";
 import { getAllDestinations } from "@/data/destinations";
 import { isCmsAuthenticated } from "@/lib/cms/auth";
-import { getDraftBySlug } from "@/lib/cms/drafts";
+import { getDraftBySlug, type DraftPost } from "@/lib/cms/drafts";
+import {
+  fetchDraftFromGithub,
+  fetchPostFromGithub,
+  isGithubConfigured,
+} from "@/lib/cms/github";
 import { sanitizeSlug } from "@/lib/cms/validate";
+import type { Post } from "@/lib/post-types";
 import { getPostBySlug } from "@/lib/posts";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +19,48 @@ type PageProps = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ draft?: string }>;
 };
+
+type EditableSource = DraftPost | Post;
+
+async function loadDraft(slug: string): Promise<DraftPost | null> {
+  if (isGithubConfigured()) {
+    try {
+      const fromGh = await fetchDraftFromGithub(slug);
+      // Null from GitHub is authoritative (e.g. draft promoted/deleted) —
+      // do not revive a stale deploy-snapshot file.
+      if (!fromGh?.slug || !fromGh?.title) return null;
+      return {
+        slug: fromGh.slug,
+        title: fromGh.title,
+        date: fromGh.date,
+        status: "draft",
+        excerpt: fromGh.excerpt ?? "",
+        featuredImage: fromGh.featuredImage ?? null,
+        destinations: fromGh.destinations ?? [],
+        guideHubs: fromGh.guideHubs,
+        contentHtml: fromGh.contentHtml ?? "",
+        itinerary: fromGh.itinerary,
+        source: fromGh.source,
+      };
+    } catch {
+      // Network/API error — fall back to local filesystem
+    }
+  }
+  return getDraftBySlug(slug);
+}
+
+async function loadPost(slug: string): Promise<Post | null> {
+  if (isGithubConfigured()) {
+    try {
+      const fromGh = await fetchPostFromGithub(slug);
+      if (fromGh?.slug && fromGh?.title) return fromGh;
+      // Prefer GitHub when configured; fall back if missing (pre-deploy local).
+    } catch {
+      // Network/API error — fall back to local filesystem
+    }
+  }
+  return getPostBySlug(slug);
+}
 
 export default async function CmsEditPostPage({ params, searchParams }: PageProps) {
   if (!(await isCmsAuthenticated())) {
@@ -25,11 +73,11 @@ export default async function CmsEditPostPage({ params, searchParams }: PageProp
   if (!slug) notFound();
 
   const wantDraft = draftParam === "1" || draftParam === "true";
-  const draft = wantDraft ? getDraftBySlug(slug) : null;
-  const post = !draft ? getPostBySlug(slug) : null;
+  const draft = wantDraft ? await loadDraft(slug) : null;
+  const post = !draft ? await loadPost(slug) : null;
   if (!draft && !post) notFound();
 
-  const source = draft ?? post!;
+  const source: EditableSource = draft ?? post!;
   const destinations = getAllDestinations().map((d) => ({
     slug: d.slug,
     name: d.name,

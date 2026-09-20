@@ -4,6 +4,11 @@ import { PostForm } from "@/components/cms/PostForm";
 import { getAllDestinations } from "@/data/destinations";
 import { isCmsAuthenticated } from "@/lib/cms/auth";
 import { getDraftBySlug } from "@/lib/cms/drafts";
+import {
+  fetchDraftFromGithub,
+  fetchPostFromGithub,
+  isGithubConfigured,
+} from "@/lib/cms/github";
 import { sanitizeSlug } from "@/lib/cms/validate";
 import { getPostBySlug } from "@/lib/posts";
 
@@ -12,6 +17,23 @@ export const dynamic = "force-dynamic";
 type PageProps = {
   searchParams: Promise<{ duplicate?: string; fromDraft?: string }>;
 };
+
+async function loadDuplicateSource(slug: string, fromDraft: boolean) {
+  if (isGithubConfigured()) {
+    try {
+      if (fromDraft) {
+        const fromGh = await fetchDraftFromGithub(slug);
+        if (fromGh?.slug && fromGh?.title) return fromGh;
+      } else {
+        const fromGh = await fetchPostFromGithub(slug);
+        if (fromGh?.slug && fromGh?.title) return fromGh;
+      }
+    } catch {
+      // fall through
+    }
+  }
+  return fromDraft ? getDraftBySlug(slug) : getPostBySlug(slug);
+}
 
 export default async function CmsNewPostPage({ searchParams }: PageProps) {
   if (!(await isCmsAuthenticated())) {
@@ -23,8 +45,7 @@ export default async function CmsNewPostPage({ searchParams }: PageProps) {
   let initial: Parameters<typeof PostForm>[0]["initial"] | undefined;
 
   if (dupSlug) {
-    const source =
-      fromDraft === "1" ? getDraftBySlug(dupSlug) : getPostBySlug(dupSlug);
+    const source = await loadDuplicateSource(dupSlug, fromDraft === "1");
     if (source) {
       initial = {
         title: `${source.title} (copy)`,
