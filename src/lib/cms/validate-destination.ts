@@ -400,6 +400,11 @@ export function validateDestinationCountry(
     if (highlights.length === 0) highlights = undefined;
   }
 
+  const city = asString(input.city);
+  if (city.length > 80) {
+    return { ok: false, error: "City must be at most 80 characters." };
+  }
+
   const tripLabel = asString(input.tripLabel) || undefined;
   const featuredPostSlugRaw = asString(input.featuredPostSlug);
   let featuredPostSlug: string | undefined;
@@ -438,6 +443,7 @@ export function validateDestinationCountry(
     image,
     imageAlt,
   };
+  if (city) country.city = city;
   if (highlights) country.highlights = highlights;
   if (tripLabel) country.tripLabel = tripLabel;
   if (featuredPostSlug) country.featuredPostSlug = featuredPostSlug;

@@ -6,6 +6,7 @@
       {
         "slug": "iceland",
         "name": "Iceland",
+        "city": "Reykjavík",
         "region": "Europe",
         "continent": "Europe",
         "blurb": "Ring-road miles, geothermal pools, and light that barely quit — notes and photos from a week in the land of fire and ice.",
@@ -215,6 +216,7 @@
       {
         "slug": "canada",
         "name": "Canada",
+        "city": "Toronto",
         "region": "North America",
         "continent": "Americas",
         "blurb": "Wide skies, city weekends, and quiet stretches of road — starting with a packed 48 hours in Toronto.",
@@ -397,6 +399,7 @@
       {
         "slug": "united-states",
         "name": "United States",
+        "city": "Colorado",
         "region": "North America",
         "continent": "Americas",
         "blurb": "Coast-to-coast fragments — mountain mornings, ski towns, wine weekends, and the roads in between.",
@@ -543,6 +546,7 @@
       {
         "slug": "mexico",
         "name": "Mexico",
+        "city": "Cancún",
         "region": "Central America",
         "continent": "Americas",
         "blurb": "Markets, plazas, Caribbean water — including five packed days in Cancún.",
@@ -739,6 +743,7 @@
       {
         "slug": "brazil",
         "name": "Brazil",
+        "city": "Rio de Janeiro",
         "region": "South America",
         "continent": "Americas",
         "blurb": "Rhythm, coastline, and cities that keep going after midnight — including a two-week Rio itinerary.",

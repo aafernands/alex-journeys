@@ -4,6 +4,7 @@ import Link from "next/link";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { SitePage } from "@/components/pages/SitePage";
 import {
+  destinationCity,
   destinationsTree,
   getAllDestinations,
   type DestinationCountry,
@@ -64,7 +65,7 @@ export default function DestinationsIndexPage() {
               <span className="absolute inset-0 bg-gradient-to-t from-heading/70 via-heading/10 to-transparent" />
               <PlaceText
                 country={dest.name}
-                destination={dest.name}
+                destination={destinationCity(dest)}
                 size={i === 0 ? "lg" : "md"}
               />
             </Link>
@@ -195,7 +196,10 @@ function DestinationCard({ country }: { country: DestinationCountry }) {
           className="object-cover transition duration-500 group-hover:scale-[1.03]"
         />
         <span className="absolute inset-0 bg-gradient-to-t from-heading/55 via-transparent to-transparent opacity-80" />
-        <PlaceText country={country.name} destination={country.name} />
+        <PlaceText
+          country={country.name}
+          destination={destinationCity(country)}
+        />
       </div>
       <div className="flex flex-1 flex-col p-4 md:p-5">
         <p className="flex-1 text-sm leading-relaxed text-text">
