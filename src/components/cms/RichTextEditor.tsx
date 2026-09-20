@@ -20,6 +20,7 @@ import {
   Redo2,
   Code2,
 } from "lucide-react";
+import { MediaPicker } from "./MediaPicker";
 
 type Props = {
   id?: string;
@@ -63,6 +64,7 @@ function ToolbarButton({
 export function RichTextEditor({ id, value, onChange, required }: Props) {
   const [showHtml, setShowHtml] = useState(false);
   const [htmlDraft, setHtmlDraft] = useState(value);
+  const [libraryOpen, setLibraryOpen] = useState(false);
 
   const extensions = useMemo(
     () => [
@@ -133,7 +135,7 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
     editor.chain().focus().extendMarkRange("link").setLink({ href: trimmed }).run();
   };
 
-  const setImage = () => {
+  const setImageFromUrl = () => {
     if (!editor) return;
     const url = window.prompt("Image URL", "https://");
     if (url === null) return;
@@ -141,6 +143,10 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
     if (!trimmed) return;
     const alt = window.prompt("Alt text (optional)", "") || "";
     editor.chain().focus().setImage({ src: trimmed, alt }).run();
+  };
+
+  const setImage = () => {
+    setLibraryOpen(true);
   };
 
   if (!editor) {
@@ -208,8 +214,11 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
         <ToolbarButton label="Link" active={editor.isActive("link")} onClick={setLink}>
           <Link2 className="h-4 w-4" />
         </ToolbarButton>
-        <ToolbarButton label="Image" onClick={setImage}>
+        <ToolbarButton label="Image from library" onClick={setImage}>
           <ImageIcon className="h-4 w-4" />
+        </ToolbarButton>
+        <ToolbarButton label="Image from URL" onClick={setImageFromUrl}>
+          <span className="text-[0.65rem] font-bold">URL</span>
         </ToolbarButton>
         <span className="mx-1 h-5 w-px bg-border" aria-hidden />
         <ToolbarButton
@@ -269,8 +278,19 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
 
       <p className="mt-1 text-xs text-muted">
         Write normally with the toolbar. HTML is saved automatically for the
-        site. Use the code icon if you ever need the raw HTML.
+        site. Use the code icon if you ever need the raw HTML. Image icon opens
+        the media library; URL inserts by paste.
       </p>
+
+      <MediaPicker
+        open={libraryOpen}
+        onClose={() => setLibraryOpen(false)}
+        onSelect={({ url, alt }) => {
+          if (!editor) return;
+          editor.chain().focus().setImage({ src: url, alt: alt || "" }).run();
+        }}
+        title="Insert image from library"
+      />
     </div>
   );
 }

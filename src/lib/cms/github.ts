@@ -1,5 +1,14 @@
 import type { DestinationContinent } from "@/data/destinations";
+import type { MediaIndex, MediaItem } from "@/lib/cms/media-types";
 import type { Post, PostMeta } from "@/lib/post-types";
+import {
+  detectMediaSource,
+  ensureUniqueMediaId,
+  isOwnedUploadUrl,
+  mediaIdFromUrl,
+  normalizeMediaUrl,
+  uploadPathFromUrl,
+} from "@/lib/cms/media";
 import { toPostMeta, type ValidatedPost } from "@/lib/cms/validate";
 
 const DEFAULT_REPO = "aafernands/fernandes-journeys";
@@ -562,3 +571,238 @@ export async function deletePage(
 
   return delResult;
 }
+
+export const MEDIA_INDEX_PATH = "src/content/media/_index.json";
+const MEDIA_UPLOAD_DIR = "public/media";
+const MAX_MEDIA_UPLOAD_BYTES = Math.floor(2.5 * 1024 * 1024);
+
+const MEDIA_UPLOAD_TYPES: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+};
+
+function emptyMediaIndex(): MediaIndex {
+  return { updatedAt: new Date().toISOString(), count: 0, items: [] };
+}
+
+async function readMediaIndexFromGithub(): Promise<{
+  data: MediaIndex;
+  sha: string | null;
+}> {
+  const file = await getFileJson<MediaIndex>(MEDIA_INDEX_PATH);
+  if (!file) return { data: emptyMediaIndex(), sha: null };
+  return {
+    data: {
+      updatedAt: file.data.updatedAt || new Date().toISOString(),
+      count: file.data.items?.length ?? 0,
+      items: Array.isArray(file.data.items) ? file.data.items : [],
+    },
+    sha: file.sha,
+  };
+}
+
+async function writeMediaIndex(
+  index: MediaIndex,
+  sha: string | null,
+  message: string,
+): Promise<{ commitUrl: string }> {
+  const payload: MediaIndex = {
+    ...index,
+    updatedAt: new Date().toISOString(),
+    count: index.items.length,
+  };
+  return putFile(
+    MEDIA_INDEX_PATH,
+    `${JSON.stringify(payload, null, 2)}\n`,
+    message,
+    sha,
+  );
+}
+
+export async function publishMediaIndex(
+  index: MediaIndex,
+): Promise<{ commitUrl: string }> {
+  const existing = await readMediaIndexFromGithub();
+  return writeMediaIndex(index, existing.sha, "cms: update media library index");
+}
+
+export async function addMediaByUrl(options: {
+  url: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+}): Promise<{ item: MediaItem; commitUrl: string; created: boolean }> {
+  const url = options.url.trim();
+  if (!url) throw new Error("URL is required.");
+  if (!url.startsWith("/") && !/^https?:\/\//i.test(url)) {
+    throw new Error("URL must be absolute (https://…) or a site path (/media/…).");
+  }
+
+  const { data: index, sha } = await readMediaIndexFromGithub();
+  const norm = normalizeMediaUrl(url);
+  const existing = index.items.find(
+    (i) => normalizeMediaUrl(i.url) === norm,
+  );
+  if (existing) {
+    const alt = (options.alt ?? "").trim();
+    if (alt && alt !== existing.alt) {
+      const items = index.items.map((i) =>
+        i.id === existing.id
+          ? {
+              ...i,
+              alt,
+              ...(options.width ? { width: options.width } : {}),
+              ...(options.height ? { height: options.height } : {}),
+            }
+          : i,
+      );
+      const result = await writeMediaIndex(
+        { ...index, items },
+        sha,
+        `cms: update media alt ${existing.id}`,
+      );
+      const item = items.find((i) => i.id === existing.id)!;
+      return { item, commitUrl: result.commitUrl, created: false };
+    }
+    return { item: existing, commitUrl: "", created: false };
+  }
+
+  const ids = new Set(index.items.map((i) => i.id));
+  const id = ensureUniqueMediaId(mediaIdFromUrl(url), ids, url);
+  const item: MediaItem = {
+    id,
+    slug: id,
+    url,
+    alt: (options.alt ?? "").trim(),
+    source: detectMediaSource(url),
+    ...(options.width ? { width: options.width } : {}),
+    ...(options.height ? { height: options.height } : {}),
+    usedBy: [],
+    createdAt: new Date().toISOString(),
+  };
+  const items = [item, ...index.items];
+  const result = await writeMediaIndex(
+    { ...index, items },
+    sha,
+    `cms: add media ${id}`,
+  );
+  return { item, commitUrl: result.commitUrl, created: true };
+}
+
+export async function uploadMediaFile(options: {
+  base64: string;
+  contentType: string;
+  filename?: string;
+  alt?: string;
+}): Promise<{ item: MediaItem; commitUrl: string }> {
+  const contentType = (
+    options.contentType.trim().toLowerCase().split(";")[0] || ""
+  ).trim();
+  const ext = MEDIA_UPLOAD_TYPES[contentType];
+  if (!ext) {
+    throw new Error(
+      "Unsupported image type. Use JPEG, PNG, WebP, or GIF.",
+    );
+  }
+
+  const base64 = options.base64.replace(/\s/g, "");
+  if (!base64) throw new Error("Empty image data.");
+  const decodedBytes = Buffer.from(base64, "base64");
+  if (decodedBytes.length === 0) throw new Error("Could not decode image data.");
+  if (decodedBytes.length > MAX_MEDIA_UPLOAD_BYTES) {
+    throw new Error(
+      `Image too large (${(decodedBytes.length / (1024 * 1024)).toFixed(1)}MB). Max is about 2.5MB.`,
+    );
+  }
+
+  const rawName = (options.filename || `upload${ext}`)
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+  const stem = rawName.replace(/\.[a-z0-9]+$/i, "") || "upload";
+  const stamp = Date.now().toString(36);
+  const filename = `${stem}-${stamp}${ext}`;
+  const imagePath = `${MEDIA_UPLOAD_DIR}/${filename}`;
+  const publicUrl = `/media/${filename}`;
+
+  const imageResult = await putBinaryFile(
+    imagePath,
+    base64,
+    `cms: upload media ${filename}`,
+    null,
+  );
+
+  const added = await addMediaByUrl({
+    url: publicUrl,
+    alt: options.alt,
+  });
+
+  return {
+    item: added.item,
+    commitUrl: added.commitUrl || imageResult.commitUrl,
+  };
+}
+
+export async function updateMediaItem(
+  id: string,
+  patch: { alt?: string },
+): Promise<{ item: MediaItem; commitUrl: string }> {
+  const { data: index, sha } = await readMediaIndexFromGithub();
+  const idx = index.items.findIndex((i) => i.id === id || i.slug === id);
+  if (idx < 0) throw new Error(`Media "${id}" not found.`);
+
+  const current = index.items[idx];
+  const next: MediaItem = {
+    ...current,
+    ...(typeof patch.alt === "string" ? { alt: patch.alt.trim() } : {}),
+  };
+  const items = [...index.items];
+  items[idx] = next;
+  const result = await writeMediaIndex(
+    { ...index, items },
+    sha,
+    `cms: update media ${next.id}`,
+  );
+  return { item: next, commitUrl: result.commitUrl };
+}
+
+export async function deleteMediaItem(
+  id: string,
+): Promise<{ commitUrl: string; deletedFile?: string }> {
+  const { data: index, sha } = await readMediaIndexFromGithub();
+  const item = index.items.find((i) => i.id === id || i.slug === id);
+  if (!item) throw new Error(`Media "${id}" not found.`);
+
+  const items = index.items.filter((i) => i.id !== item.id);
+  const indexResult = await writeMediaIndex(
+    { ...index, items },
+    sha,
+    `cms: remove media ${item.id}`,
+  );
+
+  let deletedFile: string | undefined;
+  if (item.source === "upload" && isOwnedUploadUrl(item.url)) {
+    const filePath = uploadPathFromUrl(item.url);
+    if (filePath) {
+      try {
+        const fileSha = await getFileSha(filePath);
+        if (fileSha) {
+          await deleteFile(
+            filePath,
+            `cms: delete media file ${filePath.split("/").pop()}`,
+            fileSha,
+          );
+          deletedFile = filePath;
+        }
+      } catch {
+        // Index already updated; file cleanup is best-effort
+      }
+    }
+  }
+
+  return { commitUrl: indexResult.commitUrl, deletedFile };
+}
+

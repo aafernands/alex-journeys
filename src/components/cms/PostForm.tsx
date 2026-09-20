@@ -9,6 +9,7 @@ import {
   type FormEvent,
 } from "react";
 import { useRouter } from "next/navigation";
+import { MediaPicker } from "./MediaPicker";
 import { RichTextEditor } from "./RichTextEditor";
 
 export type DestinationOption = { slug: string; name: string };
@@ -90,6 +91,7 @@ export function PostForm({
   const [pending, setPending] = useState<"publish" | "draft" | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const baselineRef = useRef(false);
 
   const derivedSlug = useMemo(() => slugify(title), [title]);
@@ -318,9 +320,18 @@ export function PostForm({
 
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
-              <label htmlFor="cms-image-url" className="text-sm font-semibold text-heading">
-                Featured image URL
-              </label>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <label htmlFor="cms-image-url" className="text-sm font-semibold text-heading">
+                  Featured image URL
+                </label>
+                <button
+                  type="button"
+                  className="text-xs font-semibold text-link hover:text-accent"
+                  onClick={() => setLibraryOpen(true)}
+                >
+                  Choose from library
+                </button>
+              </div>
               <input
                 id="cms-image-url"
                 type="url"
@@ -521,6 +532,16 @@ export function PostForm({
           Back to posts
         </a>
       </div>
+    <MediaPicker
+      open={libraryOpen}
+      onClose={() => setLibraryOpen(false)}
+      onSelect={({ url, alt }) => {
+        setFeaturedImageUrl(url);
+        if (alt) setFeaturedImageAlt(alt);
+        markDirty();
+      }}
+      title="Featured image from library"
+    />
     </form>
   );
 }

@@ -83,7 +83,8 @@ export default async function CmsHelpPage() {
             <Link href="/cms/media" className="text-link hover:text-accent">
               Media
             </Link>{" "}
-            updates the author photo site-wide after redeploy.
+            is the post image library (search, add by URL/upload, picker in the
+            editor) plus the author photo tab.
           </li>
         </ul>
       </section>

@@ -1,6 +1,6 @@
 # In-site CMS
 
-Passcode- and OAuth-gated editor at **`/cms`** for publishing blog posts, CMS pages, destinations (map + climate), and the author photo to GitHub. There is **no public header link** — bookmark `/cms` directly.
+Passcode- and OAuth-gated editor at **`/cms`** for publishing blog posts, CMS pages, destinations (map + climate), the media library, and the author photo to GitHub. There is **no public header link** — bookmark `/cms` directly.
 
 Auth lives in `src/auth.ts` (Auth.js / next-auth v5) and `src/lib/cms/auth.ts` (CMS gate that ORs OAuth admin + optional passcode).
 
@@ -15,7 +15,7 @@ After sign-in, the shell provides:
 | New / Edit post | `/cms/new`, `/cms/edit/[slug]` | Editor with SEO excerpt guidance, image preview, draft/publish, ⌘/Ctrl+S |
 | Pages | `/cms/pages` | List/create/edit/delete JSON pages under `src/content/pages` |
 | Destinations | `/cms/destinations` | Countries, map, climate, itinerary → `tree.json` |
-| Media | `/cms/media` | Author photo upload |
+| Media | `/cms/media` | Post image library + author photo |
 | Help | `/cms/help` | Short publish checklist |
 
 CMS layout sets `robots: noindex`.
@@ -84,9 +84,24 @@ Homepage, About, Contact, Start here, Bucket list, Guides, Tools, Media kit, Des
 
 Edits commit `src/content/destinations/tree.json` (`cms: update destinations`). Includes map pins, climate months, quick facts, suggested itinerary.
 
+### Media library
+
+**Media** (`/cms/media`) indexes images from published posts (featured + inline `contentHtml`) into `src/content/media/_index.json`. Existing WordPress/Jetpack CDN URLs are catalogued, not rewritten.
+
+| Action | How |
+| --- | --- |
+| Browse / search / filter | Library tab — by source (WP CDN / upload / external) and used-in |
+| Copy URL / edit alt / see used-by | Click a thumbnail in the detail panel |
+| Add by URL | Form on Library tab → commits index via GitHub |
+| Upload file | Same form → `public/media/{filename}` + index entry |
+| Rescan | **Rescan posts → index** rebuilds `usedBy` from current posts/pages |
+| Seed locally | `npm run seed:media` |
+
+Post editor: featured image **Choose from library**; rich text **Image** opens the picker ( **URL** still pastes a link).
+
 ### Author photo
 
-**Media** → upload JPEG/PNG/WebP → commits `public/brand/alex-fernandes.*` + `src/data/author-photo.json`.
+**Media → Author photo** tab → upload JPEG/PNG/WebP → commits `public/brand/alex-fernandes.*` + `src/data/author-photo.json`.
 
 ## Security notes
 

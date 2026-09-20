@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
         // Author photo uses ?v=updatedAt cache-bust from author-photo.json
         pathname: "/brand/**",
       },
+      {
+        pathname: "/media/**",
+      },
     ],
     remotePatterns: [
       {
