@@ -159,7 +159,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
         </div>
       </div>
 
-      <div className="section-shell relative flex h-16 items-center justify-between gap-3 md:justify-start md:gap-4 lg:gap-6">
+      <div className="section-shell relative flex h-[4.5rem] items-center md:h-20 justify-between gap-3 md:justify-start md:gap-4 lg:gap-6">
         {/* Mobile: search (left) */}
         <button
           type="button"
@@ -204,7 +204,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           onClick={closeAll}
           aria-label="Fernandes Journeys home"
         >
-          <BrandLogo className="h-8 w-auto sm:h-9" priority />
+          <BrandLogo className="h-11 w-auto sm:h-12 md:h-14" priority />
         </Link>
 
         {/* Desktop: primary nav (center zone) */}
