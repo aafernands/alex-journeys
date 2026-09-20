@@ -3,6 +3,12 @@ import { legacyPathRedirects } from "./src/data/guides";
 
 const nextConfig: NextConfig = {
   images: {
+    localPatterns: [
+      {
+        // Author photo uses ?v=updatedAt cache-bust from author-photo.json
+        pathname: "/brand/**",
+      },
+    ],
     remotePatterns: [
       {
         protocol: "https",

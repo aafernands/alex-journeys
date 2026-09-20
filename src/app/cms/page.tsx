@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { AuthorPhotoForm } from "@/components/cms/AuthorPhotoForm";
 import { LoginForm } from "@/components/cms/LoginForm";
 import { LogoutButton } from "@/components/cms/LogoutButton";
+import { site } from "@/data/content";
 import {
   isCmsAuthenticated,
   isPasscodeConfigured,
@@ -45,6 +47,9 @@ export default async function CmsPage() {
           <Link href="/cms/new" className="btn btn-primary">
             New post
           </Link>
+          <a href="#author-photo" className="btn btn-secondary">
+            Author photo
+          </a>
           <LogoutButton />
         </div>
       </div>
@@ -62,6 +67,17 @@ export default async function CmsPage() {
           .
         </div>
       ) : null}
+
+      <section id="author-photo" className="panel overflow-hidden">
+        <div className="border-b border-border bg-surface-soft px-5 py-3">
+          <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
+            Author photo
+          </h2>
+        </div>
+        <div className="p-5 md:p-6">
+          <AuthorPhotoForm currentSrc={site.authorPhoto} />
+        </div>
+      </section>
 
       <section className="panel overflow-hidden">
         <div className="border-b border-border bg-surface-soft px-5 py-3">

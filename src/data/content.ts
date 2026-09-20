@@ -4,10 +4,12 @@
  * Homepage featured stories are selected in posts/_index.json.
  */
 
+import authorPhotoMeta from "@/data/author-photo.json";
+
 export const site = {
   name: "Fernandes Journeys",
   authorName: "Alex Fernandes",
-  authorPhoto: "/brand/alex-fernandes.jpg",
+  authorPhoto: `${authorPhotoMeta.src}?v=${encodeURIComponent(authorPhotoMeta.updatedAt)}`,
   tagline: "Inspire. Capture. Discover.",
   email: "hello@fernandesjourneys.com",
   social: {

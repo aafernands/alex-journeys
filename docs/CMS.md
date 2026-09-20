@@ -45,6 +45,16 @@ Edit existing posts from the dashboard (**Edit**) — same publish path with upd
 
 Replace `src/lib/cms/auth.ts` (login cookie + `isCmsAuthenticated`) with your admin provider. Keep the same function names where possible so `/cms` pages and `/api/cms/*` stay stable.
 
+
+### 5. Author photo
+
+From the authenticated `/cms` dashboard, open **Author photo** (or scroll to that panel).
+
+1. Choose a JPEG, PNG, or WebP (max ~2.5MB).
+2. Preview, then **Upload author photo**.
+3. The CMS commits `public/brand/alex-fernandes.{jpg|png|webp}` and updates `src/data/author-photo.json` (cache-bust query on `site.authorPhoto`).
+4. After Vercel redeploys, the new photo appears on About, blog posts, Footer, homepage AuthorIntro, and media kit — no per-page code edits.
+
 ## Security notes
 
 - Passcode is checked only on the server (`POST /api/cms/login`).
@@ -60,3 +70,4 @@ Replace `src/lib/cms/auth.ts` (login cookie + `isCmsAuthenticated`) with your ad
 3. Unlock with the passcode.
 4. **New post** → fill form → **Publish to GitHub**.
 5. Wait for the Vercel deploy, then open `/blog/{slug}`.
+6. To change the author headshot: **Author photo** on the dashboard → upload → wait for redeploy.
