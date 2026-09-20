@@ -10,9 +10,11 @@ type Props = {
   href: string;
   items: NavChild[];
   onNavigate: () => void;
+  /** Parent row icon (matches Stories / Places in the drawer). */
+  icon?: string;
 };
 
-export function MobileTopicSection({ label, href, items, onNavigate }: Props) {
+export function MobileTopicSection({ label, href, items, onNavigate, icon = "book-marked" }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -23,7 +25,10 @@ export function MobileTopicSection({ label, href, items, onNavigate }: Props) {
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        {label}
+        <span className="inline-flex items-center gap-2.5">
+          <NavIcon name={icon} size={18} className="text-accent" />
+          {label}
+        </span>
         <svg
           width="14"
           height="14"

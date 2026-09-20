@@ -462,6 +462,7 @@ export function Header({ latestPost = null }: Props) {
               label="Guides"
               href="/guides"
               items={guidesNav}
+              icon="book-marked"
               onNavigate={closeAll}
             />
 
