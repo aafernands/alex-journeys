@@ -1,7 +1,16 @@
 {
-  "updatedAt": "2026-09-20T17:46:19.032Z",
-  "count": 77,
+  "updatedAt": "2026-09-20T17:46:21.226Z",
+  "count": 78,
   "items": [
+    {
+      "id": "photo-1683-singular-display-fullpicture-mua3ya4f",
+      "slug": "photo-1683-singular-display-fullpicture-mua3ya4f",
+      "url": "/media/photo-1683_singular_display_fullpicture-mua3ya4f.jpg",
+      "alt": "",
+      "source": "upload",
+      "usedBy": [],
+      "createdAt": "2026-09-20T17:46:21.226Z"
+    },
     {
       "id": "photo-1745-singular-display-fullpicture-mua3y8bo",
       "slug": "photo-1745-singular-display-fullpicture-mua3y8bo",
