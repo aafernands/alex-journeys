@@ -6,6 +6,9 @@
  * - EMAIL_FROM optional — default uses Resend’s onboarding address for testing.
  *   Production should use a verified domain, e.g.
  *   `Fernandes Journeys <hello@fernandesjourneys.com>`.
+ *
+ * With the default `onboarding@resend.dev` sender, Resend only delivers to the
+ * email address on the Resend account until a custom domain is verified.
  */
 
 export class EmailNotConfiguredError extends Error {
@@ -24,6 +27,7 @@ export class EmailSendError extends Error {
   }
 }
 
+/** Resend’s shared testing sender — valid per current Resend docs. */
 const DEFAULT_FROM = "Fernandes Journeys <onboarding@resend.dev>";
 
 export function isEmailConfigured(): boolean {
@@ -41,6 +45,17 @@ export type SendEmailInput = {
   html: string;
   text?: string;
 };
+
+/** Strip secrets / truncate for safe client-facing copy. */
+export function clientSafeEmailErrorMessage(raw: string): string {
+  const cleaned = raw
+    .replace(/\bre_[A-Za-z0-9_]+\b/g, "[redacted]")
+    .replace(/\bBearer\s+\S+/gi, "Bearer [redacted]")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!cleaned) return "Failed to send email.";
+  return cleaned.length > 400 ? `${cleaned.slice(0, 397)}…` : cleaned;
+}
 
 /**
  * Send one email through Resend. Throws EmailNotConfiguredError when the API
@@ -72,18 +87,38 @@ export async function sendEmail(input: SendEmailInput): Promise<void> {
 
   if (!res.ok) {
     let detail = "";
+    let errorName = "";
     try {
-      const body = (await res.json()) as { message?: string };
-      if (typeof body.message === "string") detail = body.message;
+      const body = (await res.json()) as {
+        message?: string;
+        name?: string;
+      };
+      if (typeof body.message === "string" && body.message.trim()) {
+        detail = body.message.trim();
+      }
+      if (typeof body.name === "string" && body.name.trim()) {
+        errorName = body.name.trim();
+      }
     } catch {
-      /* ignore */
+      /* ignore non-JSON bodies */
     }
-    console.error("[email] Resend send failed:", res.status, detail || "");
-    throw new EmailSendError(
-      detail
-        ? `Failed to send email: ${detail}`
-        : `Failed to send email (${res.status}).`,
+    console.error(
+      "[email] Resend send failed:",
+      res.status,
+      errorName || "",
+      detail || "",
     );
+    // Prefer Resend's human `message`; append short `name` only when useful.
+    let clientMsg: string;
+    if (detail) {
+      clientMsg =
+        errorName && !detail.toLowerCase().includes(errorName.toLowerCase())
+          ? `Failed to send email: ${detail} (${errorName})`
+          : `Failed to send email: ${detail}`;
+    } else {
+      clientMsg = `Failed to send email (${res.status}).`;
+    }
+    throw new EmailSendError(clientSafeEmailErrorMessage(clientMsg));
   }
 }
 

@@ -69,6 +69,7 @@ On successful reset: `passwordHash` updated (bcrypt), token marked `usedAt`, and
 | Unknown / disabled email | **200** generic success (same wording whether or not the email exists) |
 | User exists but **no** `passwordHash` (Google-only) | **400** — tell them to use **Continue with Google**; do **not** claim an email was sent |
 | Credentials user + Resend OK | Send email → **200** same generic success message |
+| Resend returns non-2xx | **502** — `{ error }` is Resend’s `message` (prefixed), e.g. testing-only recipient restriction |
 
 Generic success copy:
 
@@ -88,7 +89,7 @@ Credentials users on `/account` can change password via `POST /api/auth/change-p
 | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Required for email/password + user profiles + reset tokens |
 | `FIREBASE_FIRESTORE_DATABASE_ID` | Optional named DB |
 | `RESEND_API_KEY` | **Required to send** reset emails via Resend HTTP API |
-| `EMAIL_FROM` | Optional. Default for testing: `Fernandes Journeys <onboarding@resend.dev>`. Production should use a **verified domain**, e.g. `Fernandes Journeys <hello@fernandesjourneys.com>` |
+| `EMAIL_FROM` | Optional. Default for testing: `Fernandes Journeys <onboarding@resend.dev>` (Resend’s shared sender). With that default, Resend **only sends to the Resend account owner email** until you verify a domain and set `EMAIL_FROM` to an address on it (e.g. `Fernandes Journeys <hello@fernandesjourneys.com>`). |
 | `CMS_ADMIN_EMAILS` / `CMS_PASSCODE` | CMS only (unchanged) |
 
 Email/password is enabled when `AUTH_SECRET` **and** Firebase are set. Build still succeeds without them (and without Resend).
@@ -137,6 +138,7 @@ APIs: `GET /api/cms/users`, `PATCH|DELETE /api/cms/users/[id]`.
 
 1. Set `RESEND_API_KEY` (and optionally `EMAIL_FROM`, `AUTH_URL`) on the deployment.
 2. With a credentials account, open `/login` → **Forgot password?** → submit email.
+   - **Testing sender:** until a domain is verified, default `onboarding@resend.dev` only delivers to the email on your Resend account. Other recipients get a **502** whose UI text includes Resend’s “You can only send testing emails…” message.
 3. Check the inbox (Resend dashboard / email) for the link → open `/reset-password?token=…` → set a new password → sign in.
 4. Submit a **Google-only** email on forgot-password → expect a message to use Google (no “email sent” claim).
 5. With `RESEND_API_KEY` unset → forgot-password returns a clear 503-style error; site still builds.

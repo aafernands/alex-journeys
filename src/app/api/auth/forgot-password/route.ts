@@ -4,6 +4,7 @@ import { rateLimit } from "@/lib/cms/rate-limit";
 import {
   EmailNotConfiguredError,
   EmailSendError,
+  clientSafeEmailErrorMessage,
   isEmailConfigured,
   publicSiteOrigin,
   sendEmail,
@@ -137,8 +138,15 @@ export async function POST(request: Request) {
     }
     if (err instanceof EmailSendError) {
       console.error("[api/auth/forgot-password] send failed:", err);
+      // Forward Resend's message (already sanitized in EmailSendError) so the
+      // UI can show e.g. testing-recipient restrictions instead of a vague 502.
       return NextResponse.json(
-        { error: "Could not send reset email. Try again later." },
+        {
+          error: clientSafeEmailErrorMessage(
+            err.message?.trim() ||
+              "Could not send reset email. Try again later.",
+          ),
+        },
         { status: 502 },
       );
     }
