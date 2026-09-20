@@ -286,7 +286,7 @@ export function validatePostInput(
     const isSitePath =
       imageUrl.startsWith("/") &&
       !imageUrl.startsWith("//") &&
-      !imageUrl.includes("\") &&
+      !imageUrl.includes("\\") &&
       imageUrl.length <= 500;
     if (isSitePath) {
       featuredImage = { url: imageUrl, alt: imageAlt };
