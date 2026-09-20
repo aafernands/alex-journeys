@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DestinationClimate } from "@/components/destinations/DestinationClimate";
+import { DestinationQuickFacts } from "@/components/destinations/DestinationQuickFacts";
 import { DestinationMap } from "@/components/destinations/DestinationMap";
 import {
   destinationSlugs,
@@ -115,6 +116,11 @@ export default async function DestinationPage({ params }: PageProps) {
             {dest.name}
           </h1>
           <p className="mt-6 text-lead text-text">{dest.blurb}</p>
+
+          <DestinationQuickFacts
+            quickFacts={dest.quickFacts}
+            climateBestTime={dest.climate?.bestTime}
+          />
 
           {dest.highlights && dest.highlights.length > 0 ? (
             <section className="mt-10" aria-labelledby="trip-highlights-heading">

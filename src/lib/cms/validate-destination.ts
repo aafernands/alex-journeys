@@ -8,6 +8,7 @@ import type {
   DestinationCoverImage,
   DestinationMapData,
   DestinationMapPin,
+  DestinationQuickFacts,
 } from "@/data/destinations";
 import { sanitizeSlug } from "@/lib/cms/validate";
 
@@ -217,6 +218,48 @@ function validateClimate(
   return { ok: true, data: { summary, bestTime, months } };
 }
 
+
+function validateQuickFacts(
+  raw: unknown,
+):
+  | { ok: true; data?: DestinationQuickFacts }
+  | { ok: false; error: string } {
+  if (raw === undefined || raw === null || raw === "") {
+    return { ok: true };
+  }
+  if (typeof raw !== "object") {
+    return { ok: false, error: "quickFacts must be an object." };
+  }
+  const rec = raw as Record<string, unknown>;
+  const out: DestinationQuickFacts = {};
+  const keys = [
+    "bestTime",
+    "currency",
+    "language",
+    "plugs",
+    "tapWater",
+    "timezone",
+  ] as const;
+  for (const key of keys) {
+    if (rec[key] === undefined || rec[key] === null || rec[key] === "") {
+      continue;
+    }
+    if (typeof rec[key] !== "string") {
+      return { ok: false, error: `quickFacts.${key} must be a string.` };
+    }
+    const value = asString(rec[key]);
+    if (!value) continue;
+    if (value.length > 200) {
+      return {
+        ok: false,
+        error: `quickFacts.${key} must be at most 200 characters.`,
+      };
+    }
+    out[key] = value;
+  }
+  return { ok: true, data: Object.keys(out).length ? out : undefined };
+}
+
 export type DestinationCountryInput = Record<string, unknown>;
 
 export type ValidatedDestinationCountry = DestinationCountry;
@@ -305,6 +348,9 @@ export function validateDestinationCountry(
   const climateResult = validateClimate(input.climate);
   if (!climateResult.ok) return climateResult;
 
+  const quickFactsResult = validateQuickFacts(input.quickFacts);
+  if (!quickFactsResult.ok) return quickFactsResult;
+
   const country: DestinationCountry = {
     slug,
     name,
@@ -320,6 +366,7 @@ export function validateDestinationCountry(
   if (coverResult.data) country.coverImages = coverResult.data;
   if (climateResult.data) country.climate = climateResult.data;
   if (mapResult.data) country.map = mapResult.data;
+  if (quickFactsResult.data) country.quickFacts = quickFactsResult.data;
 
   return { ok: true, data: country };
 }

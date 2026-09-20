@@ -123,6 +123,15 @@ export function DestinationForm({ mode, continents, initial }: Props) {
     (c?.highlights ?? []).join("\n"),
   );
 
+  const [qfBestTime, setQfBestTime] = useState(
+    c?.quickFacts?.bestTime ?? "",
+  );
+  const [qfCurrency, setQfCurrency] = useState(c?.quickFacts?.currency ?? "");
+  const [qfLanguage, setQfLanguage] = useState(c?.quickFacts?.language ?? "");
+  const [qfPlugs, setQfPlugs] = useState(c?.quickFacts?.plugs ?? "");
+  const [qfTapWater, setQfTapWater] = useState(c?.quickFacts?.tapWater ?? "");
+  const [qfTimezone, setQfTimezone] = useState(c?.quickFacts?.timezone ?? "");
+
   const [centerLat, setCenterLat] = useState(
     c?.map?.center?.[0] !== undefined ? String(c.map.center[0]) : "",
   );
@@ -214,6 +223,17 @@ export function DestinationForm({ mode, continents, initial }: Props) {
 
         if (c?.coverImages?.length) {
           country.coverImages = c.coverImages;
+        }
+
+        const quickFacts: Record<string, string> = {};
+        if (qfBestTime.trim()) quickFacts.bestTime = qfBestTime.trim();
+        if (qfCurrency.trim()) quickFacts.currency = qfCurrency.trim();
+        if (qfLanguage.trim()) quickFacts.language = qfLanguage.trim();
+        if (qfPlugs.trim()) quickFacts.plugs = qfPlugs.trim();
+        if (qfTapWater.trim()) quickFacts.tapWater = qfTapWater.trim();
+        if (qfTimezone.trim()) quickFacts.timezone = qfTimezone.trim();
+        if (Object.keys(quickFacts).length) {
+          country.quickFacts = quickFacts;
         }
 
         if (hasMap) {
@@ -467,6 +487,92 @@ export function DestinationForm({ mode, continents, initial }: Props) {
             placeholder={"One highlight per line"}
             className={areaClass}
           />
+        </div>
+      </section>
+
+      <section className="space-y-5 border-t border-border pt-8">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
+            Quick facts
+          </h2>
+          <p className="text-xs text-muted">
+            Optional. Empty fields are omitted on the destination page. Best
+            time falls back to Climate if blank.
+          </p>
+        </div>
+        <div>
+          <label htmlFor="dest-qf-best-time" className="text-sm font-semibold text-heading">
+            Best time to visit
+          </label>
+          <input
+            id="dest-qf-best-time"
+            value={qfBestTime}
+            onChange={(e) => setQfBestTime(e.target.value)}
+            placeholder="e.g. June–August for long daylight"
+            className={fieldClass}
+          />
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label htmlFor="dest-qf-currency" className="text-sm font-semibold text-heading">
+              Currency
+            </label>
+            <input
+              id="dest-qf-currency"
+              value={qfCurrency}
+              onChange={(e) => setQfCurrency(e.target.value)}
+              placeholder="e.g. ISK (Icelandic króna)"
+              className={fieldClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="dest-qf-language" className="text-sm font-semibold text-heading">
+              Language
+            </label>
+            <input
+              id="dest-qf-language"
+              value={qfLanguage}
+              onChange={(e) => setQfLanguage(e.target.value)}
+              placeholder="e.g. Icelandic"
+              className={fieldClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="dest-qf-plugs" className="text-sm font-semibold text-heading">
+              Power plugs
+            </label>
+            <input
+              id="dest-qf-plugs"
+              value={qfPlugs}
+              onChange={(e) => setQfPlugs(e.target.value)}
+              placeholder="e.g. Type C / F, 230V"
+              className={fieldClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="dest-qf-tap" className="text-sm font-semibold text-heading">
+              Tap water
+            </label>
+            <input
+              id="dest-qf-tap"
+              value={qfTapWater}
+              onChange={(e) => setQfTapWater(e.target.value)}
+              placeholder="e.g. Safe to drink"
+              className={fieldClass}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label htmlFor="dest-qf-timezone" className="text-sm font-semibold text-heading">
+              Time zone
+            </label>
+            <input
+              id="dest-qf-timezone"
+              value={qfTimezone}
+              onChange={(e) => setQfTimezone(e.target.value)}
+              placeholder="e.g. GMT (UTC±0, no DST)"
+              className={fieldClass}
+            />
+          </div>
         </div>
       </section>
 

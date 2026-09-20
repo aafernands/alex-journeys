@@ -54,6 +54,16 @@ export type DestinationMapData = {
   pins: DestinationMapPin[];
 };
 
+/** Compact “know before you go” strip on destination pages. */
+export type DestinationQuickFacts = {
+  bestTime?: string;
+  currency?: string;
+  language?: string;
+  plugs?: string;
+  tapWater?: string;
+  timezone?: string;
+};
+
 export type DestinationCountry = {
   slug: string;
   name: string;
@@ -74,6 +84,8 @@ export type DestinationCountry = {
   climate?: DestinationClimate;
   /** Visited places for the Leaflet map (from trip notes only). */
   map?: DestinationMapData;
+  /** Best time + practical chips (currency, language, plugs, etc.). */
+  quickFacts?: DestinationQuickFacts;
 };
 
 export type DestinationContinent = {

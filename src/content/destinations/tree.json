@@ -166,7 +166,15 @@
             "src": "https://i0.wp.com/fernandesjourneys.com/wp-content/uploads/2024/10/img_6114-1024x768.jpg?resize=640%2C480&ssl=1",
             "alt": "Trip photo from discovering Iceland"
           }
-        ]
+        ],
+        "quickFacts": {
+          "bestTime": "June–August for the mildest days and nearly endless light.",
+          "currency": "ISK (Icelandic króna)",
+          "language": "Icelandic",
+          "plugs": "Type C / F, 230V",
+          "tapWater": "Safe to drink",
+          "timezone": "GMT (UTC±0, no DST)"
+        }
       }
     ]
   },
@@ -331,7 +339,15 @@
             "src": "https://i0.wp.com/fernandesjourneys.com/wp-content/uploads/2022/04/IMG_1731-1024x768.webp?resize=640%2C480&ssl=1",
             "alt": "Wide shot from the Toronto travel guide"
           }
-        ]
+        ],
+        "quickFacts": {
+          "bestTime": "May–September for patio weather and outdoor city wandering.",
+          "currency": "CAD (Canadian dollar)",
+          "language": "English, French",
+          "plugs": "Type A / B, 120V",
+          "tapWater": "Safe to drink",
+          "timezone": "Multiple (ET–PT); Toronto EST/EDT"
+        }
       },
       {
         "slug": "united-states",
@@ -459,6 +475,14 @@
               "note": "Lake reflection before the crowds"
             }
           ]
+        },
+        "quickFacts": {
+          "bestTime": "June–September for trail access, lake reflections, and mountain mornings.",
+          "currency": "USD (US dollar)",
+          "language": "English",
+          "plugs": "Type A / B, 120V",
+          "tapWater": "Generally safe",
+          "timezone": "Multiple (ET–PT); Colorado MT"
         }
       },
       {
@@ -617,7 +641,15 @@
             "src": "https://i0.wp.com/alexjournly.com/wp-content/uploads/2026/06/IMG_9424-1024x768.webp?resize=640%2C480&ssl=1",
             "alt": "Wide shot from the Cancún travel guide"
           }
-        ]
+        ],
+        "quickFacts": {
+          "bestTime": "December–April for sun, lower humidity, and calmer seas.",
+          "currency": "MXN (Mexican peso)",
+          "language": "Spanish",
+          "plugs": "Type A / B, 127V",
+          "tapWater": "Prefer bottled",
+          "timezone": "Cancún EST (UTC−5, no DST)"
+        }
       },
       {
         "slug": "brazil",
@@ -776,6 +808,14 @@
               "note": "Island day trip"
             }
           ]
+        },
+        "quickFacts": {
+          "bestTime": "May–September for cooler, drier days and clearer viewpoints.",
+          "currency": "BRL (Brazilian real)",
+          "language": "Portuguese",
+          "plugs": "Type N (also C), 127/220V",
+          "tapWater": "Prefer bottled",
+          "timezone": "BRT (UTC−3); Rio"
         }
       }
     ]
