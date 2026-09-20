@@ -166,7 +166,7 @@ export function OutboundInterstitial({
             className="inline-flex opacity-90 transition hover:opacity-100"
             aria-label={`${site.name} home`}
           >
-            <BrandLogo className="h-10 w-auto" priority />
+            <BrandLogo className="h-14 w-auto sm:h-16" width={280} height={84} priority />
           </Link>
           <p className="text-xs text-muted">
             <Link href="/" className="text-link hover:text-accent">
