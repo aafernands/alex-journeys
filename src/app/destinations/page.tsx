@@ -37,7 +37,7 @@ export default function DestinationsIndexPage() {
           {featured.map((dest, i) => (
             <Link
               key={dest.slug}
-              href={`/destinations/${dest.slug}`}
+              href={`/${dest.slug}`}
               className={`group relative block overflow-hidden bg-surface ${
                 i === 0
                   ? "col-span-2 aspect-[16/10] md:col-span-2 md:row-span-2 md:aspect-auto md:min-h-[22rem]"
@@ -178,7 +178,7 @@ function PlaceText({
 function DestinationCard({ country }: { country: DestinationCountry }) {
   return (
     <Link
-      href={`/destinations/${country.slug}`}
+      href={`/${country.slug}`}
       className="panel-interactive group flex h-full flex-col overflow-hidden"
     >
       <div className="relative aspect-[4/5] overflow-hidden bg-surface sm:aspect-[5/4]">

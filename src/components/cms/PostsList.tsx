@@ -167,7 +167,7 @@ export function PostsList({ posts, destinations, initialStatus }: Props) {
               <div className="flex shrink-0 flex-wrap gap-2">
                 {post.kind === "published" ? (
                   <Link
-                    href={`/blog/${post.slug}`}
+                    href={`/${post.slug}`}
                     className="btn btn-secondary text-xs"
                     target="_blank"
                   >

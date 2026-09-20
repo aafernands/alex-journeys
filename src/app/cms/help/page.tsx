@@ -50,7 +50,7 @@ export default async function CmsHelpPage() {
             <code className="rounded bg-surface-soft px-1 text-xs">_index.json</code>{" "}
             on GitHub <code className="rounded bg-surface-soft px-1 text-xs">main</code>.
           </li>
-          <li>Wait for the Vercel deploy, then open /blog/&#123;slug&#125;.</li>
+          <li>Wait for the Vercel deploy, then open /&#123;slug&#125;.</li>
         </ol>
         <p className="text-sm text-muted">
           Tip: ⌘/Ctrl+S saves a draft on create, or publishes when editing a live

@@ -65,7 +65,7 @@ export function getSearchIndex(): SearchItem[] {
       type: "story",
       title: p.title,
       slug: p.slug,
-      href: `/blog/${p.slug}`,
+      href: `/${p.slug}`,
       excerpt: p.excerpt || "",
     }),
   );
@@ -85,7 +85,7 @@ export function getSearchIndex(): SearchItem[] {
       type: "place",
       title: d.name,
       slug: d.slug,
-      href: `/destinations/${d.slug}`,
+      href: `/${d.slug}`,
       excerpt: d.blurb,
     }),
   );

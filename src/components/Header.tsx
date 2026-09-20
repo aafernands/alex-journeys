@@ -141,7 +141,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           </a>
           {latestPost ? (
             <Link
-              href={`/blog/${latestPost.slug}`}
+              href={`/${latestPost.slug}`}
               className="min-w-0 truncate text-sm font-medium text-text transition hover:text-accent sm:max-w-md"
             >
               <span className="hidden sm:inline">Latest from the road: </span>
@@ -284,7 +284,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
                           {continent.countries.map((country) => (
                             <li key={country.slug} role="none">
                               <Link
-                                href={`/destinations/${country.slug}`}
+                                href={`/${country.slug}`}
                                 role="menuitem"
                                 className="block px-4 py-2 text-sm text-text transition hover:bg-surface-soft hover:text-accent"
                                 onClick={closeDest}
@@ -443,7 +443,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
                             {continent.countries.map((country) => (
                               <li key={country.slug}>
                                 <Link
-                                  href={`/destinations/${country.slug}`}
+                                  href={`/${country.slug}`}
                                   className="block py-1.5 text-sm text-text hover:text-accent"
                                   onClick={closeAll}
                                 >

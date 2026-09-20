@@ -37,32 +37,32 @@ export const guideHubs: GuideHub[] = [
     links: [
       {
         title: "15 Steps to Effortlessly Plan Your Next Adventure",
-        href: "/blog/15-steps-to-effortlessly-plan-your-next-adventure",
+        href: "/15-steps-to-effortlessly-plan-your-next-adventure",
         kind: "post",
       },
       {
         title: "Best Solo Travel Destinations for First-Time Travelers",
-        href: "/blog/best-solo-travel-destinations",
+        href: "/best-solo-travel-destinations",
         kind: "post",
       },
       {
         title: "Cancun in 5 Days",
-        href: "/blog/cancun-5-day-travel-guide",
+        href: "/cancun-5-day-travel-guide",
         kind: "post",
       },
       {
         title: "Discovering Iceland: A Week in the Land of Fire and Ice",
-        href: "/blog/discovering-iceland-a-week-in-the-land-of-fire-and-ice",
+        href: "/discovering-iceland-a-week-in-the-land-of-fire-and-ice",
         kind: "post",
       },
       {
         title: "Rio de Janeiro Itinerary 2 Weeks",
-        href: "/blog/rio-de-janeiro-itinerary",
+        href: "/rio-de-janeiro-itinerary",
         kind: "post",
       },
       {
         title: "48 Hours in Toronto",
-        href: "/blog/toronto-travel-guide",
+        href: "/toronto-travel-guide",
         kind: "post",
       },
     ],
@@ -77,32 +77,32 @@ export const guideHubs: GuideHub[] = [
     links: [
       {
         title: "How to Travel the World on a Budget",
-        href: "/blog/travel-the-world-on-a-budget",
+        href: "/travel-the-world-on-a-budget",
         kind: "post",
       },
       {
         title: "My Secret Weapon—A Spending Journal",
-        href: "/blog/stay-on-budget-travel-spending-journal",
+        href: "/stay-on-budget-travel-spending-journal",
         kind: "post",
       },
       {
         title: "How to Score Cheap Flights",
-        href: "/blog/how-to-score-cheap-flights",
+        href: "/how-to-score-cheap-flights",
         kind: "post",
       },
       {
         title: "How to Save Money on Accommodation",
-        href: "/blog/save-money-accommodation",
+        href: "/save-money-accommodation",
         kind: "post",
       },
       {
         title: "Wise Review",
-        href: "/blog/wise-card-review",
+        href: "/wise-card-review",
         kind: "post",
       },
       {
         title: "The Best Travel Credit Cards",
-        href: "/blog/top-travel-credit-cards",
+        href: "/top-travel-credit-cards",
         kind: "post",
       },
       {
@@ -123,12 +123,12 @@ export const guideHubs: GuideHub[] = [
     links: [
       {
         title: "How to Travel Comfortably with Minimal Luggage",
-        href: "/blog/travel-with-minimal-luggage",
+        href: "/travel-with-minimal-luggage",
         kind: "post",
       },
       {
         title: "10 Essential Travel Gadgets",
-        href: "/blog/travel-tech-essentials",
+        href: "/travel-tech-essentials",
         kind: "post",
       },
     ],
@@ -143,42 +143,42 @@ export const guideHubs: GuideHub[] = [
     links: [
       {
         title: "Travel Like a Pro: 10 Easy Tips",
-        href: "/blog/10-tips-for-amazing-adventure",
+        href: "/10-tips-for-amazing-adventure",
         kind: "post",
       },
       {
         title: "The One Travel Mistake I’ll Never Make Again",
-        href: "/blog/travel-mistake-never-again",
+        href: "/travel-mistake-never-again",
         kind: "post",
       },
       {
         title: "Guide to Overcoming Jet Lag",
-        href: "/blog/guide-to-overcoming-jet-lag",
+        href: "/guide-to-overcoming-jet-lag",
         kind: "post",
       },
       {
         title: "Best Apps for Stress-Free Travel",
-        href: "/blog/best-travel-apps",
+        href: "/best-travel-apps",
         kind: "post",
       },
       {
         title: "How to Travel Sustainably and Responsibly",
-        href: "/blog/sustainable-travel-tips",
+        href: "/sustainable-travel-tips",
         kind: "post",
       },
       {
         title: "Why Travel Insurance is Essential",
-        href: "/blog/travel-insurance-allianz-world-nomads",
+        href: "/travel-insurance-allianz-world-nomads",
         kind: "post",
       },
       {
         title: "REAL ID Requirements",
-        href: "/blog/real-id-requirements-2025",
+        href: "/real-id-requirements-2025",
         kind: "post",
       },
       {
         title: "Automatic Refunds for Flight Delays",
-        href: "/blog/automatic-refunds-for-flight",
+        href: "/automatic-refunds-for-flight",
         kind: "post",
       },
     ],
@@ -193,27 +193,27 @@ export const guideHubs: GuideHub[] = [
     links: [
       {
         title: "Top Accommodation Sites of 2025",
-        href: "/blog/discover-the-top-accommodation-sites-of-2025",
+        href: "/discover-the-top-accommodation-sites-of-2025",
         kind: "post",
       },
       {
         title: "How to Save Money on Accommodation",
-        href: "/blog/save-money-accommodation",
+        href: "/save-money-accommodation",
         kind: "post",
       },
       {
         title: "How to Score Cheap Flights",
-        href: "/blog/how-to-score-cheap-flights",
+        href: "/how-to-score-cheap-flights",
         kind: "post",
       },
       {
         title: "Automatic Refunds for Flight Delays",
-        href: "/blog/automatic-refunds-for-flight",
+        href: "/automatic-refunds-for-flight",
         kind: "post",
       },
       {
         title: "Greenland’s New International Airport",
-        href: "/blog/nuuk-airport-opening",
+        href: "/nuuk-airport-opening",
         kind: "post",
       },
     ],
@@ -228,32 +228,32 @@ export const guideHubs: GuideHub[] = [
     links: [
       {
         title: "Top Adventure Travel Destinations for 2025",
-        href: "/blog/top-adventure-travel-destinations-for-2025",
+        href: "/top-adventure-travel-destinations-for-2025",
         kind: "post",
       },
       {
         title: "Chasing Sunrise at Maroon Bells",
-        href: "/blog/marron-bells",
+        href: "/marron-bells",
         kind: "post",
       },
       {
         title: "U.S. Ski Destinations",
-        href: "/blog/the-ultimate-insiders-guide-to-u-s-ski-destinations",
+        href: "/the-ultimate-insiders-guide-to-u-s-ski-destinations",
         kind: "post",
       },
       {
         title: "Top 5 Destinations for Wine Lovers",
-        href: "/blog/wine-lovers-destinations",
+        href: "/wine-lovers-destinations",
         kind: "post",
       },
       {
         title: "Top 10 Must-Visit Cities in Europe",
-        href: "/blog/top-10-must-visit-european-cities",
+        href: "/top-10-must-visit-european-cities",
         kind: "post",
       },
       {
         title: "NJ Wine Expo 2024",
-        href: "/blog/nj-wine-expo-2024",
+        href: "/nj-wine-expo-2024",
         kind: "post",
       },
       {
@@ -329,7 +329,7 @@ export const legacyPathRedirects: { source: string; destination: string }[] = [
   },
   { source: "/plan-your-trip", destination: "/tools" },
   { source: "/places", destination: "/destinations" },
-  { source: "/places/:path*", destination: "/destinations/:path*" },
+  { source: "/places/:path*", destination: "/:path*" },
 ];
 
 /** Slug → guide hub for blog filter by guide topic */
@@ -338,7 +338,7 @@ export const postGuideTopics: Record<string, string[]> = (() => {
   for (const hub of guideHubs) {
     for (const link of hub.links) {
       if (link.kind !== "post") continue;
-      const slug = link.href.replace(/^\/blog\//, "");
+      const slug = link.href.replace(/^\//, "");
       if (!map[slug]) map[slug] = [];
       if (!map[slug].includes(hub.slug)) map[slug].push(hub.slug);
     }

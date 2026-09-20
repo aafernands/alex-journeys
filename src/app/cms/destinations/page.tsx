@@ -63,7 +63,7 @@ export default async function CmsDestinationsPage() {
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2">
                   <Link
-                    href={`/destinations/${country.slug}`}
+                    href={`/${country.slug}`}
                     className="btn btn-secondary text-xs"
                   >
                     View

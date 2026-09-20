@@ -28,11 +28,11 @@ export default function CulinaryPage() {
     >
       <p className="mt-10 text-sm text-muted">
         Related:{" "}
-        <Link href="/blog/wine-lovers-destinations" className="text-link hover:text-accent">
+        <Link href="/wine-lovers-destinations" className="text-link hover:text-accent">
           wine destinations
         </Link>
         {" · "}
-        <Link href="/blog/nj-wine-expo-2024" className="text-link hover:text-accent">
+        <Link href="/nj-wine-expo-2024" className="text-link hover:text-accent">
           NJ Wine Expo
         </Link>
         {" · "}

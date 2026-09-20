@@ -74,35 +74,35 @@ export const startHereCards = [
 export const destinationPills = [
   {
     name: "Iceland",
-    href: "/destinations/iceland",
+    href: "/iceland",
     image:
       "/media/migrated/2025-07-img-6855-scaled-1-1afdda54.webp",
     imageAlt: "Discovering Iceland…",
   },
   {
     name: "Brazil",
-    href: "/destinations/brazil",
+    href: "/brazil",
     image:
       "/media/migrated/2025-05-img-4839-c7c74644.webp",
     imageAlt: "Rio de Janeiro, Brazil",
   },
   {
     name: "USA",
-    href: "/destinations/united-states",
+    href: "/united-states",
     image:
       "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
     imageAlt: "Maroon Bells View and Lake reflection…",
   },
   {
     name: "Mexico",
-    href: "/destinations/mexico",
+    href: "/mexico",
     image:
       "/media/migrated/2026-06-img-9395-scaled-1a44b1f7.webp",
     imageAlt: "Cancún, Mexico",
   },
   {
     name: "Canada",
-    href: "/destinations/canada",
+    href: "/canada",
     image:
       "/media/migrated/2024-10-img-0863-1-5008158e.webp",
     imageAlt: "Toronto, Canada",

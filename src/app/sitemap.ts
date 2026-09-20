@@ -36,7 +36,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   for (const post of getAllPosts()) {
     entries.push({
-      url: `${siteConfig.url}/blog/${post.slug}`,
+      url: `${siteConfig.url}/${post.slug}`,
       lastModified: post.date ? new Date(post.date) : now,
       changeFrequency: "monthly",
       priority: 0.7,
@@ -45,7 +45,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   for (const dest of getAllDestinations()) {
     entries.push({
-      url: `${siteConfig.url}/destinations/${dest.slug}`,
+      url: `${siteConfig.url}/${dest.slug}`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.75,

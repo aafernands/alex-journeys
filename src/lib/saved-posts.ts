@@ -72,7 +72,7 @@ export async function listSavedPosts(userId: string): Promise<SavedPost[]> {
     const href =
       typeof data.href === "string" && data.href.startsWith("/")
         ? data.href
-        : `/blog/${slug}`;
+        : `/${slug}`;
     return { slug, title, savedAt, href };
   });
 }
@@ -103,7 +103,7 @@ export async function addSavedPost(
     throw new Error("Post not found.");
   }
 
-  const href = `/blog/${s}`;
+  const href = `/${s}`;
   const savedAt = new Date().toISOString();
   const record: SavedPost = {
     slug: s,

@@ -50,11 +50,11 @@ const partnershipTypes = [
 ];
 
 const pastPlaces = [
-  { name: "Iceland", href: "/destinations/iceland" },
-  { name: "Canada", href: "/destinations/canada" },
-  { name: "United States", href: "/destinations/united-states" },
-  { name: "Mexico", href: "/destinations/mexico" },
-  { name: "Brazil", href: "/destinations/brazil" },
+  { name: "Iceland", href: "/iceland" },
+  { name: "Canada", href: "/canada" },
+  { name: "United States", href: "/united-states" },
+  { name: "Mexico", href: "/mexico" },
+  { name: "Brazil", href: "/brazil" },
 ];
 
 export default function MediaKitPage() {

@@ -53,13 +53,13 @@ export default function ToolsPage() {
       <p className="mt-10 text-sm text-muted">
         Related journal notes:{" "}
         <Link
-          href="/blog/travel-insurance-allianz-world-nomads"
+          href="/travel-insurance-allianz-world-nomads"
           className="text-link hover:text-accent"
         >
           travel insurance
         </Link>
         {" · "}
-        <Link href="/blog/wise-card-review" className="text-link hover:text-accent">
+        <Link href="/wise-card-review" className="text-link hover:text-accent">
           Wise review
         </Link>
         {" · "}

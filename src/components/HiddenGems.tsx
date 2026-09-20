@@ -55,7 +55,7 @@ export function HiddenGems() {
             {posts.map((post) => (
               <li key={post.slug}>
                 <Link
-                  href={`/blog/${post.slug}`}
+                  href={`/${post.slug}`}
                   className="panel-interactive group flex gap-3 p-3 sm:gap-4 sm:p-4"
                 >
                   <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-white sm:h-24 sm:w-24">

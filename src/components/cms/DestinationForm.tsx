@@ -373,7 +373,7 @@ export function DestinationForm({ mode, continents, initial }: Props) {
               className={`${fieldClass} disabled:bg-surface-soft`}
             />
             <p className="mt-1 text-xs text-muted">
-              kebab-case · becomes /destinations/{"{slug}"}
+              kebab-case · becomes /{"{slug}"}
             </p>
           </div>
           <div>
@@ -1028,10 +1028,10 @@ export function DestinationForm({ mode, continents, initial }: Props) {
               </a>
               {" · "}
               <a
-                href={`/destinations/${success.slug}`}
+                href={`/${success.slug}`}
                 className="text-link underline-offset-2 hover:text-accent hover:underline"
               >
-                Open /destinations/{success.slug}
+                Open /{success.slug}
               </a>
               {" (after deploy)"}
             </p>

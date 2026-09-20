@@ -267,7 +267,7 @@ export function PostForm({
                 className={`${fieldClass} disabled:bg-surface-soft`}
               />
               <p className="mt-1 text-xs text-muted">
-                kebab-case · becomes /blog/{"{slug}"}
+                kebab-case · becomes /{"{slug}"}
               </p>
             </div>
             <div>
@@ -485,10 +485,10 @@ export function PostForm({
                 <>
                   {" · "}
                   <a
-                    href={`/blog/${success.slug}`}
+                    href={`/${success.slug}`}
                     className="text-link underline-offset-2 hover:text-accent hover:underline"
                   >
-                    Open /blog/{success.slug}
+                    Open /{success.slug}
                   </a>
                   {" (after deploy)"}
                 </>

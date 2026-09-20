@@ -11,7 +11,7 @@ type Props = {
 export function PostCard({ post, priority = false }: Props) {
   return (
     <article className="panel-interactive group flex h-full flex-col overflow-hidden">
-      <Link href={`/blog/${post.slug}`} className="flex h-full flex-col">
+      <Link href={`/${post.slug}`} className="flex h-full flex-col">
         <div className="relative aspect-[16/10] overflow-hidden border-b border-border bg-surface">
           {post.featuredImage ? (
             <Image

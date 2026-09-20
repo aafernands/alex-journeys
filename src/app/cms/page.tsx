@@ -227,7 +227,7 @@ export default async function CmsPage() {
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2">
                   <Link
-                    href={`/blog/${post.slug}`}
+                    href={`/${post.slug}`}
                     className="btn btn-secondary text-xs"
                   >
                     View

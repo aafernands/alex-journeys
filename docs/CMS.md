@@ -60,7 +60,7 @@ Never commit secrets. Never put them in client code. The dashboard only shows co
 1. **New post** → title (slug auto), date, excerpt (counter + ~150–160 SEO guidance), featured image preview, destinations, rich text (headings, lists, links, images, undo, HTML mode).
 2. **Save draft** → `src/content/drafts/{slug}.json`.
 3. **Publish** → `src/content/posts/{slug}.json` + `_index.json`; matching draft is removed when present.
-4. Vercel redeploys → live at `/blog/{slug}`.
+4. Vercel redeploys → live at `/{slug}`.
 
 Posts list supports search, destination filter, status (published/draft), View live, Edit, Duplicate, Delete (GitHub delete + index update).
 
@@ -82,7 +82,7 @@ Homepage, About, Contact, Start here, Bucket list, Guides, Tools, Media kit, Des
 
 ### Destinations
 
-Edits commit `src/content/destinations/tree.json` (`cms: update destinations`). Includes map pins, climate months, quick facts, suggested itinerary.
+Edits commit `src/content/destinations/tree.json` (`cms: update destinations`). Includes map pins, climate months, quick facts, suggested itinerary. Public country pages live at `/{slug}` (same pattern as posts). Index hubs stay at `/blog` and `/destinations`. Legacy `/blog/{slug}` and `/destinations/{slug}` permanently redirect to `/{slug}`.
 
 ### Media library
 

@@ -22,11 +22,21 @@ const nextConfig: NextConfig = {
     ],
   },
   async redirects() {
-    return legacyPathRedirects.map((r) => ({
+    const legacy = legacyPathRedirects.map((r) => ({
       source: r.source,
       destination: r.destination,
       permanent: true,
     }));
+    return [
+      ...legacy,
+      // Cleaner public URLs: posts + destination countries at /{slug}
+      { source: "/blog/:slug", destination: "/:slug", permanent: true },
+      {
+        source: "/destinations/:slug",
+        destination: "/:slug",
+        permanent: true,
+      },
+    ];
   },
 };
 

@@ -62,7 +62,7 @@ export function DestinationItinerary({
         {featuredPostSlug ? (
           <p className="mt-5">
             <Link
-              href={`/blog/${featuredPostSlug}`}
+              href={`/${featuredPostSlug}`}
               className="text-sm font-semibold text-link transition hover:text-accent"
             >
               Read the full trip journal →
