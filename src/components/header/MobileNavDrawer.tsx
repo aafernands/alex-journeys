@@ -61,7 +61,7 @@ export function MobileNavDrawer({
           <BrandLogo className="h-9 w-auto" priority onClick={onClose} />
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-on-solid transition hover:bg-accent-deep"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
             aria-label="Close menu"
             onClick={onClose}
           >
