@@ -11,6 +11,8 @@ import { MobileTopicSection } from "@/components/header/MobileTopicSection";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
+import { OutboundLink } from "@/components/outbound/OutboundLink";
+import { site } from "@/data/content";
 import {
   SearchInput,
   type SearchInputHandle,
@@ -555,6 +557,50 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
                   >
                     Contact
                   </Link>
+                </li>
+
+                <li className="mt-4 border-t border-border pt-4">
+                  <p className="px-2 text-xs font-semibold uppercase tracking-wide text-muted">
+                    Follow along
+                  </p>
+                  <ul className="mt-2 flex flex-wrap gap-2 px-2" aria-label="Social">
+                    <li>
+                      <OutboundLink
+                        href={site.social.instagram}
+                        className="inline-flex rounded-lg border border-border bg-surface-soft px-3 py-1.5 text-sm font-semibold text-heading transition hover:border-accent hover:text-accent"
+                        onClick={closeAll}
+                      >
+                        Instagram
+                      </OutboundLink>
+                    </li>
+                    <li>
+                      <OutboundLink
+                        href={site.social.youtube}
+                        className="inline-flex rounded-lg border border-border bg-surface-soft px-3 py-1.5 text-sm font-semibold text-heading transition hover:border-accent hover:text-accent"
+                        onClick={closeAll}
+                      >
+                        YouTube
+                      </OutboundLink>
+                    </li>
+                    <li>
+                      <OutboundLink
+                        href={site.social.pinterest}
+                        className="inline-flex rounded-lg border border-border bg-surface-soft px-3 py-1.5 text-sm font-semibold text-heading transition hover:border-accent hover:text-accent"
+                        onClick={closeAll}
+                      >
+                        Pinterest
+                      </OutboundLink>
+                    </li>
+                    <li>
+                      <OutboundLink
+                        href={site.social.coffee}
+                        className="inline-flex rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-sm font-semibold text-accent transition hover:bg-accent/20"
+                        onClick={closeAll}
+                      >
+                        Buy me a coffee
+                      </OutboundLink>
+                    </li>
+                  </ul>
                 </li>
                 {googleConfigured ? (
                   <li className="mt-3 border-t border-border pt-3 px-2">
