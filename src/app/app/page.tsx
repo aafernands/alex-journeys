@@ -65,10 +65,10 @@ export default function AppPurposePage() {
           </dt>
           <dd>
             <Link
-              href="/policies"
+              href="/privacy"
               className="text-link transition hover:text-accent"
             >
-              https://www.fernandesjourneys.com/policies
+              https://www.fernandesjourneys.com/privacy
             </Link>
           </dd>
 
@@ -101,10 +101,16 @@ export default function AppPurposePage() {
             Back to home
           </Link>
           <Link
+            href="/privacy"
+            className="btn btn-secondary btn-block sm:w-auto"
+          >
+            Privacy policy
+          </Link>
+          <Link
             href="/policies"
             className="btn btn-secondary btn-block sm:w-auto"
           >
-            Privacy &amp; policies
+            All policies
           </Link>
           <Link
             href="/start-here"

@@ -28,7 +28,10 @@ const company = [
   { href: "/about", label: "About" },
   { href: "/media-kit", label: "Media kit" },
   { href: "/contact", label: "Contact" },
-  { href: "/policies", label: "Policies" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
+  { href: "/affiliate-disclosure", label: "Affiliate disclosure" },
+  { href: "/policies", label: "Policies hub" },
   { href: "/app", label: "App & Google Sign-In" },
 ];
 

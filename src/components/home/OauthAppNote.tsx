@@ -38,7 +38,7 @@ export function OauthAppNote() {
           </Link>
           {" · "}
           <Link
-            href="/policies"
+            href="/privacy"
             className="font-semibold text-link transition hover:text-accent"
           >
             Privacy policy

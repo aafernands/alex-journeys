@@ -33,7 +33,7 @@ export default function ToolsPage() {
           These are affiliate or partner links. If you book or buy through one,
           Fernandes Journeys may earn a commission at no extra cost to you. The
           opinions are Alex&apos;s own.{" "}
-          <Link href="/policies#monetization" className="text-link hover:text-accent">
+          <Link href="/affiliate-disclosure" className="text-link hover:text-accent">
             Read the full disclosure
           </Link>
           .
@@ -65,7 +65,7 @@ export default function ToolsPage() {
           all guides
         </Link>
         {" · "}
-        <Link href="/policies" className="text-link hover:text-accent">
+        <Link href="/affiliate-disclosure" className="text-link hover:text-accent">
           affiliate disclosure
         </Link>
       </p>

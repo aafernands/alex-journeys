@@ -72,7 +72,10 @@ JSON under `src/content/pages/` loaded by App Router routes that call `getPageBy
 | Slug | Public path |
 | --- | --- |
 | `culinary` | `/culinary` |
-| `policies` | `/policies` |
+| `policies` | `/policies` (hub) |
+| `privacy` | `/privacy` |
+| `terms` | `/terms` |
+| `affiliate-disclosure` | `/affiliate-disclosure` |
 | `travel-wallet` | `/travel-wallet` |
 
 Create/edit/delete from **Pages**. New slugs need a matching `src/app/{slug}/page.tsx` that reads the JSON (or they will 404).

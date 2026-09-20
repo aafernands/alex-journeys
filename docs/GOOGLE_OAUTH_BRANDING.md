@@ -8,8 +8,8 @@ Checklist for Alex after this site deploy. The OAuth consent screen must match t
 | --- | --- |
 | **Application name** | `Fernandes Journeys` (exact) |
 | **Application home page** | `https://www.fernandesjourneys.com` (**not** `/cms`) |
-| **Application privacy policy** | `https://www.fernandesjourneys.com/policies` |
-| **Application terms of service** (optional) | `https://www.fernandesjourneys.com/policies#terms` |
+| **Application privacy policy** | `https://www.fernandesjourneys.com/privacy` |
+| **Application terms of service** (optional) | `https://www.fernandesjourneys.com/terms` |
 | **Authorized domains** | `fernandesjourneys.com` |
 | App purpose page (linked from site) | `https://www.fernandesjourneys.com/app` |
 
@@ -31,7 +31,7 @@ Google’s “home page URL not registered to you” failure is **Search Console
 
 ## Site checks already done in code
 
-- Privacy policy at `/policies` documents Google Sign-In scopes (`openid`, `email`, `profile`), CMS vs reader use, retention, and contact.
+- Privacy policy at `/privacy` documents Google Sign-In scopes (`openid`, `email`, `profile`), CMS vs reader use, retention, and contact.
 - Public app-purpose page at `/app` states app name **Fernandes Journeys** and that Sign-In is for owner CMS + optional reader saves only.
 - Homepage shows a crawlable “About this site & Google Sign-In” note and the **Fernandes Journeys** wordmark in the header (logo PNG may still show the old “alex journly” graphic; alt text and visible text say Fernandes Journeys).
 - Root `/` is public (no auth middleware on `/`). Do **not** set the OAuth “Application home page” to `/cms`.
@@ -40,7 +40,8 @@ Google’s “home page URL not registered to you” failure is **Search Console
 
 1. Confirm live:
    - https://www.fernandesjourneys.com → 200, no login wall
-   - https://www.fernandesjourneys.com/policies → substantial privacy + OAuth section
+   - https://www.fernandesjourneys.com/privacy → substantial privacy + OAuth section
+   - https://www.fernandesjourneys.com/policies → hub linking privacy / terms / affiliate
    - https://www.fernandesjourneys.com/app → app purpose
 2. Update consent screen fields exactly as in the table above.
 3. Finish Search Console domain verification for apex + www.

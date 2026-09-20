@@ -95,14 +95,14 @@ export function NewsletterForm({ className }: Props) {
           By entering your email, you agree to receive Fernandes Journeys emails
           and agree to our{" "}
           <Link
-            href="/policies"
+            href="/terms"
             className="text-hero-type underline underline-offset-2 hover:text-accent"
           >
             Terms and Conditions
           </Link>{" "}
           and{" "}
           <Link
-            href="/policies"
+            href="/privacy"
             className="text-hero-type underline underline-offset-2 hover:text-accent"
           >
             Privacy Policy
