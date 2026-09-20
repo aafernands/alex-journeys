@@ -25,6 +25,7 @@ import {
   Utensils,
   Wallet,
   Wifi,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
 
@@ -56,6 +57,7 @@ const ICONS: Record<string, LucideIcon> = {
   utensils: Utensils,
   wallet: Wallet,
   wifi: Wifi,
+  wrench: Wrench,
 };
 
 type Props = {

@@ -95,6 +95,15 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
     return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen, mobileSearchOpen, closeAll]);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
+
   /** Press `/` to focus site search (skip when typing in a field). */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -391,144 +400,174 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
       )}
 
       {mobileOpen && (
-        <nav
-          id="mobile-nav"
-          className="max-h-[min(80vh,32rem)] overflow-y-auto border-t border-border bg-white px-5 py-4 md:hidden"
-          aria-label="Mobile"
-        >
-          <ul className="flex flex-col gap-1">
-            <li>
+        <div className="fixed inset-0 z-[80] md:hidden" role="dialog" aria-modal="true" aria-label="Site menu">
+          {/* Scrim — tap the thin right gap to close */}
+          <button
+            type="button"
+            className="absolute inset-0 bg-heading/40 backdrop-blur-[1px]"
+            aria-label="Close menu"
+            onClick={closeAll}
+          />
+
+          {/* Near-full-width drawer, small gap on the right */}
+          <nav
+            id="mobile-nav"
+            className="absolute inset-y-0 left-0 flex w-[calc(100%-0.75rem)] max-w-[28rem] flex-col bg-bg shadow-xl"
+            aria-label="Mobile"
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+              <Link href="/" onClick={closeAll} aria-label="Fernandes Journeys home">
+                <BrandLogo className="h-9 w-auto" priority />
+              </Link>
               <button
                 type="button"
-                className="flex w-full items-center justify-between py-2.5 text-base font-semibold tracking-tight text-heading"
-                aria-expanded={mobileDestOpen}
-                onClick={() => setMobileDestOpen((v) => !v)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-on-solid transition hover:bg-accent-deep"
+                aria-label="Close menu"
+                onClick={closeAll}
               >
-                <span className="inline-flex items-center gap-2.5">
-                  <NavIcon name="map-pin" size={18} className="text-accent" />
-                  Places
-                </span>
-                <ChevronDown open={mobileDestOpen} />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+                </svg>
               </button>
-              {mobileDestOpen && (
-                <ul className="mb-2 ml-3 border-l border-border pl-3">
-                  <li>
-                    <Link
-                      href="/destinations"
-                      className="block py-1.5 text-sm text-text hover:text-accent"
-                      onClick={closeAll}
-                    >
-                      All places
-                    </Link>
-                  </li>
-                  {destinationsTree.map((continent) => {
-                    const continentOpen = mobileContinent === continent.id;
-                    return (
-                      <li key={continent.id}>
-                        <button
-                          type="button"
-                          className="flex w-full items-center justify-between py-1.5 text-sm font-semibold text-heading"
-                          aria-expanded={continentOpen}
-                          onClick={() =>
-                            setMobileContinent(
-                              continentOpen ? null : continent.id,
-                            )
-                          }
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 py-3">
+              <ul className="flex flex-col gap-0.5">
+                <li>
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft"
+                    aria-expanded={mobileDestOpen}
+                    onClick={() => setMobileDestOpen((v) => !v)}
+                  >
+                    <span className="inline-flex items-center gap-2.5">
+                      <NavIcon name="map-pin" size={18} className="text-accent" />
+                      Places
+                    </span>
+                    <ChevronDown open={mobileDestOpen} />
+                  </button>
+                  {mobileDestOpen && (
+                    <ul className="mb-2 ml-3 border-l border-border pl-3">
+                      <li>
+                        <Link
+                          href="/destinations"
+                          className="block py-1.5 text-sm text-text hover:text-accent"
+                          onClick={closeAll}
                         >
-                          {continent.name}
-                          <ChevronDown open={continentOpen} />
-                        </button>
-                        {continentOpen && (
-                          <ul className="mb-1 ml-2 border-l border-border pl-3">
-                            {continent.countries.map((country) => (
-                              <li key={country.slug}>
-                                <Link
-                                  href={`/${country.slug}`}
-                                  className="block py-1.5 text-sm text-text hover:text-accent"
-                                  onClick={closeAll}
-                                >
-                                  {country.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
+                          All places
+                        </Link>
                       </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </li>
+                      {destinationsTree.map((continent) => {
+                        const continentOpen = mobileContinent === continent.id;
+                        return (
+                          <li key={continent.id}>
+                            <button
+                              type="button"
+                              className="flex w-full items-center justify-between py-1.5 text-sm font-semibold text-heading"
+                              aria-expanded={continentOpen}
+                              onClick={() =>
+                                setMobileContinent(
+                                  continentOpen ? null : continent.id,
+                                )
+                              }
+                            >
+                              {continent.name}
+                              <ChevronDown open={continentOpen} />
+                            </button>
+                            {continentOpen && (
+                              <ul className="mb-1 ml-2 border-l border-border pl-3">
+                                {continent.countries.map((country) => (
+                                  <li key={country.slug}>
+                                    <Link
+                                      href={`/${country.slug}`}
+                                      className="block py-1.5 text-sm text-text hover:text-accent"
+                                      onClick={closeAll}
+                                    >
+                                      {country.name}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </li>
 
-            <li>
-              <Link
-                href="/blog"
-                className="flex items-center gap-2.5 py-2.5 text-base font-semibold tracking-tight text-heading hover:text-accent"
-                onClick={closeAll}
-              >
-                <NavIcon name="book-open" size={18} className="text-accent" />
-                Stories
-              </Link>
-            </li>
+                <li>
+                  <Link
+                    href="/blog"
+                    className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent"
+                    onClick={closeAll}
+                  >
+                    <NavIcon name="book-open" size={18} className="text-accent" />
+                    Stories
+                  </Link>
+                </li>
 
-            <MobileTopicSection
-              label="Guides"
-              href="/guides"
-              items={guidesNav}
-              icon="book-marked"
-              onNavigate={closeAll}
-            />
-
-            <li>
-              <Link
-                href="/start-here"
-                className="flex items-center gap-2.5 py-2.5 text-base font-semibold tracking-tight text-heading hover:text-accent"
-                onClick={closeAll}
-              >
-                <NavIcon name="compass" size={18} className="text-accent" />
-                Start here
-              </Link>
-            </li>
-
-            <li className="pt-2">
-              <Link
-                href="/tools"
-                className="btn btn-primary btn-block"
-                onClick={closeAll}
-              >
-                Tools I use
-              </Link>
-            </li>
-
-            <li className="mt-3 border-t border-border pt-3">
-              <Link
-                href="/about"
-                className="block py-2 text-sm font-semibold text-text hover:text-accent"
-                onClick={closeAll}
-              >
-                About
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/contact"
-                className="block py-2 text-sm font-semibold text-text hover:text-accent"
-                onClick={closeAll}
-              >
-                Contact
-              </Link>
-            </li>
-            {googleConfigured ? (
-              <li className="mt-3 border-t border-border pt-3">
-                <ReaderAuthButtons
-                  variant="mobile"
-                  googleConfigured={googleConfigured}
+                <MobileTopicSection
+                  label="Guides"
+                  href="/guides"
+                  items={guidesNav}
+                  icon="book-marked"
                   onNavigate={closeAll}
                 />
-              </li>
-            ) : null}
-          </ul>
-        </nav>
+
+                <li>
+                  <Link
+                    href="/start-here"
+                    className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent"
+                    onClick={closeAll}
+                  >
+                    <NavIcon name="compass" size={18} className="text-accent" />
+                    Start here
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    href="/tools"
+                    className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent"
+                    onClick={closeAll}
+                  >
+                    <NavIcon name="wrench" size={18} className="text-accent" />
+                    Tools I use
+                  </Link>
+                </li>
+
+                <li className="mt-3 border-t border-border pt-3">
+                  <Link
+                    href="/about"
+                    className="block rounded-lg px-2 py-2 text-sm font-semibold text-text hover:bg-surface-soft hover:text-accent"
+                    onClick={closeAll}
+                  >
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/contact"
+                    className="block rounded-lg px-2 py-2 text-sm font-semibold text-text hover:bg-surface-soft hover:text-accent"
+                    onClick={closeAll}
+                  >
+                    Contact
+                  </Link>
+                </li>
+                {googleConfigured ? (
+                  <li className="mt-3 border-t border-border pt-3 px-2">
+                    <ReaderAuthButtons
+                      variant="mobile"
+                      googleConfigured={googleConfigured}
+                      onNavigate={closeAll}
+                    />
+                  </li>
+                ) : null}
+              </ul>
+            </div>
+          </nav>
+        </div>
       )}
     </header>
   );
