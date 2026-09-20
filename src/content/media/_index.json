@@ -1,7 +1,16 @@
 {
-  "updatedAt": "2026-09-20T17:46:29.286Z",
-  "count": 81,
+  "updatedAt": "2026-09-20T17:46:31.955Z",
+  "count": 82,
   "items": [
+    {
+      "id": "img-0486-mua3yi6t",
+      "slug": "img-0486-mua3yi6t",
+      "url": "/media/img_0486-mua3yi6t.jpg",
+      "alt": "",
+      "source": "upload",
+      "usedBy": [],
+      "createdAt": "2026-09-20T17:46:31.955Z"
+    },
     {
       "id": "img-0476-mua3yfzf",
       "slug": "img-0476-mua3yfzf",
