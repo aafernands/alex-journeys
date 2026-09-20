@@ -859,7 +859,6 @@ export function DesignForm({ initial }: Props) {
                     className={fieldClass}
                   />
                 </div>
-                </div>
               </div>
             </div>
           </div>
