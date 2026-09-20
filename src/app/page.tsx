@@ -1,10 +1,16 @@
 import { Hero } from "@/components/Hero";
 import { AuthorIntro } from "@/components/home/AuthorIntro";
+import { OauthAppNote } from "@/components/home/OauthAppNote";
 import { GuidesHubStrip } from "@/components/home/GuidesHubStrip";
 import { StartHereCards } from "@/components/home/StartHereCards";
 import { ToolsStrip } from "@/components/home/ToolsStrip";
 import { DestinationPills } from "@/components/DestinationPills";
 import { LatestPosts } from "@/components/LatestPosts";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default function HomePage() {
   return (
@@ -22,6 +28,7 @@ export default function HomePage() {
         <LatestPosts />
         <GuidesHubStrip />
         <ToolsStrip />
+        <OauthAppNote />
         <AuthorIntro />
       </main>
     </>

@@ -40,9 +40,6 @@ export const metadata: Metadata = {
   creator: siteConfig.author,
   publisher: siteConfig.name,
   keywords: [...siteConfig.keywords],
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     type: "website",
     url: siteConfig.url,

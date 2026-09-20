@@ -6,7 +6,8 @@ import { getPageBySlug } from "@/lib/pages";
 export const metadata: Metadata = {
   title: "Policies & Disclosures",
   description:
-    "Privacy, terms of use, affiliate disclosure, comments policy, and cookies for Fernandes Journeys.",
+    "Privacy policy (including Google Sign-In / OAuth for Fernandes Journeys), terms of use, affiliate disclosure, comments policy, and cookies.",
+  alternates: { canonical: "/policies" },
 };
 
 export default function PoliciesPage() {

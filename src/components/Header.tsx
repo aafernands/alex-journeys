@@ -200,7 +200,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
         {/* Logo: centered on mobile, left on desktop */}
         <Link
           href="/"
-          className="absolute left-1/2 z-10 -translate-x-1/2 md:static md:translate-x-0"
+          className="absolute left-1/2 z-10 flex -translate-x-1/2 items-center gap-2.5 md:static md:translate-x-0"
           onClick={closeAll}
           aria-label="Fernandes Journeys home"
         >
@@ -210,8 +210,11 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             width={200}
             height={55}
             priority
-            className="h-11 w-auto max-w-[min(64vw,16rem)] -my-1 object-contain sm:h-12 md:h-[3.25rem] md:max-w-none md:-my-1.5"
+            className="h-11 w-auto max-w-[min(42vw,11rem)] -my-1 object-contain sm:h-12 sm:max-w-[13rem] md:h-[3.25rem] md:max-w-[14rem] md:-my-1.5"
           />
+          <span className="font-display hidden text-base font-bold tracking-tight text-heading sm:inline md:text-lg">
+            Fernandes Journeys
+          </span>
         </Link>
 
         <nav

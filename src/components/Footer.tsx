@@ -28,6 +28,7 @@ const company = [
   { href: "/media-kit", label: "Media kit" },
   { href: "/contact", label: "Contact" },
   { href: "/policies", label: "Policies" },
+  { href: "/app", label: "App & Google Sign-In" },
 ];
 
 export function Footer() {

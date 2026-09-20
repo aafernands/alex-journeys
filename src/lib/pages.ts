@@ -38,6 +38,7 @@ export const CODE_ONLY_PAGE_ROUTES = [
   { path: "/blog", note: "Blog index (posts JSON)" },
   { path: "/search", note: "Search (React)" },
   { path: "/account", note: "Reader account dashboard (profile + saves)" },
+  { path: "/app", note: "OAuth app purpose (Google branding)" },
 ] as const;
 
 /** Public path for a CMS content page slug. */
