@@ -81,6 +81,8 @@ export type DestinationItinerary = {
 export type DestinationCountry = {
   slug: string;
   name: string;
+  /** City or place name shown on photo cards (e.g. "Toronto", "Reykjavík"). */
+  city?: string;
   region: string;
   continent: string;
   blurb: string;
@@ -121,6 +123,12 @@ export function getDestinationBySlug(
   slug: string,
 ): DestinationCountry | undefined {
   return getAllDestinations().find((d) => d.slug === slug);
+}
+
+/** City/place label for overlay cards; falls back to the country name. */
+export function destinationCity(dest: DestinationCountry): string {
+  const city = dest.city?.trim();
+  return city || dest.name;
 }
 
 export const destinationSlugs = getAllDestinations().map((d) => d.slug);

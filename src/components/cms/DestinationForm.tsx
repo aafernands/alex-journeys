@@ -121,6 +121,7 @@ export function DestinationForm({ mode, continents, initial }: Props) {
   const c = initial?.country;
 
   const [name, setName] = useState(c?.name ?? "");
+  const [city, setCity] = useState(c?.city ?? "");
   const [slug, setSlug] = useState(c?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(mode === "edit");
   const [continentChoice, setContinentChoice] = useState(
@@ -232,6 +233,7 @@ export function DestinationForm({ mode, continents, initial }: Props) {
         const country: Record<string, unknown> = {
           slug: finalSlug,
           name: name.trim(),
+          city: city.trim() || undefined,
           region: region.trim(),
           continent: continentName || name.trim(),
           blurb: blurb.trim(),
@@ -339,20 +341,38 @@ export function DestinationForm({ mode, continents, initial }: Props) {
           Core details
         </h2>
 
-        <div>
-          <label htmlFor="dest-name" className="text-sm font-semibold text-heading">
-            Name <span className="text-accent">*</span>
-          </label>
-          <input
-            id="dest-name"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              if (!slugTouched) setSlug(slugify(e.target.value));
-            }}
-            required
-            className={fieldClass}
-          />
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label htmlFor="dest-name" className="text-sm font-semibold text-heading">
+              Name <span className="text-accent">*</span>
+            </label>
+            <input
+              id="dest-name"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (!slugTouched) setSlug(slugify(e.target.value));
+              }}
+              required
+              className={fieldClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="dest-city" className="text-sm font-semibold text-heading">
+              City / place
+            </label>
+            <input
+              id="dest-city"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              maxLength={80}
+              placeholder="e.g. Reykjavík, Toronto"
+              className={fieldClass}
+            />
+            <p className="mt-1 text-xs text-muted">
+              Shown on homepage photo cards under the country name.
+            </p>
+          </div>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2">
