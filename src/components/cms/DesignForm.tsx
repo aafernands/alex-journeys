@@ -822,7 +822,7 @@ export function DesignForm({ initial }: Props) {
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-wide text-muted">
-                    Primary CTA label / href
+                    Learn more link label / href
                   </label>
                   <input
                     value={homeSections.author.primaryCta.label}
@@ -859,44 +859,6 @@ export function DesignForm({ initial }: Props) {
                     className={fieldClass}
                   />
                 </div>
-                <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-muted">
-                    Secondary CTA label / href
-                  </label>
-                  <input
-                    value={homeSections.author.secondaryCta.label}
-                    onChange={(e) => {
-                      setHomeSections((hs) => ({
-                        ...hs,
-                        author: {
-                          ...hs.author,
-                          secondaryCta: {
-                            ...hs.author.secondaryCta,
-                            label: e.target.value,
-                          },
-                        },
-                      }));
-                      setSuccess(null);
-                    }}
-                    className={fieldClass}
-                  />
-                  <input
-                    value={homeSections.author.secondaryCta.href}
-                    onChange={(e) => {
-                      setHomeSections((hs) => ({
-                        ...hs,
-                        author: {
-                          ...hs.author,
-                          secondaryCta: {
-                            ...hs.author.secondaryCta,
-                            href: e.target.value,
-                          },
-                        },
-                      }));
-                      setSuccess(null);
-                    }}
-                    className={fieldClass}
-                  />
                 </div>
               </div>
             </div>
