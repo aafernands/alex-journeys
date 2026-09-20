@@ -38,8 +38,6 @@ const company = [
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
   { href: "/affiliate-disclosure", label: "Affiliate disclosure" },
-  { href: "/policies", label: "Policies hub" },
-  { href: "/app", label: "App & Google Sign-In" },
 ];
 
 export function Footer() {

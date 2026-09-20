@@ -74,19 +74,18 @@ JSON under `src/content/pages/` loaded by App Router routes via `getPageBySlug` 
 | `about` | `/about` | Photo stays from Author photo CMS; body + next-step CTAs editable |
 | `contact` | `/contact` | Intro + form labels/success copy via sections; form stays React |
 | `start-here` | `/start-here` | Intro + step cards via sections |
-| `bucket-list` | `/bucket-list` | Intro editable; post grid from hub slugs |
 | `media-kit` | `/media-kit` | Full kit copy + stats/lists via contentHtml + sections |
-| `app` | `/app` | OAuth purpose page |
+| `app` | `/app` | OAuth purpose page (kept for Google branding; not in primary nav/footer) |
 | `guides` | `/guides` | Hub intro only; guide cards stay data-driven |
 | `tools` | `/tools` | Intro + affiliate disclosure blurb; tool cards from nav data |
 | `destinations` | `/destinations` | Index intro only; tree stays Destinations CMS |
 | `blog` | `/blog` | Index intro only; posts from Posts CMS |
-| `culinary` | `/culinary` | |
-| `policies` | `/policies` | Hub |
+| `policies` | `/policies` | Legal hub (hash redirects); demoted from footer |
 | `privacy` | `/privacy` | |
 | `terms` | `/terms` | |
 | `affiliate-disclosure` | `/affiliate-disclosure` | |
-| `travel-wallet` | `/travel-wallet` | |
+
+Phase D redirects (JSON may remain as archive; public URLs 301): `culinary` and `bucket-list` → `/guides/experiences`; `travel-wallet` → `/guides/money-budget`.
 
 Create/edit/delete from **Pages**. Known slugs have explicit routes. **New CMS-only slugs** without a dedicated `src/app/{slug}/page.tsx` are served by the catch-all `src/app/[slug]/page.tsx` when they do not collide with a post or destination (and are not reserved app routes).
 

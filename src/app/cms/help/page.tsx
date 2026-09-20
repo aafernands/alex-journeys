@@ -112,10 +112,12 @@ export default async function CmsHelpPage() {
             <code className="rounded bg-surface-soft px-1 text-xs">
               src/content/pages
             </code>
-            — including About, Contact, Start here, Bucket list, Media kit, App
-            purpose, Guides/Tools/Destinations/Blog intros, policies, culinary,
-            travel-wallet, and more. Hub <em>cards</em> stay data-driven; editable
-            fields are title, description, intro, and optional sections JSON.
+            — including About, Contact, Start here, Media kit, App purpose,
+            Guides/Tools/Destinations/Blog intros, policies, and legal pages.
+            Culinary, bucket-list, and travel-wallet JSON may remain as archive;
+            those URLs 301 into Guides. Hub <em>cards</em> stay data-driven;
+            editable fields are title, description, intro, and optional sections
+            JSON.
           </li>
           <li>
             <Link href="/cms/design" className="text-link hover:text-accent">

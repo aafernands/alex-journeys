@@ -17,15 +17,12 @@ const STATIC_ROUTES: {
   { path: "/destinations", changeFrequency: "weekly", priority: 0.9 },
   { path: "/guides", changeFrequency: "weekly", priority: 0.85 },
   { path: "/tools", changeFrequency: "monthly", priority: 0.6 },
-  { path: "/culinary", changeFrequency: "monthly", priority: 0.6 },
-  { path: "/bucket-list", changeFrequency: "monthly", priority: 0.6 },
   { path: "/media-kit", changeFrequency: "monthly", priority: 0.5 },
   { path: "/policies", changeFrequency: "yearly", priority: 0.3 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
   { path: "/affiliate-disclosure", changeFrequency: "yearly", priority: 0.3 },
-  { path: "/app", changeFrequency: "yearly", priority: 0.4 },
-  { path: "/travel-wallet", changeFrequency: "monthly", priority: 0.55 },
+  { path: "/app", changeFrequency: "yearly", priority: 0.2 },
   { path: "/search", changeFrequency: "monthly", priority: 0.4 },
 ];
 

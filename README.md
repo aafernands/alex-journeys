@@ -11,9 +11,10 @@ Alex Fernandes’s personal travel journal — destinations from past trips, tri
 - **Tailwind CSS** v4
 - **next/font** — Montserrat (display) + Open Sans (body)
 - Blog posts as cleaned JSON under `src/content/posts/`
-- Static pages (policies, culinary, travel-wallet) under `src/content/pages/`
-- Pillars: Places (`/destinations`), Stories (`/blog`), Guides (`/guides`), Tools (`/tools`)
-- Also: `/bucket-list`, `/start-here`, `/contact`
+- Static pages (About, Contact, Start here, Media kit, legal, Tools) under `src/content/pages/`
+- Pillars: Places (`/destinations`), Stories (`/blog`), Guides (`/guides`), plus Tools (`/tools`)
+- Also: `/start-here`, `/contact`, `/about`, `/media-kit`
+- Thin leftovers `/culinary`, `/bucket-list`, `/travel-wallet` permanently redirect into Guides
 - Unpublished draft: `src/content/drafts/` (not listed on /blog)
 - Images are **project-hosted** under `public/media/` (plus Unsplash for a few stock shots)
 

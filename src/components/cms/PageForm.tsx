@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { redirectedPageSlugs } from "@/data/guides";
 import { RichTextEditor } from "./RichTextEditor";
 
 export type PageFormInitial = {
@@ -291,10 +292,10 @@ export function PageForm({ mode, initial }: Props) {
               </a>
               {" · "}
               <a
-                href={`/${success.slug}`}
+                href={redirectedPageSlugs[success.slug] ?? `/${success.slug}`}
                 className="text-link underline-offset-2 hover:text-accent hover:underline"
               >
-                Open /{success.slug}
+                Open {redirectedPageSlugs[success.slug] ?? `/${success.slug}`}
               </a>
               {" (after deploy)"}
             </p>

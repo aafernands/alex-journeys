@@ -93,14 +93,6 @@ export const PAGE_DEFAULTS: Record<string, SitePage> = {
         "Want the short version of who I am? Read About →",
     },
   },
-  "bucket-list": {
-    slug: "bucket-list",
-    title: "Places worth the early alarm",
-    label: "Bucket list",
-    description:
-      "A curated tray of adventure and once-in-a-while trips from the journal — rebuilt from the WordPress bucket-list post grid, without the agency clutter.",
-    contentHtml: "<p></p>",
-  },
   "media-kit": {
     slug: "media-kit",
     title: "Media kit",

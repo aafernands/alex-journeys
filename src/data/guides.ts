@@ -72,7 +72,7 @@ export const guideHubs: GuideHub[] = [
     title: "Money & budget",
     shortTitle: "Money",
     description:
-      "Stretch a trip, cards I actually use, and the travel wallet notes that still earn their keep.",
+      "Stretch a trip, cards I actually use, and money notes from the road.",
     icon: "wallet",
     links: [
       {
@@ -104,12 +104,6 @@ export const guideHubs: GuideHub[] = [
         title: "The Best Travel Credit Cards",
         href: "/top-travel-credit-cards",
         kind: "post",
-      },
-      {
-        title: "Travel Wallet",
-        href: "/travel-wallet",
-        description: "Cards, cash, and fees abroad.",
-        kind: "page",
       },
     ],
   },
@@ -256,18 +250,6 @@ export const guideHubs: GuideHub[] = [
         href: "/nj-wine-expo-2024",
         kind: "post",
       },
-      {
-        title: "Bucket List",
-        href: "/bucket-list",
-        description: "Must-see trips from the journal.",
-        kind: "page",
-      },
-      {
-        title: "Culinary",
-        href: "/culinary",
-        description: "Flavors, markets, and cultural bites.",
-        kind: "page",
-      },
     ],
   },
 ];
@@ -330,7 +312,18 @@ export const legacyPathRedirects: { source: string; destination: string }[] = [
   { source: "/plan-your-trip", destination: "/tools" },
   { source: "/places", destination: "/destinations" },
   { source: "/places/:path*", destination: "/:path*" },
+  // Phase D — thin WordPress leftovers → guide hubs
+  { source: "/culinary", destination: "/guides/experiences" },
+  { source: "/bucket-list", destination: "/guides/experiences" },
+  { source: "/travel-wallet", destination: "/guides/money-budget" },
 ];
+
+/** CMS slugs whose public URLs 301 into Guides. JSON may remain as archive. */
+export const redirectedPageSlugs: Record<string, string> = {
+  culinary: "/guides/experiences",
+  "bucket-list": "/guides/experiences",
+  "travel-wallet": "/guides/money-budget",
+};
 
 /** Slug → guide hub for blog filter by guide topic */
 export const postGuideTopics: Record<string, string[]> = (() => {

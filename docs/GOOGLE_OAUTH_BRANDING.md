@@ -41,8 +41,8 @@ Google’s “home page URL not registered to you” failure is **Search Console
 1. Confirm live:
    - https://www.fernandesjourneys.com → 200, no login wall
    - https://www.fernandesjourneys.com/privacy → substantial privacy + OAuth section
-   - https://www.fernandesjourneys.com/policies → hub linking privacy / terms / affiliate
-   - https://www.fernandesjourneys.com/app → app purpose
+   - https://www.fernandesjourneys.com/policies → legal hub (privacy / terms / affiliate); not in primary nav
+   - https://www.fernandesjourneys.com/app → app purpose (kept for branding; not promoted in marketing nav)
 2. Update consent screen fields exactly as in the table above.
 3. Finish Search Console domain verification for apex + www.
 4. Resubmit branding verification in Google Cloud Console.

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
+import { redirectedPageSlugs } from "@/data/guides";
 
 export type PagesListItem = {
   slug: string;
@@ -108,13 +109,21 @@ export function PagesList({ pages }: Props) {
                   {page.label ? `${page.label} · ` : ""}
                   <span className="font-mono">/{page.slug}</span>
                 </p>
+                {redirectedPageSlugs[page.slug] ? (
+                  <p className="mt-1 text-xs font-medium text-accent">
+                    Public URL redirects to{" "}
+                    <span className="font-mono">
+                      {redirectedPageSlugs[page.slug]}
+                    </span>
+                  </p>
+                ) : null}
                 <p className="mt-1 line-clamp-2 text-sm text-muted">
                   {page.description}
                 </p>
               </div>
               <div className="flex shrink-0 flex-wrap gap-2">
                 <Link
-                  href={`/${page.slug}`}
+                  href={redirectedPageSlugs[page.slug] ?? `/${page.slug}`}
                   className="btn btn-secondary text-xs"
                   target="_blank"
                 >

@@ -6,12 +6,9 @@
     "privacy",
     "terms",
     "affiliate-disclosure",
-    "culinary",
-    "travel-wallet",
     "about",
     "contact",
     "start-here",
-    "bucket-list",
     "media-kit",
     "app",
     "guides",
@@ -68,6 +65,18 @@
     {
       "slug": "destinations",
       "reason": "Already rebuilt as /destinations in Next.js; kept existing design"
+    },
+    {
+      "slug": "culinary",
+      "reason": "Phase D: thin WordPress leftover; 301 /culinary → /guides/experiences"
+    },
+    {
+      "slug": "bucket-list",
+      "reason": "Phase D: empty body + post grid duplicate of /guides/experiences; 301 /bucket-list → /guides/experiences"
+    },
+    {
+      "slug": "travel-wallet",
+      "reason": "Phase D: leftover money page overlapping Wise/credit-card posts; 301 /travel-wallet → /guides/money-budget"
     }
   ],
   "draft": "ios-26-boarding-pass-experience (stored under src/content/drafts/, not published)",
