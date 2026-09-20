@@ -214,7 +214,16 @@ export function ReaderLoginForm({
             />
             {mode === "signup" ? (
               <p className="mt-1.5 text-xs text-muted">At least 8 characters.</p>
-            ) : null}
+            ) : (
+              <p className="mt-1.5 text-right text-xs">
+                <Link
+                  href="/forgot-password"
+                  className="font-semibold text-accent hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </p>
+            )}
           </div>
 
           <button

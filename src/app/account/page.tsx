@@ -10,12 +10,14 @@ import {
 } from "lucide-react";
 import { auth, isReaderAuthConfigured } from "@/auth";
 import { AccountAuthActions } from "@/components/AccountAuthActions";
+import { ChangePasswordForm } from "@/components/ChangePasswordForm";
 import {
   SavedPostsList,
   type SavedPostRow,
 } from "@/components/SavedPostsList";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
 import { getPostBySlug } from "@/lib/posts";
+import { getUserById } from "@/lib/users";
 import {
   listSavedPosts,
   SavedPostsUnavailableError,
@@ -57,6 +59,16 @@ export default async function AccountPage() {
   let posts: SavedPostRow[] = [];
   let loadError: string | null = null;
   let firebaseOk = isFirebaseConfigured();
+  let hasPassword = false;
+
+  if (signedIn && userId && firebaseOk) {
+    try {
+      const profile = await getUserById(userId);
+      hasPassword = Boolean(profile?.passwordHash);
+    } catch (err) {
+      console.warn("[account] profile lookup failed:", err);
+    }
+  }
 
   if (signedIn && userId) {
     if (!firebaseOk) {
@@ -244,6 +256,24 @@ export default async function AccountPage() {
                   </li>
                 </ul>
               </section>
+
+              {hasPassword ? (
+                <section
+                  className="panel p-6 md:p-8"
+                  aria-labelledby="account-password"
+                >
+                  <h2
+                    id="account-password"
+                    className="font-display text-xl font-bold text-heading"
+                  >
+                    Change password
+                  </h2>
+                  <p className="mt-1 text-sm text-muted">
+                    Update the password for your email sign-in.
+                  </p>
+                  <ChangePasswordForm />
+                </section>
+              ) : null}
 
               <section
                 className="panel p-6 md:p-8"
