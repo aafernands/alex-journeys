@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostContent } from "@/components/blog/PostContent";
+import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { SavePostButton } from "@/components/SavePostButton";
 import { RelatedPosts } from "@/components/blog/RelatedPosts";
 import { JsonLd } from "@/components/JsonLd";
@@ -90,10 +91,8 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-4">
-              <a
+              <OutboundLink
                 href={site.social.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="group relative shrink-0 rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] p-[2.5px] shadow-sm transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                 aria-label={`${site.authorName} on Instagram`}
               >
@@ -108,18 +107,16 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
                     />
                   </span>
                 </span>
-              </a>
+              </OutboundLink>
               <div>
                 <p className="text-sm font-semibold text-heading">
                   By{" "}
-                  <a
+                  <OutboundLink
                     href={site.social.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="transition hover:text-accent"
                   >
                     {site.authorName}
-                  </a>
+                  </OutboundLink>
                 </p>
                 <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted">
                   <time dateTime={post.date}>
@@ -128,10 +125,8 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
                   <span aria-hidden="true" className="text-muted-light">
                     ·
                   </span>
-                  <a
+                  <OutboundLink
                     href={site.social.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 font-medium text-link transition hover:text-accent"
                   >
                     <svg
@@ -150,7 +145,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
                       <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
                     </svg>
                     Instagram
-                  </a>
+                  </OutboundLink>
                 </p>
               </div>
               </div>

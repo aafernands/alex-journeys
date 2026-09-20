@@ -55,6 +55,11 @@ Open [http://localhost:3000](http://localhost:3000).
 npm run build
 ```
 
+
+## Outbound links
+
+External and affiliate links pause briefly on **`/out?to=…`** (departure interstitial) before redirecting. See [`docs/OUTBOUND.md`](docs/OUTBOUND.md).
+
 ## Deploy
 
 Connected to Vercel from `main`. Push to deploy.

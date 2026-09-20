@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { NavIcon } from "@/components/icons/NavIcon";
+import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { Section, SectionHead } from "@/components/ui/Section";
 import { tripPlannerTools } from "@/data/nav";
 
@@ -29,10 +30,9 @@ export function ToolsStrip() {
       <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {preview.map((tool) => (
           <li key={tool.href}>
-            <a
+            <OutboundLink
               href={tool.href}
-              target="_blank"
-              rel="noopener noreferrer sponsored"
+              affiliate
               className="panel-interactive group flex h-full items-center gap-3 p-4"
             >
               <span className="panel-nested flex size-9 shrink-0 items-center justify-center bg-white text-accent">
@@ -44,7 +44,7 @@ export function ToolsStrip() {
                 </span>
                 <span className="block text-xs text-muted">{tool.partner}</span>
               </span>
-            </a>
+            </OutboundLink>
           </li>
         ))}
       </ul>

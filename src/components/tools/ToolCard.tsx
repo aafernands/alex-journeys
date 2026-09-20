@@ -1,5 +1,6 @@
 import { ExternalLink } from "lucide-react";
 import { NavIcon } from "@/components/icons/NavIcon";
+import { OutboundLink } from "@/components/outbound/OutboundLink";
 import type { AffiliateTool } from "@/data/nav";
 
 type ToolCardProps = {
@@ -8,10 +9,9 @@ type ToolCardProps = {
 
 export function ToolCard({ tool }: ToolCardProps) {
   return (
-    <a
+    <OutboundLink
       href={tool.href}
-      target="_blank"
-      rel="noopener noreferrer sponsored"
+      affiliate
       className="panel-interactive group flex h-full items-start gap-3.5 p-4 sm:p-5"
     >
       <span className="panel-nested flex size-11 shrink-0 items-center justify-center bg-white text-accent">
@@ -42,6 +42,6 @@ export function ToolCard({ tool }: ToolCardProps) {
           {tool.description}
         </span>
       </span>
-    </a>
+    </OutboundLink>
   );
 }

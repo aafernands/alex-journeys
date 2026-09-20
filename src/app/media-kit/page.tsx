@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { SitePage } from "@/components/pages/SitePage";
+import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { site } from "@/data/content";
 
 export const metadata: Metadata = {
@@ -186,11 +187,8 @@ export default function MediaKitPage() {
         <ul className="mt-6 grid gap-4 sm:grid-cols-3">
           {platforms.map((p) => (
             <li key={p.name}>
-              <a
+              <OutboundLink
                 href={p.href}
-                {...(p.href.startsWith("http")
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
                 className="panel-interactive flex h-full flex-col gap-1 p-5 md:p-6"
               >
                 <span className="font-display text-lg font-bold text-heading">
@@ -200,7 +198,7 @@ export default function MediaKitPage() {
                 <span className="mt-3 text-sm font-semibold text-link">
                   Visit →
                 </span>
-              </a>
+              </OutboundLink>
             </li>
           ))}
         </ul>

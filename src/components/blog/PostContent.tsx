@@ -1,3 +1,5 @@
+import { rewriteHtmlExternalLinks } from "@/lib/outbound";
+
 type Props = {
   html: string;
 };
@@ -17,12 +19,14 @@ function withHeadingIds(html: string): string {
   });
 }
 
-/** Renders cleaned WordPress HTML with prose styles. */
+/** Renders cleaned WordPress HTML with prose styles and outbound rewrites. */
 export function PostContent({ html }: Props) {
+  const prepared = rewriteHtmlExternalLinks(withHeadingIds(html));
+
   return (
     <div
       className="post-prose"
-      dangerouslySetInnerHTML={{ __html: withHeadingIds(html) }}
+      dangerouslySetInnerHTML={{ __html: prepared }}
     />
   );
 }

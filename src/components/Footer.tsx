@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { NewsletterForm } from "@/components/newsletter/NewsletterForm";
+import { OutboundLink } from "@/components/outbound/OutboundLink";
 import {
   PostageStamp,
   PostmarkWatermark,
@@ -149,25 +150,21 @@ export function Footer() {
                 <ul className="flex flex-wrap gap-2">
                   {social.map((item) => (
                     <li key={item.label}>
-                      <a
+                      <OutboundLink
                         href={item.href}
                         className="inline-flex rounded-lg border border-hero-type/15 bg-hero-type/5 px-3 py-1.5 text-sm font-semibold text-hero-type/90 transition hover:bg-hero-type/10"
-                        rel="noopener noreferrer"
-                        target="_blank"
                       >
                         {item.label}
-                      </a>
+                      </OutboundLink>
                     </li>
                   ))}
                   <li>
-                    <a
+                    <OutboundLink
                       href={site.social.coffee}
                       className="inline-flex rounded-lg border border-accent/40 bg-accent/15 px-3 py-1.5 text-sm font-semibold text-accent transition hover:bg-accent/25"
-                      rel="noopener noreferrer"
-                      target="_blank"
                     >
                       Buy me a coffee
-                    </a>
+                    </OutboundLink>
                   </li>
                 </ul>
               </nav>
