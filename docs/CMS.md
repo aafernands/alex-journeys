@@ -105,11 +105,13 @@ Post editor: featured image **Choose from library**; rich text **Image** opens t
 
 ## Security notes
 
-- OAuth: only `CMS_ADMIN_EMAILS`; `session.user.isAdmin` from Auth.js callbacks.
+- OAuth: Google is open to **public readers**; CMS still requires `CMS_ADMIN_EMAILS` (`session.user.isAdmin`) or passcode. Reader sessions alone never unlock `/cms`.
 - Passcode: server-only check; httpOnly cookie, HMAC-signed; never logged.
 - `isCmsAuthenticated()` = OAuth admin **or** passcode session.
 - Slugs sanitized (kebab-case); path traversal rejected.
 - CMS layout: `robots: noindex`.
+
+Public reader save/bookmarks: see [`READER-SAVED-POSTS.md`](./READER-SAVED-POSTS.md).
 
 ## How Alex publishes
 

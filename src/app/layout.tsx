@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Outfit, Inter } from "next/font/google";
 import { Header } from "@/components/Header";
+import { Providers } from "@/components/Providers";
 import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/JsonLd";
+import { isGoogleAuthConfigured, isOauthConfigured } from "@/auth";
 import { getLatestPost } from "@/lib/posts";
 import {
   absoluteUrl,
@@ -88,6 +90,8 @@ export default function RootLayout({
   const latestPost = latest
     ? { slug: latest.slug, title: latest.title }
     : null;
+  const googleConfigured =
+    isOauthConfigured() && isGoogleAuthConfigured();
 
   return (
     <html
@@ -102,9 +106,14 @@ export default function RootLayout({
         <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
       </head>
       <body id="top" className="min-h-full flex flex-col font-sans">
-        <Header latestPost={latestPost} />
-        <div className="flex-1">{children}</div>
-        <Footer />
+        <Providers>
+          <Header
+            latestPost={latestPost}
+            googleConfigured={googleConfigured}
+          />
+          <div className="flex-1">{children}</div>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

@@ -1,0 +1,68 @@
+# Reader Google login & saved posts
+
+Public readers can **Sign in with Google** (header) and **Save** blog posts. Data lives in **Cloud Firestore** on the existing Firebase project. CMS admin access is unchanged: allowlisted `CMS_ADMIN_EMAILS` or passcode only.
+
+## What readers get
+
+| Surface | Behavior |
+| --- | --- |
+| Header | Sign in / Sign out; **Saved** link when signed in |
+| Blog post | **Save** / **Saved** toggle; signed-out tap → Google sign-in |
+| `/saved` | List of saved posts (title, saved date, link); empty state if none |
+
+Reader sessions **do not** unlock `/cms`.
+
+## Firestore shape
+
+```
+users/{userId}/saved/{slug}
+  { slug, title, savedAt, href }
+```
+
+`userId` = Auth.js `session.user.id` (Google `sub`).
+
+## Env vars (Vercel + local `.env.local`)
+
+| Variable | Required | Notes |
+| --- | --- | --- |
+| `FIREBASE_PROJECT_ID` | Yes for save | Firebase project id |
+| `FIREBASE_CLIENT_EMAIL` | Yes for save | Service account email |
+| `FIREBASE_PRIVATE_KEY` | Yes for save | Full private key; store with `\n` for newlines (code expands them) |
+| `FIREBASE_PRIVATE_KEY_ID` | Optional | From the service account JSON (not required by the Admin SDK init) |
+
+Also required for Google readers (already used by CMS):
+
+- `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`
+- Optional: `AUTH_TRUST_HOST=true` on Vercel
+
+Build succeeds **without** Firebase env: save APIs return **503** until configured.
+
+## Firebase console steps
+
+1. Open [Firebase Console](https://console.firebase.google.com/) → your existing project.
+2. **Build → Firestore Database** → create database (production mode is fine; rules can deny client access — this app uses the Admin SDK only).
+3. **Project settings → Service accounts → Generate new private key** (or reuse an existing server key).
+4. Copy into Vercel env:
+   - `project_id` → `FIREBASE_PROJECT_ID`
+   - `client_email` → `FIREBASE_CLIENT_EMAIL`
+   - `private_key` → `FIREBASE_PRIVATE_KEY` (keep quotes/`\n` as Vercel expects)
+5. Redeploy.
+
+No client Firebase SDK is used; do not put the service account key in the browser.
+
+## Google OAuth Testing mode
+
+If the Google Cloud OAuth consent screen is in **Testing**, only listed test users can sign in as public readers. To open readers to everyone:
+
+- Add test users in Google Cloud Console, **or**
+- Publish the OAuth consent screen (External → In production).
+
+Until then, non-test Google accounts will fail sign-in even though the site UI shows **Sign in**.
+
+## Code map
+
+- `src/lib/firebase-admin.ts` — Admin init
+- `src/lib/saved-posts.ts` — list / add / remove
+- `src/app/api/saved/route.ts` — GET / POST / DELETE
+- `src/components/ReaderAuthButtons.tsx`, `SavePostButton.tsx`
+- `src/auth.ts` — Google open to all; `session.user.id` + `isAdmin` for CMS

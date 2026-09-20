@@ -2,7 +2,7 @@
   "name": "fernandes-journeys",
   "version": "0.1.0",
   "private": true,
-  "description": "Fernandes Journeys \u2014 Alex\u2019s travel blog for personal travel blog \u2014 destinations from past trips.",
+  "description": "Fernandes Journeys — Alex’s travel blog for personal travel blog — destinations from past trips.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -17,6 +17,7 @@
     "@tiptap/pm": "^3.31.3",
     "@tiptap/react": "^3.31.3",
     "@tiptap/starter-kit": "^3.31.3",
+    "firebase-admin": "^13.10.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.544.0",
     "next": "16.3.5",

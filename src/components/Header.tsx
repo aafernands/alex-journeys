@@ -9,6 +9,7 @@ import { TopicFlyout } from "@/components/header/TopicFlyout";
 import { MobileTopicSection } from "@/components/header/MobileTopicSection";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
 import {
   SearchInput,
   type SearchInputHandle,
@@ -20,9 +21,10 @@ type LatestPost = { slug: string; title: string };
 
 type Props = {
   latestPost?: LatestPost | null;
+  googleConfigured?: boolean;
 };
 
-export function Header({ latestPost = null }: Props) {
+export function Header({ latestPost = null, googleConfigured = false }: Props) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -329,6 +331,11 @@ export function Header({ latestPost = null }: Props) {
             className="shrink-0"
           />
 
+          <ReaderAuthButtons
+            variant="header"
+            googleConfigured={googleConfigured}
+          />
+
           <ThemeToggle />
 
           <Link href="/tools" className="btn btn-ink !min-h-9 !px-4 !py-1.5 text-sm">
@@ -511,6 +518,15 @@ export function Header({ latestPost = null }: Props) {
                 Contact
               </Link>
             </li>
+            {googleConfigured ? (
+              <li className="mt-3 border-t border-border pt-3">
+                <ReaderAuthButtons
+                  variant="mobile"
+                  googleConfigured={googleConfigured}
+                  onNavigate={closeAll}
+                />
+              </li>
+            ) : null}
           </ul>
         </nav>
       )}

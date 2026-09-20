@@ -2,7 +2,8 @@
  * CMS auth: Auth.js admin session OR optional passcode cookie.
  * Swap / extend here without touching CMS pages/API.
  *
- * TODO: Public reader accounts are not built yet — see src/auth.ts.
+ * Public readers may have an Auth.js Google session (see src/auth.ts) —
+ * that alone never unlocks the CMS; isAdmin / passcode still required.
  */
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";

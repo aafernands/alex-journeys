@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostContent } from "@/components/blog/PostContent";
+import { SavePostButton } from "@/components/SavePostButton";
 import { RelatedPosts } from "@/components/blog/RelatedPosts";
 import { JsonLd } from "@/components/JsonLd";
 import {
@@ -125,7 +126,8 @@ export default async function BlogPostPage({ params }: PageProps) {
               {post.title}
             </h1>
 
-            <div className="mt-6 flex flex-wrap items-center gap-4">
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-4">
               <a
                 href={site.social.instagram}
                 target="_blank"
@@ -189,6 +191,8 @@ export default async function BlogPostPage({ params }: PageProps) {
                   </a>
                 </p>
               </div>
+              </div>
+              <SavePostButton slug={slug} />
             </div>
           </div>
 

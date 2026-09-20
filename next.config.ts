@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import { legacyPathRedirects } from "./src/data/guides";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["firebase-admin"],
   images: {
     localPatterns: [
       {

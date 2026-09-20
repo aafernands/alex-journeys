@@ -59,6 +59,10 @@ npm run build
 
 Connected to Vercel from `main`. Push to deploy.
 
+## Reader accounts & saved posts
+
+Public **Sign in with Google** in the header; readers can save posts to Firestore (`/saved`). Setup: [`docs/READER-SAVED-POSTS.md`](docs/READER-SAVED-POSTS.md).
+
 ## In-site CMS
 
 Passcode-gated editor at **`/cms`** (not linked in the public header). Publishes posts to GitHub so Vercel redeploys.
