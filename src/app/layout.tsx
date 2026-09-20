@@ -107,7 +107,7 @@ export default function RootLayout({
             latestPost={latestPost}
             googleConfigured={googleConfigured}
           />
-          <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex min-h-0 flex-1 flex-col mobile-bottom-nav-pad">
             <div className="flex-1">{children}</div>
             <Footer />
           </div>

@@ -24,8 +24,8 @@ type Props = {
 };
 
 /**
- * Full primary mobile menu (opened from the header hamburger).
- * Near-full-width overlay under a full-screen scrim — no bottom bar gap.
+ * Secondary mobile drawer (opened from bottom Menu tab).
+ * Primary Places/Stories/Guides/Saved live in the bottom bar — drawer holds the rest.
  */
 export function MobileNavDrawer({
   open,
@@ -39,7 +39,7 @@ export function MobileNavDrawer({
 
   return (
     <div
-      className="fixed inset-0 z-[200] md:hidden"
+      className="fixed inset-x-0 top-0 z-[200] bottom-[calc(3.5rem+env(safe-area-inset-bottom,0px))] md:hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Site menu"
@@ -56,11 +56,12 @@ export function MobileNavDrawer({
         className="absolute inset-y-0 left-0 flex w-[calc(100%-0.75rem)] max-w-[28rem] flex-col bg-bg shadow-xl"
         aria-label="Mobile"
       >
+        {/* Header: logo + close */}
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
           <BrandLogo className="h-9 w-auto" priority onClick={onClose} />
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-on-solid transition hover:bg-accent-deep"
             aria-label="Close menu"
             onClick={onClose}
           >
@@ -78,9 +79,52 @@ export function MobileNavDrawer({
           </button>
         </div>
 
+        {/* Scrollable secondary links */}
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
           <ul className="flex flex-col gap-0.5">
             <li>
+              <Link
+                href="/start-here"
+                className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent"
+                onClick={onClose}
+              >
+                <NavIcon name="compass" size={18} className="text-accent" />
+                Start here
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="/tools"
+                className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent"
+                onClick={onClose}
+              >
+                <NavIcon name="wrench" size={18} className="text-accent" />
+                Tools I use
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="/about"
+                className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent"
+                onClick={onClose}
+              >
+                About
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="/contact"
+                className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent"
+                onClick={onClose}
+              >
+                Contact
+              </Link>
+            </li>
+
+            <li className="mt-3 border-t border-border pt-3">
               <button
                 type="button"
                 className="flex w-full items-center justify-between rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft"
@@ -143,17 +187,6 @@ export function MobileNavDrawer({
               ) : null}
             </li>
 
-            <li>
-              <Link
-                href="/blog"
-                className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent"
-                onClick={onClose}
-              >
-                <NavIcon name="book-open" size={18} className="text-accent" />
-                Stories
-              </Link>
-            </li>
-
             <MobileTopicSection
               label="Guides"
               href="/guides"
@@ -161,62 +194,21 @@ export function MobileNavDrawer({
               icon="book-marked"
               onNavigate={onClose}
             />
-
-            <li>
-              <Link
-                href="/account"
-                className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent"
-                onClick={onClose}
-              >
-                <NavIcon name="bookmark" size={18} className="text-accent" />
-                Saved
-              </Link>
-            </li>
-
-            <li>
-              <Link
-                href="/start-here"
-                className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent"
-                onClick={onClose}
-              >
-                <NavIcon name="compass" size={18} className="text-accent" />
-                Start here
-              </Link>
-            </li>
-
-            <li>
-              <Link
-                href="/tools"
-                className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent"
-                onClick={onClose}
-              >
-                <NavIcon name="wrench" size={18} className="text-accent" />
-                Tools I use
-              </Link>
-            </li>
-
-            <li className="mt-3 border-t border-border pt-3">
-              <Link
-                href="/about"
-                className="block rounded-lg px-2 py-2 text-sm font-semibold text-text hover:bg-surface-soft hover:text-accent"
-                onClick={onClose}
-              >
-                About
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/contact"
-                className="block rounded-lg px-2 py-2 text-sm font-semibold text-text hover:bg-surface-soft hover:text-accent"
-                onClick={onClose}
-              >
-                Contact
-              </Link>
-            </li>
           </ul>
         </div>
 
-        <div className="shrink-0 border-t border-border px-4 pb-3 pt-3">
+        {/* Sticky footer: auth above clean social icon row */}
+        <div className="shrink-0 px-4 pb-3 pt-2">
+          {googleConfigured ? (
+            <div className="mb-3 px-2">
+              <ReaderAuthButtons
+                variant="mobile"
+                googleConfigured={googleConfigured}
+                onNavigate={onClose}
+              />
+            </div>
+          ) : null}
+
           <ul
             className="flex flex-row items-center justify-center gap-5 px-2"
             aria-label="Social"
@@ -262,16 +254,6 @@ export function MobileNavDrawer({
               </OutboundLink>
             </li>
           </ul>
-
-          {googleConfigured ? (
-            <div className="mt-3 px-2">
-              <ReaderAuthButtons
-                variant="mobile"
-                googleConfigured={googleConfigured}
-                onNavigate={onClose}
-              />
-            </div>
-          ) : null}
         </div>
       </nav>
     </div>
