@@ -1,9 +1,15 @@
 import Link from "next/link";
+import {
+  isGitHubAuthConfigured,
+  isGoogleAuthConfigured,
+  isOauthConfigured,
+} from "@/auth";
 import { AuthorPhotoForm } from "@/components/cms/AuthorPhotoForm";
 import { LoginForm } from "@/components/cms/LoginForm";
 import { LogoutButton } from "@/components/cms/LogoutButton";
 import { site } from "@/data/content";
 import {
+  hasOauthAdminSession,
   isCmsAuthenticated,
   isPasscodeConfigured,
 } from "@/lib/cms/auth";
@@ -17,13 +23,20 @@ import { formatPostDate, getAllPosts } from "@/lib/posts";
 export const dynamic = "force-dynamic";
 
 export default async function CmsPage() {
-  const configured = isPasscodeConfigured();
+  const passcodeConfigured = isPasscodeConfigured();
+  const googleConfigured = isOauthConfigured() && isGoogleAuthConfigured();
+  const githubConfigured = isOauthConfigured() && isGitHubAuthConfigured();
   const authed = await isCmsAuthenticated();
+  const oauthAdmin = authed ? await hasOauthAdminSession() : false;
 
   if (!authed) {
     return (
       <div className="mx-auto max-w-md">
-        <LoginForm configured={configured} />
+        <LoginForm
+          passcodeConfigured={passcodeConfigured}
+          googleConfigured={googleConfigured}
+          githubConfigured={githubConfigured}
+        />
       </div>
     );
   }
@@ -60,7 +73,7 @@ export default async function CmsPage() {
           <a href="#author-photo" className="btn btn-secondary">
             Author photo
           </a>
-          <LogoutButton />
+          <LogoutButton oauthSession={oauthAdmin} />
         </div>
       </div>
 

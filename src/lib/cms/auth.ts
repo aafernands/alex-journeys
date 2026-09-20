@@ -1,9 +1,12 @@
 /**
- * Isolated CMS auth module (passcode + signed httpOnly cookie).
- * Swap this file later for real admin auth without touching CMS pages/API.
+ * CMS auth: Auth.js admin session OR optional passcode cookie.
+ * Swap / extend here without touching CMS pages/API.
+ *
+ * TODO: Public reader accounts are not built yet — see src/auth.ts.
  */
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
+import { auth, isAdminEmail } from "@/auth";
 import {
   CMS_COOKIE_MAX_AGE,
   CMS_COOKIE_NAME,
@@ -85,10 +88,34 @@ export function cookieOptions(maxAge = CMS_COOKIE_MAX_AGE) {
   };
 }
 
-/** Server-side session check (reads httpOnly cookie). */
-export async function isCmsAuthenticated(): Promise<boolean> {
+/** True when the passcode httpOnly cookie is valid. */
+export async function hasPasscodeSession(): Promise<boolean> {
   if (!isPasscodeConfigured()) return false;
   const jar = await cookies();
   return verifySessionToken(jar.get(CMS_COOKIE_NAME)?.value);
 }
 
+/**
+ * Auth.js session for the current request, if any.
+ * Useful when UI needs email / isAdmin beyond a boolean gate.
+ */
+export async function getCmsSession() {
+  return auth();
+}
+
+/** True when Auth.js session belongs to an allowlisted CMS admin. */
+export async function hasOauthAdminSession(): Promise<boolean> {
+  const session = await auth();
+  if (!session?.user) return false;
+  if (session.user.isAdmin === true) return true;
+  return isAdminEmail(session.user.email);
+}
+
+/**
+ * Server-side CMS gate: Auth.js allowlisted admin OR valid passcode cookie.
+ */
+export async function isCmsAuthenticated(): Promise<boolean> {
+  if (await hasOauthAdminSession()) return true;
+  if (await hasPasscodeSession()) return true;
+  return false;
+}
