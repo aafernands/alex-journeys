@@ -194,7 +194,14 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
             <p className="mt-1 text-sm leading-relaxed text-text">
               Some links on this page may be affiliate links. If you book or buy
               through them, I may earn a small commission at no extra cost to
-              you — thanks for supporting the journal.
+              you — thanks for supporting the journal. Read the{" "}
+              <Link
+                href="/affiliate-disclosure"
+                className="font-semibold text-link hover:text-accent"
+              >
+                full affiliate disclosure
+              </Link>
+              .
             </p>
           </aside>
 

@@ -176,7 +176,7 @@ export default async function CmsPage() {
           <FileText className="h-5 w-5 text-accent" aria-hidden />
           <div>
             <p className="font-semibold text-heading">Manage pages</p>
-            <p className="text-xs text-muted">Culinary, policies, more</p>
+            <p className="text-xs text-muted">Culinary, legal hub + separate legal pages</p>
           </div>
         </Link>
         <Link

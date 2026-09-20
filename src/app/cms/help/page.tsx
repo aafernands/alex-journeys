@@ -71,7 +71,11 @@ export default async function CmsHelpPage() {
             <code className="rounded bg-surface-soft px-1 text-xs">
               src/content/pages
             </code>{" "}
-            (culinary, policies, travel-wallet today).
+            (culinary, the <code className="rounded bg-surface-soft px-1 text-xs">/policies</code>{" "}
+            hub, <code className="rounded bg-surface-soft px-1 text-xs">/privacy</code>,{" "}
+            <code className="rounded bg-surface-soft px-1 text-xs">/terms</code>,{" "}
+            <code className="rounded bg-surface-soft px-1 text-xs">/affiliate-disclosure</code>, and
+            travel-wallet today).
           </li>
           <li>
             <Link href="/cms/destinations" className="text-link hover:text-accent">

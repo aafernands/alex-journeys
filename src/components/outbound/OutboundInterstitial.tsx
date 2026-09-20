@@ -114,7 +114,14 @@ export function OutboundInterstitial({
           {affiliate ? (
             <p className="mt-3 text-center text-sm leading-relaxed text-muted">
               This link is an affiliate partner link. If you book or buy there,{" "}
-              {site.name} may earn a commission at no extra cost to you.
+              {site.name} may earn a commission at no extra cost to you. See the{" "}
+              <Link
+                href="/affiliate-disclosure"
+                className="font-semibold text-link hover:text-accent"
+              >
+                affiliate disclosure
+              </Link>
+              .
             </p>
           ) : (
             <p className="mt-3 text-center text-sm leading-relaxed text-muted">

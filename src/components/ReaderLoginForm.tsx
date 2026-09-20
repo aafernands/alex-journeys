@@ -312,6 +312,17 @@ export function ReaderLoginForm({
         </button>
       ) : null}
 
+      <p className="mt-5 text-center text-xs leading-relaxed text-muted">
+        By continuing, you agree to our{" "}
+        <Link href="/terms" className="font-semibold text-link hover:text-accent">
+          Terms
+        </Link>{" "}and{" "}
+        <Link href="/privacy" className="font-semibold text-link hover:text-accent">
+          Privacy Policy
+        </Link>
+        .
+      </p>
+
       {error || authError ? (
         <p className="mt-4 text-sm font-medium text-red-600" role="alert">
           {error ||

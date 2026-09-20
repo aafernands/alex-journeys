@@ -73,6 +73,30 @@ export default function AppPurposePage() {
           </dd>
 
           <dt className="text-sm font-semibold uppercase tracking-wide text-muted">
+            Terms of use
+          </dt>
+          <dd>
+            <Link
+              href="/terms"
+              className="text-link transition hover:text-accent"
+            >
+              https://www.fernandesjourneys.com/terms
+            </Link>
+          </dd>
+
+          <dt className="text-sm font-semibold uppercase tracking-wide text-muted">
+            Affiliate disclosure
+          </dt>
+          <dd>
+            <Link
+              href="/affiliate-disclosure"
+              className="text-link transition hover:text-accent"
+            >
+              https://www.fernandesjourneys.com/affiliate-disclosure
+            </Link>
+          </dd>
+
+          <dt className="text-sm font-semibold uppercase tracking-wide text-muted">
             Contact
           </dt>
           <dd>
@@ -107,10 +131,22 @@ export default function AppPurposePage() {
             Privacy policy
           </Link>
           <Link
+            href="/terms"
+            className="btn btn-secondary btn-block sm:w-auto"
+          >
+            Terms of use
+          </Link>
+          <Link
+            href="/affiliate-disclosure"
+            className="btn btn-secondary btn-block sm:w-auto"
+          >
+            Affiliate disclosure
+          </Link>
+          <Link
             href="/policies"
             className="btn btn-secondary btn-block sm:w-auto"
           >
-            All policies
+            Policies hub
           </Link>
           <Link
             href="/start-here"

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ContactForm } from "@/components/pages/ContactForm";
 import { SitePage } from "@/components/pages/SitePage";
 import { site } from "@/data/content";
@@ -29,6 +30,11 @@ export default function ContactPage() {
             {site.email}
           </a>
           . I read every message — replies may take a few days if I’m mid-itinerary.
+          <br />
+          <Link href="/privacy" className="text-link hover:text-accent">
+            Read the Privacy Policy
+          </Link>
+          .
         </p>
       </aside>
     </SitePage>
