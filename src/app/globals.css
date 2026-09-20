@@ -103,17 +103,6 @@ body {
   line-height: 1.65;
 }
 
-/* Space for fixed mobile bottom tab bar (AllTrails-style). Desktop unchanged. */
-.mobile-bottom-nav-pad {
-  padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
-}
-
-@media (min-width: 768px) {
-  .mobile-bottom-nav-pad {
-    padding-bottom: 0;
-  }
-}
-
 
 
 ::selection {

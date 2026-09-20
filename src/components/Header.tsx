@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { TopicFlyout } from "@/components/header/TopicFlyout";
-import { MobileBottomNav } from "@/components/header/MobileBottomNav";
 import { MobileNavDrawer } from "@/components/header/MobileNavDrawer";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
@@ -361,7 +360,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             </Link>
           </div>
 
-          {/* Mobile: theme + hamburger (drawer also opens from bottom Menu tab) */}
+          {/* Mobile: theme + hamburger */}
           <div className="relative z-10 flex items-center gap-1 md:hidden">
             <ThemeToggle />
             <button
@@ -413,20 +412,11 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
 
       {mounted
         ? createPortal(
-            <>
-              <MobileBottomNav
-                menuOpen={mobileOpen}
-                onOpenMenu={() => {
-                  setMobileSearchOpen(false);
-                  setMobileOpen((v) => !v);
-                }}
-              />
-              <MobileNavDrawer
-                open={mobileOpen}
-                onClose={closeAll}
-                googleConfigured={googleConfigured}
-              />
-            </>,
+            <MobileNavDrawer
+              open={mobileOpen}
+              onClose={closeAll}
+              googleConfigured={googleConfigured}
+            />,
             document.body,
           )
         : null}
