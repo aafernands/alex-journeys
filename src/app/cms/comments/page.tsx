@@ -19,6 +19,15 @@ function parseFilter(raw: string | undefined): CommentStatus | "all" {
   return "pending";
 }
 
+function isIndexRelatedError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return (
+    /index/i.test(msg) ||
+    /console\.firebase\.google\.com/i.test(msg) ||
+    /failed[-_]?precondition/i.test(msg)
+  );
+}
+
 export default async function CmsCommentsPage({
   searchParams,
 }: {
@@ -48,7 +57,15 @@ export default async function CmsCommentsPage({
         loadError = "Firestore is temporarily unavailable.";
       } else {
         console.error("[cms/comments] list failed:", err);
-        loadError = "Could not load comments.";
+        if (err instanceof Error && err.message) {
+          console.error("[cms/comments] err.message:", err.message);
+        }
+        if (isIndexRelatedError(err)) {
+          loadError =
+            "Could not load comments. Create the Firestore composite index (link in server logs) or wait for deploy of indexes.";
+        } else {
+          loadError = "Could not load comments.";
+        }
       }
     }
   }

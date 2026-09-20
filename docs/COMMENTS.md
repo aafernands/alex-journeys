@@ -37,12 +37,12 @@ Uses the same Firebase Admin credentials as saved posts (`FIREBASE_PROJECT_ID`, 
 
 ### Indexes
 
-First queries may prompt Firestore to create composite indexes, typically:
+Declared in `firestore.indexes.json` (deploy with `firebase deploy --only firestore:indexes` when the Firebase CLI is linked to the project):
 
-- `slug` ASC + `status` ASC + `createdAt` ASC (public list)
 - `status` ASC + `createdAt` DESC (CMS lists)
+- `slug` ASC + `status` ASC + `createdAt` ASC (public list)
 
-Follow the console link in the server log if a query fails with a failed-precondition index error.
+List helpers fall back to equality filters + in-memory sort if the composite index is missing. Server logs include the Firebase console index URL when Firestore returns failed-precondition. Create the index once (console link or deploy the JSON) so queries stay efficient at scale.
 
 ## APIs
 

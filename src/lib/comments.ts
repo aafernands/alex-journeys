@@ -107,16 +107,64 @@ function docToComment(id: string, data: DocumentData): Comment {
   };
 }
 
+/** True when Firestore rejects a query for a missing composite index. */
+function isFirestoreIndexError(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const e = err as { code?: number | string; message?: string };
+  const code = e.code;
+  const msg = typeof e.message === "string" ? e.message : "";
+  return (
+    code === 9 ||
+    code === "failed-precondition" ||
+    /failed[-_]?precondition/i.test(msg) ||
+    /requires an index/i.test(msg) ||
+    /The query requires an index/i.test(msg)
+  );
+}
+
+function logIndexFallback(context: string, err: unknown): void {
+  const msg = err instanceof Error ? err.message : String(err);
+  console.error(
+    `[comments] ${context}: indexed query failed (falling back to in-memory sort).`,
+    msg,
+    err,
+  );
+  const urlMatch = msg.match(/https:\/\/console\.firebase\.google\.com[^\s)"]+/);
+  if (urlMatch) {
+    console.error(`[comments] Create composite index: ${urlMatch[0]}`);
+  }
+}
+
+function sortByCreatedAt(comments: Comment[], direction: "asc" | "desc"): Comment[] {
+  const sorted = [...comments];
+  sorted.sort((a, b) =>
+    direction === "asc"
+      ? a.createdAt.localeCompare(b.createdAt)
+      : b.createdAt.localeCompare(a.createdAt),
+  );
+  return sorted;
+}
+
 /** Public list: approved comments for a post, oldest first (thread-friendly). */
 export async function listApprovedComments(slug: string): Promise<Comment[]> {
   const s = sanitizeSlug(slug);
-  const snap = await commentsCollection()
-    .where("slug", "==", s)
-    .where("status", "==", "approved")
-    .orderBy("createdAt", "asc")
-    .get();
+  const base = () =>
+    commentsCollection()
+      .where("slug", "==", s)
+      .where("status", "==", "approved");
 
-  return snap.docs.map((doc) => docToComment(doc.id, doc.data()));
+  try {
+    const snap = await base().orderBy("createdAt", "asc").get();
+    return snap.docs.map((doc) => docToComment(doc.id, doc.data()));
+  } catch (err) {
+    if (!isFirestoreIndexError(err)) throw err;
+    logIndexFallback("listApprovedComments", err);
+    const snap = await base().get();
+    return sortByCreatedAt(
+      snap.docs.map((doc) => docToComment(doc.id, doc.data())),
+      "asc",
+    );
+  }
 }
 
 export type ListCommentsForCmsOpts = {
@@ -127,25 +175,42 @@ export type ListCommentsForCmsOpts = {
 
 /**
  * CMS list. Defaults to pending. Sorted by createdAt desc.
+ * Falls back to equality-only query + in-memory sort when the composite
+ * index is missing (failed-precondition).
  */
 export async function listCommentsForCms(
   opts: ListCommentsForCmsOpts = {},
 ): Promise<Comment[]> {
   const limit = Math.min(Math.max(opts.limit ?? 100, 1), 500);
-  let query: Query = commentsCollection();
-
-  if (opts.slug) {
-    query = query.where("slug", "==", sanitizeSlug(opts.slug));
-  }
-
   const status = opts.status ?? "pending";
-  if (status !== "all") {
-    query = query.where("status", "==", status);
+  const slug = opts.slug ? sanitizeSlug(opts.slug) : undefined;
+
+  function buildFiltered(includeOrder: boolean): Query {
+    let query: Query = commentsCollection();
+    if (slug) {
+      query = query.where("slug", "==", slug);
+    }
+    if (status !== "all") {
+      query = query.where("status", "==", status);
+    }
+    if (includeOrder) {
+      query = query.orderBy("createdAt", "desc").limit(limit);
+    }
+    return query;
   }
 
-  query = query.orderBy("createdAt", "desc").limit(limit);
-  const snap = await query.get();
-  return snap.docs.map((doc) => docToComment(doc.id, doc.data()));
+  try {
+    const snap = await buildFiltered(true).get();
+    return snap.docs.map((doc) => docToComment(doc.id, doc.data()));
+  } catch (err) {
+    if (!isFirestoreIndexError(err)) throw err;
+    logIndexFallback("listCommentsForCms", err);
+    const snap = await buildFiltered(false).get();
+    return sortByCreatedAt(
+      snap.docs.map((doc) => docToComment(doc.id, doc.data())),
+      "desc",
+    ).slice(0, limit);
+  }
 }
 
 /** Count pending comments (for CMS badge / dashboard). */
