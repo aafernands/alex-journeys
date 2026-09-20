@@ -42,21 +42,15 @@ export function AuthorIntro() {
             {author.headline}
           </h2>
           <p className="mt-4 max-w-xl text-lead text-text">{author.body}</p>
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <p className="mt-7">
             <Link
-              href={author.primaryCta.href}
-              className="btn btn-ink btn-block sm:w-auto"
+              href={author.primaryCta.href || "/about"}
+              className="text-link inline-flex items-center gap-1.5 text-sm font-semibold hover:text-accent"
             >
-              {author.primaryCta.label}
+              {author.primaryCta.label?.trim() || "Learn more about me"}
               <span aria-hidden="true">→</span>
             </Link>
-            <Link
-              href={author.secondaryCta.href}
-              className="btn btn-secondary btn-block sm:w-auto"
-            >
-              {author.secondaryCta.label}
-            </Link>
-          </div>
+          </p>
         </div>
       </div>
     </Section>
