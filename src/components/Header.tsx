@@ -204,7 +204,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           onClick={closeAll}
           aria-label="Fernandes Journeys home"
         >
-          <BrandLogo className="h-11 w-auto sm:h-12 md:h-14" priority />
+          <BrandLogo className="h-12 w-auto sm:h-14 md:h-16" width={260} height={78} priority />
         </Link>
 
         {/* Desktop: primary nav (center zone) */}
