@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-20T21:11:13.945Z",
+  "updatedAt": "2026-09-20T21:39:52.335Z",
   "hero": {
     "image": "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
     "imageAlt": "Maroon Bells View and Lake reflection of Bell mountains",
@@ -216,8 +216,8 @@
       "eyebrow": "About the journal",
       "headline": "Hi, I’m Alex",
       "body": "I’m Alex Fernandes — traveler, photographer, and the voice behind Fernandes Journeys. Based in New Jersey, I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
-      "photo": "/brand/alex-fernandes.jpg",
-      "photoAlt": "Alex Fernandes",
+      "photo": "/media/migrated/2025-07-img-5438-scaled-3c927d5a.webp",
+      "photoAlt": "Discover the Top Accommodation Sites of 2025",
       "primaryCta": {
         "label": "About me",
         "href": "/about"
