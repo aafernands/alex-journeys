@@ -1,11 +1,11 @@
 {
-  "updatedAt": "2026-09-20T20:37:00.361Z",
+  "updatedAt": "2026-09-20T20:44:12.207Z",
   "hero": {
-    "image": "/media/img_5141-muaa0na5.jpg",
-    "imageAlt": "Sunrise over Maroon Bells reflected in a calm alpine lake",
-    "imageCaption": "Niagara Falls, NY",
+    "image": "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
+    "imageAlt": "Maroon Bells View and Lake reflection of Bell mountains",
+    "imageCaption": "Marron Bells, CO",
     "windowBadge": "Field note",
-    "eyebrow": "",
+    "eyebrow": "test",
     "tagline": "Inspire. Capture. Discover.",
     "subtitle": "A personal travel blog sharing places I’ve been and notes from the road — places, stories, guides, and photos from journeys already behind me.",
     "ctaPrimary": {
