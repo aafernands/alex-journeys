@@ -86,11 +86,11 @@ Edits commit `src/content/destinations/tree.json` (`cms: update destinations`). 
 
 ### Media library
 
-**Media** (`/cms/media`) indexes images from published posts (featured + inline `contentHtml`) into `src/content/media/_index.json`. Existing WordPress/Jetpack CDN URLs are catalogued, not rewritten.
+**Media** (`/cms/media`) indexes images from published posts (featured + inline `contentHtml`) into `src/content/media/_index.json`. Post and site assets are **project-hosted** under `public/media/` (including `public/media/migrated/` from the WordPress CDN migration). New uploads go to `public/media/`.
 
 | Action | How |
 | --- | --- |
-| Browse / search / filter | Library tab — by source (WP CDN / upload / external) and used-in |
+| Browse / search / filter | Library tab — by source (upload / external) and used-in |
 | Copy URL / edit alt / see used-by | Click a thumbnail in the detail panel |
 | Add by URL | Form on Library tab → commits index via GitHub |
 | Upload file | Same form → `public/media/{filename}` + index entry |

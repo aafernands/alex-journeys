@@ -13,7 +13,7 @@ type Props = {
 };
 
 const SOURCE_LABEL: Record<MediaSource, string> = {
-  "wordpress-cdn": "WP CDN",
+  "wordpress-cdn": "Legacy WP CDN",
   upload: "Upload",
   external: "External",
 };
@@ -236,7 +236,7 @@ export function MediaLibrary({ initialItems, updatedAt }: Props) {
           className="min-h-11 rounded-lg border border-border bg-white px-3 text-sm text-heading focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
         >
           <option value="all">All sources</option>
-          <option value="wordpress-cdn">WP CDN</option>
+          <option value="wordpress-cdn">Legacy WP CDN</option>
           <option value="upload">Uploads</option>
           <option value="external">External</option>
         </select>

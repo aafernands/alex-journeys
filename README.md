@@ -15,19 +15,20 @@ Alex Fernandes’s personal travel journal — destinations from past trips, tri
 - Pillars: Places (`/destinations`), Stories (`/blog`), Guides (`/guides`), Tools (`/tools`)
 - Also: `/bucket-list`, `/start-here`, `/contact`
 - Unpublished draft: `src/content/drafts/` (not listed on /blog)
-- Remote images from **WordPress/CDN** (alexjournly.com, i0.wp.com) and Unsplash
+- Images are **project-hosted** under `public/media/` (plus Unsplash for a few stock shots)
 
-## WordPress migration
+## WordPress migration (complete)
 
-Blog content was migrated from **[alexjournly.com](https://alexjournly.com)** (REST API export).
+Blog content was migrated from **[alexjournly.com](https://alexjournly.com)** (REST API export). **Media CDN migration is complete** — former WordPress/Jetpack (`i0.wp.com`) assets now live under `public/media/migrated/` and content references `/media/migrated/...`. Publishing stays on **GitHub** (CMS → GitHub → Vercel); WordPress is no longer used for runtime assets.
 
-- Migration script: `scripts/migrate-wp-posts.mjs`
+- Post migration script: `scripts/migrate-wp-posts.mjs` (historical)
+- CDN asset migration: `scripts/migrate-cdn-assets.mjs`
 - Output: `src/content/posts/*.json` (30 posts) + `_index.json`
 - Original publish dates and slugs are preserved
-- Featured images remain remote URLs for v1
 
 ```bash
 node scripts/migrate-wp-posts.mjs
+node scripts/migrate-cdn-assets.mjs
 ```
 
 ## Design

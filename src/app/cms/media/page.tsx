@@ -29,9 +29,10 @@ export default async function CmsMediaPage({
         <p className="eyebrow text-accent">Brand &amp; post assets</p>
         <h1 className="font-display mt-2 text-display text-heading">Media</h1>
         <p className="mt-3 max-w-2xl text-sm text-muted">
-          Browse images already used in published posts (WordPress/Jetpack CDN
-          URLs stay as-is), add new ones by URL or upload, and pick them from
-          the post editor. Author photo remains under its own tab.
+          Browse project-hosted images used in published posts (stored under{" "}
+          <code className="text-xs">/media/</code>), add new ones by URL or
+          upload, and pick them from the post editor. Author photo remains under
+          its own tab.
         </p>
       </div>
 
