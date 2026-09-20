@@ -17,6 +17,7 @@
     "@tiptap/pm": "^3.31.3",
     "@tiptap/react": "^3.31.3",
     "@tiptap/starter-kit": "^3.31.3",
+    "bcryptjs": "^3.0.3",
     "firebase-admin": "^13.10.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.544.0",

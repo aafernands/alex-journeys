@@ -1,7 +1,7 @@
 "use client";
 
 import { Bookmark, BookmarkCheck } from "lucide-react";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 
 type Props = {
@@ -59,12 +59,8 @@ export function SavePostButton({ slug }: Props) {
   const onClick = async () => {
     setError(null);
     if (!signedIn) {
-      setPending(true);
-      try {
-        await signIn("google", { callbackUrl: window.location.href });
-      } finally {
-        setPending(false);
-      }
+      const path = window.location.pathname + window.location.search;
+      window.location.href = `/login?callbackUrl=${encodeURIComponent(path || "/account")}`;
       return;
     }
 

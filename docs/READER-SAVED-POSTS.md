@@ -1,13 +1,13 @@
 # Reader Google login & saved posts
 
-Public readers can **Sign in with Google** (header) and **Save** blog posts. Saved posts live on the **Account** dashboard (`/account`). Data is stored in **Cloud Firestore** on the existing Firebase project. CMS admin access is unchanged: allowlisted `CMS_ADMIN_EMAILS` or passcode only.
+Public readers can **Sign in** (email/password or Google — see [READER-AUTH.md](./READER-AUTH.md)) and **Save** blog posts. Saved posts live on the **Account** dashboard (`/account`). Data is stored in **Cloud Firestore** on the existing Firebase project. CMS admin access is unchanged: allowlisted `CMS_ADMIN_EMAILS` or passcode only.
 
 ## What readers get
 
 | Surface | Behavior |
 | --- | --- |
-| Header | Signed out: **Sign in**. Signed in: avatar menu (photo + name on desktop, photo only on mobile) → Account dashboard, Logout; admins also see **Admin console** → `/cms`. Standalone Account nav link removed (use the menu). |
-| Blog post | **Save** / **Saved** toggle; signed-out tap → Google sign-in |
+| Header | Signed out: **Sign in** → `/login`. Signed in: avatar menu (photo + name on desktop, photo only on mobile) → Account dashboard, Logout; admins also see **Admin console** → `/cms`. Standalone Account nav link removed (use the menu). |
+| Blog post | **Save** / **Saved** toggle; signed-out tap → `/login` |
 | `/account` | Reader dashboard: Google profile, saved posts (with Remove / Clear all), explore links, sign out |
 | `/saved` | Permanent redirect → `/account` (saves are Account-only) |
 

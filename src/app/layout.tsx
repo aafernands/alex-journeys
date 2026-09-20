@@ -4,7 +4,7 @@ import { Header } from "@/components/Header";
 import { Providers } from "@/components/Providers";
 import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/JsonLd";
-import { isGoogleAuthConfigured, isOauthConfigured } from "@/auth";
+import { isReaderAuthConfigured } from "@/auth";
 import { getLatestPost } from "@/lib/posts";
 import {
   absoluteUrl,
@@ -87,8 +87,7 @@ export default function RootLayout({
   const latestPost = latest
     ? { slug: latest.slug, title: latest.title }
     : null;
-  const googleConfigured =
-    isOauthConfigured() && isGoogleAuthConfigured();
+  const googleConfigured = isReaderAuthConfigured();
 
   return (
     <html

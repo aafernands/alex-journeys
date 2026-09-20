@@ -1,21 +1,26 @@
 "use client";
 
-import { signIn, useSession } from "next-auth/react";
-import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useMemo } from "react";
 import { UserMenu } from "@/components/UserMenu";
 
 type Props = {
   /** Compact styling for the sticky header. */
   variant?: "header" | "mobile";
   onNavigate?: () => void;
-  /** When false, hide the control (Google OAuth not configured). */
+  /**
+   * When false, hide the control (no reader auth configured).
+   * Prop name kept for Header compatibility; means "reader auth available".
+   */
   googleConfigured?: boolean;
-  /** Override sign-in return URL (default: current page). */
+  /** Override sign-in return URL (path). Default: current path. */
   callbackUrl?: string;
 };
 
 /**
- * Public reader auth: Sign in with Google, or avatar UserMenu when signed in.
+ * Public reader auth: link to /login, or avatar UserMenu when signed in.
  * Admin console appears in the menu only when session.user.isAdmin.
  */
 export function ReaderAuthButtons({
@@ -25,7 +30,15 @@ export function ReaderAuthButtons({
   callbackUrl,
 }: Props) {
   const { data: session, status } = useSession();
-  const [pending, setPending] = useState(false);
+  const pathname = usePathname();
+
+  const loginHref = useMemo(() => {
+    let path = callbackUrl || pathname || "/account";
+    if (!path.startsWith("/") || path.startsWith("//")) path = "/account";
+    // Avoid bouncing login → login
+    if (path === "/login" || path.startsWith("/login?")) path = "/account";
+    return `/login?callbackUrl=${encodeURIComponent(path)}`;
+  }, [callbackUrl, pathname]);
 
   if (!googleConfigured) {
     return null;
@@ -59,22 +72,8 @@ export function ReaderAuthButtons({
   }
 
   return (
-    <button
-      type="button"
-      className={buttonClass}
-      disabled={pending}
-      onClick={async () => {
-        setPending(true);
-        try {
-          await signIn("google", {
-            callbackUrl: callbackUrl ?? window.location.href,
-          });
-        } finally {
-          setPending(false);
-        }
-      }}
-    >
-      {pending ? "Signing in…" : "Sign in"}
-    </button>
+    <Link href={loginHref} className={buttonClass} onClick={() => onNavigate?.()}>
+      Sign in
+    </Link>
   );
 }

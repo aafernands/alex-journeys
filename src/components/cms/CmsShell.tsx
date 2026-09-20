@@ -12,6 +12,7 @@ import {
   MapPin,
   Menu,
   PenLine,
+  Users,
   X,
 } from "lucide-react";
 import { LogoutButton } from "./LogoutButton";
@@ -22,6 +23,7 @@ const NAV = [
   { href: "/cms/pages", label: "Pages", icon: FileText },
   { href: "/cms/destinations", label: "Destinations", icon: MapPin },
   { href: "/cms/media", label: "Media", icon: ImageIcon },
+  { href: "/cms/users", label: "Users", icon: Users },
   { href: "/cms/help", label: "Help", icon: HelpCircle },
 ] as const;
 

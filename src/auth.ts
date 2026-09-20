@@ -1,14 +1,23 @@
 import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
+import {
+  authorizeCredentials,
+  isCredentialsStoreReady,
+  upsertOauthUser,
+} from "@/lib/users";
 
 /**
  * Auth.js (next-auth v5).
  *
  * - Google: any signed-in user is a public reader (save posts on /account).
+ * - Credentials (email/password): public readers via Firestore + bcrypt.
  * - CMS access still requires email in CMS_ADMIN_EMAILS (or passcode) —
  *   see src/lib/cms/auth.ts. Reader sessions alone never unlock /cms.
  * - GitHub OAuth remains available for CMS admins only.
+ *
+ * Sign-in UI for readers: `/login`. CMS keeps its own login at `/cms`.
  */
 
 function adminEmails(): Set<string> {
@@ -42,11 +51,29 @@ export function isGitHubAuthConfigured(): boolean {
   );
 }
 
+/** True when email/password reader auth can run (AUTH_SECRET + Firebase). */
+export function isCredentialsAuthConfigured(): boolean {
+  return isCredentialsStoreReady();
+}
+
+/**
+ * True when Auth.js can run for public readers (secret + Google and/or
+ * credentials store).
+ */
+export function isReaderAuthConfigured(): boolean {
+  return (
+    Boolean(process.env.AUTH_SECRET?.trim()) &&
+    (isGoogleAuthConfigured() || isCredentialsAuthConfigured())
+  );
+}
+
 /** True when Auth.js can run (secret + at least one provider). */
 export function isOauthConfigured(): boolean {
   return (
     Boolean(process.env.AUTH_SECRET?.trim()) &&
-    (isGoogleAuthConfigured() || isGitHubAuthConfigured())
+    (isGoogleAuthConfigured() ||
+      isGitHubAuthConfigured() ||
+      isCredentialsAuthConfigured())
   );
 }
 
@@ -67,17 +94,46 @@ const providers = [
         }),
       ]
     : []),
+  ...(isCredentialsAuthConfigured()
+    ? [
+        Credentials({
+          id: "credentials",
+          name: "Email and Password",
+          credentials: {
+            email: { label: "Email", type: "email" },
+            password: { label: "Password", type: "password" },
+          },
+          async authorize(credentials) {
+            const email =
+              typeof credentials?.email === "string"
+                ? credentials.email
+                : "";
+            const password =
+              typeof credentials?.password === "string"
+                ? credentials.password
+                : "";
+            if (!email || !password) return null;
+            try {
+              return await authorizeCredentials(email, password);
+            } catch (err) {
+              console.error("[auth] credentials authorize failed:", err);
+              return null;
+            }
+          },
+        }),
+      ]
+    : []),
 ];
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  // Allow build without AUTH_SECRET; production runtime must set it for OAuth.
+  // Allow build without AUTH_SECRET; production runtime must set it for auth.
   secret: process.env.AUTH_SECRET || "build-placeholder-not-for-production",
   trustHost: true,
   providers,
   pages: {
-    // CMS login UI for provider-less / admin entry; readers call signIn("google").
-    signIn: "/cms",
-    error: "/cms",
+    // Public reader login (email/password + Google). CMS keeps `/cms` UI.
+    signIn: "/login",
+    error: "/login",
   },
   callbacks: {
     async jwt({ token, user, account }) {
@@ -103,16 +159,51 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
     async signIn({ user, account }) {
-      // Public readers: any Google account may sign in.
-      if (account?.provider === "google") {
+      // Credentials: authorize() already checked password + disabled.
+      if (account?.provider === "credentials") {
         return true;
       }
-      // GitHub (CMS tooling): allowlisted admins only.
+
+      // Public readers: any Google account may sign in (unless disabled in CMS).
+      if (account?.provider === "google") {
+        const id =
+          account.providerAccountId ||
+          (typeof user.id === "string" ? user.id : "");
+        if (!id) return false;
+        const result = await upsertOauthUser({
+          id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+          provider: "google",
+        });
+        return result.ok;
+      }
+
+      // GitHub (CMS tooling): allowlisted admins only + upsert profile.
       const allow = adminEmails();
       if (allow.size === 0) {
         return false;
       }
-      return isAdminEmail(user.email);
+      if (!isAdminEmail(user.email)) {
+        return false;
+      }
+      if (account?.provider === "github") {
+        const id =
+          account.providerAccountId ||
+          (typeof user.id === "string" ? user.id : "");
+        if (id) {
+          const result = await upsertOauthUser({
+            id,
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            provider: "github",
+          });
+          if (!result.ok) return false;
+        }
+      }
+      return true;
     },
   },
 });

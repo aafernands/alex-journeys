@@ -8,7 +8,7 @@ import {
   MapPin,
   User,
 } from "lucide-react";
-import { auth, isGoogleAuthConfigured, isOauthConfigured } from "@/auth";
+import { auth, isReaderAuthConfigured } from "@/auth";
 import { AccountAuthActions } from "@/components/AccountAuthActions";
 import {
   SavedPostsList,
@@ -49,7 +49,7 @@ function enrichSavedPosts(
 
 export default async function AccountPage() {
   const session = await auth();
-  const googleConfigured = isOauthConfigured() && isGoogleAuthConfigured();
+  const googleConfigured = isReaderAuthConfigured();
   const userId = session?.user?.id?.trim();
   const signedIn = Boolean(session?.user && userId);
   const user = session?.user;
@@ -88,8 +88,8 @@ export default async function AccountPage() {
               Account
             </h1>
             <p className="mt-3 max-w-xl text-sm text-muted md:text-base">
-              Profile, saved stories, and shortcuts. Sign in with Google to keep
-              bookmarks across devices.
+              Profile, saved stories, and shortcuts. Sign in with email or Google
+              to keep bookmarks across devices.
             </p>
           </div>
         </div>
@@ -107,11 +107,11 @@ export default async function AccountPage() {
                 />
                 <div>
                   <h2 className="font-display text-xl font-bold text-heading">
-                    Sign in with Google
+                    Sign in to continue
                   </h2>
                   <p className="mt-2 text-sm leading-relaxed text-text">
-                    Save stories across devices and manage them here. Signing in
-                    does not grant CMS access.
+                    Save stories across devices and manage them here. Use email
+                    and password or Google. Signing in does not grant CMS access.
                   </p>
                   <div className="mt-5">
                     <AccountAuthActions
