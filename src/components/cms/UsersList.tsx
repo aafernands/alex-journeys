@@ -1,8 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import {
+  Ban,
+  CheckCircle2,
+  KeyRound,
+  MoreHorizontal,
+  Search,
+  Trash2,
+} from "lucide-react";
 import type { UserPublic } from "@/lib/user-types";
 
 type Props = {
@@ -10,6 +17,12 @@ type Props = {
 };
 
 type PendingAction = "toggle" | "delete" | "send-reset";
+
+type RowFeedback = {
+  userId: string;
+  kind: "success" | "error";
+  message: string;
+};
 
 function formatWhen(iso: string | null): string {
   if (!iso) return "—";
@@ -21,6 +34,214 @@ function formatWhen(iso: string | null): string {
   });
 }
 
+type RowActionsProps = {
+  user: UserPublic;
+  busy: boolean;
+  pendingAction: PendingAction | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSendReset: () => void;
+  onToggle: () => void;
+  onDelete: () => void;
+  feedback: RowFeedback | null;
+};
+
+function RowActions({
+  user,
+  busy,
+  pendingAction,
+  open,
+  onOpenChange,
+  onSendReset,
+  onToggle,
+  onDelete,
+  feedback,
+}: RowActionsProps) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuId = useId();
+  const [menuStyle, setMenuStyle] = useState<CSSProperties>({});
+
+  const close = useCallback(() => onOpenChange(false), [onOpenChange]);
+
+  const placeMenu = useCallback(() => {
+    const btn = buttonRef.current;
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const menuWidth = 208;
+    const pad = 8;
+    const left = Math.min(
+      Math.max(pad, rect.right - menuWidth),
+      window.innerWidth - menuWidth - pad,
+    );
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const openUp = spaceBelow < 160 && rect.top > spaceBelow;
+    setMenuStyle({
+      position: "fixed",
+      left,
+      top: openUp ? undefined : rect.bottom + 4,
+      bottom: openUp ? window.innerHeight - rect.top + 4 : undefined,
+      width: menuWidth,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    placeMenu();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        close();
+        buttonRef.current?.focus();
+      }
+    };
+    const onPointer = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        close();
+      }
+    };
+    const onReposition = () => placeMenu();
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onPointer);
+    window.addEventListener("resize", onReposition);
+    window.addEventListener("scroll", onReposition, true);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onPointer);
+      window.removeEventListener("resize", onReposition);
+      window.removeEventListener("scroll", onReposition, true);
+    };
+  }, [open, close, placeMenu]);
+
+  const itemClass =
+    "flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm font-medium text-heading transition hover:bg-surface-soft disabled:cursor-not-allowed disabled:opacity-50";
+
+  const canSendReset = !user.disabled && Boolean(user.email?.trim());
+  const resetTitle = user.disabled
+    ? "Enable the account before sending a reset link"
+    : !user.email?.trim()
+      ? "User has no email"
+      : "Email a 1-hour password reset link (same as forgot-password)";
+
+  const sending = busy && pendingAction === "send-reset";
+  const toggling = busy && pendingAction === "toggle";
+  const deleting = busy && pendingAction === "delete";
+
+  return (
+    <div className="relative flex flex-col items-end gap-1" ref={wrapRef}>
+      <button
+        ref={buttonRef}
+        type="button"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-white text-heading transition hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25 disabled:opacity-60"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-controls={menuId}
+        aria-label={`Actions for ${user.email || user.name || user.id}`}
+        disabled={busy}
+        onClick={() => {
+          if (open) {
+            close();
+            return;
+          }
+          placeMenu();
+          onOpenChange(true);
+        }}
+      >
+        {busy ? (
+          <span className="text-xs font-semibold text-muted">…</span>
+        ) : (
+          <MoreHorizontal className="h-4 w-4" strokeWidth={2} aria-hidden />
+        )}
+      </button>
+
+      {open ? (
+        <div
+          id={menuId}
+          role="menu"
+          aria-label="User actions"
+          style={menuStyle}
+          className="z-50 rounded-xl border border-border bg-white py-1.5 shadow-lg"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            className={itemClass}
+            disabled={busy || !canSendReset}
+            title={resetTitle}
+            onClick={() => {
+              close();
+              onSendReset();
+            }}
+          >
+            <KeyRound
+              className="h-4 w-4 shrink-0 text-accent"
+              strokeWidth={2}
+              aria-hidden
+            />
+            {sending ? "Sending…" : "Send reset link"}
+          </button>
+
+          <button
+            type="button"
+            role="menuitem"
+            className={itemClass}
+            disabled={busy}
+            onClick={() => {
+              close();
+              onToggle();
+            }}
+          >
+            {user.disabled ? (
+              <CheckCircle2
+                className="h-4 w-4 shrink-0 text-emerald-700"
+                strokeWidth={2}
+                aria-hidden
+              />
+            ) : (
+              <Ban
+                className="h-4 w-4 shrink-0 text-muted"
+                strokeWidth={2}
+                aria-hidden
+              />
+            )}
+            {toggling ? "…" : user.disabled ? "Enable" : "Disable"}
+          </button>
+
+          <div className="my-1 border-t border-border" />
+
+          <button
+            type="button"
+            role="menuitem"
+            className={`${itemClass} text-red-700 hover:bg-red-50`}
+            disabled={busy}
+            onClick={() => {
+              close();
+              onDelete();
+            }}
+          >
+            <Trash2
+              className="h-4 w-4 shrink-0 text-red-600"
+              strokeWidth={2}
+              aria-hidden
+            />
+            {deleting ? "…" : "Delete"}
+          </button>
+        </div>
+      ) : null}
+
+      {feedback && feedback.userId === user.id ? (
+        <p
+          className={`max-w-[11rem] text-right text-[11px] font-medium leading-snug ${
+            feedback.kind === "success" ? "text-emerald-800" : "text-red-600"
+          }`}
+          role={feedback.kind === "error" ? "alert" : "status"}
+        >
+          {feedback.message}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export function UsersList({ users }: Props) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -28,8 +249,8 @@ export function UsersList({ users }: Props) {
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(
     null,
   );
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<RowFeedback | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -44,8 +265,7 @@ export function UsersList({ users }: Props) {
   }, [users, query]);
 
   function beginAction(userId: string, action: PendingAction) {
-    setError(null);
-    setSuccess(null);
+    setFeedback(null);
     setPendingId(userId);
     setPendingAction(action);
   }
@@ -65,14 +285,27 @@ export function UsersList({ users }: Props) {
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
-        setError(data.error || "Update failed.");
+        setFeedback({
+          userId: user.id,
+          kind: "error",
+          message: data.error || "Update failed.",
+        });
         endAction();
         return;
       }
+      setFeedback({
+        userId: user.id,
+        kind: "success",
+        message: user.disabled ? "Enabled." : "Disabled.",
+      });
       router.refresh();
       endAction();
     } catch {
-      setError("Network error. Try again.");
+      setFeedback({
+        userId: user.id,
+        kind: "error",
+        message: "Network error. Try again.",
+      });
       endAction();
     }
   }
@@ -92,22 +325,34 @@ export function UsersList({ users }: Props) {
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
-        setError(data.error || "Delete failed.");
+        setFeedback({
+          userId: user.id,
+          kind: "error",
+          message: data.error || "Delete failed.",
+        });
         endAction();
         return;
       }
+      setFeedback(null);
       router.refresh();
       endAction();
     } catch {
-      setError("Network error. Try again.");
+      setFeedback({
+        userId: user.id,
+        kind: "error",
+        message: "Network error. Try again.",
+      });
       endAction();
     }
   }
 
   async function sendResetLink(user: UserPublic) {
     if (!user.email?.trim()) {
-      setError("This user has no email address.");
-      setSuccess(null);
+      setFeedback({
+        userId: user.id,
+        kind: "error",
+        message: "This user has no email address.",
+      });
       return;
     }
     beginAction(user.id, "send-reset");
@@ -122,15 +367,27 @@ export function UsersList({ users }: Props) {
         email?: string;
       };
       if (!res.ok) {
-        setError(data.error || "Could not send reset email.");
+        setFeedback({
+          userId: user.id,
+          kind: "error",
+          message: data.error || "Could not send reset email.",
+        });
         endAction();
         return;
       }
       const emailed = data.email || user.email;
-      setSuccess(data.message || `Reset email sent to ${emailed}.`);
+      setFeedback({
+        userId: user.id,
+        kind: "success",
+        message: data.message || `Reset email sent to ${emailed}.`,
+      });
       endAction();
     } catch {
-      setError("Network error. Try again.");
+      setFeedback({
+        userId: user.id,
+        kind: "error",
+        message: "Network error. Try again.",
+      });
       endAction();
     }
   }
@@ -151,18 +408,6 @@ export function UsersList({ users }: Props) {
         />
       </div>
 
-      {error ? (
-        <p className="text-sm font-medium text-red-600" role="alert">
-          {error}
-        </p>
-      ) : null}
-
-      {success ? (
-        <p className="text-sm font-medium text-emerald-800" role="status">
-          {success}
-        </p>
-      ) : null}
-
       {filtered.length === 0 ? (
         <div className="panel p-6">
           <p className="text-sm text-muted">
@@ -181,16 +426,17 @@ export function UsersList({ users }: Props) {
                 <th className="px-4 py-3 font-semibold">Created</th>
                 <th className="px-4 py-3 font-semibold">Last login</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
-                <th className="px-4 py-3 font-semibold">Actions</th>
+                <th className="px-4 py-3 text-right font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((u) => {
                 const busy = pendingId === u.id;
-                const sending =
-                  busy && pendingAction === "send-reset";
                 return (
-                  <tr key={u.id} className="border-b border-border last:border-0">
+                  <tr
+                    key={u.id}
+                    className="border-b border-border last:border-0"
+                  >
                     <td className="px-4 py-3">
                       <p className="font-semibold text-heading">
                         {u.name?.trim() || "—"}
@@ -236,43 +482,21 @@ export function UsersList({ users }: Props) {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          className="btn btn-secondary !min-h-8 !px-3 !py-1 text-xs"
-                          disabled={busy || u.disabled || !u.email?.trim()}
-                          title={
-                            u.disabled
-                              ? "Enable the account before sending a reset link"
-                              : !u.email?.trim()
-                                ? "User has no email"
-                                : "Email a 1-hour password reset link (same as forgot-password)"
-                          }
-                          onClick={() => void sendResetLink(u)}
-                        >
-                          {sending ? "Sending…" : "Send reset link"}
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-secondary !min-h-8 !px-3 !py-1 text-xs"
-                          disabled={busy}
-                          onClick={() => void toggleDisabled(u)}
-                        >
-                          {busy && pendingAction === "toggle"
-                            ? "…"
-                            : u.disabled
-                              ? "Enable"
-                              : "Disable"}
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-secondary !min-h-8 !px-3 !py-1 text-xs text-red-700"
-                          disabled={busy}
-                          onClick={() => void removeUser(u)}
-                        >
-                          {busy && pendingAction === "delete" ? "…" : "Delete"}
-                        </button>
-                      </div>
+                      <RowActions
+                        user={u}
+                        busy={busy}
+                        pendingAction={busy ? pendingAction : null}
+                        open={openMenuId === u.id}
+                        onOpenChange={(next) =>
+                          setOpenMenuId(next ? u.id : null)
+                        }
+                        onSendReset={() => void sendResetLink(u)}
+                        onToggle={() => void toggleDisabled(u)}
+                        onDelete={() => void removeUser(u)}
+                        feedback={
+                          feedback?.userId === u.id ? feedback : null
+                        }
+                      />
                     </td>
                   </tr>
                 );
