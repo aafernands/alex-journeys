@@ -216,6 +216,8 @@
       "eyebrow": "About the journal",
       "headline": "Hi, I’m Alex",
       "body": "I’m Alex Fernandes — traveler, photographer, and the voice behind Fernandes Journeys. Based in New Jersey, I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
+      "photo": "/brand/alex-fernandes.jpg",
+      "photoAlt": "Alex Fernandes",
       "primaryCta": {
         "label": "About me",
         "href": "/about"

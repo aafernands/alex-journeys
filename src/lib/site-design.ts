@@ -4,7 +4,8 @@
  */
 
 import siteDesignJson from "@/data/site-design.json";
-import { about, hero as contentHero, startHereCards } from "@/data/content";
+import authorPhotoMeta from "@/data/author-photo.json";
+import { about, hero as contentHero, startHereCards, site } from "@/data/content";
 
 export type HeroCta = {
   label: string;
@@ -98,6 +99,9 @@ export type HomeSections = {
     eyebrow: string;
     headline: string;
     body: string;
+    /** Homepage author intro portrait (CMS). Empty → falls back to site.authorPhoto */
+    photo: string;
+    photoAlt: string;
     primaryCta: HeroCta;
     secondaryCta: HeroCta;
   };
@@ -162,6 +166,8 @@ const DEFAULT_HOME_SECTIONS: HomeSections = {
     eyebrow: "About the journal",
     headline: about.headline,
     body: about.paragraphs[0],
+    photo: authorPhotoMeta.src,
+    photoAlt: site.authorName,
     primaryCta: { label: "About me", href: "/about" },
     secondaryCta: { label: "Start here", href: "/start-here" },
   },
@@ -538,6 +544,8 @@ function normalizeHomeSections(raw: unknown, fallback: HomeSections): HomeSectio
       eyebrow: asString(authorRaw.eyebrow, fallback.author.eyebrow),
       headline: asString(authorRaw.headline, fallback.author.headline),
       body: asString(authorRaw.body, fallback.author.body),
+      photo: asString(authorRaw.photo, fallback.author.photo).trim(),
+      photoAlt: asString(authorRaw.photoAlt, fallback.author.photoAlt),
       primaryCta: normalizeCta(authorRaw.primaryCta, fallback.author.primaryCta),
       secondaryCta: normalizeCta(
         authorRaw.secondaryCta,
@@ -701,6 +709,36 @@ export function validateSiteDesignInput(raw: unknown): SiteDesignValidation {
     }
   }
 
+  const author = design.homeSections.author;
+  if (author.photo.trim()) {
+    if (
+      !author.photo.startsWith("/") &&
+      !/^https?:\/\//i.test(author.photo)
+    ) {
+      return {
+        ok: false,
+        error:
+          "Author photo must be a site path (/media/… or /brand/…) or https URL.",
+      };
+    }
+  }
+  if (author.photoAlt.length > TEXT_MAX) {
+    return { ok: false, error: "Author photo alt is too long." };
+  }
+  if (author.body.length > 800) {
+    return { ok: false, error: "Author intro body is too long (max 800)." };
+  }
+  const authorPrimaryErr = validateHref(
+    author.primaryCta.href,
+    "Author primary CTA",
+  );
+  if (authorPrimaryErr) return { ok: false, error: authorPrimaryErr };
+  const authorSecondaryErr = validateHref(
+    author.secondaryCta.href,
+    "Author secondary CTA",
+  );
+  if (authorSecondaryErr) return { ok: false, error: authorSecondaryErr };
+
   return {
     ok: true,
     design: {
@@ -749,6 +787,25 @@ export function validateSiteDesignInput(raw: unknown): SiteDesignValidation {
             ...(s.accent ? { accent: true } : {}),
           })),
         })),
+      },
+      homeSections: {
+        ...design.homeSections,
+        author: {
+          ...author,
+          eyebrow: author.eyebrow.trim(),
+          headline: author.headline.trim(),
+          body: author.body.trim(),
+          photo: author.photo.trim(),
+          photoAlt: author.photoAlt.trim(),
+          primaryCta: {
+            label: author.primaryCta.label.trim(),
+            href: author.primaryCta.href.trim(),
+          },
+          secondaryCta: {
+            label: author.secondaryCta.label.trim(),
+            href: author.secondaryCta.href.trim(),
+          },
+        },
       },
     },
   };

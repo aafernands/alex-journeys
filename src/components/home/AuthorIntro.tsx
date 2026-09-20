@@ -6,6 +6,8 @@ import { getSiteDesign } from "@/lib/site-design";
 
 export function AuthorIntro() {
   const { author } = getSiteDesign().homeSections;
+  const photoSrc = author.photo.trim() || site.authorPhoto;
+  const photoAlt = author.photoAlt.trim() || site.authorName;
 
   return (
     <Section
@@ -15,33 +17,38 @@ export function AuthorIntro() {
       size="md"
       aria-labelledby="author-heading"
     >
-      <div className="panel flex flex-col gap-6 p-6 md:flex-row md:items-center md:gap-8 md:p-8">
-        <div className="relative size-16 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-soft md:size-20">
-          <Image
-            src={site.authorPhoto}
-            alt={site.authorName}
-            fill
-            sizes="80px"
-            className="object-cover object-top"
-          />
+      <div className="grid items-center gap-8 md:gap-10 lg:grid-cols-12 lg:gap-12">
+        <div className="lg:col-span-5">
+          <div className="panel overflow-hidden shadow-sm">
+            <div className="relative aspect-[4/5] bg-surface-soft sm:aspect-[3/4]">
+              <Image
+                src={photoSrc}
+                alt={photoAlt}
+                fill
+                sizes="(max-width: 1024px) 100vw, 40vw"
+                className="object-cover object-top"
+                priority
+              />
+            </div>
+          </div>
         </div>
-        <div className="min-w-0 flex-1">
+
+        <div className="lg:col-span-7">
           <p className="eyebrow">{author.eyebrow}</p>
           <h2
             id="author-heading"
-            className="font-display mt-2 text-2xl font-bold tracking-tight text-heading md:text-[1.75rem]"
+            className="font-display mt-2 text-display text-heading"
           >
             {author.headline}
           </h2>
-          <p className="mt-3 max-w-2xl text-base leading-relaxed text-text">
-            {author.body}
-          </p>
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <p className="mt-4 max-w-xl text-lead text-text">{author.body}</p>
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               href={author.primaryCta.href}
               className="btn btn-ink btn-block sm:w-auto"
             >
               {author.primaryCta.label}
+              <span aria-hidden="true">→</span>
             </Link>
             <Link
               href={author.secondaryCta.href}

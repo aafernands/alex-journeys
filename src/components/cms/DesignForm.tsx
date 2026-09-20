@@ -48,6 +48,7 @@ export function DesignForm({ initial }: Props) {
   );
   const [homeSections, setHomeSections] = useState(initial.homeSections);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [authorLibraryOpen, setAuthorLibraryOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -702,6 +703,71 @@ export function DesignForm({ initial }: Props) {
 
             <div className="rounded-lg border border-border bg-surface-soft/50 p-4">
               <p className="text-sm font-bold text-heading">Author intro</p>
+              <p className="mt-1 text-xs text-muted">
+                Portrait shown on the homepage right after the hero. Pick from
+                the media library (upload new files under Media first if needed).
+              </p>
+              <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start">
+                <div className="relative size-28 shrink-0 overflow-hidden rounded-lg border border-border bg-white sm:size-32">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={
+                      homeSections.author.photo ||
+                      "/brand/alex-fernandes.jpg"
+                    }
+                    alt={
+                      homeSections.author.photoAlt || "Author photo preview"
+                    }
+                    className="h-full w-full object-cover object-top"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.opacity = "0.3";
+                    }}
+                  />
+                </div>
+                <div className="min-w-0 flex-1 space-y-3">
+                  <button
+                    type="button"
+                    className="btn btn-secondary text-sm"
+                    onClick={() => setAuthorLibraryOpen(true)}
+                  >
+                    Choose from library
+                  </button>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                      Photo URL / path
+                    </label>
+                    <input
+                      value={homeSections.author.photo}
+                      onChange={(e) => {
+                        setHomeSections((hs) => ({
+                          ...hs,
+                          author: { ...hs.author, photo: e.target.value },
+                        }));
+                        setSuccess(null);
+                      }}
+                      placeholder="/media/… or /brand/…"
+                      className={fieldClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                      Photo alt text
+                    </label>
+                    <input
+                      value={homeSections.author.photoAlt}
+                      onChange={(e) => {
+                        setHomeSections((hs) => ({
+                          ...hs,
+                          author: { ...hs.author, photoAlt: e.target.value },
+                        }));
+                        setSuccess(null);
+                      }}
+                      placeholder="Alex Fernandes"
+                      className={fieldClass}
+                    />
+                  </div>
+                </div>
+              </div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-wide text-muted">
@@ -923,6 +989,23 @@ export function DesignForm({ initial }: Props) {
             ...h,
             image: item.url,
             imageAlt: item.alt || h.imageAlt,
+          }));
+          setSuccess(null);
+        }}
+      />
+
+      <MediaPicker
+        open={authorLibraryOpen}
+        onClose={() => setAuthorLibraryOpen(false)}
+        title="Choose author intro photo"
+        onSelect={(item) => {
+          setHomeSections((hs) => ({
+            ...hs,
+            author: {
+              ...hs.author,
+              photo: item.url,
+              photoAlt: item.alt || hs.author.photoAlt,
+            },
           }));
           setSuccess(null);
         }}

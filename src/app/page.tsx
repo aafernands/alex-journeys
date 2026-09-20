@@ -24,6 +24,7 @@ export default function HomePage() {
       </a>
       <main className="flex-1">
         <Hero />
+        <AuthorIntro />
         <StartHereCards />
         <FeaturedFieldNote />
         <DestinationPills />
@@ -31,7 +32,6 @@ export default function HomePage() {
         <GuidesHubStrip />
         <ToolsStrip />
         <OauthAppNote />
-        <AuthorIntro />
       </main>
     </>
   );

@@ -130,7 +130,7 @@ Post editor: featured image **Choose from library**; rich text **Image** opens t
 | Object position / overlay | Fine-tune crop and soft darken |
 | “From the road” strip | Show/hide + labels under hero CTAs |
 | Featured slideshow | Separate field-note card under the hero. Add/remove/reorder slides; each slide has image (library or upload), alt, caption, note, badge, optional stats, optional story link |
-| Homepage sections | Start here (incl. cards JSON), Places, Latest stories, Guides, Tools, OAuth note, Author intro |
+| Homepage sections | Start here (incl. cards JSON), Places, Latest stories, Guides, Tools, OAuth note, Author intro (incl. portrait via media library) |
 
 Theme tokens (fonts/colors) UI is intentionally out of scope for now — stub note on the Design page.
 
