@@ -1,22 +1,43 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { PostContent } from "@/components/blog/PostContent";
 import { SitePage } from "@/components/pages/SitePage";
-import { about, site } from "@/data/content";
+import { site } from "@/data/content";
+import { PAGE_DEFAULTS } from "@/lib/page-defaults";
+import { getPageWithFallback } from "@/lib/pages";
 
-export const metadata: Metadata = {
-  title: "About",
-  description:
-    "Meet Alex Fernandes — the traveler behind Fernandes Journeys, a personal trip journal of places already visited.",
-  alternates: { canonical: "/about" },
-};
+export function generateMetadata(): Metadata {
+  const page = getPageWithFallback("about", PAGE_DEFAULTS.about);
+  return {
+    title: page.title,
+    description: page.description,
+    alternates: { canonical: "/about" },
+  };
+}
+
+function asRecord(v: unknown): Record<string, unknown> {
+  return v && typeof v === "object" && !Array.isArray(v)
+    ? (v as Record<string, unknown>)
+    : {};
+}
+
+function asString(v: unknown, fallback: string): string {
+  return typeof v === "string" && v.trim() ? v.trim() : fallback;
+}
 
 export default function AboutPage() {
+  const page = getPageWithFallback("about", PAGE_DEFAULTS.about);
+  const next = asRecord(page.sections?.nextStep);
+  const primary = asRecord(next.primaryCta);
+  const secondary = asRecord(next.secondaryCta);
+  const tertiary = asRecord(next.tertiaryCta);
+
   return (
     <SitePage
-      label="About"
-      title={about.headline}
-      description={about.paragraphs[0]}
+      label={page.label}
+      title={page.title}
+      description={page.description}
       crumbs={[
         { href: "/", label: "Home" },
         { label: "About" },
@@ -33,31 +54,40 @@ export default function AboutPage() {
             priority
           />
         </div>
-        <div className="panel space-y-5 p-6 text-base leading-relaxed text-text md:p-8">
-          {about.paragraphs.slice(1).map((p) => (
-            <p key={p.slice(0, 24)}>{p}</p>
-          ))}
+        <div className="panel p-6 md:p-8">
+          <PostContent html={page.contentHtml} />
         </div>
       </div>
 
       <aside className="panel-soft mt-8 p-6 md:p-8">
-        <p className="eyebrow">Next step</p>
+        <p className="eyebrow">{asString(next.eyebrow, "Next step")}</p>
         <p className="font-display mt-2 text-lg font-bold text-heading">
-          New to the journal?
+          {asString(next.title, "New to the journal?")}
         </p>
         <p className="mt-2 text-sm leading-relaxed text-text">
-          Start with destinations I&apos;ve visited, then stories from the road,
-          then the resources and trip tools I actually use.
+          {asString(
+            next.body,
+            "Start with destinations I’ve visited, then stories from the road, then the resources and trip tools I actually use.",
+          )}
         </p>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <Link href="/start-here" className="btn btn-primary btn-block sm:w-auto">
-            Start here
+          <Link
+            href={asString(primary.href, "/start-here")}
+            className="btn btn-primary btn-block sm:w-auto"
+          >
+            {asString(primary.label, "Start here")}
           </Link>
-          <Link href="/media-kit" className="btn btn-secondary btn-block sm:w-auto">
-            Media kit
+          <Link
+            href={asString(secondary.href, "/media-kit")}
+            className="btn btn-secondary btn-block sm:w-auto"
+          >
+            {asString(secondary.label, "Media kit")}
           </Link>
-          <Link href="/contact" className="btn btn-secondary btn-block sm:w-auto">
-            Contact
+          <Link
+            href={asString(tertiary.href, "/contact")}
+            className="btn btn-secondary btn-block sm:w-auto"
+          >
+            {asString(tertiary.label, "Contact")}
           </Link>
         </div>
       </aside>

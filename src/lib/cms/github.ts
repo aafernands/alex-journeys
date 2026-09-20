@@ -510,6 +510,7 @@ export async function publishPage(
     description: string;
     label?: string;
     contentHtml: string;
+    sections?: Record<string, unknown>;
     source?: SitePageSource;
   },
   options?: { update?: boolean },
@@ -522,11 +523,16 @@ export async function publishPage(
     throw new Error(`A page with slug "${page.slug}" already exists.`);
   }
 
-  // Preserve WordPress source metadata when updating
+  // Preserve WordPress source metadata + sections when updating
   let source = page.source;
-  if (existingSha && !source) {
-    const existing = await getFileJson<{ source?: SitePageSource }>(pagePath);
-    source = existing?.data?.source;
+  let sections = page.sections;
+  if (existingSha) {
+    const existing = await getFileJson<{
+      source?: SitePageSource;
+      sections?: Record<string, unknown>;
+    }>(pagePath);
+    if (!source) source = existing?.data?.source;
+    if (sections === undefined) sections = existing?.data?.sections;
   }
 
   const payload = {
@@ -535,6 +541,7 @@ export async function publishPage(
     label: page.label,
     description: page.description,
     contentHtml: page.contentHtml,
+    ...(sections && Object.keys(sections).length > 0 ? { sections } : {}),
     ...(source ? { source } : {}),
   };
 

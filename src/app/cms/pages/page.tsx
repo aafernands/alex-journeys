@@ -29,7 +29,12 @@ export default async function CmsPagesPage() {
             <code className="rounded bg-surface-soft px-1.5 py-0.5 text-xs">
               src/content/pages
             </code>
-            . Hub routes built only in React are listed below as code-only.
+            . Edit About, Contact, hubs, Media kit, and more here. Homepage hero
+            + section chrome live under{" "}
+            <Link href="/cms/design" className="text-link hover:text-accent">
+              Website design
+            </Link>
+            . App/auth routes stay code-only (listed below).
           </p>
         </div>
         <Link href="/cms/pages/new" className="btn btn-primary">
@@ -41,8 +46,12 @@ export default async function CmsPagesPage() {
 
       <section className="panel p-5">
         <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
-          Code-only routes (not editable here)
+          Code-only / app routes (not editable as pages)
         </h2>
+        <p className="mt-2 text-sm text-muted">
+          Individual posts and destination country pages are edited under Posts
+          and Destinations — not here.
+        </p>
         <ul className="mt-3 grid gap-2 sm:grid-cols-2">
           {CODE_ONLY_PAGE_ROUTES.map((r) => (
             <li key={r.path} className="text-sm text-muted">

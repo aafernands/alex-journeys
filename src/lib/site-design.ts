@@ -4,7 +4,7 @@
  */
 
 import siteDesignJson from "@/data/site-design.json";
-import { hero as contentHero } from "@/data/content";
+import { about, hero as contentHero, startHereCards } from "@/data/content";
 
 export type HeroCta = {
   label: string;
@@ -42,9 +42,45 @@ export type HeroDesign = {
   stats: HeroStat[];
 };
 
+export type HomeSectionCard = {
+  title: string;
+  href: string;
+  icon: string;
+  description: string;
+  cta: string;
+};
+
+export type HomeSectionChrome = {
+  eyebrow: string;
+  title: string;
+  description?: string;
+  ctaLabel?: string;
+};
+
+export type HomeSections = {
+  startHere: HomeSectionChrome & { cards: HomeSectionCard[] };
+  places: HomeSectionChrome;
+  latest: HomeSectionChrome;
+  guides: HomeSectionChrome;
+  tools: HomeSectionChrome;
+  oauthNote: {
+    eyebrow: string;
+    title: string;
+    body: string;
+  };
+  author: {
+    eyebrow: string;
+    headline: string;
+    body: string;
+    primaryCta: HeroCta;
+    secondaryCta: HeroCta;
+  };
+};
+
 export type SiteDesign = {
   updatedAt: string;
   hero: HeroDesign;
+  homeSections: HomeSections;
   seo: {
     /** Optional homepage title override snippet (empty = use site default) */
     homeTitleSnippet: string;
@@ -54,8 +90,57 @@ export type SiteDesign = {
   };
 };
 
+
+const DEFAULT_HOME_SECTIONS: HomeSections = {
+  startHere: {
+    eyebrow: "New here?",
+    title: "Start here.",
+    description:
+      "Three easy ways into the journal — places I've been, stories from the road, and practical notes I still use.",
+    cards: startHereCards.map((c) => ({ ...c })),
+  },
+  places: {
+    eyebrow: "Places",
+    title: "Places from the journal.",
+    description:
+      "Photo-led stops from trips already taken — tap a place to browse related stories.",
+  },
+  latest: {
+    eyebrow: "From the journal",
+    title: "Latest stories.",
+    ctaLabel: "Browse all stories",
+  },
+  guides: {
+    eyebrow: "Guides",
+    title: "Guides worth opening.",
+    description:
+      "Six hubs of notes I still use — planning, money, packing, smarter travel, stays, and experiences.",
+    ctaLabel: "All guides",
+  },
+  tools: {
+    eyebrow: "Tools",
+    title: "Tools I use.",
+    description:
+      "Partners I actually open when planning — stays, flights, insurance, and connectivity.",
+    ctaLabel: "See all tools",
+  },
+  oauthNote: {
+    eyebrow: "About this site & Google Sign-In",
+    title: "",
+    body: "This is a personal travel journal. Public content is viewable without login. Google Sign-In is only for optional reader saved posts and for the owner's private content management system (/cms) — not a consumer login product.",
+  },
+  author: {
+    eyebrow: "About the journal",
+    headline: about.headline,
+    body: about.paragraphs[0],
+    primaryCta: { label: "About me", href: "/about" },
+    secondaryCta: { label: "Start here", href: "/start-here" },
+  },
+};
+
 export const DEFAULT_SITE_DESIGN: SiteDesign = {
   updatedAt: "2026-09-20T00:00:00.000Z",
+  homeSections: structuredClone(DEFAULT_HOME_SECTIONS),
   hero: {
     image: contentHero.image,
     imageAlt: contentHero.imageAlt,
@@ -196,9 +281,133 @@ export function normalizeSiteDesign(raw: unknown): SiteDesign {
     stats: normalizeStats(heroRaw.stats, base.hero.stats),
   };
 
+
+function normalizeHomeSections(raw: unknown, fallback: HomeSections): HomeSections {
+  const root =
+    raw && typeof raw === "object" && !Array.isArray(raw)
+      ? (raw as Record<string, unknown>)
+      : {};
+
+  function chrome(
+    key: keyof HomeSections,
+    fb: HomeSectionChrome,
+  ): HomeSectionChrome {
+    const o =
+      root[key] && typeof root[key] === "object"
+        ? (root[key] as Record<string, unknown>)
+        : {};
+    return {
+      eyebrow: asString(o.eyebrow, fb.eyebrow),
+      title: asString(o.title, fb.title),
+      ...(fb.description !== undefined
+        ? { description: asString(o.description, fb.description ?? "") }
+        : o.description
+          ? { description: asString(o.description, "") }
+          : {}),
+      ...(fb.ctaLabel !== undefined || o.ctaLabel
+        ? { ctaLabel: asString(o.ctaLabel, fb.ctaLabel ?? "") }
+        : {}),
+    };
+  }
+
+  const startRaw =
+    root.startHere && typeof root.startHere === "object"
+      ? (root.startHere as Record<string, unknown>)
+      : {};
+  const cardsRaw = Array.isArray(startRaw.cards) ? startRaw.cards : null;
+  const cards: HomeSectionCard[] = cardsRaw
+    ? cardsRaw.slice(0, 6).map((item, i) => {
+        const fb = fallback.startHere.cards[i] ?? fallback.startHere.cards[0];
+        const o =
+          item && typeof item === "object"
+            ? (item as Record<string, unknown>)
+            : {};
+        return {
+          title: asString(o.title, fb.title),
+          href: asString(o.href, fb.href),
+          icon: asString(o.icon, fb.icon),
+          description: asString(o.description, fb.description),
+          cta: asString(o.cta, fb.cta),
+        };
+      })
+    : fallback.startHere.cards.map((c) => ({ ...c }));
+
+  const startChrome = chrome("startHere", fallback.startHere);
+  const oauthRaw =
+    root.oauthNote && typeof root.oauthNote === "object"
+      ? (root.oauthNote as Record<string, unknown>)
+      : {};
+  const authorRaw =
+    root.author && typeof root.author === "object"
+      ? (root.author as Record<string, unknown>)
+      : {};
+
+  return {
+    startHere: {
+      ...startChrome,
+      description: asString(
+        startRaw.description,
+        fallback.startHere.description ?? "",
+      ),
+      cards: cards.length ? cards : fallback.startHere.cards.map((c) => ({ ...c })),
+    },
+    places: chrome("places", fallback.places),
+    latest: {
+      ...chrome("latest", fallback.latest),
+      ctaLabel: asString(
+        (root.latest as Record<string, unknown> | undefined)?.ctaLabel,
+        fallback.latest.ctaLabel ?? "Browse all stories",
+      ),
+    },
+    guides: {
+      ...chrome("guides", fallback.guides),
+      description: asString(
+        (root.guides as Record<string, unknown> | undefined)?.description,
+        fallback.guides.description ?? "",
+      ),
+      ctaLabel: asString(
+        (root.guides as Record<string, unknown> | undefined)?.ctaLabel,
+        fallback.guides.ctaLabel ?? "All guides",
+      ),
+    },
+    tools: {
+      ...chrome("tools", fallback.tools),
+      description: asString(
+        (root.tools as Record<string, unknown> | undefined)?.description,
+        fallback.tools.description ?? "",
+      ),
+      ctaLabel: asString(
+        (root.tools as Record<string, unknown> | undefined)?.ctaLabel,
+        fallback.tools.ctaLabel ?? "See all tools",
+      ),
+    },
+    oauthNote: {
+      eyebrow: asString(oauthRaw.eyebrow, fallback.oauthNote.eyebrow),
+      title: asString(oauthRaw.title, fallback.oauthNote.title),
+      body: asString(oauthRaw.body, fallback.oauthNote.body),
+    },
+    author: {
+      eyebrow: asString(authorRaw.eyebrow, fallback.author.eyebrow),
+      headline: asString(authorRaw.headline, fallback.author.headline),
+      body: asString(authorRaw.body, fallback.author.body),
+      primaryCta: normalizeCta(authorRaw.primaryCta, fallback.author.primaryCta),
+      secondaryCta: normalizeCta(
+        authorRaw.secondaryCta,
+        fallback.author.secondaryCta,
+      ),
+    },
+  };
+}
+
+  const homeSections = normalizeHomeSections(
+    root.homeSections,
+    base.homeSections,
+  );
+
   return {
     updatedAt: asString(root.updatedAt, base.updatedAt),
     hero,
+    homeSections,
     seo: {
       homeTitleSnippet: asString(
         seoRaw.homeTitleSnippet,

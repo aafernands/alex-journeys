@@ -97,24 +97,11 @@ export default async function CmsHelpPage() {
           </li>
           <li>Publish — the public post shows a visual timeline after the story.</li>
         </ol>
-        <p className="text-sm text-muted">
-          Example (Niagara): Create post → story in Content → enable Trip
-          timeline → check <strong>Canada</strong> → check{" "}
-          <strong>Plan a trip</strong> → publish. Timeline appears on{" "}
-          <code className="rounded bg-surface-soft px-1 text-xs">/&#123;slug&#125;</code>
-          ; the post also lists on{" "}
-          <code className="rounded bg-surface-soft px-1 text-xs">/canada</code>{" "}
-          and{" "}
-          <code className="rounded bg-surface-soft px-1 text-xs">
-            /guides/plan-a-trip
-          </code>
-          .
-        </p>
       </section>
 
       <section className="panel space-y-3 p-5 md:p-6">
         <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
-          Pages & destinations
+          Pages, hubs &amp; homepage
         </h2>
         <ul className="list-disc space-y-2 pl-5 text-sm text-text">
           <li>
@@ -124,43 +111,51 @@ export default async function CmsHelpPage() {
             edits JSON under{" "}
             <code className="rounded bg-surface-soft px-1 text-xs">
               src/content/pages
-            </code>{" "}
-            (culinary, the <code className="rounded bg-surface-soft px-1 text-xs">/policies</code>{" "}
-            hub, <code className="rounded bg-surface-soft px-1 text-xs">/privacy</code>,{" "}
-            <code className="rounded bg-surface-soft px-1 text-xs">/terms</code>,{" "}
-            <code className="rounded bg-surface-soft px-1 text-xs">/affiliate-disclosure</code>, and
-            travel-wallet today).
-          </li>
-          <li>
-            <Link href="/cms/destinations" className="text-link hover:text-accent">
-              Destinations
-            </Link>{" "}
-            updates the continent/country tree (map, climate, itinerary).
-          </li>
-          <li>
-            <Link href="/cms/media" className="text-link hover:text-accent">
-              Media
-            </Link>{" "}
-            is the post image library (search, add by URL/upload, picker in the
-            editor) plus the author photo tab.
+            </code>
+            — including About, Contact, Start here, Bucket list, Media kit, App
+            purpose, Guides/Tools/Destinations/Blog intros, policies, culinary,
+            travel-wallet, and more. Hub <em>cards</em> stay data-driven; editable
+            fields are title, description, intro, and optional sections JSON.
           </li>
           <li>
             <Link href="/cms/design" className="text-link hover:text-accent">
               Website design
             </Link>{" "}
-            controls the homepage hero image, location label, tagline, subtitle,
-            CTAs, and “From the road” strip (commits{" "}
+            controls the homepage hero <strong>and</strong> major homepage section
+            chrome (Start here, Places, Latest, Guides, Tools, OAuth note, Author
+            intro) via{" "}
             <code className="rounded bg-surface-soft px-1 text-xs">
               src/data/site-design.json
             </code>
-            ).
+            .
+          </li>
+          <li>
+            <Link href="/cms/destinations" className="text-link hover:text-accent">
+              Destinations
+            </Link>{" "}
+            updates the continent/country tree (map, climate, itinerary). Country
+            pages themselves are not “Pages” — use Destinations.
+          </li>
+          <li>
+            <Link href="/cms/media" className="text-link hover:text-accent">
+              Media
+            </Link>{" "}
+            is the image library plus the author photo tab.
+          </li>
+          <li>
+            New CMS page slugs without a dedicated{" "}
+            <code className="rounded bg-surface-soft px-1 text-xs">
+              src/app/&#123;slug&#125;
+            </code>{" "}
+            route are served by the catch-all when they do not collide with a post
+            or destination.
           </li>
         </ul>
       </section>
 
       <section className="panel space-y-3 p-5 md:p-6">
         <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
-          Change the homepage hero
+          Change the homepage
         </h2>
         <ol className="list-decimal space-y-2 pl-5 text-sm text-text">
           <li>
@@ -172,14 +167,17 @@ export default async function CmsHelpPage() {
           </li>
           <li>
             Under <strong>Homepage hero image</strong>, choose from the media
-            library or upload a new photo. Set alt text and the window chrome
-            location label (e.g. Maroon Bells · Colorado).
+            library or upload. Set alt text and window chrome location label.
           </li>
           <li>
-            Edit tagline, subtitle, and CTAs as needed, then{" "}
-            <strong>Save website design</strong>.
+            Edit hero tagline, subtitle, CTAs, then scroll to{" "}
+            <strong>Homepage sections</strong> for Start here / Places / Latest /
+            Guides / Tools / OAuth note / Author intro.
           </li>
-          <li>Wait for the Vercel deploy — the live homepage updates automatically.</li>
+          <li>
+            <strong>Save website design</strong> → wait for Vercel → live homepage
+            updates.
+          </li>
         </ol>
       </section>
 
@@ -205,10 +203,11 @@ export default async function CmsHelpPage() {
 
       <section className="panel space-y-3 p-5 md:p-6">
         <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
-          Code-only routes
+          Code-only / app routes
         </h2>
         <p className="text-sm text-muted">
-          These are React pages, not JSON CMS content:
+          These are app/auth/system routes — not marketing pages. Individual posts
+          and destination country pages are edited under Posts and Destinations.
         </p>
         <ul className="mt-2 grid gap-1 sm:grid-cols-2">
           {CODE_ONLY_PAGE_ROUTES.map((r) => (

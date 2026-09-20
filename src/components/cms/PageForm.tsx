@@ -10,6 +10,8 @@ export type PageFormInitial = {
   description: string;
   label: string;
   contentHtml: string;
+  /** Optional structured sections as pretty JSON string */
+  sectionsJson: string;
 };
 
 type Props = {
@@ -40,6 +42,7 @@ export function PageForm({ mode, initial }: Props) {
   const [description, setDescription] = useState(initial?.description ?? "");
   const [label, setLabel] = useState(initial?.label ?? "");
   const [contentHtml, setContentHtml] = useState(initial?.contentHtml ?? "");
+  const [sectionsJson, setSectionsJson] = useState(initial?.sectionsJson ?? "");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{
     commitUrl: string;
@@ -89,6 +92,7 @@ export function PageForm({ mode, initial }: Props) {
           description,
           label,
           contentHtml,
+          sections: sectionsJson.trim() || undefined,
           update: mode === "edit",
         }),
       });
@@ -115,7 +119,7 @@ export function PageForm({ mode, initial }: Props) {
       setError("Network error. Try again.");
       setPending(false);
     }
-  }, [contentHtml, description, finalSlug, label, mode, router, title]);
+  }, [contentHtml, description, finalSlug, label, mode, router, sectionsJson, title]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -179,8 +183,9 @@ export function PageForm({ mode, initial }: Props) {
             className={`${fieldClass} disabled:bg-surface-soft`}
           />
           <p className="mt-1 text-xs text-muted">
-            Public URL: /{finalSlug || "{slug}"} — only works if a matching App
-            Router page already loads this JSON.
+            Public URL: /{finalSlug || "{slug}"}. Known slugs have explicit
+            routes; other CMS-only slugs are served by the catch-all when they
+            don’t collide with a post or destination.
           </p>
         </div>
         <div>
@@ -226,7 +231,7 @@ export function PageForm({ mode, initial }: Props) {
 
       <div>
         <label htmlFor="cms-page-content" className="text-sm font-semibold text-heading">
-          Content <span className="text-accent">*</span>
+          Content
         </label>
         <RichTextEditor
           id="cms-page-content"
@@ -235,8 +240,33 @@ export function PageForm({ mode, initial }: Props) {
             setContentHtml(html);
             markDirty();
           }}
-          required
         />
+        <p className="mt-1 text-xs text-muted">
+          Hub intros can leave body empty — title, description, and sections
+          drive the page chrome.
+        </p>
+      </div>
+
+      <div>
+        <label htmlFor="cms-page-sections" className="text-sm font-semibold text-heading">
+          Sections (optional JSON)
+        </label>
+        <textarea
+          id="cms-page-sections"
+          value={sectionsJson}
+          onChange={(e) => {
+            setSectionsJson(e.target.value);
+            markDirty();
+          }}
+          rows={8}
+          spellCheck={false}
+          placeholder='{"disclosure":{"title":"…","body":"…"}}'
+          className={`${areaClass} font-mono text-xs`}
+        />
+        <p className="mt-1 text-xs text-muted">
+          Structured extras for hubs, contact form labels, media kit stats, etc.
+          Must be a JSON object. Leave blank to keep existing sections on update.
+        </p>
       </div>
 
       {error ? (

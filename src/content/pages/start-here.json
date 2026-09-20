@@ -1,0 +1,40 @@
+{
+  "slug": "start-here",
+  "title": "Start here.",
+  "label": "Welcome",
+  "description": "This is a personal travel blog — places I’ve been and notes from the road. Pick a path below and dig in.",
+  "contentHtml": "<p></p>",
+  "sections": {
+    "steps": [
+      {
+        "title": "Places",
+        "href": "/destinations",
+        "icon": "map-pin",
+        "description": "Places I’ve already been — country pages with trip notes and linked stories.",
+        "cta": "Browse places"
+      },
+      {
+        "title": "Stories",
+        "href": "/blog",
+        "icon": "book-open",
+        "description": "Longer stories from the road: guides, sunrise runs, packing fails, and favorites.",
+        "cta": "Read stories"
+      },
+      {
+        "title": "Guides",
+        "href": "/guides",
+        "icon": "compass",
+        "description": "Six hubs — plan, money, packing, smarter travel, stays, and experiences.",
+        "cta": "Open guides"
+      },
+      {
+        "title": "Tools",
+        "href": "/tools",
+        "icon": "suitcase",
+        "description": "Honest affiliate tools I use for stays, flights, insurance, and connectivity — not a booking desk.",
+        "cta": "See tools"
+      }
+    ],
+    "aboutTeaser": "Want the short version of who I am?"
+  }
+}

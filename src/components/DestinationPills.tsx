@@ -2,8 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Section, SectionHead } from "@/components/ui/Section";
 import { destinationPills } from "@/data/content";
+import { getSiteDesign } from "@/lib/site-design";
 
 export function DestinationPills() {
+  const { places } = getSiteDesign().homeSections;
+
   return (
     <Section
       id="where-next"
@@ -12,10 +15,10 @@ export function DestinationPills() {
       aria-labelledby="where-next-heading"
     >
       <SectionHead
-        eyebrow="Places"
-        title="Places from the journal."
+        eyebrow={places.eyebrow}
+        title={places.title}
         titleId="where-next-heading"
-        description="Photo-led stops from trips already taken — tap a place to browse related stories."
+        description={places.description}
         align="center"
       />
 

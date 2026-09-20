@@ -1,0 +1,22 @@
+{
+  "slug": "contact",
+  "title": "Contact me",
+  "label": "Hello",
+  "description": "I’d love to hear from you. Say hello about a trip you’ve taken, a story idea, or just to share a photo from the road — this is a personal journal, not a booking desk.",
+  "contentHtml": "<p></p>",
+  "sections": {
+    "form": {
+      "firstNameLabel": "First name",
+      "lastNameLabel": "Last name",
+      "emailLabel": "Email",
+      "messageLabel": "Message",
+      "submitLabel": "Send message",
+      "successCopy": "Opening your email app to send…",
+      "directEmailHint": "Or email me directly at"
+    },
+    "emailAside": {
+      "title": "Prefer email?",
+      "body": "Reach me at {email}. I read every message — replies may take a few days if I’m mid-itinerary."
+    }
+  }
+}

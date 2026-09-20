@@ -1,17 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BlogFilters } from "@/components/blog/BlogFilters";
+import { asString } from "@/lib/cms-section-utils";
+import { PAGE_DEFAULTS } from "@/lib/page-defaults";
+import { getPageWithFallback } from "@/lib/pages";
 import { getAllPosts } from "@/lib/posts";
 
-export const metadata: Metadata = {
-  title: "Stories",
-  description:
-    "Trip notes, destination guides, and travel tips from Fernandes Journeys.",
-  alternates: { canonical: "/blog" },
-};
+export function generateMetadata(): Metadata {
+  const page = getPageWithFallback("blog", PAGE_DEFAULTS.blog);
+  return {
+    title: page.title,
+    description: page.description,
+    alternates: { canonical: "/blog" },
+  };
+}
 
 export default function BlogIndexPage() {
+  const page = getPageWithFallback("blog", PAGE_DEFAULTS.blog);
   const posts = getAllPosts();
+  const template = asString(
+    page.sections?.introTemplate,
+    "{count} stories from the road — destination guides, trip notes, and practical travel tips. Filter by place or guide topic.",
+  );
+  const intro = template.replace("{count}", String(posts.length));
 
   return (
     <main className="bg-white">
@@ -24,16 +35,19 @@ export default function BlogIndexPage() {
               </Link>
             </li>
             <li aria-hidden="true">›</li>
-            <li className="text-text">Stories</li>
+            <li className="text-text">{page.title}</li>
           </ol>
         </nav>
 
-        <p className="mt-8 eyebrow">Journal</p>
-        <h1 className="font-display mt-2 text-display text-heading">Stories</h1>
-        <p className="mt-4 max-w-2xl text-lead text-text">
-          {posts.length} stories from the road — destination guides, trip notes,
-          and practical travel tips. Filter by place or guide topic.
-        </p>
+        {page.label ? <p className="mt-8 eyebrow">{page.label}</p> : null}
+        <h1
+          className={`font-display text-display text-heading ${
+            page.label ? "mt-2" : "mt-8"
+          }`}
+        >
+          {page.title}
+        </h1>
+        <p className="mt-4 max-w-2xl text-lead text-text">{intro}</p>
 
         <BlogFilters posts={posts} />
       </div>

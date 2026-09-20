@@ -8,6 +8,11 @@ export type SitePage = {
   /** Optional eyebrow label above the H1 */
   label?: string;
   contentHtml: string;
+  /**
+   * Optional structured sections for hubs, forms, and complex layouts.
+   * Shape is page-specific; routes read known keys with fallbacks.
+   */
+  sections?: Record<string, unknown>;
   source?: {
     site: string;
     url: string;
@@ -24,21 +29,18 @@ type PagesIndex = {
 
 const PAGES_DIR = path.join(process.cwd(), "src/content/pages");
 
-/** Marketing / hub routes that are React code only (not JSON-editable). */
+/**
+ * True app / auth / system routes — not JSON-editable as marketing pages.
+ * Content hubs (about, contact, guides intros, etc.) are CMS pages.
+ */
 export const CODE_ONLY_PAGE_ROUTES = [
-  { path: "/", note: "Homepage (hero via CMS → Website design)" },
-  { path: "/about", note: "About (React)" },
-  { path: "/contact", note: "Contact form (React)" },
-  { path: "/start-here", note: "Start here hub (React)" },
-  { path: "/bucket-list", note: "Bucket list (React)" },
-  { path: "/guides", note: "Guides hub (React)" },
-  { path: "/tools", note: "Tools hub (React)" },
-  { path: "/media-kit", note: "Media kit (React)" },
-  { path: "/destinations", note: "Destinations index (data-driven tree)" },
-  { path: "/blog", note: "Blog index (posts JSON)" },
-  { path: "/search", note: "Search (React)" },
   { path: "/account", note: "Reader account dashboard (profile + saves)" },
-  { path: "/app", note: "OAuth app purpose (Google branding)" },
+  { path: "/login", note: "Reader / admin sign-in" },
+  { path: "/forgot-password", note: "Password reset request" },
+  { path: "/reset-password", note: "Password reset form" },
+  { path: "/search", note: "Site search UI (indexes posts/pages)" },
+  { path: "/cms/*", note: "Admin console (gated)" },
+  { path: "/api/*", note: "API routes (auth, CMS, newsletter, saves)" },
 ] as const;
 
 /** Public path for a CMS content page slug. */
@@ -49,7 +51,42 @@ export function cmsPagePublicPath(slug: string): string {
 export function getPageBySlug(slug: string): SitePage | null {
   const file = path.join(PAGES_DIR, `${slug}.json`);
   if (!fs.existsSync(file)) return null;
-  return JSON.parse(fs.readFileSync(file, "utf8")) as SitePage;
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8")) as SitePage;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Load a CMS page, merging with fallback defaults so builds never blank
+ * if a JSON file is missing or incomplete.
+ */
+export function getPageWithFallback(
+  slug: string,
+  fallback: SitePage,
+): SitePage {
+  const page = getPageBySlug(slug);
+  if (!page) return { ...fallback, slug };
+  return {
+    ...fallback,
+    ...page,
+    slug,
+    title: page.title?.trim() || fallback.title,
+    description: page.description?.trim() || fallback.description,
+    label: page.label?.trim() || fallback.label,
+    contentHtml:
+      typeof page.contentHtml === "string" && page.contentHtml.trim()
+        ? page.contentHtml
+        : fallback.contentHtml,
+    sections: {
+      ...(fallback.sections ?? {}),
+      ...(page.sections && typeof page.sections === "object"
+        ? page.sections
+        : {}),
+    },
+    source: page.source ?? fallback.source,
+  };
 }
 
 function readIndex(): PagesIndex {
@@ -76,3 +113,23 @@ export function getAllCmsPages(): SitePage[] {
   }
   return pages.sort((a, b) => a.title.localeCompare(b.title));
 }
+
+/** Slugs that already have an explicit App Router page under src/app/{slug}. */
+export const EXPLICIT_CMS_PAGE_SLUGS = [
+  "about",
+  "contact",
+  "start-here",
+  "bucket-list",
+  "media-kit",
+  "app",
+  "guides",
+  "tools",
+  "destinations",
+  "blog",
+  "culinary",
+  "policies",
+  "privacy",
+  "terms",
+  "affiliate-disclosure",
+  "travel-wallet",
+] as const;

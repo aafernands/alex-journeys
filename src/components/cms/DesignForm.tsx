@@ -42,6 +42,7 @@ export function DesignForm({ initial }: Props) {
   const [showHeroStats, setShowHeroStats] = useState(
     initial.flags.showHeroStats,
   );
+  const [homeSections, setHomeSections] = useState(initial.homeSections);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
@@ -97,6 +98,7 @@ export function DesignForm({ initial }: Props) {
             const design: SiteDesign = {
               updatedAt: initial.updatedAt,
               hero,
+              homeSections,
               seo: { homeTitleSnippet: seoSnippet.trim() },
               flags: { showHeroStats },
             };
@@ -120,6 +122,7 @@ export function DesignForm({ initial }: Props) {
             }
             if (data.design) {
               setHero(data.design.hero);
+              setHomeSections(data.design.homeSections);
               setSeoSnippet(data.design.seo.homeTitleSnippet || "");
               setShowHeroStats(data.design.flags.showHeroStats);
             }
@@ -537,6 +540,339 @@ export function DesignForm({ initial }: Props) {
                   />
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+
+        {/* Homepage section chrome */}
+        <section className="panel overflow-hidden">
+          <div className="border-b border-border bg-surface-soft px-5 py-3">
+            <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
+              Homepage sections
+            </h2>
+          </div>
+          <div className="space-y-8 p-5 md:p-6">
+            <p className="text-sm text-muted">
+              Edit major homepage section titles and copy (Start here, Places,
+              Latest stories, Guides, Tools, Google Sign-In note, Author intro).
+              Cards and hub lists stay data-driven where noted.
+            </p>
+
+            {(
+              [
+                ["startHere", "Start here"],
+                ["places", "Places strip"],
+                ["latest", "Latest stories"],
+                ["guides", "Guides strip"],
+                ["tools", "Tools strip"],
+              ] as const
+            ).map(([key, label]) => {
+              const section = homeSections[key];
+              return (
+                <div
+                  key={key}
+                  className="rounded-lg border border-border bg-surface-soft/50 p-4"
+                >
+                  <p className="text-sm font-bold text-heading">{label}</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                        Eyebrow
+                      </label>
+                      <input
+                        value={section.eyebrow}
+                        onChange={(e) => {
+                          setHomeSections((hs) => ({
+                            ...hs,
+                            [key]: { ...section, eyebrow: e.target.value },
+                          }));
+                          setSuccess(null);
+                        }}
+                        className={fieldClass}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                        Title
+                      </label>
+                      <input
+                        value={section.title}
+                        onChange={(e) => {
+                          setHomeSections((hs) => ({
+                            ...hs,
+                            [key]: { ...section, title: e.target.value },
+                          }));
+                          setSuccess(null);
+                        }}
+                        className={fieldClass}
+                      />
+                    </div>
+                  </div>
+                  {"description" in section ? (
+                    <div className="mt-3">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                        Description
+                      </label>
+                      <textarea
+                        value={section.description || ""}
+                        onChange={(e) => {
+                          setHomeSections((hs) => ({
+                            ...hs,
+                            [key]: { ...section, description: e.target.value },
+                          }));
+                          setSuccess(null);
+                        }}
+                        rows={2}
+                        className={areaClass}
+                      />
+                    </div>
+                  ) : null}
+                  {"ctaLabel" in section ? (
+                    <div className="mt-3">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                        CTA label
+                      </label>
+                      <input
+                        value={section.ctaLabel || ""}
+                        onChange={(e) => {
+                          setHomeSections((hs) => ({
+                            ...hs,
+                            [key]: { ...section, ctaLabel: e.target.value },
+                          }));
+                          setSuccess(null);
+                        }}
+                        className={fieldClass}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+
+            <div className="rounded-lg border border-border bg-surface-soft/50 p-4">
+              <p className="text-sm font-bold text-heading">
+                Start here cards (JSON)
+              </p>
+              <p className="mt-1 text-xs text-muted">
+                Array of title, href, icon, description, cta.
+              </p>
+              <textarea
+                value={JSON.stringify(homeSections.startHere.cards, null, 2)}
+                onChange={(e) => {
+                  try {
+                    const parsed = JSON.parse(e.target.value) as unknown;
+                    if (!Array.isArray(parsed)) return;
+                    setHomeSections((hs) => ({
+                      ...hs,
+                      startHere: {
+                        ...hs.startHere,
+                        cards: parsed as typeof hs.startHere.cards,
+                      },
+                    }));
+                    setSuccess(null);
+                    setError(null);
+                  } catch {
+                    /* allow typing invalid JSON until blur/save */
+                  }
+                }}
+                rows={10}
+                spellCheck={false}
+                className={`${areaClass} font-mono text-xs`}
+              />
+            </div>
+
+            <div className="rounded-lg border border-border bg-surface-soft/50 p-4">
+              <p className="text-sm font-bold text-heading">Google Sign-In note</p>
+              <div className="mt-3 grid gap-3">
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                    Eyebrow
+                  </label>
+                  <input
+                    value={homeSections.oauthNote.eyebrow}
+                    onChange={(e) => {
+                      setHomeSections((hs) => ({
+                        ...hs,
+                        oauthNote: {
+                          ...hs.oauthNote,
+                          eyebrow: e.target.value,
+                        },
+                      }));
+                      setSuccess(null);
+                    }}
+                    className={fieldClass}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                    Title (blank = site name)
+                  </label>
+                  <input
+                    value={homeSections.oauthNote.title}
+                    onChange={(e) => {
+                      setHomeSections((hs) => ({
+                        ...hs,
+                        oauthNote: { ...hs.oauthNote, title: e.target.value },
+                      }));
+                      setSuccess(null);
+                    }}
+                    className={fieldClass}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                    Body
+                  </label>
+                  <textarea
+                    value={homeSections.oauthNote.body}
+                    onChange={(e) => {
+                      setHomeSections((hs) => ({
+                        ...hs,
+                        oauthNote: { ...hs.oauthNote, body: e.target.value },
+                      }));
+                      setSuccess(null);
+                    }}
+                    rows={3}
+                    className={areaClass}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-border bg-surface-soft/50 p-4">
+              <p className="text-sm font-bold text-heading">Author intro</p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                    Eyebrow
+                  </label>
+                  <input
+                    value={homeSections.author.eyebrow}
+                    onChange={(e) => {
+                      setHomeSections((hs) => ({
+                        ...hs,
+                        author: { ...hs.author, eyebrow: e.target.value },
+                      }));
+                      setSuccess(null);
+                    }}
+                    className={fieldClass}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                    Headline
+                  </label>
+                  <input
+                    value={homeSections.author.headline}
+                    onChange={(e) => {
+                      setHomeSections((hs) => ({
+                        ...hs,
+                        author: { ...hs.author, headline: e.target.value },
+                      }));
+                      setSuccess(null);
+                    }}
+                    className={fieldClass}
+                  />
+                </div>
+              </div>
+              <div className="mt-3">
+                <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                  Body
+                </label>
+                <textarea
+                  value={homeSections.author.body}
+                  onChange={(e) => {
+                    setHomeSections((hs) => ({
+                      ...hs,
+                      author: { ...hs.author, body: e.target.value },
+                    }));
+                    setSuccess(null);
+                  }}
+                  rows={3}
+                  className={areaClass}
+                />
+              </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                    Primary CTA label / href
+                  </label>
+                  <input
+                    value={homeSections.author.primaryCta.label}
+                    onChange={(e) => {
+                      setHomeSections((hs) => ({
+                        ...hs,
+                        author: {
+                          ...hs.author,
+                          primaryCta: {
+                            ...hs.author.primaryCta,
+                            label: e.target.value,
+                          },
+                        },
+                      }));
+                      setSuccess(null);
+                    }}
+                    className={fieldClass}
+                  />
+                  <input
+                    value={homeSections.author.primaryCta.href}
+                    onChange={(e) => {
+                      setHomeSections((hs) => ({
+                        ...hs,
+                        author: {
+                          ...hs.author,
+                          primaryCta: {
+                            ...hs.author.primaryCta,
+                            href: e.target.value,
+                          },
+                        },
+                      }));
+                      setSuccess(null);
+                    }}
+                    className={fieldClass}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                    Secondary CTA label / href
+                  </label>
+                  <input
+                    value={homeSections.author.secondaryCta.label}
+                    onChange={(e) => {
+                      setHomeSections((hs) => ({
+                        ...hs,
+                        author: {
+                          ...hs.author,
+                          secondaryCta: {
+                            ...hs.author.secondaryCta,
+                            label: e.target.value,
+                          },
+                        },
+                      }));
+                      setSuccess(null);
+                    }}
+                    className={fieldClass}
+                  />
+                  <input
+                    value={homeSections.author.secondaryCta.href}
+                    onChange={(e) => {
+                      setHomeSections((hs) => ({
+                        ...hs,
+                        author: {
+                          ...hs.author,
+                          secondaryCta: {
+                            ...hs.author.secondaryCta,
+                            href: e.target.value,
+                          },
+                        },
+                      }));
+                      setSuccess(null);
+                    }}
+                    className={fieldClass}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </section>

@@ -8,23 +8,28 @@ import {
   getAllDestinations,
   type DestinationCountry,
 } from "@/data/destinations";
+import { PAGE_DEFAULTS } from "@/lib/page-defaults";
+import { getPageWithFallback } from "@/lib/pages";
 
-export const metadata: Metadata = {
-  title: "Places",
-  description:
-    "Places I’ve been — photo-led destinations from past trips on Fernandes Journeys.",
-  alternates: { canonical: "/destinations" },
-};
+export function generateMetadata(): Metadata {
+  const page = getPageWithFallback("destinations", PAGE_DEFAULTS.destinations);
+  return {
+    title: "Places",
+    description: page.description,
+    alternates: { canonical: "/destinations" },
+  };
+}
 
 export default function DestinationsIndexPage() {
+  const page = getPageWithFallback("destinations", PAGE_DEFAULTS.destinations);
   const all = getAllDestinations();
   const featured = all.slice(0, 4);
 
   return (
     <SitePage
-      label="Places"
-      title="Places I’ve been."
-      description="A photo map of past trips — Iceland nights, Canadian weekends, mountain mornings, Caribbean water, and Rio after dark. Stories and notes, not a booking catalog."
+      label={page.label}
+      title={page.title}
+      description={page.description}
       narrow={false}
       crumbs={[
         { href: "/", label: "Home" },

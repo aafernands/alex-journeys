@@ -2,9 +2,11 @@ import Link from "next/link";
 import { PostCard } from "@/components/blog/PostCard";
 import { Section, SectionHead } from "@/components/ui/Section";
 import { getAllPosts } from "@/lib/posts";
+import { getSiteDesign } from "@/lib/site-design";
 
 export function LatestPosts() {
   const posts = getAllPosts().slice(0, 6);
+  const { latest } = getSiteDesign().homeSections;
 
   return (
     <Section
@@ -14,12 +16,12 @@ export function LatestPosts() {
       aria-labelledby="latest-heading"
     >
       <SectionHead
-        eyebrow="From the journal"
-        title="Latest stories."
+        eyebrow={latest.eyebrow}
+        title={latest.title}
         titleId="latest-heading"
         action={
           <Link href="/blog" className="btn btn-secondary">
-            Browse all stories
+            {latest.ctaLabel || "Browse all stories"}
             <span aria-hidden="true">→</span>
           </Link>
         }

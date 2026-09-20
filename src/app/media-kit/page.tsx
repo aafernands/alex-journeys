@@ -1,21 +1,22 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { PostContent } from "@/components/blog/PostContent";
 import { SitePage } from "@/components/pages/SitePage";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { site } from "@/data/content";
+import { asRecord, asString, asStringArray } from "@/lib/cms-section-utils";
+import { PAGE_DEFAULTS } from "@/lib/page-defaults";
+import { getPageWithFallback } from "@/lib/pages";
 
-export const metadata: Metadata = {
-  title: "Media Kit",
-  description:
-    "Media kit for Fernandes Journeys — audience reach, platforms, partnership types, and how to work with Alex Fernandes.",
-};
-
-const stats = [
-  { value: "10K", label: "Instagram Followers" },
-  { value: "15K", label: "Average Reach" },
-  { value: "80K", label: "Website Visitors" },
-];
+export function generateMetadata(): Metadata {
+  const page = getPageWithFallback("media-kit", PAGE_DEFAULTS["media-kit"]);
+  return {
+    title: page.title,
+    description: page.description,
+    alternates: { canonical: "/media-kit" },
+  };
+}
 
 const platforms = [
   {
@@ -35,21 +36,6 @@ const platforms = [
   },
 ];
 
-const createItems = [
-  "Destination stories from trips I’ve already taken",
-  "Reels- and Shorts-friendly moments from the road",
-  "Practical guides and itinerary notes",
-  "Honest tool and affiliate recommendations I actually use",
-];
-
-const partnershipTypes = [
-  "Sponsored posts",
-  "Destination features",
-  "Product / gear features",
-  "Affiliate partnerships",
-  "Newsletter mentions",
-];
-
 const pastPlaces = [
   { name: "Iceland", href: "/iceland" },
   { name: "Canada", href: "/canada" },
@@ -59,18 +45,46 @@ const pastPlaces = [
 ];
 
 export default function MediaKitPage() {
+  const page = getPageWithFallback("media-kit", PAGE_DEFAULTS["media-kit"]);
+  const s = page.sections ?? {};
+  const hero = asRecord(s.hero);
+  const audience = asRecord(s.audience);
+  const cta = asRecord(s.cta);
+  const statsRaw = Array.isArray(audience.stats) ? audience.stats : [];
+  const stats =
+    statsRaw.length > 0
+      ? statsRaw.map((item) => {
+          const o = asRecord(item);
+          return {
+            value: asString(o.value, "—"),
+            label: asString(o.label, ""),
+          };
+        })
+      : [
+          { value: "10K", label: "Instagram Followers" },
+          { value: "15K", label: "Average Reach" },
+          { value: "80K", label: "Website Visitors" },
+        ];
+  const createItems = asStringArray(
+    s.createItems,
+    PAGE_DEFAULTS["media-kit"].sections?.createItems as string[],
+  );
+  const partnershipTypes = asStringArray(
+    s.partnershipTypes,
+    PAGE_DEFAULTS["media-kit"].sections?.partnershipTypes as string[],
+  );
+
   return (
     <SitePage
-      label="For brands"
-      title="Media kit"
-      description="A simple overview of Fernandes Journeys — who I am, where the audience is, and how we can work together."
+      label={page.label}
+      title={page.title}
+      description={page.description}
       narrow={false}
       crumbs={[
         { href: "/", label: "Home" },
         { label: "Media Kit" },
       ]}
     >
-      {/* Hero */}
       <section
         aria-labelledby="mk-hero"
         className="panel mt-10 grid gap-8 p-6 md:mt-12 md:grid-cols-[minmax(0,12rem)_1fr] md:items-center md:gap-10 md:p-8"
@@ -94,74 +108,63 @@ export default function MediaKitPage() {
             {site.authorName}
           </h2>
           <p className="mt-2 text-base font-semibold text-accent">
-            Traveler · Creator · Journal
+            {asString(hero.role, "Traveler · Creator · Journal")}
           </p>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-text md:text-base">
-            Personal trip notes, destination stories, and honest recommendations
-            from the road — partner-friendly, not an agency.
+            {asString(
+              hero.blurb,
+              "Personal trip notes, destination stories, and honest recommendations from the road — partner-friendly, not an agency.",
+            )}
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <a
               href={`mailto:${site.email}?subject=Partnership%20inquiry%20—%20Fernandes%20Journeys`}
               className="btn btn-primary btn-block sm:w-auto"
             >
-              Email for partnerships
+              {asString(hero.primaryCta, "Email for partnerships")}
             </a>
             <a
               href="#audience"
               className="btn btn-secondary btn-block sm:w-auto"
             >
-              See audience &amp; reach
+              {asString(hero.secondaryCta, "See audience & reach")}
             </a>
           </div>
         </div>
       </section>
 
-      {/* About */}
       <section aria-labelledby="mk-about" className="mt-12 md:mt-14">
         <p className="eyebrow">About</p>
         <h2
           id="mk-about"
           className="font-display mt-2 text-xl font-bold text-heading md:text-2xl"
         >
-          One traveler, one journal
+          {asString(s.aboutHeading, "One traveler, one journal")}
         </h2>
-        <div className="panel mt-5 max-w-3xl space-y-4 p-6 text-base leading-relaxed text-text md:p-8">
-          <p>
-            I’m Alex Fernandes — traveler and photographer behind Fernandes
-            Journeys. Based in New Jersey, I document trips I’ve already taken:
-            the routes, neighborhoods, and small details I’d tell a friend over
-            coffee.
-          </p>
-          <p>
-            The journal covers places across Iceland, Canada, the US, Mexico,
-            and Brazil, with longer stories, practical guides, and photo-led
-            moments that travel well on Instagram and YouTube.
-          </p>
-          <p>
-            Brands work with me directly — no agency middle layer. If a
-            destination, product, or tool fits how I actually travel, I’m open
-            to featuring it honestly.
-          </p>
+        <div className="panel mt-5 max-w-3xl p-6 md:p-8">
+          <PostContent html={page.contentHtml} />
         </div>
       </section>
 
-      {/* Audience & reach */}
       <section
         id="audience"
         aria-labelledby="mk-audience"
         className="mt-12 md:mt-14"
       >
-        <p className="eyebrow">Audience &amp; reach</p>
+        <p className="eyebrow">
+          {asString(audience.eyebrow, "Audience & reach")}
+        </p>
         <h2
           id="mk-audience"
           className="font-display mt-2 text-xl font-bold text-heading md:text-2xl"
         >
-          Current numbers
+          {asString(audience.title, "Current numbers")}
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          Snapshot from the current audience graphic — Instagram followers,
-          average reach, and website visitors.
+          {asString(
+            audience.note,
+            "Snapshot from the current audience graphic — Instagram followers, average reach, and website visitors.",
+          )}
         </p>
         <ul className="mt-6 grid gap-4 sm:grid-cols-3">
           {stats.map((stat) => (
@@ -175,14 +178,13 @@ export default function MediaKitPage() {
         </ul>
       </section>
 
-      {/* Platforms */}
       <section aria-labelledby="mk-platforms" className="mt-12 md:mt-14">
         <p className="eyebrow">Platforms</p>
         <h2
           id="mk-platforms"
           className="font-display mt-2 text-xl font-bold text-heading md:text-2xl"
         >
-          Where to find the journal
+          {asString(s.platformsHeading, "Where to find the journal")}
         </h2>
         <ul className="mt-6 grid gap-4 sm:grid-cols-3">
           {platforms.map((p) => (
@@ -204,7 +206,6 @@ export default function MediaKitPage() {
         </ul>
       </section>
 
-      {/* What I create + Partnership types */}
       <div className="mt-12 grid gap-8 md:mt-14 md:grid-cols-2 md:gap-6">
         <section aria-labelledby="mk-create" className="panel p-6 md:p-8">
           <p className="eyebrow">Content</p>
@@ -212,7 +213,7 @@ export default function MediaKitPage() {
             id="mk-create"
             className="font-display mt-2 text-xl font-bold text-heading"
           >
-            What I create
+            {asString(s.createHeading, "What I create")}
           </h2>
           <ul className="mt-5 space-y-3 text-sm leading-relaxed text-text md:text-base">
             {createItems.map((item) => (
@@ -233,7 +234,7 @@ export default function MediaKitPage() {
             id="mk-partners"
             className="font-display mt-2 text-xl font-bold text-heading"
           >
-            Partnership types
+            {asString(s.partnersHeading, "Partnership types")}
           </h2>
           <ul className="mt-5 space-y-3 text-sm leading-relaxed text-text md:text-base">
             {partnershipTypes.map((item) => (
@@ -249,18 +250,19 @@ export default function MediaKitPage() {
         </section>
       </div>
 
-      {/* Past places */}
       <section aria-labelledby="mk-places" className="mt-12 md:mt-14">
         <p className="eyebrow">Journal</p>
         <h2
           id="mk-places"
           className="font-display mt-2 text-xl font-bold text-heading md:text-2xl"
         >
-          Past places
+          {asString(s.placesHeading, "Past places")}
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          Destinations already documented on the site — from the personal trip
-          journal.
+          {asString(
+            s.placesNote,
+            "Destinations already documented on the site — from the personal trip journal.",
+          )}
         </p>
         <ul className="mt-6 flex flex-wrap gap-2">
           {pastPlaces.map((place) => (
@@ -276,16 +278,16 @@ export default function MediaKitPage() {
         </ul>
       </section>
 
-      {/* Contact CTA */}
       <aside className="panel-soft mt-12 p-6 md:mt-14 md:p-8">
-        <p className="eyebrow">Next step</p>
+        <p className="eyebrow">{asString(cta.eyebrow, "Next step")}</p>
         <p className="font-display mt-2 text-xl font-bold text-heading md:text-2xl">
-          Let’s talk
+          {asString(cta.title, "Let’s talk")}
         </p>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-text md:text-base">
-          For sponsorships, destination features, product or gear placements,
-          affiliate work, or a newsletter mention — email me directly. I read
-          every message.
+          {asString(
+            cta.body,
+            "For sponsorships, destination features, product or gear placements, affiliate work, or a newsletter mention — email me directly. I read every message.",
+          )}
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <a

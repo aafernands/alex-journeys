@@ -1,0 +1,10 @@
+{
+  "slug": "blog",
+  "title": "Stories",
+  "label": "Journal",
+  "description": "Trip notes, destination guides, and travel tips from Fernandes Journeys.",
+  "contentHtml": "<p></p>",
+  "sections": {
+    "introTemplate": "{count} stories from the road — destination guides, trip notes, and practical travel tips. Filter by place or guide topic."
+  }
+}

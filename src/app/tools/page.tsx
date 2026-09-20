@@ -3,19 +3,28 @@ import Link from "next/link";
 import { SitePage } from "@/components/pages/SitePage";
 import { ToolCard } from "@/components/tools/ToolCard";
 import { tripPlannerTools } from "@/data/nav";
+import { asRecord, asString } from "@/lib/cms-section-utils";
+import { PAGE_DEFAULTS } from "@/lib/page-defaults";
+import { getPageWithFallback } from "@/lib/pages";
 
-export const metadata: Metadata = {
-  title: "Tools I use",
-  description:
-    "Affiliate tools I actually use when planning trips — stays, flights, insurance, money, and connectivity.",
-};
+export function generateMetadata(): Metadata {
+  const page = getPageWithFallback("tools", PAGE_DEFAULTS.tools);
+  return {
+    title: page.title,
+    description: page.description,
+    alternates: { canonical: "/tools" },
+  };
+}
 
 export default function ToolsPage() {
+  const page = getPageWithFallback("tools", PAGE_DEFAULTS.tools);
+  const disclosure = asRecord(page.sections?.disclosure);
+
   return (
     <SitePage
-      label="Tools from the road"
-      title="Tools I use"
-      description="A short list of partners I use when planning — not a booking desk. Some links are affiliates; if you book through them I may earn a small commission at no extra cost to you."
+      label={page.label}
+      title={page.title}
+      description={page.description}
       narrow={false}
       crumbs={[
         { href: "/", label: "Home" },
@@ -27,12 +36,13 @@ export default function ToolsPage() {
         aria-label="Affiliate disclosure"
       >
         <p className="font-display text-sm font-bold text-heading">
-          Affiliate &amp; partner links
+          {asString(disclosure.title, "Affiliate & partner links")}
         </p>
         <p className="mt-1 text-sm leading-relaxed text-text">
-          These are affiliate or partner links. If you book or buy through one,
-          Fernandes Journeys may earn a commission at no extra cost to you. The
-          opinions are Alex&apos;s own.{" "}
+          {asString(
+            disclosure.body,
+            "These are affiliate or partner links. If you book or buy through one, Fernandes Journeys may earn a commission at no extra cost to you. The opinions are Alex’s own.",
+          )}{" "}
           <Link href="/affiliate-disclosure" className="text-link hover:text-accent">
             Read the full disclosure
           </Link>

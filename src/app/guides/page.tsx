@@ -2,20 +2,27 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { SitePage } from "@/components/pages/SitePage";
-import { guideHubs, guidesIntro } from "@/data/guides";
+import { guideHubs } from "@/data/guides";
+import { PAGE_DEFAULTS } from "@/lib/page-defaults";
+import { getPageWithFallback } from "@/lib/pages";
 
-export const metadata: Metadata = {
-  title: "Guides",
-  description: guidesIntro.description,
-  alternates: { canonical: "/guides" },
-};
+export function generateMetadata(): Metadata {
+  const page = getPageWithFallback("guides", PAGE_DEFAULTS.guides);
+  return {
+    title: "Guides",
+    description: page.description,
+    alternates: { canonical: "/guides" },
+  };
+}
 
 export default function GuidesPage() {
+  const page = getPageWithFallback("guides", PAGE_DEFAULTS.guides);
+
   return (
     <SitePage
-      label={guidesIntro.label}
-      title={guidesIntro.title}
-      description={guidesIntro.description}
+      label={page.label}
+      title={page.title}
+      description={page.description}
       narrow={false}
       crumbs={[
         { href: "/", label: "Home" },

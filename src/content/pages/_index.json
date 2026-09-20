@@ -7,15 +7,19 @@
     "terms",
     "affiliate-disclosure",
     "culinary",
-    "travel-wallet"
-  ],
-  "hubs": [
+    "travel-wallet",
+    "about",
+    "contact",
+    "start-here",
+    "bucket-list",
+    "media-kit",
+    "app",
     "guides",
     "tools",
-    "bucket-list",
-    "contact",
-    "start-here"
+    "destinations",
+    "blog"
   ],
+  "hubs": [],
   "skipped": [
     {
       "slug": "sustainability",
@@ -73,5 +77,6 @@
     "skipped": [
       "Login"
     ]
-  }
+  },
+  "note": "Marketing/content pages are JSON under this folder. App routes (account, login, search, cms, api) stay code-only."
 }

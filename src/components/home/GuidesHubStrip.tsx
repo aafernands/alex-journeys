@@ -2,8 +2,11 @@ import Link from "next/link";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { Section, SectionHead } from "@/components/ui/Section";
 import { guideHubs } from "@/data/guides";
+import { getSiteDesign } from "@/lib/site-design";
 
 export function GuidesHubStrip() {
+  const { guides } = getSiteDesign().homeSections;
+
   return (
     <Section
       id="guides-hubs"
@@ -11,13 +14,13 @@ export function GuidesHubStrip() {
       aria-labelledby="guides-hubs-heading"
     >
       <SectionHead
-        eyebrow="Guides"
-        title="Guides worth opening."
+        eyebrow={guides.eyebrow}
+        title={guides.title}
         titleId="guides-hubs-heading"
-        description="Six hubs of notes I still use — planning, money, packing, smarter travel, stays, and experiences."
+        description={guides.description}
         action={
           <Link href="/guides" className="btn btn-secondary">
-            All guides
+            {guides.ctaLabel || "All guides"}
             <span aria-hidden="true">→</span>
           </Link>
         }

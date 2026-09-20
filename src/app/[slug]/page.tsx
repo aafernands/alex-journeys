@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogPostView } from "@/components/blog/BlogPostView";
 import { DestinationCountryView } from "@/components/destinations/DestinationCountryView";
+import { SitePage } from "@/components/pages/SitePage";
 import {
   destinationSlugs,
   getDestinationBySlug,
 } from "@/data/destinations";
+import { getPageBySlug, getAllCmsPages } from "@/lib/pages";
 import { getPostBySlug, getPostSlugs } from "@/lib/posts";
 import {
   publicDestinationPath,
@@ -16,10 +18,44 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+/** Slugs that must not be served as generic CMS pages via catch-all. */
+const RESERVED_CATCHALL_SLUGS = new Set([
+  "account",
+  "login",
+  "search",
+  "cms",
+  "api",
+  "blog",
+  "destinations",
+  "guides",
+  "tools",
+  "about",
+  "contact",
+  "start-here",
+  "bucket-list",
+  "media-kit",
+  "app",
+  "culinary",
+  "policies",
+  "privacy",
+  "terms",
+  "affiliate-disclosure",
+  "travel-wallet",
+  "out",
+  "forgot-password",
+  "reset-password",
+]);
+
 export function generateStaticParams() {
   const dest = destinationSlugs.map((slug) => ({ slug }));
   const posts = getPostSlugs().map((slug) => ({ slug }));
-  return [...dest, ...posts];
+  const cmsOnly = getAllCmsPages()
+    .map((p) => p.slug)
+    .filter((slug) => !RESERVED_CATCHALL_SLUGS.has(slug))
+    .filter((slug) => !destinationSlugs.includes(slug))
+    .filter((slug) => !getPostSlugs().includes(slug))
+    .map((slug) => ({ slug }));
+  return [...dest, ...posts, ...cmsOnly];
 }
 
 export async function generateMetadata({
@@ -88,14 +124,26 @@ export async function generateMetadata({
     };
   }
 
+  if (!RESERVED_CATCHALL_SLUGS.has(slug)) {
+    const page = getPageBySlug(slug);
+    if (page) {
+      return {
+        title: page.title,
+        description: page.description,
+        alternates: { canonical: `/${slug}` },
+      };
+    }
+  }
+
   return { title: "Not found" };
 }
 
 /**
  * Root slug resolver: destination country pages win over posts when both
- * match (they currently never overlap). Static App Router segments
+ * match (they currently never overlap). Explicit App Router segments
  * (about, blog, destinations, cms, …) already take precedence over this
- * dynamic route.
+ * dynamic route. Remaining CMS-only pages (future marketing pages without
+ * a dedicated route file) are served last.
  */
 export default async function PublicSlugPage({ params }: PageProps) {
   const { slug } = await params;
@@ -106,6 +154,24 @@ export default async function PublicSlugPage({ params }: PageProps) {
 
   if (getPostBySlug(slug)) {
     return <BlogPostView slug={slug} />;
+  }
+
+  if (!RESERVED_CATCHALL_SLUGS.has(slug)) {
+    const page = getPageBySlug(slug);
+    if (page) {
+      return (
+        <SitePage
+          label={page.label}
+          title={page.title}
+          description={page.description}
+          html={page.contentHtml}
+          crumbs={[
+            { href: "/", label: "Home" },
+            { label: page.title },
+          ]}
+        />
+      );
+    }
   }
 
   notFound();

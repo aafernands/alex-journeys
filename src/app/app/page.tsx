@@ -1,21 +1,30 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PostContent } from "@/components/blog/PostContent";
 import { SitePage } from "@/components/pages/SitePage";
 import { site } from "@/data/content";
+import { asRecord, asString } from "@/lib/cms-section-utils";
+import { PAGE_DEFAULTS } from "@/lib/page-defaults";
+import { getPageWithFallback } from "@/lib/pages";
 
-export const metadata: Metadata = {
-  title: "About this site & Google Sign-In",
-  description:
-    "Fernandes Journeys is a personal travel journal. Google Sign-In is only for optional reader saves and the owner’s private CMS — not a consumer login product.",
-  alternates: { canonical: "/app" },
-};
+export function generateMetadata(): Metadata {
+  const page = getPageWithFallback("app", PAGE_DEFAULTS.app);
+  return {
+    title: "About this site & Google Sign-In",
+    description: page.description,
+    alternates: { canonical: "/app" },
+  };
+}
 
 export default function AppPurposePage() {
+  const page = getPageWithFallback("app", PAGE_DEFAULTS.app);
+  const aside = asRecord(page.sections?.visitorAside);
+
   return (
     <SitePage
-      label="Google OAuth app"
-      title="About Fernandes Journeys & Google Sign-In"
-      description="Public information about the Fernandes Journeys website and why it uses Google Sign-In."
+      label={page.label}
+      title={page.title}
+      description={page.description}
       crumbs={[
         { href: "/", label: "Home" },
         { label: "App purpose" },
@@ -29,23 +38,10 @@ export default function AppPurposePage() {
           <dd className="font-semibold text-heading">{site.name}</dd>
 
           <dt className="text-sm font-semibold uppercase tracking-wide text-muted">
-            What it is
+            Details
           </dt>
           <dd>
-            A personal travel journal by {site.authorName} — destinations from
-            past trips, trip notes, and photos from the road. Public stories are
-            readable without signing in.
-          </dd>
-
-          <dt className="text-sm font-semibold uppercase tracking-wide text-muted">
-            Why Google Sign-In
-          </dt>
-          <dd>
-            Google Sign-In is <strong>not</strong> a consumer social login
-            product on this site. It is used only so (1) readers may optionally
-            save posts to an account, and (2) authorized admins can sign in to
-            the private content management system at <code>/cms</code> to publish
-            and edit travel stories. Most visitors never need to sign in.
+            <PostContent html={page.contentHtml} />
           </dd>
 
           <dt className="text-sm font-semibold uppercase tracking-wide text-muted">
@@ -111,29 +107,26 @@ export default function AppPurposePage() {
       </div>
 
       <aside className="panel-soft mt-8 p-6 md:p-8">
-        <p className="eyebrow">For visitors</p>
+        <p className="eyebrow">
+          {asString(aside.eyebrow, "For visitors")}
+        </p>
         <p className="font-display mt-2 text-lg font-bold text-heading">
-          No login required to read the journal
+          {asString(aside.title, "No login required to read the journal")}
         </p>
         <p className="mt-2 text-sm leading-relaxed text-text">
-          Explore places, stories, and guides freely. Sign in with Google only if
-          you want to save posts — or if you are an authorized admin editing the
-          CMS.
+          {asString(
+            aside.body,
+            "Explore places, stories, and guides freely. Sign in with Google only if you want to save posts — or if you are an authorized admin editing the CMS.",
+          )}
         </p>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link href="/" className="btn btn-ink btn-block sm:w-auto">
             Back to home
           </Link>
-          <Link
-            href="/privacy"
-            className="btn btn-secondary btn-block sm:w-auto"
-          >
+          <Link href="/privacy" className="btn btn-secondary btn-block sm:w-auto">
             Privacy policy
           </Link>
-          <Link
-            href="/terms"
-            className="btn btn-secondary btn-block sm:w-auto"
-          >
+          <Link href="/terms" className="btn btn-secondary btn-block sm:w-auto">
             Terms of use
           </Link>
           <Link
@@ -142,10 +135,7 @@ export default function AppPurposePage() {
           >
             Affiliate disclosure
           </Link>
-          <Link
-            href="/policies"
-            className="btn btn-secondary btn-block sm:w-auto"
-          >
+          <Link href="/policies" className="btn btn-secondary btn-block sm:w-auto">
             Policies hub
           </Link>
           <Link

@@ -2,24 +2,30 @@ import type { Metadata } from "next";
 import { PostCard } from "@/components/blog/PostCard";
 import { SitePage } from "@/components/pages/SitePage";
 import { bucketListSlugs } from "@/data/hubs";
+import { PAGE_DEFAULTS } from "@/lib/page-defaults";
+import { getPageWithFallback } from "@/lib/pages";
 import { getPostBySlug } from "@/lib/posts";
 
-export const metadata: Metadata = {
-  title: "Bucket List",
-  description:
-    "Adventure stories and once-in-a-while trips from the journal — curated from Alex’s bucket-list posts.",
-};
+export function generateMetadata(): Metadata {
+  const page = getPageWithFallback("bucket-list", PAGE_DEFAULTS["bucket-list"]);
+  return {
+    title: page.title,
+    description: page.description,
+    alternates: { canonical: "/bucket-list" },
+  };
+}
 
 export default function BucketListPage() {
+  const page = getPageWithFallback("bucket-list", PAGE_DEFAULTS["bucket-list"]);
   const posts = bucketListSlugs
     .map((slug) => getPostBySlug(slug))
     .filter((p): p is NonNullable<typeof p> => Boolean(p));
 
   return (
     <SitePage
-      label="Bucket list"
-      title="Places worth the early alarm"
-      description="A curated tray of adventure and once-in-a-while trips from the journal — rebuilt from the WordPress bucket-list post grid, without the agency clutter."
+      label={page.label}
+      title={page.title}
+      description={page.description}
       narrow={false}
       crumbs={[
         { href: "/", label: "Home" },

@@ -8,12 +8,36 @@ import {
   type TurnstileFieldHandle,
 } from "@/components/TurnstileField";
 
-export function ContactForm() {
+export type ContactFormLabels = {
+  firstNameLabel?: string;
+  lastNameLabel?: string;
+  emailLabel?: string;
+  messageLabel?: string;
+  submitLabel?: string;
+  successCopy?: string;
+  directEmailHint?: string;
+};
+
+type Props = {
+  labels?: ContactFormLabels;
+};
+
+export function ContactForm({ labels }: Props) {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileFieldHandle>(null);
   const widgetEnabled = isTurnstileWidgetEnabled();
+
+  const firstNameLabel = labels?.firstNameLabel || "First name";
+  const lastNameLabel = labels?.lastNameLabel || "Last name";
+  const emailLabel = labels?.emailLabel || "Email";
+  const messageLabel = labels?.messageLabel || "Message";
+  const submitLabel = labels?.submitLabel || "Send message";
+  const successCopy =
+    labels?.successCopy || `Opening your email app to send to ${site.email}…`;
+  const directEmailHint =
+    labels?.directEmailHint || "Or email me directly at";
 
   return (
     <form
@@ -48,7 +72,7 @@ export function ContactForm() {
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="contact-first" className="text-sm font-semibold text-heading">
-            First name <span className="text-accent">*</span>
+            {firstNameLabel} <span className="text-accent">*</span>
           </label>
           <input
             id="contact-first"
@@ -61,7 +85,7 @@ export function ContactForm() {
         </div>
         <div>
           <label htmlFor="contact-last" className="text-sm font-semibold text-heading">
-            Last name
+            {lastNameLabel}
           </label>
           <input
             id="contact-last"
@@ -74,7 +98,7 @@ export function ContactForm() {
       </div>
       <div>
         <label htmlFor="contact-email" className="text-sm font-semibold text-heading">
-          Email <span className="text-accent">*</span>
+          {emailLabel} <span className="text-accent">*</span>
         </label>
         <input
           id="contact-email"
@@ -87,7 +111,7 @@ export function ContactForm() {
       </div>
       <div>
         <label htmlFor="contact-message" className="text-sm font-semibold text-heading">
-          Message <span className="text-accent">*</span>
+          {messageLabel} <span className="text-accent">*</span>
         </label>
         <textarea
           id="contact-message"
@@ -106,7 +130,7 @@ export function ContactForm() {
         disabled={widgetEnabled && !turnstileToken}
         className="btn btn-primary btn-block sm:w-auto disabled:cursor-not-allowed disabled:opacity-60 disabled:grayscale"
       >
-        Send message
+        {submitLabel}
       </button>
       {error ? (
         <p className="text-sm font-medium text-red-600" role="alert">
@@ -115,11 +139,13 @@ export function ContactForm() {
       ) : null}
       {sent ? (
         <p className="text-sm text-text" role="status">
-          Opening your email app to send to {site.email}…
+          {successCopy.includes(site.email)
+            ? successCopy
+            : `${successCopy} ${site.email}`}
         </p>
       ) : (
         <p className="text-sm text-muted">
-          Or email me directly at{" "}
+          {directEmailHint}{" "}
           <a href={`mailto:${site.email}`} className="text-link hover:text-accent">
             {site.email}
           </a>

@@ -1,9 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Section } from "@/components/ui/Section";
-import { about, site } from "@/data/content";
+import { site } from "@/data/content";
+import { getSiteDesign } from "@/lib/site-design";
 
 export function AuthorIntro() {
+  const { author } = getSiteDesign().homeSections;
+
   return (
     <Section
       id="author"
@@ -23,25 +26,28 @@ export function AuthorIntro() {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="eyebrow">About the journal</p>
+          <p className="eyebrow">{author.eyebrow}</p>
           <h2
             id="author-heading"
             className="font-display mt-2 text-2xl font-bold tracking-tight text-heading md:text-[1.75rem]"
           >
-            {about.headline}
+            {author.headline}
           </h2>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-text">
-            {about.paragraphs[0]}
+            {author.body}
           </p>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link href="/about" className="btn btn-ink btn-block sm:w-auto">
-              About me
+            <Link
+              href={author.primaryCta.href}
+              className="btn btn-ink btn-block sm:w-auto"
+            >
+              {author.primaryCta.label}
             </Link>
             <Link
-              href="/start-here"
+              href={author.secondaryCta.href}
               className="btn btn-secondary btn-block sm:w-auto"
             >
-              Start here
+              {author.secondaryCta.label}
             </Link>
           </div>
         </div>

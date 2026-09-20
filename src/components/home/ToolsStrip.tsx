@@ -3,9 +3,11 @@ import { NavIcon } from "@/components/icons/NavIcon";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { Section, SectionHead } from "@/components/ui/Section";
 import { tripPlannerTools } from "@/data/nav";
+import { getSiteDesign } from "@/lib/site-design";
 
 export function ToolsStrip() {
   const preview = tripPlannerTools.slice(0, 4);
+  const { tools } = getSiteDesign().homeSections;
 
   return (
     <Section
@@ -15,13 +17,13 @@ export function ToolsStrip() {
       aria-labelledby="tools-strip-heading"
     >
       <SectionHead
-        eyebrow="Tools"
-        title="Tools I use."
+        eyebrow={tools.eyebrow}
+        title={tools.title}
         titleId="tools-strip-heading"
-        description="Partners I actually open when planning — stays, flights, insurance, and connectivity."
+        description={tools.description}
         action={
           <Link href="/tools" className="btn btn-ink">
-            See all tools
+            {tools.ctaLabel || "See all tools"}
             <span aria-hidden="true">→</span>
           </Link>
         }

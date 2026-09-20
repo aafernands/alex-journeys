@@ -23,7 +23,9 @@ export default async function CmsNewPagePage() {
           <code className="rounded bg-surface-soft px-1.5 py-0.5 text-xs">
             src/content/pages/&#123;slug&#125;.json
           </code>
-          . Add a matching App Router page if the route does not exist yet.
+          . Known marketing routes have explicit App Router pages. Other CMS-only
+          slugs are served by the catch-all resolver when they do not collide with
+          a post or destination.
         </p>
       </div>
       <PageForm mode="create" />

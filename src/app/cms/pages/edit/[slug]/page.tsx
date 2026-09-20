@@ -42,6 +42,9 @@ export default async function CmsEditPagePage({ params }: PageProps) {
           description: page.description,
           label: page.label ?? "",
           contentHtml: page.contentHtml,
+          sectionsJson: page.sections
+            ? JSON.stringify(page.sections, null, 2)
+            : "",
         }}
       />
     </div>

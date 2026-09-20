@@ -2,55 +2,60 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { SitePage } from "@/components/pages/SitePage";
+import { asRecord, asString } from "@/lib/cms-section-utils";
+import { PAGE_DEFAULTS } from "@/lib/page-defaults";
+import { getPageWithFallback } from "@/lib/pages";
 
-export const metadata: Metadata = {
-  title: "Start Here",
-  description:
-    "New to Fernandes Journeys? Start with Places, Stories, Guides, and Tools from this personal travel journal.",
-  alternates: { canonical: "/start-here" },
+export function generateMetadata(): Metadata {
+  const page = getPageWithFallback("start-here", PAGE_DEFAULTS["start-here"]);
+  return {
+    title: page.title.replace(/\.$/, ""),
+    description: page.description,
+    alternates: { canonical: "/start-here" },
+  };
+}
+
+type Step = {
+  title: string;
+  href: string;
+  icon: string;
+  description: string;
+  cta: string;
 };
 
-const steps = [
-  {
-    title: "Places",
-    href: "/destinations",
-    icon: "map-pin",
-    description:
-      "Places I’ve already been — country pages with trip notes and linked stories.",
-    cta: "Browse places",
-  },
-  {
-    title: "Stories",
-    href: "/blog",
-    icon: "book-open",
-    description:
-      "Longer stories from the road: guides, sunrise runs, packing fails, and favorites.",
-    cta: "Read stories",
-  },
-  {
-    title: "Guides",
-    href: "/guides",
-    icon: "compass",
-    description:
-      "Six hubs — plan, money, packing, smarter travel, stays, and experiences.",
-    cta: "Open guides",
-  },
-  {
-    title: "Tools",
-    href: "/tools",
-    icon: "suitcase",
-    description:
-      "Honest affiliate tools I use for stays, flights, insurance, and connectivity — not a booking desk.",
-    cta: "See tools",
-  },
-];
+function readSteps(raw: unknown): Step[] {
+  const fallback = (PAGE_DEFAULTS["start-here"].sections?.steps ?? []) as Step[];
+  if (!Array.isArray(raw) || raw.length === 0) return fallback;
+  const steps: Step[] = [];
+  for (const item of raw) {
+    const o = asRecord(item);
+    const title = asString(o.title);
+    const href = asString(o.href);
+    if (!title || !href) continue;
+    steps.push({
+      title,
+      href,
+      icon: asString(o.icon, "compass"),
+      description: asString(o.description),
+      cta: asString(o.cta, "Open"),
+    });
+  }
+  return steps.length ? steps : fallback;
+}
 
 export default function StartHerePage() {
+  const page = getPageWithFallback("start-here", PAGE_DEFAULTS["start-here"]);
+  const steps = readSteps(page.sections?.steps);
+  const teaser = asString(
+    page.sections?.aboutTeaser,
+    "Want the short version of who I am?",
+  );
+
   return (
     <SitePage
-      label="Welcome"
-      title="Start here."
-      description="This is a personal travel blog — places I’ve been and notes from the road. Pick a path below and dig in."
+      label={page.label}
+      title={page.title}
+      description={page.description}
       narrow={false}
       crumbs={[
         { href: "/", label: "Home" },
@@ -88,7 +93,7 @@ export default function StartHerePage() {
 
       <div className="panel-soft mt-12 p-6 text-center">
         <p className="text-sm text-text">
-          Want the short version of who I am?{" "}
+          {teaser}{" "}
           <Link
             href="/about"
             className="font-semibold text-link hover:text-accent"

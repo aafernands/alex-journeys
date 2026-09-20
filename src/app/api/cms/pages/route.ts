@@ -6,7 +6,8 @@ import {
   publishPage,
 } from "@/lib/cms/github";
 import { sanitizeSlug } from "@/lib/cms/validate";
-import { validatePageInput } from "@/lib/cms/validate-page";
+import { toSitePage, validatePageInput } from "@/lib/cms/validate-page";
+import { getPageBySlug } from "@/lib/pages";
 
 export const runtime = "nodejs";
 
@@ -44,7 +45,9 @@ export async function POST(request: Request) {
   const update = Boolean(input.update);
 
   try {
-    const result = await publishPage(validated.data, { update });
+    const existing = update ? getPageBySlug(validated.data.slug) : null;
+    const page = toSitePage(validated.data, existing);
+    const result = await publishPage(page, { update });
     return NextResponse.json({
       ok: true,
       slug: result.slug,

@@ -67,22 +67,32 @@ Posts list supports search, destination filter, status (published/draft), View l
 
 ### Pages (CMS-editable)
 
-JSON under `src/content/pages/` loaded by App Router routes that call `getPageBySlug`:
+JSON under `src/content/pages/` loaded by App Router routes via `getPageBySlug` / `getPageWithFallback` (fallback defaults in `src/lib/page-defaults.ts` so builds never blank). Optional `sections` object holds structured extras (form labels, hub steps, media-kit stats, disclosure blurbs).
 
-| Slug | Public path |
-| --- | --- |
-| `culinary` | `/culinary` |
-| `policies` | `/policies` (hub) |
-| `privacy` | `/privacy` |
-| `terms` | `/terms` |
-| `affiliate-disclosure` | `/affiliate-disclosure` |
-| `travel-wallet` | `/travel-wallet` |
+| Slug | Public path | Notes |
+| --- | --- | --- |
+| `about` | `/about` | Photo stays from Author photo CMS; body + next-step CTAs editable |
+| `contact` | `/contact` | Intro + form labels/success copy via sections; form stays React |
+| `start-here` | `/start-here` | Intro + step cards via sections |
+| `bucket-list` | `/bucket-list` | Intro editable; post grid from hub slugs |
+| `media-kit` | `/media-kit` | Full kit copy + stats/lists via contentHtml + sections |
+| `app` | `/app` | OAuth purpose page |
+| `guides` | `/guides` | Hub intro only; guide cards stay data-driven |
+| `tools` | `/tools` | Intro + affiliate disclosure blurb; tool cards from nav data |
+| `destinations` | `/destinations` | Index intro only; tree stays Destinations CMS |
+| `blog` | `/blog` | Index intro only; posts from Posts CMS |
+| `culinary` | `/culinary` | |
+| `policies` | `/policies` | Hub |
+| `privacy` | `/privacy` | |
+| `terms` | `/terms` | |
+| `affiliate-disclosure` | `/affiliate-disclosure` | |
+| `travel-wallet` | `/travel-wallet` | |
 
-Create/edit/delete from **Pages**. New slugs need a matching `src/app/{slug}/page.tsx` that reads the JSON (or they will 404).
+Create/edit/delete from **Pages**. Known slugs have explicit routes. **New CMS-only slugs** without a dedicated `src/app/{slug}/page.tsx` are served by the catch-all `src/app/[slug]/page.tsx` when they do not collide with a post or destination (and are not reserved app routes).
 
-#### Code-only routes (not JSON-editable)
+#### Code-only / app routes (not marketing Pages)
 
-Homepage, About, Contact, Start here, Bucket list, Guides, Tools, Media kit, Destinations index, Blog index, Search — see `CODE_ONLY_PAGE_ROUTES` in `src/lib/pages.ts` and the CMS Help page.
+`/account`, `/login`, `/forgot-password`, `/reset-password`, `/search`, `/cms/*`, `/api/*` — see `CODE_ONLY_PAGE_ROUTES`. Individual posts and destination country pages use **Posts** and **Destinations**, not Pages.
 
 ### Destinations
 
@@ -107,7 +117,7 @@ Post editor: featured image **Choose from library**; rich text **Image** opens t
 
 **Media → Author photo** tab → upload JPEG/PNG/WebP → commits `public/brand/alex-fernandes.*` + `src/data/author-photo.json`.
 
-### Website design (homepage hero)
+### Website design (homepage hero + sections)
 
 **Website design** (`/cms/design`) edits `src/data/site-design.json` (Git-backed like the author photo).
 
@@ -120,6 +130,7 @@ Post editor: featured image **Choose from library**; rich text **Image** opens t
 | Object position / overlay | Fine-tune crop and soft darken |
 | “From the road” strip | Show/hide + labels |
 | Photo stats row | Show/hide + three label/value pairs |
+| Homepage sections | Start here (incl. cards JSON), Places, Latest stories, Guides, Tools, OAuth note, Author intro |
 
 Theme tokens (fonts/colors) UI is intentionally out of scope for now — stub note on the Design page.
 

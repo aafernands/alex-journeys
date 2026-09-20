@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { Section, SectionHead } from "@/components/ui/Section";
-import { startHereCards } from "@/data/content";
+import { getSiteDesign } from "@/lib/site-design";
 
 export function StartHereCards() {
+  const { startHere } = getSiteDesign().homeSections;
+
   return (
     <Section
       id="start-here-cards"
@@ -11,15 +13,15 @@ export function StartHereCards() {
       aria-labelledby="start-here-cards-heading"
     >
       <SectionHead
-        eyebrow="New here?"
-        title="Start here."
+        eyebrow={startHere.eyebrow}
+        title={startHere.title}
         titleId="start-here-cards-heading"
-        description="Three easy ways into the journal — places I've been, stories from the road, and practical notes I still use."
+        description={startHere.description}
         align="center"
       />
 
       <ul className="mt-10 grid gap-4 sm:grid-cols-3 sm:gap-5">
-        {startHereCards.map((card) => (
+        {startHere.cards.map((card) => (
           <li key={card.href}>
             <Link
               href={card.href}
