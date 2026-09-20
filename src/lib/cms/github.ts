@@ -1,9 +1,11 @@
+import type { DestinationContinent } from "@/data/destinations";
 import type { Post, PostMeta } from "@/lib/post-types";
 import { toPostMeta, type ValidatedPost } from "@/lib/cms/validate";
 
 const DEFAULT_REPO = "aafernands/fernandes-journeys";
 const DEFAULT_BRANCH = "main";
 const POSTS_PATH = "src/content/posts";
+export const DESTINATIONS_TREE_PATH = "src/content/destinations/tree.json";
 
 type GhFileResponse = {
   sha: string;
@@ -295,4 +297,23 @@ export async function updateAuthorPhoto(options: {
     commitUrl: metaResult.commitUrl || imageResult.commitUrl,
     src: `${src}?v=${encodeURIComponent(updatedAt)}`,
   };
+}
+
+export async function fetchDestinationsTreeFromGithub(): Promise<{
+  data: DestinationContinent[];
+  sha: string;
+} | null> {
+  return getFileJson<DestinationContinent[]>(DESTINATIONS_TREE_PATH);
+}
+
+export async function publishDestinationsTree(
+  tree: DestinationContinent[],
+): Promise<{ commitUrl: string }> {
+  const existingSha = await getFileSha(DESTINATIONS_TREE_PATH);
+  return putFile(
+    DESTINATIONS_TREE_PATH,
+    `${JSON.stringify(tree, null, 2)}\n`,
+    "cms: update destinations",
+    existingSha,
+  );
 }

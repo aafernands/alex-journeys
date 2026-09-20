@@ -8,6 +8,10 @@ import {
   isPasscodeConfigured,
 } from "@/lib/cms/auth";
 import { isGithubConfigured } from "@/lib/cms/github";
+import {
+  destinationsTree,
+  getAllDestinations,
+} from "@/data/destinations";
 import { formatPostDate, getAllPosts } from "@/lib/posts";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +51,12 @@ export default async function CmsPage() {
           <Link href="/cms/new" className="btn btn-primary">
             New post
           </Link>
+          <Link href="/cms/destinations" className="btn btn-secondary">
+            Destinations
+          </Link>
+          <Link href="/cms/destinations/new" className="btn btn-secondary">
+            New destination
+          </Link>
           <a href="#author-photo" className="btn btn-secondary">
             Author photo
           </a>
@@ -77,6 +87,55 @@ export default async function CmsPage() {
         <div className="p-5 md:p-6">
           <AuthorPhotoForm currentSrc={site.authorPhoto} />
         </div>
+      </section>
+
+
+      <section id="destinations" className="panel overflow-hidden">
+        <div className="flex flex-col gap-3 border-b border-border bg-surface-soft px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
+            Destinations ({getAllDestinations().length})
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/cms/destinations" className="btn btn-secondary text-xs">
+              View all
+            </Link>
+            <Link href="/cms/destinations/new" className="btn btn-primary text-xs">
+              New destination
+            </Link>
+          </div>
+        </div>
+        <ul className="divide-y divide-border">
+          {destinationsTree.flatMap((continent) =>
+            continent.countries.map((country) => (
+              <li
+                key={country.slug}
+                className="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <p className="font-semibold text-heading">{country.name}</p>
+                  <p className="mt-0.5 text-xs text-muted">
+                    {continent.name} · {country.region} ·{" "}
+                    <span className="font-mono">{country.slug}</span>
+                  </p>
+                </div>
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  <Link
+                    href={`/destinations/${country.slug}`}
+                    className="btn btn-secondary text-xs"
+                  >
+                    View
+                  </Link>
+                  <Link
+                    href={`/cms/destinations/edit/${country.slug}`}
+                    className="btn btn-secondary text-xs"
+                  >
+                    Edit
+                  </Link>
+                </div>
+              </li>
+            )),
+          )}
+        </ul>
       </section>
 
       <section className="panel overflow-hidden">

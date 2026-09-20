@@ -1,6 +1,6 @@
 # In-site CMS
 
-Passcode-gated editor at **`/cms`** for publishing blog posts to GitHub. There is **no public header link** — bookmark `/cms` directly.
+Passcode-gated editor at **`/cms`** for publishing blog posts and destinations (map + climate) to GitHub. There is **no public header link** — bookmark `/cms` directly.
 
 Auth lives in `src/lib/cms/auth.ts` so you can later swap the passcode for real admin auth without rewriting pages.
 
@@ -55,6 +55,31 @@ From the authenticated `/cms` dashboard, open **Author photo** (or scroll to tha
 3. The CMS commits `public/brand/alex-fernandes.{jpg|png|webp}` and updates `src/data/author-photo.json` (cache-bust query on `site.authorPhoto`).
 4. After Vercel redeploys, the new photo appears on About, blog posts, Footer, homepage AuthorIntro, and media kit — no per-page code edits.
 
+
+
+### 6. Destinations (countries, map, climate)
+
+Destination pages and the header mega-menu read from **`src/content/destinations/tree.json`** (continents → countries). Types and helpers stay in `src/data/destinations.ts`.
+
+From the authenticated `/cms` dashboard:
+
+1. Open **Destinations** (or **New destination**).
+2. Create or edit a country: name, slug, continent, region, blurb, hero image, optional trip label / featured post / highlights.
+3. Optionally fill **Map** (center, zoom, pins) and **Climate** (summary, best time, 12 monthly rows).
+4. **Publish** commits `tree.json` with message `cms: update destinations`.
+5. After Vercel redeploys, `/destinations/{slug}`, the destinations index, header menu, and sitemap pick up the change.
+
+URLs:
+
+| Page | Path |
+| --- | --- |
+| List by continent | `/cms/destinations` |
+| New country | `/cms/destinations/new` |
+| Edit country | `/cms/destinations/edit/{slug}` |
+| API | `POST /api/cms/destinations` |
+
+Body shape: `{ country, continentId, continentName?, update? }`. Auth + GitHub token required (same as posts).
+
 ## Security notes
 
 - Passcode is checked only on the server (`POST /api/cms/login`).
@@ -71,3 +96,4 @@ From the authenticated `/cms` dashboard, open **Author photo** (or scroll to tha
 4. **New post** → fill form → **Publish to GitHub**.
 5. Wait for the Vercel deploy, then open `/blog/{slug}`.
 6. To change the author headshot: **Author photo** on the dashboard → upload → wait for redeploy.
+7. To add or edit a destination: **Destinations** → **New destination** (or Edit) → fill map/climate as needed → **Publish** → wait for redeploy → open `/destinations/{slug}`.
