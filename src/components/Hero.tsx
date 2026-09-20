@@ -4,9 +4,9 @@ import { Leaf, Trees } from "lucide-react";
 import { getSiteDesign } from "@/lib/site-design";
 
 /**
- * Full-viewport Maroon Bells (or CMS hero image) behind the copy.
- * Uses a real radial vignette (edges darker, center open) plus a light
- * left scrim so white type stays readable — no blur, no frosted card.
+ * Full-bleed hero photo with theme-aware type + contrasting vignette:
+ * light mode → black copy on a light wash/vignette
+ * dark mode → white copy on a dark wash/vignette
  */
 export function Hero() {
   const { hero } = getSiteDesign();
@@ -27,20 +27,30 @@ export function Hero() {
           className="object-cover"
           style={{ objectPosition: hero.objectPosition || "center" }}
         />
-        {/* Photographic vignette — darken corners/edges, keep the center open */}
+
+        {/* Light mode: pale vignette + left wash so black type contrasts */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 dark:hidden"
           style={{
             background:
-              "radial-gradient(ellipse 75% 70% at 50% 45%, transparent 0%, transparent 42%, rgba(0,0,0,0.28) 78%, rgba(0,0,0,0.55) 100%)",
+              "radial-gradient(ellipse 78% 72% at 50% 42%, transparent 0%, transparent 38%, rgba(255,252,247,0.45) 72%, rgba(250,246,240,0.88) 100%)",
           }}
         />
-        {/* Soft left readability wash for white copy — not a full-frame wash */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent md:from-black/45 md:via-black/15 md:to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-bg/90 via-bg/55 to-transparent dark:hidden md:from-bg/85 md:via-bg/40" />
+
+        {/* Dark mode: black vignette + left wash so white type contrasts */}
+        <div
+          className="absolute inset-0 hidden dark:block"
+          style={{
+            background:
+              "radial-gradient(ellipse 75% 70% at 50% 45%, transparent 0%, transparent 40%, rgba(0,0,0,0.35) 75%, rgba(0,0,0,0.72) 100%)",
+          }}
+        />
+        <div className="absolute inset-0 hidden bg-gradient-to-r from-black/65 via-black/30 to-transparent dark:block md:from-black/55 md:via-black/20" />
       </div>
 
       {hero.imageCaption ? (
-        <p className="absolute bottom-5 right-5 z-10 max-w-[16rem] text-right text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/80 sm:bottom-8 sm:right-8">
+        <p className="absolute bottom-5 right-5 z-10 max-w-[16rem] text-right text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-heading/70 dark:text-white/80 sm:bottom-8 sm:right-8">
           {hero.imageCaption}
         </p>
       ) : null}
@@ -49,26 +59,26 @@ export function Hero() {
         <div className="max-w-xl xl:max-w-2xl">
           <h1
             id="hero-heading"
-            className="animate-fade-up font-display text-hero text-white [text-shadow:0_1px_18px_rgba(0,0,0,0.35)]"
+            className="animate-fade-up font-display text-hero text-heading dark:text-white dark:[text-shadow:0_1px_18px_rgba(0,0,0,0.4)]"
           >
             {hero.tagline}
           </h1>
 
-          <p className="animate-fade-up animate-delay-2 mt-5 max-w-lg text-lead text-white/92 [text-shadow:0_1px_12px_rgba(0,0,0,0.3)]">
+          <p className="animate-fade-up animate-delay-2 mt-5 max-w-lg text-lead text-text dark:text-white/90 dark:[text-shadow:0_1px_12px_rgba(0,0,0,0.35)]">
             {hero.subtitle}
           </p>
 
           <div className="animate-fade-up animate-delay-3 mt-8 flex w-full max-w-sm flex-col gap-3 sm:max-w-none sm:flex-row sm:items-center">
             <Link
               href={hero.ctaPrimary.href}
-              className="btn btn-block border border-transparent bg-white text-heading hover:bg-white/90 sm:w-auto sm:min-w-[11rem]"
+              className="btn btn-ink btn-block sm:w-auto sm:min-w-[11rem] dark:border-transparent dark:bg-white dark:text-heading dark:hover:bg-white/90"
             >
               {hero.ctaPrimary.label}
               <span aria-hidden="true">→</span>
             </Link>
             <Link
               href={hero.ctaSecondary.href}
-              className="btn btn-block border border-white/75 bg-transparent text-white hover:border-white hover:bg-white/10 sm:w-auto sm:min-w-[11rem]"
+              className="btn btn-secondary btn-block sm:w-auto sm:min-w-[11rem] dark:border-white/75 dark:bg-transparent dark:text-white dark:hover:border-white dark:hover:bg-white/10"
             >
               {hero.ctaSecondary.label}
             </Link>
@@ -76,7 +86,7 @@ export function Hero() {
 
           {hero.showFromTheRoad ? (
             <div className="animate-fade-up animate-delay-3 mt-10 hidden sm:block">
-              <p className="inline-flex items-center gap-2 text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-white">
+              <p className="inline-flex items-center gap-2 text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-heading dark:text-white">
                 <Trees
                   size={14}
                   strokeWidth={2}
@@ -85,11 +95,14 @@ export function Hero() {
                 />
                 {hero.fromTheRoad.label}
               </p>
-              <ul className="mt-3 flex flex-wrap items-center gap-x-1 gap-y-2 text-sm text-white/88">
+              <ul className="mt-3 flex flex-wrap items-center gap-x-1 gap-y-2 text-sm text-text dark:text-white/88">
                 {hero.fromTheRoad.items.map((item, i) => (
                   <li key={item} className="inline-flex items-center gap-2">
                     {i > 0 ? (
-                      <span className="mx-1.5 text-white/45" aria-hidden="true">
+                      <span
+                        className="mx-1.5 text-muted dark:text-white/45"
+                        aria-hidden="true"
+                      >
                         ·
                       </span>
                     ) : null}
