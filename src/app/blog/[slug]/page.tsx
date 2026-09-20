@@ -126,14 +126,19 @@ export default async function BlogPostPage({ params }: PageProps) {
             </h1>
 
             <div className="mt-6 flex flex-wrap items-center gap-4">
-              <div
-                className="flex size-11 items-center justify-center rounded-lg border border-border bg-surface-soft text-sm font-bold text-heading"
-                aria-hidden="true"
-              >
-                AF
+              <div className="relative size-11 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-soft">
+                <Image
+                  src={site.authorPhoto}
+                  alt={site.authorName}
+                  fill
+                  sizes="44px"
+                  className="object-cover object-top"
+                />
               </div>
               <div>
-                <p className="text-sm font-semibold text-heading">By Alex F.</p>
+                <p className="text-sm font-semibold text-heading">
+                  By {site.authorName}
+                </p>
                 <time
                   className="text-sm text-muted"
                   dateTime={post.date}
