@@ -363,6 +363,30 @@ body {
   animation-delay: 0.24s;
 }
 
+@keyframes ig-author-ring-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.14);
+    opacity: 0.12;
+  }
+}
+
+.ig-author-ring-pulse {
+  animation: ig-author-ring-pulse 2.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ig-author-ring-pulse {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+
 /* Migrated WordPress post body */
 .post-prose {
   color: var(--text);

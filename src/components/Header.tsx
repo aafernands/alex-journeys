@@ -563,41 +563,45 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
                   <p className="px-2 text-xs font-semibold uppercase tracking-wide text-muted">
                     Follow along
                   </p>
-                  <ul className="mt-2 flex flex-wrap gap-2 px-2" aria-label="Social">
+                  <ul className="mt-2 flex flex-row flex-wrap items-center gap-2 px-2" aria-label="Social">
                     <li>
                       <OutboundLink
                         href={site.social.instagram}
-                        className="inline-flex rounded-lg border border-border bg-surface-soft px-3 py-1.5 text-sm font-semibold text-heading transition hover:border-accent hover:text-accent"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-surface-soft text-heading transition hover:border-accent hover:text-accent"
+                        aria-label="Instagram"
                         onClick={closeAll}
                       >
-                        Instagram
+                        <SocialInstagramIcon />
                       </OutboundLink>
                     </li>
                     <li>
                       <OutboundLink
                         href={site.social.youtube}
-                        className="inline-flex rounded-lg border border-border bg-surface-soft px-3 py-1.5 text-sm font-semibold text-heading transition hover:border-accent hover:text-accent"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-surface-soft text-heading transition hover:border-accent hover:text-accent"
+                        aria-label="YouTube"
                         onClick={closeAll}
                       >
-                        YouTube
+                        <SocialYouTubeIcon />
                       </OutboundLink>
                     </li>
                     <li>
                       <OutboundLink
                         href={site.social.pinterest}
-                        className="inline-flex rounded-lg border border-border bg-surface-soft px-3 py-1.5 text-sm font-semibold text-heading transition hover:border-accent hover:text-accent"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-surface-soft text-heading transition hover:border-accent hover:text-accent"
+                        aria-label="Pinterest"
                         onClick={closeAll}
                       >
-                        Pinterest
+                        <SocialPinterestIcon />
                       </OutboundLink>
                     </li>
                     <li>
                       <OutboundLink
                         href={site.social.coffee}
-                        className="inline-flex rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-sm font-semibold text-accent transition hover:bg-accent/20"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-accent/40 bg-accent/10 text-accent transition hover:bg-accent/20"
+                        aria-label="Buy me a coffee"
                         onClick={closeAll}
                       >
-                        Buy me a coffee
+                        <SocialCoffeeIcon />
                       </OutboundLink>
                     </li>
                   </ul>
@@ -677,6 +681,79 @@ function ChevronRight() {
       aria-hidden="true"
     >
       <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function SocialInstagramIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function SocialYouTubeIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M2.5 8.5A3.5 3.5 0 0 1 6 5h12a3.5 3.5 0 0 1 3.5 3.5v7A3.5 3.5 0 0 1 18 19H6a3.5 3.5 0 0 1-3.5-3.5v-7Z" />
+      <path d="m10 9.5 5 2.5-5 2.5v-5Z" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function SocialPinterestIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M12 2C6.5 2 2 6.3 2 11.6c0 4 2.5 7.4 6.1 8.7-.1-.7-.2-1.9 0-2.7.2-.7 1.2-5 1.2-5s-.3-.6-.3-1.5c0-1.4.8-2.4 1.8-2.4.9 0 1.3.6 1.3 1.4 0 .9-.6 2.2-.9 3.4-.3 1 0.5 1.8 1.5 1.8 1.8 0 3.1-2.2 3.1-4.8 0-2-1.4-3.5-3.9-3.5-2.8 0-4.5 2.1-4.5 4.4 0 .9.3 1.8.7 2.3.1.1.1.2.1.3l-.3 1c0 .1-.1.2-.3.1-1.2-.5-1.8-1.9-1.8-3.4 0-2.6 2.2-5.7 6.6-5.7 3.5 0 5.8 2.5 5.8 5.3 0 3.6-2 6.3-5 6.3-1 0-1.9-.5-2.2-1.2l-.6 2.3c-.2.8-.8 1.8-1.2 2.4.9.3 1.9.4 2.9.4 5.5 0 10-4.3 10-9.6C22 6.3 17.5 2 12 2Z" />
+    </svg>
+  );
+}
+
+function SocialCoffeeIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 8h13v7a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8Z" />
+      <path d="M16 8h2.5a3.5 3.5 0 0 1 0 7H16" />
+      <path d="M6 2v2M10 2v2M14 2v2" />
     </svg>
   );
 }

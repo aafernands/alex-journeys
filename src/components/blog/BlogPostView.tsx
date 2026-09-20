@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostContent } from "@/components/blog/PostContent";
+import { PostItineraryTimeline } from "@/components/blog/PostItineraryTimeline";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { SavePostButton } from "@/components/SavePostButton";
 import { RelatedPosts } from "@/components/blog/RelatedPosts";
@@ -91,61 +92,45 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-4">
-              <OutboundLink
-                href={site.social.instagram}
-                className="group relative shrink-0 rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] p-[2.5px] shadow-sm transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                aria-label={`${site.authorName} on Instagram`}
-              >
-                <span className="relative block size-11 overflow-hidden rounded-full bg-white p-[2px] dark:bg-bg">
-                  <span className="relative block size-full overflow-hidden rounded-full bg-surface-soft">
-                    <Image
-                      src={site.authorPhoto}
-                      alt=""
-                      fill
-                      sizes="44px"
-                      className="object-cover object-top transition duration-300 group-hover:scale-105"
-                    />
+              <span className="relative inline-flex shrink-0">
+                <span
+                  className="ig-author-ring-pulse pointer-events-none absolute -inset-[3px] rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]"
+                  aria-hidden="true"
+                />
+                <OutboundLink
+                  href={site.social.instagram}
+                  affiliate={false}
+                  className="group relative rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] p-[2.5px] shadow-sm transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                  aria-label={`${site.authorName} on Instagram`}
+                >
+                  <span className="relative block size-11 overflow-hidden rounded-full bg-white p-[2px] dark:bg-bg">
+                    <span className="relative block size-full overflow-hidden rounded-full bg-surface-soft">
+                      <Image
+                        src={site.authorPhoto}
+                        alt=""
+                        fill
+                        sizes="44px"
+                        className="object-cover object-top transition duration-300 group-hover:scale-105"
+                      />
+                    </span>
                   </span>
-                </span>
-              </OutboundLink>
+                </OutboundLink>
+              </span>
               <div>
                 <p className="text-sm font-semibold text-heading">
                   By{" "}
                   <OutboundLink
                     href={site.social.instagram}
+                    affiliate={false}
                     className="transition hover:text-accent"
                   >
                     {site.authorName}
                   </OutboundLink>
                 </p>
-                <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted">
+                <p className="mt-0.5 text-sm text-muted">
                   <time dateTime={post.date}>
                     Updated {formatPostDate(post.date)}
                   </time>
-                  <span aria-hidden="true" className="text-muted-light">
-                    ·
-                  </span>
-                  <OutboundLink
-                    href={site.social.instagram}
-                    className="inline-flex items-center gap-1 font-medium text-link transition hover:text-accent"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      width="14"
-                      height="14"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <rect x="3" y="3" width="18" height="18" rx="5" />
-                      <circle cx="12" cy="12" r="4" />
-                      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-                    </svg>
-                    Instagram
-                  </OutboundLink>
                 </p>
               </div>
               </div>
@@ -233,6 +218,10 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
           <div className="mt-10 md:mt-12">
             <PostContent html={post.contentHtml} />
           </div>
+
+          {post.itinerary?.enabled && post.itinerary.days.length > 0 ? (
+            <PostItineraryTimeline itinerary={post.itinerary} />
+          ) : null}
 
           <aside className="panel-soft mt-14 flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
             <div className="relative size-16 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-soft">
