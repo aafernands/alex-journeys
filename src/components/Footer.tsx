@@ -2,6 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand/BrandLogo";
+import {
+  SocialCoffeeIcon,
+  SocialInstagramIcon,
+  SocialPinterestIcon,
+  SocialYouTubeIcon,
+} from "@/components/icons/SocialIcons";
 import { NewsletterForm } from "@/components/newsletter/NewsletterForm";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import {
@@ -11,9 +18,9 @@ import {
 import { site, about } from "@/data/content";
 
 const social = [
-  { label: "Instagram", href: site.social.instagram },
-  { label: "YouTube", href: site.social.youtube },
-  { label: "Pinterest", href: site.social.pinterest },
+  { label: "Instagram", href: site.social.instagram, icon: SocialInstagramIcon },
+  { label: "YouTube", href: site.social.youtube, icon: SocialYouTubeIcon },
+  { label: "Pinterest", href: site.social.pinterest, icon: SocialPinterestIcon },
 ];
 
 const explore = [
@@ -142,21 +149,20 @@ export function Footer() {
         <div className="section-shell py-12 md:py-14">
           <div className="grid gap-10 md:grid-cols-12 md:gap-8">
             <div className="md:col-span-4">
-              <p className="font-display text-lg font-bold tracking-tight">
-                {site.name}
-              </p>
+              <BrandLogo className="h-10 w-auto" />
               <p className="mt-2 max-w-xs text-sm leading-relaxed text-hero-type/60">
                 A personal travel journal by {site.authorName}. Places
                 I&apos;ve been, notes from the road.
               </p>
               <nav aria-label="Social" className="mt-6">
-                <ul className="flex flex-wrap gap-2">
+                <ul className="flex flex-wrap gap-x-5 gap-y-3">
                   {social.map((item) => (
                     <li key={item.label}>
                       <OutboundLink
                         href={item.href}
-                        className="inline-flex rounded-lg border border-hero-type/15 bg-hero-type/5 px-3 py-1.5 text-sm font-semibold text-hero-type/90 transition hover:bg-hero-type/10"
+                        className="inline-flex items-center gap-2 text-sm font-semibold text-hero-type/80 transition hover:text-accent"
                       >
+                        <item.icon size={18} />
                         {item.label}
                       </OutboundLink>
                     </li>
@@ -164,8 +170,9 @@ export function Footer() {
                   <li>
                     <OutboundLink
                       href={site.social.coffee}
-                      className="inline-flex rounded-lg border border-accent/40 bg-accent/15 px-3 py-1.5 text-sm font-semibold text-accent transition hover:bg-accent/25"
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-hero-type/80 transition hover:text-accent"
                     >
+                      <SocialCoffeeIcon size={18} />
                       Buy me a coffee
                     </OutboundLink>
                   </li>
