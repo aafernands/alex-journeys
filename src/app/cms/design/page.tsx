@@ -21,9 +21,9 @@ export default async function CmsDesignPage() {
           Website design
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-muted md:text-base">
-          Control the homepage hero (image, location label, tagline, subtitle,
-          CTAs) and major homepage section chrome (Start here, Places, Latest,
-          Guides, Tools, OAuth note, Author intro). Saves commit{" "}
+          Control the homepage hero (headline photo only), the featured
+          field-note slideshow, and major homepage section chrome (Start here,
+          Places, Latest, Guides, Tools, OAuth note, Author intro). Saves commit{" "}
           <code className="rounded bg-surface-soft px-1.5 py-0.5 text-xs">
             src/data/site-design.json
           </code>{" "}
