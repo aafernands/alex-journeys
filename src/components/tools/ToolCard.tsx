@@ -1,0 +1,47 @@
+import { ExternalLink } from "lucide-react";
+import { NavIcon } from "@/components/icons/NavIcon";
+import type { AffiliateTool } from "@/data/nav";
+
+type ToolCardProps = {
+  tool: AffiliateTool;
+};
+
+export function ToolCard({ tool }: ToolCardProps) {
+  return (
+    <a
+      href={tool.href}
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+      className="panel-interactive group flex h-full items-start gap-3.5 p-4 sm:p-5"
+    >
+      <span className="panel-nested flex size-11 shrink-0 items-center justify-center bg-white text-accent">
+        <NavIcon name={tool.icon} size={20} />
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-1.5">
+          <span className="font-display text-base font-bold leading-snug text-heading sm:text-lg">
+            {tool.title}
+          </span>
+          <ExternalLink
+            className="size-3.5 shrink-0 text-muted transition-colors group-hover:text-accent"
+            strokeWidth={2}
+            aria-hidden="true"
+          />
+          <span className="sr-only">(opens in a new tab)</span>
+        </span>
+
+        <span className="mt-1 flex flex-wrap items-center gap-2">
+          <span className="text-sm font-semibold text-muted">{tool.partner}</span>
+          <span className="rounded-full border border-border bg-surface-soft px-1.5 py-0.5 text-[0.625rem] font-semibold uppercase tracking-[0.08em] text-muted">
+            Affiliate
+          </span>
+        </span>
+
+        <span className="mt-2 block text-sm leading-relaxed text-text">
+          {tool.description}
+        </span>
+      </span>
+    </a>
+  );
+}
