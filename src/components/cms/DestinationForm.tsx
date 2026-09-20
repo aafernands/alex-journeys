@@ -29,6 +29,12 @@ type PinDraft = {
   note: string;
 };
 
+type ItineraryDayDraft = {
+  day: string;
+  title: string;
+  detail: string;
+};
+
 type MonthDraft = {
   month: number;
   label: string;
@@ -78,6 +84,17 @@ function pinDraftsFrom(pins?: DestinationMapPin[]): PinDraft[] {
   }));
 }
 
+function itineraryDayDraftsFrom(
+  days?: { day: string; title: string; detail: string }[],
+): ItineraryDayDraft[] {
+  if (!days?.length) return [];
+  return days.map((d) => ({
+    day: d.day,
+    title: d.title,
+    detail: d.detail,
+  }));
+}
+
 const fieldClass =
   "mt-2 min-h-11 w-full rounded-lg border border-border bg-white px-4 text-sm text-heading placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25";
 const areaClass =
@@ -121,6 +138,13 @@ export function DestinationForm({ mode, continents, initial }: Props) {
   );
   const [highlightsText, setHighlightsText] = useState(
     (c?.highlights ?? []).join("\n"),
+  );
+
+  const [itineraryTitle, setItineraryTitle] = useState(
+    c?.itinerary?.title ?? "",
+  );
+  const [itineraryDays, setItineraryDays] = useState<ItineraryDayDraft[]>(
+    itineraryDayDraftsFrom(c?.itinerary?.days),
   );
 
   const [qfBestTime, setQfBestTime] = useState(
@@ -234,6 +258,22 @@ export function DestinationForm({ mode, continents, initial }: Props) {
         if (qfTimezone.trim()) quickFacts.timezone = qfTimezone.trim();
         if (Object.keys(quickFacts).length) {
           country.quickFacts = quickFacts;
+        }
+
+        const dayPayload = itineraryDays
+          .map((d) => ({
+            day: d.day.trim(),
+            title: d.title.trim(),
+            detail: d.detail.trim(),
+          }))
+          .filter((d) => d.day || d.title || d.detail);
+        if (dayPayload.length > 0 || itineraryTitle.trim()) {
+          country.itinerary = {
+            ...(itineraryTitle.trim()
+              ? { title: itineraryTitle.trim() }
+              : {}),
+            days: dayPayload,
+          };
         }
 
         if (hasMap) {
@@ -487,6 +527,121 @@ export function DestinationForm({ mode, continents, initial }: Props) {
             placeholder={"One highlight per line"}
             className={areaClass}
           />
+        </div>
+      </section>
+
+      <section className="space-y-5 border-t border-border pt-8">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
+            Suggested itinerary
+          </h2>
+          <p className="text-xs text-muted">
+            Optional. From real trip notes only — omit empty days to hide the
+            block on the page.
+          </p>
+        </div>
+        <div>
+          <label
+            htmlFor="dest-itinerary-title"
+            className="text-sm font-semibold text-heading"
+          >
+            Itinerary title
+          </label>
+          <input
+            id="dest-itinerary-title"
+            value={itineraryTitle}
+            onChange={(e) => setItineraryTitle(e.target.value)}
+            placeholder='e.g. "48 hours in Toronto" or "A week in Iceland"'
+            className={fieldClass}
+          />
+        </div>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-semibold text-heading">Days</p>
+            <button
+              type="button"
+              className="btn btn-secondary text-xs"
+              onClick={() =>
+                setItineraryDays((prev) => [
+                  ...prev,
+                  {
+                    day: `Day ${prev.length + 1}`,
+                    title: "",
+                    detail: "",
+                  },
+                ])
+              }
+            >
+              Add day
+            </button>
+          </div>
+          {itineraryDays.length === 0 ? (
+            <p className="text-xs text-muted">No itinerary days yet.</p>
+          ) : (
+            itineraryDays.map((row, idx) => (
+              <div
+                key={idx}
+                className="space-y-3 rounded-lg border border-border bg-surface-soft/40 p-3"
+              >
+                <div className="grid gap-3 sm:grid-cols-[8rem_1fr_auto]">
+                  <input
+                    aria-label={`Itinerary day ${idx + 1} label`}
+                    placeholder="Day 1"
+                    value={row.day}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setItineraryDays((prev) =>
+                        prev.map((d, i) =>
+                          i === idx ? { ...d, day: v } : d,
+                        ),
+                      );
+                    }}
+                    className={fieldClass + " mt-0"}
+                  />
+                  <input
+                    aria-label={`Itinerary day ${idx + 1} title`}
+                    placeholder="Title"
+                    value={row.title}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setItineraryDays((prev) =>
+                        prev.map((d, i) =>
+                          i === idx ? { ...d, title: v } : d,
+                        ),
+                      );
+                    }}
+                    className={fieldClass + " mt-0"}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-secondary text-xs"
+                    onClick={() =>
+                      setItineraryDays((prev) =>
+                        prev.filter((_, i) => i !== idx),
+                      )
+                    }
+                  >
+                    Remove
+                  </button>
+                </div>
+                <textarea
+                  aria-label={`Itinerary day ${idx + 1} detail`}
+                  placeholder="Short detail from the real trip"
+                  value={row.detail}
+                  rows={2}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setItineraryDays((prev) =>
+                      prev.map((d, i) =>
+                        i === idx ? { ...d, detail: v } : d,
+                      ),
+                    );
+                  }}
+                  className={areaClass + " mt-0"}
+                />
+              </div>
+            ))
+          )}
         </div>
       </section>
 

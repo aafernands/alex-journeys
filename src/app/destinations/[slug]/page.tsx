@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DestinationClimate } from "@/components/destinations/DestinationClimate";
+import { DestinationItinerary } from "@/components/destinations/DestinationItinerary";
 import { DestinationQuickFacts } from "@/components/destinations/DestinationQuickFacts";
 import { DestinationMap } from "@/components/destinations/DestinationMap";
 import {
@@ -148,6 +149,11 @@ export default async function DestinationPage({ params }: PageProps) {
               </ul>
             </section>
           ) : null}
+
+          <DestinationItinerary
+            itinerary={dest.itinerary}
+            featuredPostSlug={dest.featuredPostSlug}
+          />
 
           {dest.climate ? (
             <DestinationClimate

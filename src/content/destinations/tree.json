@@ -174,6 +174,36 @@
           "plugs": "Type C / F, 230V",
           "tapWater": "Safe to drink",
           "timezone": "GMT (UTC±0, no DST)"
+        },
+        "itinerary": {
+          "title": "A week in Iceland",
+          "days": [
+            {
+              "day": "Day 1",
+              "title": "Arrival and Blue Lagoon",
+              "detail": "Land in Reykjavík and base in peaceful Laugardalur; afternoon soak at the Blue Lagoon; dinner at Kopar by the old harbor under the midnight sun."
+            },
+            {
+              "day": "Day 2",
+              "title": "South coast waterfalls, black beach, Glacier Lagoon",
+              "detail": "Seljalandsfoss and Skógafoss, Reynisfjara black beach with basalt columns, then a boat ride among icebergs at Jökulsárlón Glacier Lagoon."
+            },
+            {
+              "day": "Day 3",
+              "title": "Sunrise, glacier hike, and downtown",
+              "detail": "Sunrise from Hallgrímskirkja tower, a guided hike on Sólheimajökull glacier, then colorful downtown Reykjavík and dinner at Matarkjallarinn."
+            },
+            {
+              "day": "Day 4",
+              "title": "Thingvellir, geysers, and volcano country",
+              "detail": "Thingvellir National Park and the rift valley, Strokkur geyser eruptions at Haukadalur, then a hike to a safe viewpoint at Fagradalsfjall volcano near Grindavík."
+            },
+            {
+              "day": "Day 5",
+              "title": "Departure and farewell",
+              "detail": "Pack up from the Laugardalur base and head home with ring-road miles and geothermal memories from the week."
+            }
+          ]
         }
       }
     ]
@@ -347,6 +377,21 @@
           "plugs": "Type A / B, 120V",
           "tapWater": "Safe to drink",
           "timezone": "Multiple (ET–PT); Toronto EST/EDT"
+        },
+        "itinerary": {
+          "title": "48 hours in Toronto",
+          "days": [
+            {
+              "day": "Day 1",
+              "title": "Historic charm and cultural landmarks",
+              "detail": "Morning at Casa Loma’s Gothic Revival rooms and gardens; afternoon selfie at the Toronto sign in Nathan Phillips Square; late stop at the Hockey Hall of Fame."
+            },
+            {
+              "day": "Day 2",
+              "title": "Modern icons and dinner in the sky",
+              "detail": "Leisurely downtown stroll (Queen Street West or the PATH), afternoon at the Royal Ontario Museum, then sunset dinner at the 360 Restaurant in the CN Tower."
+            }
+          ]
         }
       },
       {
@@ -483,6 +528,16 @@
           "plugs": "Type A / B, 120V",
           "tapWater": "Generally safe",
           "timezone": "Multiple (ET–PT); Colorado MT"
+        },
+        "itinerary": {
+          "title": "Maroon Bells sunrise",
+          "days": [
+            {
+              "day": "Morning",
+              "title": "4:30 AM chase from Carbondale",
+              "detail": "Early drive from Carbondale with wildlife along the mountain road (foxes, moose); reserve a vehicle pass and arrive before 8 AM for the lake reflection of the Bells at sunrise. Fill the tank the night before and bring warm layers."
+            }
+          ]
         }
       },
       {
@@ -649,6 +704,36 @@
           "plugs": "Type A / B, 127V",
           "tapWater": "Prefer bottled",
           "timezone": "Cancún EST (UTC−5, no DST)"
+        },
+        "itinerary": {
+          "title": "5 days in Cancun",
+          "days": [
+            {
+              "day": "Day 1",
+              "title": "Arrive and settle at Emporio Cancun",
+              "detail": "Check into Emporio Cancun in the Hotel Zone; pool, Caribbean breeze, and beach access to ease into vacation mode."
+            },
+            {
+              "day": "Day 2",
+              "title": "Chichen Itza",
+              "detail": "Day trip to the Mayan pyramids — stand before El Castillo and walk the archaeological site on the Yucatán Peninsula."
+            },
+            {
+              "day": "Day 3",
+              "title": "Xplor Park adventure",
+              "detail": "Ziplines above the jungle, underground caverns, and rivers carved through rock — an adrenaline break from the beach."
+            },
+            {
+              "day": "Day 4",
+              "title": "Isla Mujeres and Coco Bongo",
+              "detail": "Ferry to Isla Mujeres for clear water and a laid-back beach day; night at Coco Bongo for live shows, music, and acrobatics."
+            },
+            {
+              "day": "Day 5",
+              "title": "One last day in paradise",
+              "detail": "Final beach walk and all-inclusive downtime at Emporio Cancun before heading home."
+            }
+          ]
         }
       },
       {
@@ -816,6 +901,46 @@
           "plugs": "Type N (also C), 127/220V",
           "tapWater": "Prefer bottled",
           "timezone": "BRT (UTC−3); Rio"
+        },
+        "itinerary": {
+          "title": "Rio highlights (sample from a 2-week trip)",
+          "days": [
+            {
+              "day": "Day 1",
+              "title": "Arrival and Copacabana",
+              "detail": "Settle near Copacabana or Ipanema; sunset stroll on the wave-patterned promenade with coco gelado and a beachfront caipirinha."
+            },
+            {
+              "day": "Day 2",
+              "title": "Christ the Redeemer and Santa Teresa",
+              "detail": "Cog train up Corcovado to Christ the Redeemer, then wander bohemian Santa Teresa’s colorful streets, galleries, and Ruins Park views."
+            },
+            {
+              "day": "Day 3",
+              "title": "Sugarloaf Mountain and Urca",
+              "detail": "Morning in quiet Urca, cable car to Sugarloaf for Guanabara Bay panoramas timed for sunset, then a waterfront stroll."
+            },
+            {
+              "day": "Day 4",
+              "title": "Tijuca National Park",
+              "detail": "Guided hike in the urban rainforest — waterfalls like Cascatinha or Pico da Tijuca views, monkeys, and a picnic among the trees."
+            },
+            {
+              "day": "Day 5",
+              "title": "Lapa, Centro, and samba energy",
+              "detail": "Metropolitan Cathedral and Theatro Municipal in Centro, Selarón Steps in Lapa, and evening samba if the mood strikes."
+            },
+            {
+              "day": "Day 6",
+              "title": "Bay or island day trip",
+              "detail": "Ferry to Niterói for Niemeyer’s MAC and quieter beaches, or a day trip to car-free Ilha Grande and Lopes Mendes Beach."
+            },
+            {
+              "day": "Day 7",
+              "title": "Ipanema, Leblon, and soft landing",
+              "detail": "Lounge at Ipanema (Posto 9), browse Leblon, and leave room for one last favorite café or beach walk before farewell."
+            }
+          ]
         }
       }
     ]

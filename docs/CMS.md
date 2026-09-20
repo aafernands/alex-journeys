@@ -57,7 +57,7 @@ From the authenticated `/cms` dashboard, open **Author photo** (or scroll to tha
 
 
 
-### 6. Destinations (countries, map, climate, quick facts)
+### 6. Destinations (countries, map, climate, quick facts, itinerary)
 
 Destination pages and the header mega-menu read from **`src/content/destinations/tree.json`** (continents → countries). Types and helpers stay in `src/data/destinations.ts`.
 
@@ -65,7 +65,7 @@ From the authenticated `/cms` dashboard:
 
 1. Open **Destinations** (or **New destination**).
 2. Create or edit a country: name, slug, continent, region, blurb, hero image, optional trip label / featured post / highlights.
-3. Optionally fill **Quick facts** (best time, currency, language, plugs, tap water, time zone), **Map** (center, zoom, pins), and **Climate** (summary, best time, 12 monthly rows). Empty quick-fact fields are omitted on the page; best time falls back to Climate when the quick-facts best time is blank.
+3. Optionally fill **Suggested itinerary** (title + repeatable day rows: day label, title, detail — from real trip notes only), **Quick facts** (best time, currency, language, plugs, tap water, time zone), **Map** (center, zoom, pins), and **Climate** (summary, best time, 12 monthly rows). Empty itinerary days / quick-fact fields are omitted on the page; best time falls back to Climate when the quick-facts best time is blank.
 4. **Publish** commits `tree.json` with message `cms: update destinations`.
 5. After Vercel redeploys, `/destinations/{slug}`, the destinations index, header menu, and sitemap pick up the change.
 
@@ -96,4 +96,4 @@ Body shape: `{ country, continentId, continentName?, update? }`. Auth + GitHub t
 4. **New post** → fill form → **Publish to GitHub**.
 5. Wait for the Vercel deploy, then open `/blog/{slug}`.
 6. To change the author headshot: **Author photo** on the dashboard → upload → wait for redeploy.
-7. To add or edit a destination: **Destinations** → **New destination** (or Edit) → fill quick facts / map / climate as needed → **Publish** → wait for redeploy → open `/destinations/{slug}`.
+7. To add or edit a destination: **Destinations** → **New destination** (or Edit) → fill itinerary / quick facts / map / climate as needed → **Publish** → wait for redeploy → open `/destinations/{slug}`.

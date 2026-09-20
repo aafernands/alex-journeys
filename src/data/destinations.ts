@@ -5,7 +5,7 @@
  *
  * Tree data lives in src/content/destinations/tree.json (CMS-editable).
  * Optional trip fields (highlights, coverImages, etc.) are filled only from
- * facts already in linked posts — no invented hotels, dates, or itineraries.
+ * facts already in linked posts — no invented hotels or fake bookings; itineraries only from real trip notes.
  */
 
 import treeJson from "@/content/destinations/tree.json";
@@ -64,6 +64,20 @@ export type DestinationQuickFacts = {
   timezone?: string;
 };
 
+export type DestinationItineraryDay = {
+  /** e.g. "Day 1" or "Morning" */
+  day: string;
+  title: string;
+  detail: string;
+};
+
+/** Suggested day-by-day outline from a real trip (CMS-editable). */
+export type DestinationItinerary = {
+  /** e.g. "48 hours in Toronto" or "A week in Iceland" */
+  title?: string;
+  days: DestinationItineraryDay[];
+};
+
 export type DestinationCountry = {
   slug: string;
   name: string;
@@ -86,6 +100,8 @@ export type DestinationCountry = {
   map?: DestinationMapData;
   /** Best time + practical chips (currency, language, plugs, etc.). */
   quickFacts?: DestinationQuickFacts;
+  /** Suggested itinerary from trip notes (omit or empty days to hide). */
+  itinerary?: DestinationItinerary;
 };
 
 export type DestinationContinent = {

@@ -6,6 +6,8 @@ import type {
   DestinationContinent,
   DestinationCountry,
   DestinationCoverImage,
+  DestinationItinerary,
+  DestinationItineraryDay,
   DestinationMapData,
   DestinationMapPin,
   DestinationQuickFacts,
@@ -260,6 +262,79 @@ function validateQuickFacts(
   return { ok: true, data: Object.keys(out).length ? out : undefined };
 }
 
+
+function validateItinerary(
+  raw: unknown,
+):
+  | { ok: true; data?: DestinationItinerary }
+  | { ok: false; error: string } {
+  if (raw === undefined || raw === null || raw === "") {
+    return { ok: true };
+  }
+  if (typeof raw !== "object") {
+    return { ok: false, error: "itinerary must be an object." };
+  }
+  const rec = raw as Record<string, unknown>;
+  const title = asString(rec.title) || undefined;
+  if (title && title.length > 160) {
+    return { ok: false, error: "itinerary.title must be at most 160 characters." };
+  }
+  if (!Array.isArray(rec.days)) {
+    return { ok: false, error: "itinerary.days must be an array." };
+  }
+  if (rec.days.length > 21) {
+    return { ok: false, error: "itinerary.days supports at most 21 entries." };
+  }
+  const days: DestinationItineraryDay[] = [];
+  for (let i = 0; i < rec.days.length; i++) {
+    const item = rec.days[i];
+    if (typeof item !== "object" || item === null) {
+      return { ok: false, error: `itinerary.days[${i}] must be an object.` };
+    }
+    const d = item as Record<string, unknown>;
+    const day = asString(d.day);
+    const dayTitle = asString(d.title);
+    const detail = asString(d.detail);
+    if (!day && !dayTitle && !detail) {
+      continue;
+    }
+    if (!day) {
+      return { ok: false, error: `itinerary.days[${i}].day is required.` };
+    }
+    if (!dayTitle) {
+      return { ok: false, error: `itinerary.days[${i}].title is required.` };
+    }
+    if (!detail) {
+      return { ok: false, error: `itinerary.days[${i}].detail is required.` };
+    }
+    if (day.length > 40) {
+      return {
+        ok: false,
+        error: `itinerary.days[${i}].day must be at most 40 characters.`,
+      };
+    }
+    if (dayTitle.length > 160) {
+      return {
+        ok: false,
+        error: `itinerary.days[${i}].title must be at most 160 characters.`,
+      };
+    }
+    if (detail.length > 800) {
+      return {
+        ok: false,
+        error: `itinerary.days[${i}].detail must be at most 800 characters.`,
+      };
+    }
+    days.push({ day, title: dayTitle, detail });
+  }
+  if (days.length === 0) {
+    return { ok: true };
+  }
+  const out: DestinationItinerary = { days };
+  if (title) out.title = title;
+  return { ok: true, data: out };
+}
+
 export type DestinationCountryInput = Record<string, unknown>;
 
 export type ValidatedDestinationCountry = DestinationCountry;
@@ -351,6 +426,9 @@ export function validateDestinationCountry(
   const quickFactsResult = validateQuickFacts(input.quickFacts);
   if (!quickFactsResult.ok) return quickFactsResult;
 
+  const itineraryResult = validateItinerary(input.itinerary);
+  if (!itineraryResult.ok) return itineraryResult;
+
   const country: DestinationCountry = {
     slug,
     name,
@@ -367,6 +445,7 @@ export function validateDestinationCountry(
   if (climateResult.data) country.climate = climateResult.data;
   if (mapResult.data) country.map = mapResult.data;
   if (quickFactsResult.data) country.quickFacts = quickFactsResult.data;
+  if (itineraryResult.data) country.itinerary = itineraryResult.data;
 
   return { ok: true, data: country };
 }
