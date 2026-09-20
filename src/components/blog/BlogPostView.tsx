@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { PostContent } from "@/components/blog/PostContent";
 import { PostItineraryTimeline } from "@/components/blog/PostItineraryTimeline";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
-import { SavePostButton } from "@/components/SavePostButton";
+import { CommentSection } from "@/components/blog/CommentSection";
+import { PostActions } from "@/components/blog/PostActions";
 import { RelatedPosts } from "@/components/blog/RelatedPosts";
 import { JsonLd } from "@/components/JsonLd";
 import {
@@ -138,7 +139,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
                 </p>
               </div>
               </div>
-              <SavePostButton slug={slug} />
+              <PostActions slug={slug} title={post.title} />
             </div>
           </div>
         </div>
@@ -239,6 +240,8 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
               </p>
             </div>
           </aside>
+
+          <CommentSection slug={slug} />
 
           <footer className="mt-12 flex flex-wrap gap-3 border-t border-border pt-8">
             <Link href="/blog" className="btn btn-secondary">

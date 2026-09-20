@@ -76,3 +76,7 @@ If Firebase Console shows a database id other than `(default)` (e.g. `ai-studio-
 `FIREBASE_FIRESTORE_DATABASE_ID=<that-exact-id>`
 
 Leave unset to use `(default)`.
+
+## Related
+
+Post **comments** (moderated) also use this Firestore project — see [COMMENTS.md](./COMMENTS.md).

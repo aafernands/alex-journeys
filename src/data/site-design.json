@@ -1,11 +1,11 @@
 {
-  "updatedAt": "2026-09-20T20:37:00.361Z",
+  "updatedAt": "2026-09-20T21:39:52.335Z",
   "hero": {
-    "image": "/media/img_5141-muaa0na5.jpg",
-    "imageAlt": "Sunrise over Maroon Bells reflected in a calm alpine lake",
-    "imageCaption": "Niagara Falls, NY",
+    "image": "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
+    "imageAlt": "Maroon Bells View and Lake reflection of Bell mountains",
+    "imageCaption": "Marron Bells, CO",
     "windowBadge": "Field note",
-    "eyebrow": "",
+    "eyebrow": "test",
     "tagline": "Inspire. Capture. Discover.",
     "subtitle": "A personal travel blog sharing places I’ve been and notes from the road — places, stories, guides, and photos from journeys already behind me.",
     "ctaPrimary": {
@@ -40,6 +40,119 @@
         "label": "Journal",
         "value": "Featured",
         "accent": true
+      }
+    ]
+  },
+  "featuredSlideshow": {
+    "enabled": true,
+    "eyebrow": "Field notes",
+    "title": "A field note worth opening.",
+    "autoplay": true,
+    "intervalMs": 8000,
+    "secondaryCta": {
+      "label": "New here? Start here",
+      "href": "/start-here"
+    },
+    "slides": [
+      {
+        "id": "slide-featured-seed",
+        "image": "/media/photo-1745_singular_display_fullpicture-mua3y8bo.jpg",
+        "imageAlt": "Niagara Falls from the New York side, mist rising over the gorge",
+        "caption": "Niagara Falls, NY",
+        "note": "First look from the New York side — the roar hits before the view does. Mist on your face, a rainbow if the sun’s out, and proof that “tourist” doesn’t mean skip it.",
+        "windowBadge": "Field note",
+        "stats": [
+          {
+            "label": "Light",
+            "value": "Midday"
+          },
+          {
+            "label": "Season",
+            "value": "Spring"
+          },
+          {
+            "label": "Journal",
+            "value": "Featured",
+            "accent": true
+          }
+        ],
+        "href": "/niagara-falls",
+        "ctaLabel": "Read the Niagara story"
+      },
+      {
+        "id": "slide-4ed0782d-b414-4152-91c1-5eb0021a7660",
+        "image": "/media/img_5141-muaa0na5.jpg",
+        "imageAlt": "Sunrise over Maroon Bells reflected in a calm alpine lake",
+        "caption": "Maroon Bells, CO",
+        "note": "Sunrise at Maroon Bells — cold air, glass-still water, and twin peaks mirrored so clean it feels unreal. Worth the early alarm.",
+        "windowBadge": "Field note",
+        "stats": [
+          {
+            "label": "Light",
+            "value": "Sunrise"
+          },
+          {
+            "label": "Season",
+            "value": "Alpine"
+          },
+          {
+            "label": "Journal",
+            "value": "Featured",
+            "accent": true
+          }
+        ],
+        "href": "/marron-bells",
+        "ctaLabel": "Read the sunrise story"
+      },
+      {
+        "id": "slide-772afa84-4984-4d1b-a373-53c4a6efb91f",
+        "image": "/media/migrated/2024-10-img-0863-1-5008158e.webp",
+        "imageAlt": "Casa Loma Gothic castle and gardens in Toronto",
+        "caption": "Casa Loma, Toronto",
+        "note": "A Gothic castle in the middle of Toronto — turrets, gardens, and skyline peeking through. Odd, photogenic, and an easy half-day when you’re already in the city.",
+        "windowBadge": "Field note",
+        "stats": [
+          {
+            "label": "Light",
+            "value": "Golden hour"
+          },
+          {
+            "label": "Season",
+            "value": "Spring"
+          },
+          {
+            "label": "Journal",
+            "value": "Featured",
+            "accent": true
+          }
+        ],
+        "href": "/toronto-travel-guide",
+        "ctaLabel": "Read the Toronto guide"
+      },
+      {
+        "id": "slide-d3ba4e38-7f7f-4211-b78a-77b45c2619f1",
+        "image": "/media/migrated/2026-06-img-9424-1024x768-800d98bd.webp",
+        "imageAlt": "",
+        "caption": "Cancún, Mexico",
+        "note": "Caribbean blue that doesn’t look real until you’re in it — hotel-zone mornings, Isla Mujeres day trips, and nights that run longer than planned. Five days is enough to taste it; not enough to leave ready.",
+        "windowBadge": "Field note",
+        "stats": [
+          {
+            "label": "Light",
+            "value": "Golden hour"
+          },
+          {
+            "label": "Season",
+            "value": "Winter sun"
+          },
+          {
+            "label": "Journal",
+            "value": "Featured",
+            "accent": true
+          }
+        ],
+        "href": "/cancun-5-day-travel-guide",
+        "ctaLabel": "Read the Cancún guide"
       }
     ]
   },
@@ -103,6 +216,8 @@
       "eyebrow": "About the journal",
       "headline": "Hi, I’m Alex",
       "body": "I’m Alex Fernandes — traveler, photographer, and the voice behind Fernandes Journeys. Based in New Jersey, I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
+      "photo": "/media/migrated/2025-07-img-5438-scaled-3c927d5a.webp",
+      "photoAlt": "Discover the Top Accommodation Sites of 2025",
       "primaryCta": {
         "label": "About me",
         "href": "/about"

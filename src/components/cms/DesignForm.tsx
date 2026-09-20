@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { FeaturedSlideshowEditor } from "./FeaturedSlideshowEditor";
 import { MediaPicker } from "./MediaPicker";
 import {
   MAX_MEDIA_UPLOAD_BYTES,
@@ -36,6 +37,9 @@ export function DesignForm({ initial }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [hero, setHero] = useState(initial.hero);
+  const [featuredSlideshow, setFeaturedSlideshow] = useState(
+    initial.featuredSlideshow,
+  );
   const [seoSnippet, setSeoSnippet] = useState(
     initial.seo.homeTitleSnippet || "",
   );
@@ -44,6 +48,7 @@ export function DesignForm({ initial }: Props) {
   );
   const [homeSections, setHomeSections] = useState(initial.homeSections);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [authorLibraryOpen, setAuthorLibraryOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -98,6 +103,7 @@ export function DesignForm({ initial }: Props) {
             const design: SiteDesign = {
               updatedAt: initial.updatedAt,
               hero,
+              featuredSlideshow,
               homeSections,
               seo: { homeTitleSnippet: seoSnippet.trim() },
               flags: { showHeroStats },
@@ -122,6 +128,7 @@ export function DesignForm({ initial }: Props) {
             }
             if (data.design) {
               setHero(data.design.hero);
+              setFeaturedSlideshow(data.design.featuredSlideshow);
               setHomeSections(data.design.homeSections);
               setSeoSnippet(data.design.seo.homeTitleSnippet || "");
               setShowHeroStats(data.design.flags.showHeroStats);
@@ -147,12 +154,14 @@ export function DesignForm({ initial }: Props) {
         <section className="panel overflow-hidden">
           <div className="border-b border-border bg-surface-soft px-5 py-3">
             <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
-              Homepage hero image
+              Homepage hero
             </h2>
           </div>
           <div className="space-y-5 p-5 md:p-6">
             <p className="text-sm text-muted">
-              Photo behind / beside the Fernandes Journeys headline. Pick from
+              Full-bleed photo behind the “Inspire. Capture. Discover.” headline
+              only. This is <strong>not</strong> the featured field-note card —
+              manage that in <strong>Featured slideshow</strong> below. Pick from
               the media library or upload a new file (JPEG, PNG, WebP, GIF · max
               ~{MAX_MEDIA_UPLOAD_LABEL}).
             </p>
@@ -243,7 +252,7 @@ export function DesignForm({ initial }: Props) {
                   htmlFor="design-image-caption"
                   className="text-sm font-semibold text-heading"
                 >
-                  Location label (window chrome)
+                  Location label on hero photo
                 </label>
                 <input
                   id="design-image-caption"
@@ -254,37 +263,20 @@ export function DesignForm({ initial }: Props) {
                 />
               </div>
             </div>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="design-window-badge"
-                  className="text-sm font-semibold text-heading"
-                >
-                  Window badge
-                </label>
-                <input
-                  id="design-window-badge"
-                  value={hero.windowBadge}
-                  onChange={(e) => patchHero("windowBadge", e.target.value)}
-                  placeholder="Field note"
-                  className={fieldClass}
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="design-object-position"
-                  className="text-sm font-semibold text-heading"
-                >
-                  Object position
-                </label>
-                <input
-                  id="design-object-position"
-                  value={hero.objectPosition}
-                  onChange={(e) => patchHero("objectPosition", e.target.value)}
-                  placeholder="center, top, 50% 30%"
-                  className={fieldClass}
-                />
-              </div>
+            <div>
+              <label
+                htmlFor="design-object-position"
+                className="text-sm font-semibold text-heading"
+              >
+                Object position
+              </label>
+              <input
+                id="design-object-position"
+                value={hero.objectPosition}
+                onChange={(e) => patchHero("objectPosition", e.target.value)}
+                placeholder="center, top, 50% 30%"
+                className={fieldClass}
+              />
             </div>
             <label className="flex items-center gap-2.5 text-sm text-text">
               <input
@@ -432,14 +424,18 @@ export function DesignForm({ initial }: Props) {
           </div>
         </section>
 
-        {/* From the road + stats */}
+        {/* From the road (hero strip only) */}
         <section className="panel overflow-hidden">
           <div className="border-b border-border bg-surface-soft px-5 py-3">
             <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
-              From the road &amp; photo stats
+              From the road (hero strip)
             </h2>
           </div>
           <div className="space-y-5 p-5 md:p-6">
+            <p className="text-sm text-muted">
+              Small list under the hero headline CTAs. Photo stats for the
+              featured card live in Featured slideshow, not here.
+            </p>
             <label className="flex items-center gap-2.5 text-sm text-text">
               <input
                 type="checkbox"
@@ -494,55 +490,20 @@ export function DesignForm({ initial }: Props) {
                 className={areaClass}
               />
             </div>
-            <label className="flex items-center gap-2.5 text-sm text-text">
-              <input
-                type="checkbox"
-                checked={showHeroStats}
-                onChange={(e) => {
-                  setShowHeroStats(e.target.checked);
-                  setSuccess(null);
-                }}
-                className="size-4 rounded border-border text-accent focus:ring-accent/30"
-              />
-              Show stats row under the hero photo
-            </label>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {hero.stats.map((stat, i) => (
-                <div
-                  key={i}
-                  className="rounded-lg border border-border bg-surface-soft p-3"
-                >
-                  <label className="text-xs font-semibold uppercase tracking-wide text-muted">
-                    Stat {i + 1} label
-                  </label>
-                  <input
-                    value={stat.label}
-                    onChange={(e) => {
-                      const stats = hero.stats.map((s, j) =>
-                        j === i ? { ...s, label: e.target.value } : s,
-                      );
-                      patchHero("stats", stats);
-                    }}
-                    className={fieldClass}
-                  />
-                  <label className="mt-2 block text-xs font-semibold uppercase tracking-wide text-muted">
-                    Value
-                  </label>
-                  <input
-                    value={stat.value}
-                    onChange={(e) => {
-                      const stats = hero.stats.map((s, j) =>
-                        j === i ? { ...s, value: e.target.value } : s,
-                      );
-                      patchHero("stats", stats);
-                    }}
-                    className={fieldClass}
-                  />
-                </div>
-              ))}
-            </div>
           </div>
         </section>
+
+        <FeaturedSlideshowEditor
+          value={featuredSlideshow}
+          onChange={(next) => {
+            setFeaturedSlideshow(next);
+            setSuccess(null);
+          }}
+          onError={(message) => {
+            setError(message);
+            if (message) setSuccess(null);
+          }}
+        />
 
 
         {/* Homepage section chrome */}
@@ -742,6 +703,71 @@ export function DesignForm({ initial }: Props) {
 
             <div className="rounded-lg border border-border bg-surface-soft/50 p-4">
               <p className="text-sm font-bold text-heading">Author intro</p>
+              <p className="mt-1 text-xs text-muted">
+                Portrait shown on the homepage right after the hero. Pick from
+                the media library (upload new files under Media first if needed).
+              </p>
+              <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start">
+                <div className="relative size-28 shrink-0 overflow-hidden rounded-lg border border-border bg-white sm:size-32">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={
+                      homeSections.author.photo ||
+                      "/brand/alex-fernandes.jpg"
+                    }
+                    alt={
+                      homeSections.author.photoAlt || "Author photo preview"
+                    }
+                    className="h-full w-full object-cover object-top"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.opacity = "0.3";
+                    }}
+                  />
+                </div>
+                <div className="min-w-0 flex-1 space-y-3">
+                  <button
+                    type="button"
+                    className="btn btn-secondary text-sm"
+                    onClick={() => setAuthorLibraryOpen(true)}
+                  >
+                    Choose from library
+                  </button>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                      Photo URL / path
+                    </label>
+                    <input
+                      value={homeSections.author.photo}
+                      onChange={(e) => {
+                        setHomeSections((hs) => ({
+                          ...hs,
+                          author: { ...hs.author, photo: e.target.value },
+                        }));
+                        setSuccess(null);
+                      }}
+                      placeholder="/media/… or /brand/…"
+                      className={fieldClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-wide text-muted">
+                      Photo alt text
+                    </label>
+                    <input
+                      value={homeSections.author.photoAlt}
+                      onChange={(e) => {
+                        setHomeSections((hs) => ({
+                          ...hs,
+                          author: { ...hs.author, photoAlt: e.target.value },
+                        }));
+                        setSuccess(null);
+                      }}
+                      placeholder="Alex Fernandes"
+                      className={fieldClass}
+                    />
+                  </div>
+                </div>
+              </div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-wide text-muted">
@@ -954,7 +980,7 @@ export function DesignForm({ initial }: Props) {
       <MediaPicker
         open={libraryOpen}
         onClose={() => setLibraryOpen(false)}
-        title="Choose hero image"
+        title="Choose homepage hero image (headline photo only)"
         onSelect={(item) => {
           setPendingFile(null);
           setLocalPreview(null);
@@ -963,6 +989,23 @@ export function DesignForm({ initial }: Props) {
             ...h,
             image: item.url,
             imageAlt: item.alt || h.imageAlt,
+          }));
+          setSuccess(null);
+        }}
+      />
+
+      <MediaPicker
+        open={authorLibraryOpen}
+        onClose={() => setAuthorLibraryOpen(false)}
+        title="Choose author intro photo"
+        onSelect={(item) => {
+          setHomeSections((hs) => ({
+            ...hs,
+            author: {
+              ...hs.author,
+              photo: item.url,
+              photoAlt: item.alt || hs.author.photoAlt,
+            },
           }));
           setSuccess(null);
         }}

@@ -4,7 +4,8 @@
  */
 
 import siteDesignJson from "@/data/site-design.json";
-import { about, hero as contentHero, startHereCards } from "@/data/content";
+import authorPhotoMeta from "@/data/author-photo.json";
+import { about, hero as contentHero, startHereCards, site } from "@/data/content";
 
 export type HeroCta = {
   label: string;
@@ -17,12 +18,38 @@ export type HeroStat = {
   accent?: boolean;
 };
 
+export type FeaturedSlide = {
+  id: string;
+  image: string;
+  imageAlt: string;
+  /** Window-chrome location / caption */
+  caption: string;
+  /** Journal note shown beside the photo */
+  note: string;
+  windowBadge: string;
+  stats: HeroStat[];
+  /** Optional story / destination link */
+  href: string;
+  ctaLabel: string;
+};
+
+export type FeaturedSlideshow = {
+  enabled: boolean;
+  eyebrow: string;
+  title: string;
+  autoplay: boolean;
+  /** Autoplay interval in ms (clamped 4s–20s). */
+  intervalMs: number;
+  secondaryCta: HeroCta;
+  slides: FeaturedSlide[];
+};
+
 export type HeroDesign = {
   image: string;
   imageAlt: string;
-  /** Window chrome location / caption text */
+  /** Location label on the full-bleed hero photo */
   imageCaption: string;
-  /** Small badge in the photo window chrome (e.g. "Field note") */
+  /** Legacy field — featured card now uses featuredSlideshow slides */
   windowBadge: string;
   /** Text after site name in the eyebrow pill */
   eyebrow: string;
@@ -72,6 +99,9 @@ export type HomeSections = {
     eyebrow: string;
     headline: string;
     body: string;
+    /** Homepage author intro portrait (CMS). Empty → falls back to site.authorPhoto */
+    photo: string;
+    photoAlt: string;
     primaryCta: HeroCta;
     secondaryCta: HeroCta;
   };
@@ -80,6 +110,7 @@ export type HomeSections = {
 export type SiteDesign = {
   updatedAt: string;
   hero: HeroDesign;
+  featuredSlideshow: FeaturedSlideshow;
   homeSections: HomeSections;
   seo: {
     /** Optional homepage title override snippet (empty = use site default) */
@@ -89,6 +120,8 @@ export type SiteDesign = {
     showHeroStats: boolean;
   };
 };
+
+const MAX_FEATURED_SLIDES = 12;
 
 
 const DEFAULT_HOME_SECTIONS: HomeSections = {
@@ -133,43 +166,78 @@ const DEFAULT_HOME_SECTIONS: HomeSections = {
     eyebrow: "About the journal",
     headline: about.headline,
     body: about.paragraphs[0],
+    photo: authorPhotoMeta.src,
+    photoAlt: site.authorName,
     primaryCta: { label: "About me", href: "/about" },
     secondaryCta: { label: "Start here", href: "/start-here" },
   },
 };
 
+const DEFAULT_HERO: HeroDesign = {
+  image: contentHero.image,
+  imageAlt: contentHero.imageAlt,
+  imageCaption: "Maroon Bells · Colorado",
+  windowBadge: "Field note",
+  eyebrow: "Personal travel journal",
+  tagline: contentHero.tagline,
+  subtitle: contentHero.subtitle,
+  ctaPrimary: {
+    label: contentHero.ctaPrimary,
+    href: "/destinations",
+  },
+  ctaSecondary: {
+    label: contentHero.ctaSecondary,
+    href: "/blog",
+  },
+  objectPosition: "center",
+  overlay: true,
+  showFromTheRoad: true,
+  fromTheRoad: {
+    label: "From the road",
+    items: ["Places visited", "Trip notes & photos", "Tools I still use"],
+  },
+  stats: [
+    { label: "Light", value: "Sunrise" },
+    { label: "Season", value: "Alpine" },
+    { label: "Journal", value: "Featured", accent: true },
+  ],
+};
+
+function seedFeaturedSlideFromHero(
+  hero: HeroDesign,
+  id = "slide-featured-seed",
+): FeaturedSlide {
+  const caption = hero.imageCaption || "Maroon Bells · Colorado";
+  return {
+    id,
+    image: hero.image,
+    imageAlt: hero.imageAlt,
+    caption,
+    note: `Sunrise at ${caption.replace(" · ", ", ")} — cold air, quiet lake, and the kind of light that makes you glad you left before dawn. Start here for places, stories, and guides from trips already behind me.`,
+    windowBadge: hero.windowBadge || "Field note",
+    stats: hero.stats.map((s) => ({ ...s })),
+    href: "/marron-bells",
+    ctaLabel: "Read the sunrise story",
+  };
+}
+
+function defaultFeaturedSlideshow(hero: HeroDesign): FeaturedSlideshow {
+  return {
+    enabled: true,
+    eyebrow: "Field notes",
+    title: "A field note worth opening.",
+    autoplay: true,
+    intervalMs: 8000,
+    secondaryCta: { label: "New here? Start here", href: "/start-here" },
+    slides: [seedFeaturedSlideFromHero(hero)],
+  };
+}
+
 export const DEFAULT_SITE_DESIGN: SiteDesign = {
   updatedAt: "2026-09-20T00:00:00.000Z",
   homeSections: structuredClone(DEFAULT_HOME_SECTIONS),
-  hero: {
-    image: contentHero.image,
-    imageAlt: contentHero.imageAlt,
-    imageCaption: "Maroon Bells · Colorado",
-    windowBadge: "Field note",
-    eyebrow: "Personal travel journal",
-    tagline: contentHero.tagline,
-    subtitle: contentHero.subtitle,
-    ctaPrimary: {
-      label: contentHero.ctaPrimary,
-      href: "/destinations",
-    },
-    ctaSecondary: {
-      label: contentHero.ctaSecondary,
-      href: "/blog",
-    },
-    objectPosition: "center",
-    overlay: true,
-    showFromTheRoad: true,
-    fromTheRoad: {
-      label: "From the road",
-      items: ["Places visited", "Trip notes & photos", "Tools I still use"],
-    },
-    stats: [
-      { label: "Light", value: "Sunrise" },
-      { label: "Season", value: "Alpine" },
-      { label: "Journal", value: "Featured", accent: true },
-    ],
-  },
+  hero: structuredClone(DEFAULT_HERO),
+  featuredSlideshow: defaultFeaturedSlideshow(DEFAULT_HERO),
   seo: {
     homeTitleSnippet: "",
   },
@@ -209,6 +277,92 @@ function normalizeStats(raw: unknown, fallback: HeroStat[]): HeroStat[] {
       ...(o.accent === true || fb.accent ? { accent: true } : {}),
     };
   });
+}
+
+function newSlideId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return `slide-${crypto.randomUUID()}`;
+  }
+  return `slide-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function normalizeSlide(raw: unknown, fallback: FeaturedSlide, index: number): FeaturedSlide {
+  if (!raw || typeof raw !== "object") {
+    return { ...fallback, stats: fallback.stats.map((s) => ({ ...s })) };
+  }
+  const o = raw as Record<string, unknown>;
+  const id = asString(o.id, fallback.id).trim() || `slide-${index + 1}`;
+  return {
+    id,
+    image: asString(o.image, fallback.image).trim(),
+    imageAlt: asString(o.imageAlt, fallback.imageAlt),
+    caption: asString(o.caption, fallback.caption),
+    note: asString(o.note, fallback.note),
+    windowBadge: asString(o.windowBadge, fallback.windowBadge),
+    stats: normalizeStats(o.stats, fallback.stats),
+    href: asString(o.href, fallback.href).trim(),
+    ctaLabel: asString(o.ctaLabel, fallback.ctaLabel),
+  };
+}
+
+function normalizeFeaturedSlideshow(
+  raw: unknown,
+  fallback: FeaturedSlideshow,
+  hero: HeroDesign,
+): FeaturedSlideshow {
+  const seeded = defaultFeaturedSlideshow(hero);
+  if (!raw || typeof raw !== "object") {
+    return seeded;
+  }
+  const o = raw as Record<string, unknown>;
+  const slidesRaw = Array.isArray(o.slides) ? o.slides : null;
+  const seedSlide = seeded.slides[0];
+  const slides = slidesRaw
+    ? slidesRaw.slice(0, MAX_FEATURED_SLIDES).map((item, i) =>
+        normalizeSlide(item, seedSlide, i),
+      )
+    : fallback.slides.map((s, i) => normalizeSlide(s, seedSlide, i));
+
+  const interval = Number(o.intervalMs);
+  return {
+    enabled: asBool(o.enabled, fallback.enabled),
+    eyebrow: asString(o.eyebrow, fallback.eyebrow),
+    title: asString(o.title, fallback.title),
+    autoplay: asBool(o.autoplay, fallback.autoplay),
+    intervalMs:
+      Number.isFinite(interval) && interval > 0
+        ? Math.min(20000, Math.max(4000, Math.round(interval)))
+        : fallback.intervalMs,
+    secondaryCta: normalizeCta(o.secondaryCta, fallback.secondaryCta),
+    slides: slides.length ? slides : seeded.slides,
+  };
+}
+
+/** Slides with an image — used on the public homepage. */
+export function visibleFeaturedSlides(slideshow: FeaturedSlideshow): FeaturedSlide[] {
+  return slideshow.slides.filter((s) => s.image.trim().length > 0);
+}
+
+function emptySlide(): FeaturedSlide {
+  return {
+    id: newSlideId(),
+    image: "",
+    imageAlt: "",
+    caption: "",
+    note: "",
+    windowBadge: "Field note",
+    stats: [
+      { label: "", value: "" },
+      { label: "", value: "" },
+      { label: "", value: "" },
+    ],
+    href: "",
+    ctaLabel: "",
+  };
+}
+
+export function createEmptyFeaturedSlide(): FeaturedSlide {
+  return emptySlide();
 }
 
 function normalizeFromTheRoad(
@@ -390,6 +544,8 @@ function normalizeHomeSections(raw: unknown, fallback: HomeSections): HomeSectio
       eyebrow: asString(authorRaw.eyebrow, fallback.author.eyebrow),
       headline: asString(authorRaw.headline, fallback.author.headline),
       body: asString(authorRaw.body, fallback.author.body),
+      photo: asString(authorRaw.photo, fallback.author.photo).trim(),
+      photoAlt: asString(authorRaw.photoAlt, fallback.author.photoAlt),
       primaryCta: normalizeCta(authorRaw.primaryCta, fallback.author.primaryCta),
       secondaryCta: normalizeCta(
         authorRaw.secondaryCta,
@@ -404,9 +560,16 @@ function normalizeHomeSections(raw: unknown, fallback: HomeSections): HomeSectio
     base.homeSections,
   );
 
+  const featuredSlideshow = normalizeFeaturedSlideshow(
+    root.featuredSlideshow,
+    base.featuredSlideshow,
+    hero,
+  );
+
   return {
     updatedAt: asString(root.updatedAt, base.updatedAt),
     hero,
+    featuredSlideshow,
     homeSections,
     seo: {
       homeTitleSnippet: asString(
@@ -502,6 +665,80 @@ export function validateSiteDesignInput(raw: unknown): SiteDesignValidation {
     return { ok: false, error: "Secondary CTA label is required." };
   }
 
+  const { featuredSlideshow } = design;
+  if (featuredSlideshow.title.length > SHORT_MAX) {
+    return { ok: false, error: "Featured slideshow title is too long (max 120)." };
+  }
+  if (featuredSlideshow.eyebrow.length > SHORT_MAX) {
+    return { ok: false, error: "Featured slideshow eyebrow is too long (max 120)." };
+  }
+  const secondarySlideCta = validateHref(
+    featuredSlideshow.secondaryCta.href,
+    "Featured slideshow secondary CTA",
+  );
+  if (featuredSlideshow.secondaryCta.href.trim() && secondarySlideCta) {
+    return { ok: false, error: secondarySlideCta };
+  }
+
+  for (let i = 0; i < featuredSlideshow.slides.length; i++) {
+    const slide = featuredSlideshow.slides[i];
+    const n = i + 1;
+    if (slide.image.trim()) {
+      if (
+        !slide.image.startsWith("/") &&
+        !/^https?:\/\//i.test(slide.image)
+      ) {
+        return {
+          ok: false,
+          error: `Featured slide ${n} image must be a site path (/media/…) or https URL.`,
+        };
+      }
+    }
+    if (slide.imageAlt.length > TEXT_MAX) {
+      return { ok: false, error: `Featured slide ${n} alt is too long.` };
+    }
+    if (slide.caption.length > SHORT_MAX) {
+      return { ok: false, error: `Featured slide ${n} caption is too long (max 120).` };
+    }
+    if (slide.note.length > 800) {
+      return { ok: false, error: `Featured slide ${n} note is too long (max 800).` };
+    }
+    if (slide.href.trim()) {
+      const hrefErr = validateHref(slide.href, `Featured slide ${n} link`);
+      if (hrefErr) return { ok: false, error: hrefErr };
+    }
+  }
+
+  const author = design.homeSections.author;
+  if (author.photo.trim()) {
+    if (
+      !author.photo.startsWith("/") &&
+      !/^https?:\/\//i.test(author.photo)
+    ) {
+      return {
+        ok: false,
+        error:
+          "Author photo must be a site path (/media/… or /brand/…) or https URL.",
+      };
+    }
+  }
+  if (author.photoAlt.length > TEXT_MAX) {
+    return { ok: false, error: "Author photo alt is too long." };
+  }
+  if (author.body.length > 800) {
+    return { ok: false, error: "Author intro body is too long (max 800)." };
+  }
+  const authorPrimaryErr = validateHref(
+    author.primaryCta.href,
+    "Author primary CTA",
+  );
+  if (authorPrimaryErr) return { ok: false, error: authorPrimaryErr };
+  const authorSecondaryErr = validateHref(
+    author.secondaryCta.href,
+    "Author secondary CTA",
+  );
+  if (authorSecondaryErr) return { ok: false, error: authorSecondaryErr };
+
   return {
     ok: true,
     design: {
@@ -525,6 +762,50 @@ export function validateSiteDesignInput(raw: unknown): SiteDesignValidation {
           href: hero.ctaSecondary.href.trim(),
         },
         objectPosition: hero.objectPosition.trim() || "center",
+      },
+      featuredSlideshow: {
+        ...featuredSlideshow,
+        eyebrow: featuredSlideshow.eyebrow.trim(),
+        title: featuredSlideshow.title.trim(),
+        secondaryCta: {
+          label: featuredSlideshow.secondaryCta.label.trim(),
+          href: featuredSlideshow.secondaryCta.href.trim(),
+        },
+        slides: featuredSlideshow.slides.map((slide) => ({
+          ...slide,
+          id: slide.id.trim() || newSlideId(),
+          image: slide.image.trim(),
+          imageAlt: slide.imageAlt.trim(),
+          caption: slide.caption.trim(),
+          note: slide.note.trim(),
+          windowBadge: slide.windowBadge.trim(),
+          href: slide.href.trim(),
+          ctaLabel: slide.ctaLabel.trim(),
+          stats: slide.stats.map((s) => ({
+            label: s.label.trim(),
+            value: s.value.trim(),
+            ...(s.accent ? { accent: true } : {}),
+          })),
+        })),
+      },
+      homeSections: {
+        ...design.homeSections,
+        author: {
+          ...author,
+          eyebrow: author.eyebrow.trim(),
+          headline: author.headline.trim(),
+          body: author.body.trim(),
+          photo: author.photo.trim(),
+          photoAlt: author.photoAlt.trim(),
+          primaryCta: {
+            label: author.primaryCta.label.trim(),
+            href: author.primaryCta.href.trim(),
+          },
+          secondaryCta: {
+            label: author.secondaryCta.label.trim(),
+            href: author.secondaryCta.href.trim(),
+          },
+        },
       },
     },
   };

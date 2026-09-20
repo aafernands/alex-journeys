@@ -16,7 +16,7 @@ After sign-in, the shell provides:
 | Pages | `/cms/pages` | List/create/edit/delete JSON pages under `src/content/pages` |
 | Destinations | `/cms/destinations` | Countries, map, climate, itinerary → `tree.json` |
 | Media | `/cms/media` | Post image library + author photo |
-| Website design | `/cms/design` | Homepage hero image, copy, CTAs, “From the road” strip |
+| Website design | `/cms/design` | Homepage hero (headline photo), featured slideshow, section chrome |
 | Help | `/cms/help` | Short publish checklist |
 
 CMS layout sets `robots: noindex`.
@@ -123,14 +123,14 @@ Post editor: featured image **Choose from library**; rich text **Image** opens t
 
 | Control | Notes |
 | --- | --- |
-| Hero image | Choose from media library or upload → `public/media/hero-…` |
-| Alt + location label | Window chrome text (e.g. `Maroon Bells · Colorado`) |
-| Eyebrow, tagline, subtitle | Copy beside the photo |
+| Hero image | Full-bleed headline photo only. Library or upload → `public/media/hero-…` |
+| Alt + location label | Small location label on the hero photo |
+| Eyebrow, tagline, subtitle | Copy over the hero photo |
 | Primary / secondary CTAs | Label + href |
 | Object position / overlay | Fine-tune crop and soft darken |
-| “From the road” strip | Show/hide + labels |
-| Photo stats row | Show/hide + three label/value pairs |
-| Homepage sections | Start here (incl. cards JSON), Places, Latest stories, Guides, Tools, OAuth note, Author intro |
+| “From the road” strip | Show/hide + labels under hero CTAs |
+| Featured slideshow | Separate field-note card under the hero. Add/remove/reorder slides; each slide has image (library or upload), alt, caption, note, badge, optional stats, optional story link |
+| Homepage sections | Start here (incl. cards JSON), Places, Latest stories, Guides, Tools, OAuth note, Author intro (incl. portrait via media library) |
 
 Theme tokens (fonts/colors) UI is intentionally out of scope for now — stub note on the Design page.
 

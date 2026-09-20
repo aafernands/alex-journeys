@@ -14,6 +14,11 @@ import {
 import { getAllDrafts } from "@/lib/cms/drafts";
 import { isGithubConfigured } from "@/lib/cms/github";
 import { getAllCmsPages } from "@/lib/pages";
+import {
+  CommentsUnavailableError,
+  countPendingComments,
+} from "@/lib/comments";
+import { isFirebaseConfigured } from "@/lib/firebase-admin";
 import { formatPostDate, getAllPosts } from "@/lib/posts";
 import {
   CheckCircle2,
@@ -22,6 +27,7 @@ import {
   PenLine,
   Plus,
   AlertTriangle,
+  MessageSquare,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -54,9 +60,25 @@ export default async function CmsPage() {
   const githubOk = isGithubConfigured();
   const recent = posts.slice(0, 6);
 
+  let pendingComments = 0;
+  if (isFirebaseConfigured()) {
+    try {
+      pendingComments = await countPendingComments();
+    } catch (err) {
+      if (!(err instanceof CommentsUnavailableError)) {
+        console.warn("[cms] pending comments count failed:", err);
+      }
+    }
+  }
+
   const stats = [
     { label: "Published posts", value: posts.length, href: "/cms/posts" },
     { label: "Drafts", value: drafts.length, href: "/cms/posts?status=draft" },
+    {
+      label: "Pending comments",
+      value: pendingComments,
+      href: "/cms/comments",
+    },
     { label: "Pages", value: pages.length, href: "/cms/pages" },
     {
       label: "Destinations",
@@ -93,7 +115,7 @@ export default async function CmsPage() {
         </div>
       </div>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {stats.map((s) => (
           <Link
             key={s.label}
@@ -158,7 +180,21 @@ export default async function CmsPage() {
         ) : null}
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Link
+          href="/cms/comments"
+          className="panel flex items-center gap-3 p-5 transition hover:ring-2 hover:ring-accent/30"
+        >
+          <MessageSquare className="h-5 w-5 text-accent" aria-hidden />
+          <div>
+            <p className="font-semibold text-heading">Moderate comments</p>
+            <p className="text-xs text-muted">
+              {pendingComments > 0
+                ? `${pendingComments} pending review`
+                : "Nothing waiting"}
+            </p>
+          </div>
+        </Link>
         <Link
           href="/cms/new"
           className="panel flex items-center gap-3 p-5 transition hover:ring-2 hover:ring-accent/30"
