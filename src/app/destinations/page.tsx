@@ -13,6 +13,7 @@ export const metadata: Metadata = {
   title: "Places",
   description:
     "Places I’ve been — photo-led destinations from past trips on Fernandes Journeys.",
+  alternates: { canonical: "/destinations" },
 };
 
 export default function DestinationsIndexPage() {

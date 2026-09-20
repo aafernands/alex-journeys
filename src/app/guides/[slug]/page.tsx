@@ -22,7 +22,22 @@ export async function generateMetadata({
   const { slug } = await params;
   const hub = getGuideHub(slug);
   if (!hub) return { title: "Guides" };
-  return { title: hub.title, description: hub.description };
+  return {
+    title: hub.title,
+    description: hub.description,
+    alternates: { canonical: `/guides/${slug}` },
+    openGraph: {
+      title: hub.title,
+      description: hub.description,
+      type: "website",
+      url: `/guides/${slug}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: hub.title,
+      description: hub.description,
+    },
+  };
 }
 
 export default async function GuideHubPage({ params }: PageProps) {

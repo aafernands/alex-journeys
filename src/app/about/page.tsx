@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "About",
   description:
     "Meet Alex Fernandes — the traveler behind Fernandes Journeys, a personal trip journal of places already visited.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

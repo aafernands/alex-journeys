@@ -2,7 +2,14 @@ import type { Metadata } from "next";
 import { Outfit, Inter } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { JsonLd } from "@/components/JsonLd";
 import { getLatestPost } from "@/lib/posts";
+import {
+  absoluteUrl,
+  organizationJsonLd,
+  siteConfig,
+  websiteJsonLd,
+} from "@/lib/seo";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -20,18 +27,53 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
     default: "Fernandes Journeys — Travel Journal",
     template: "%s · Fernandes Journeys",
   },
-  description:
-    "Fernandes Journeys is a personal travel journal — destinations from past trips, trip notes, and photos from the road. Written by Alex Fernandes.",
+  description: siteConfig.description,
+  applicationName: siteConfig.name,
+  authors: [{ name: siteConfig.author, url: absoluteUrl("/about") }],
+  creator: siteConfig.author,
+  publisher: siteConfig.name,
+  keywords: [...siteConfig.keywords],
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Fernandes Journeys — Travel Journal",
-    description:
-      "Personal travel journal — destinations from past trips and notes from the road.",
     type: "website",
-    locale: "en_US",
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    locale: siteConfig.locale,
+    title: "Fernandes Journeys — Travel Journal",
+    description: siteConfig.shortDescription,
+    images: [
+      {
+        url: siteConfig.ogImage,
+        alt: `${siteConfig.name} logo`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Fernandes Journeys — Travel Journal",
+    description: siteConfig.shortDescription,
+    images: [siteConfig.ogImage],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  icons: {
+    icon: "/favicon.ico",
   },
 };
 
@@ -57,6 +99,7 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{ __html: themeInitScript }}
         />
+        <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
       </head>
       <body id="top" className="min-h-full flex flex-col font-sans">
         <Header latestPost={latestPost} />

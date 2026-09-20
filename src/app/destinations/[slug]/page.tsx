@@ -27,7 +27,21 @@ export async function generateMetadata({
   if (!dest) return { title: "Place" };
   return {
     title: dest.name,
-    description: `Notes from my trip to ${dest.name} — Fernandes Journeys.`,
+    description: dest.blurb || `Notes from my trip to ${dest.name} — Fernandes Journeys.`,
+    alternates: { canonical: `/destinations/${slug}` },
+    openGraph: {
+      title: dest.name,
+      description: dest.blurb,
+      type: "website",
+      url: `/destinations/${slug}`,
+      images: dest.image ? [{ url: dest.image, alt: dest.imageAlt }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: dest.name,
+      description: dest.blurb,
+      images: dest.image ? [dest.image] : undefined,
+    },
   };
 }
 

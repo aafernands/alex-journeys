@@ -4,12 +4,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostContent } from "@/components/blog/PostContent";
 import { RelatedPosts } from "@/components/blog/RelatedPosts";
+import { JsonLd } from "@/components/JsonLd";
 import {
   formatPostDate,
   getPostBySlug,
   getPostSlugs,
   getRelatedPosts,
 } from "@/lib/posts";
+import { blogPostingJsonLd } from "@/lib/seo";
 import { site } from "@/data/content";
 
 type PageProps = {
@@ -26,17 +28,28 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = getPostBySlug(slug);
   if (!post) return { title: "Post" };
+  const description = post.excerpt || `Travel story: ${post.title}`;
+  const images = post.featuredImage
+    ? [{ url: post.featuredImage.url, alt: post.featuredImage.alt || post.title }]
+    : undefined;
   return {
     title: post.title,
-    description: post.excerpt || `Travel story: ${post.title}`,
+    description,
+    alternates: { canonical: `/blog/${slug}` },
     openGraph: {
       title: post.title,
-      description: post.excerpt || undefined,
+      description,
       type: "article",
       publishedTime: post.date,
-      images: post.featuredImage
-        ? [{ url: post.featuredImage.url }]
-        : undefined,
+      modifiedTime: post.date,
+      url: `/blog/${slug}`,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description,
+      images: post.featuredImage ? [post.featuredImage.url] : undefined,
     },
   };
 }
@@ -65,9 +78,18 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   const toc = extractToc(post.contentHtml);
   const related = getRelatedPosts(slug, 3);
+  const jsonLd = blogPostingJsonLd({
+    title: post.title,
+    description: post.excerpt || undefined,
+    path: `/blog/${slug}`,
+    datePublished: post.date,
+    dateModified: post.date,
+    image: post.featuredImage?.url ?? null,
+  });
 
   return (
     <main className="bg-bg">
+      <JsonLd data={jsonLd} />
       {/* Product-style article header — no magazine dark hero */}
       <header className="border-b border-border bg-white">
         <div className="section-shell py-10 md:py-14">

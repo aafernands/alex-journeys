@@ -7,6 +7,7 @@ import { guideHubs, guidesIntro } from "@/data/guides";
 export const metadata: Metadata = {
   title: "Guides",
   description: guidesIntro.description,
+  alternates: { canonical: "/guides" },
 };
 
 export default function GuidesPage() {

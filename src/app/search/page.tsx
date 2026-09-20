@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Search",
   description:
     "Search Stories, Guides, Places, and key pages across Fernandes Journeys.",
+  alternates: { canonical: "/search" },
 };
 
 type Props = {

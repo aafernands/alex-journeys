@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Start Here",
   description:
     "New to Fernandes Journeys? Start with Places, Stories, Guides, and Tools from this personal travel journal.",
+  alternates: { canonical: "/start-here" },
 };
 
 const steps = [

@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Stories",
   description:
     "Trip notes, destination guides, and travel tips from Fernandes Journeys.",
+  alternates: { canonical: "/blog" },
 };
 
 export default function BlogIndexPage() {
