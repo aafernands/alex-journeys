@@ -6,9 +6,10 @@ Public readers can **Sign in with Google** (header) and **Save** blog posts. Dat
 
 | Surface | Behavior |
 | --- | --- |
-| Header | Sign in / Sign out; **Saved** link when signed in |
+| Header | Sign in / Sign out; **Saved** → `/saved`; **Account** → `/account` |
 | Blog post | **Save** / **Saved** toggle; signed-out tap → Google sign-in |
-| `/saved` | List of saved posts (title, saved date, link); empty state if none |
+| `/saved` | Dedicated saves list (title, saved date, link); empty state if none |
+| `/account` | Signed-in hub: Google profile, saved posts, sign out; guests get Sign in with Google |
 
 Reader sessions **do not** unlock `/cms`.
 
@@ -64,7 +65,9 @@ Until then, non-test Google accounts will fail sign-in even though the site UI s
 - `src/lib/firebase-admin.ts` — Admin init
 - `src/lib/saved-posts.ts` — list / add / remove
 - `src/app/api/saved/route.ts` — GET / POST / DELETE
-- `src/components/ReaderAuthButtons.tsx`, `SavePostButton.tsx`
+- `src/components/ReaderAuthButtons.tsx`, `SavePostButton.tsx`, `AccountAuthActions.tsx`
+- `src/app/account/page.tsx` — reader account hub (profile + saves)
+- `src/app/saved/page.tsx` — dedicated saves list
 - `src/auth.ts` — Google open to all; `session.user.id` + `isAdmin` for CMS
 
 ## Named Firestore database (AI Studio)

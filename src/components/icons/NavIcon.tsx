@@ -52,6 +52,7 @@ const ICONS: Record<string, LucideIcon> = {
   sun: Sun,
   trees: Trees,
   user: User,
+  "circle-user": User,
   utensils: Utensils,
   wallet: Wallet,
   wifi: Wifi,

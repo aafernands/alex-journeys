@@ -9,16 +9,20 @@ type Props = {
   onNavigate?: () => void;
   /** When false, hide the control (Google OAuth not configured). */
   googleConfigured?: boolean;
+  /** Override sign-in return URL (default: current page). */
+  callbackUrl?: string;
 };
 
 /**
  * Public reader auth: Sign in with Google / Sign out.
  * Does not expose CMS; admins still use /cms.
+ * Profile / saves live under /account (nav link).
  */
 export function ReaderAuthButtons({
   variant = "header",
   onNavigate,
   googleConfigured = true,
+  callbackUrl,
 }: Props) {
   const { data: session, status } = useSession();
   const [pending, setPending] = useState(false);
@@ -79,7 +83,9 @@ export function ReaderAuthButtons({
       onClick={async () => {
         setPending(true);
         try {
-          await signIn("google", { callbackUrl: window.location.href });
+          await signIn("google", {
+            callbackUrl: callbackUrl ?? window.location.href,
+          });
         } finally {
           setPending(false);
         }
