@@ -41,7 +41,7 @@ export function ContactForm({ labels }: Props) {
 
   return (
     <form
-      className="mt-10 space-y-5"
+      className="hub-follow space-y-5"
       onSubmit={(e) => {
         e.preventDefault();
         setError(null);

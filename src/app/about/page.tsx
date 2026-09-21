@@ -44,7 +44,7 @@ export default function AboutPage() {
         { label: "About" },
       ]}
     >
-      <div className="mt-10 grid gap-8 md:mt-12 md:grid-cols-[minmax(0,14rem)_1fr] md:items-start md:gap-10">
+      <div className="hub-follow grid gap-8 md:grid-cols-[minmax(0,14rem)_1fr] md:items-start md:gap-10">
         <div className="relative mx-auto aspect-[3/4] w-full max-w-[14rem] overflow-hidden rounded-xl border border-border bg-surface-soft md:mx-0">
           <Image
             src={site.authorPhoto}
@@ -60,12 +60,12 @@ export default function AboutPage() {
         </div>
       </div>
 
-      <aside className="panel-soft mt-8 p-6 md:p-8">
+      <aside className="panel-soft hub-block p-6 md:p-8">
         <p className="eyebrow">{asString(next.eyebrow, "Next step")}</p>
-        <p className="font-display mt-2 text-lg font-bold text-heading">
+        <p className="card-title mt-2">
           {asString(next.title, "New to the journal?")}
         </p>
-        <p className="mt-2 text-sm leading-relaxed text-text">
+        <p className="card-body mt-2">
           {asString(
             next.body,
             "Start with destinations I’ve visited, then stories from the road, then the resources and trip tools I actually use.",

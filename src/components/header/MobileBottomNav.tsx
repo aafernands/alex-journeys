@@ -71,7 +71,7 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      className={`fixed inset-x-0 bottom-0 z-[150] border-t border-border bg-white/95 backdrop-blur-md transition-[transform,opacity] duration-200 ease-out md:hidden motion-reduce:transition-none ${
+      className={`fixed inset-x-0 bottom-0 z-[150] border-t border-border bg-white/95 shadow-[0_-8px_24px_rgba(20,17,13,0.08)] backdrop-blur-md transition-[transform,opacity] duration-200 ease-out md:hidden motion-reduce:transition-none dark:shadow-[0_-10px_28px_rgba(0,0,0,0.45)] ${
         visible
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-full opacity-0"

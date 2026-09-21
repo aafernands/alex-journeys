@@ -51,7 +51,7 @@ export function Footer() {
         className="border-t border-border"
         aria-labelledby="newsletter-heading"
       >
-        <div className="section-shell py-12 md:py-16">
+        <div className="section-shell section-band">
           <div className="newsletter-postcard relative overflow-hidden rounded-xl bg-near-black text-hero-type shadow-[0_20px_50px_-28px_rgba(0,0,0,0.55)]">
             {/* Airmail stripe frame */}
             <div
@@ -83,7 +83,7 @@ export function Footer() {
                   <p className="eyebrow !text-accent">Dispatch from the road</p>
                   <h2
                     id="newsletter-heading"
-                    className="font-display mt-2 max-w-xl text-3xl tracking-tight sm:text-4xl lg:text-[2.75rem]"
+                    className="font-display text-display mt-2 max-w-xl text-hero-type"
                   >
                     <span className="font-normal">The Traveler&apos;s</span>{" "}
                     <span className="font-bold">Journal</span>
@@ -144,7 +144,7 @@ export function Footer() {
 
       {/* Full-bleed dark footer */}
       <div className="bg-near-black text-hero-type">
-        <div className="section-shell py-12 md:py-14">
+        <div className="section-shell section-band">
           <div className="grid gap-10 md:grid-cols-12 md:gap-8">
             <div className="md:col-span-4">
               <BrandLogo className="h-10 w-auto" />

@@ -96,7 +96,7 @@ export default async function GuideHubPage({ params }: PageProps) {
         { label: hub.title },
       ]}
     >
-      <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-surface-soft px-3 py-1.5 text-sm font-semibold text-heading">
+      <div className="hub-follow inline-flex items-center gap-2 rounded-full bg-surface-soft px-3 py-1.5 text-sm font-semibold text-heading">
         <NavIcon name={hub.icon} size={16} className="text-accent" />
         {posts.length + pages.length}{" "}
         {posts.length + pages.length === 1 ? "note" : "notes"} from the journal
@@ -110,11 +110,11 @@ export default async function GuideHubPage({ params }: PageProps) {
                 href={page.href}
                 className="panel-interactive group flex h-full gap-4 p-5"
               >
-                <span className="panel-nested flex size-11 shrink-0 items-center justify-center bg-white text-accent">
+                <span className="icon-tile">
                   <NavIcon name="book-open" size={20} />
                 </span>
                 <span>
-                  <span className="font-display block text-lg font-bold text-heading">
+                  <span className="card-title block">
                     {page.title}
                   </span>
                   {page.description ? (
@@ -130,7 +130,7 @@ export default async function GuideHubPage({ params }: PageProps) {
       ) : null}
 
       {posts.length > 0 ? (
-        <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+        <ul className="hub-follow grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {posts.map((post, i) => (
             <li key={post.slug}>
               <PostCard post={post} priority={i < 3} />

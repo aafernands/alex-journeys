@@ -53,11 +53,11 @@ export default function ContactPage() {
           ),
         }}
       />
-      <aside className="panel-soft mt-12 p-6">
-        <p className="font-display text-lg font-bold text-heading">
+      <aside className="panel-soft hub-block p-6">
+        <p className="card-title">
           {asString(aside.title, "Prefer email?")}
         </p>
-        <p className="mt-2 text-sm leading-relaxed text-text">
+        <p className="card-body mt-2">
           {asideBody}{" "}
           <Link href="/privacy" className="text-link hover:text-accent">
             Read the Privacy Policy

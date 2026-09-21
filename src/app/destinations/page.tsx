@@ -38,7 +38,7 @@ export default function DestinationsIndexPage() {
       ]}
     >
       <DestinationCarousel
-        className="mt-10"
+        className="hub-follow"
         destinations={all}
         label="All places"
         preloadFirst
@@ -59,7 +59,7 @@ export default function DestinationsIndexPage() {
         ))}
       </nav>
 
-      <div className="mt-14 space-y-16">
+      <div className="hub-block space-y-12 md:space-y-16">
         {destinationsTree.map((continent) => (
           <section
             key={continent.id}

@@ -47,7 +47,10 @@ export function SitePage({
   extraAdminLinks,
 }: Props) {
   const width = narrow ? "max-w-3xl" : "max-w-none";
-  const bg = tone === "white" ? "bg-white" : "bg-bg";
+  const bg =
+    tone === "white"
+      ? "bg-white [--carousel-fade:var(--white)]"
+      : "bg-bg [--carousel-fade:var(--bg)]";
   const editHref = adminEdit?.href ?? (cmsSlug ? cmsEditPageHref(cmsSlug) : null);
   const editLabel = adminEdit?.label ?? "Edit page";
 
@@ -61,7 +64,7 @@ export function SitePage({
           showChip={false}
         />
       ) : null}
-      <div className="section-shell py-10 md:py-14">
+      <div className="section-shell section-band">
         <div className={width}>
           {crumbs && crumbs.length > 0 ? (
             <nav aria-label="Breadcrumb" className="text-sm text-muted">

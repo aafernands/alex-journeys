@@ -153,7 +153,7 @@ export default async function AccountPage() {
   return (
     <main className="bg-bg">
       <header className="border-b border-border bg-white">
-        <div className="section-shell py-10 md:py-14">
+        <div className="section-shell section-band">
           <div className="mx-auto max-w-3xl">
             <p className="eyebrow">Your dashboard</p>
             <h1 className="font-display text-display mt-2 text-heading">
@@ -167,7 +167,7 @@ export default async function AccountPage() {
         </div>
       </header>
 
-      <div className="section-shell py-10 md:py-14">
+      <div className="section-shell section-band">
         <div className="mx-auto flex max-w-3xl flex-col gap-8">
           {!signedIn ? (
             <div className="panel p-6 md:p-8">

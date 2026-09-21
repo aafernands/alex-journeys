@@ -7,7 +7,7 @@ type Props = {
   children: ReactNode;
   /** Visual band: white, soft surface, or page default */
   tone?: Tone;
-  /** Hairline top + bottom borders (typical for soft bands) */
+  /** Hairline top border between bands (avoids double lines) */
   hairline?: boolean;
   /** Extra vertical padding */
   size?: "md" | "lg";
@@ -16,9 +16,9 @@ type Props = {
 };
 
 const toneClass: Record<Tone, string> = {
-  default: "bg-bg",
-  soft: "bg-surface-soft",
-  white: "bg-white",
+  default: "bg-bg [--carousel-fade:var(--bg)]",
+  soft: "bg-surface-soft [--carousel-fade:var(--surface-soft)]",
+  white: "bg-white [--carousel-fade:var(--white)]",
 };
 
 /**
@@ -34,8 +34,8 @@ export function Section({
   className = "",
   "aria-labelledby": labelledBy,
 }: Props) {
-  const py = size === "lg" ? "py-12 md:py-16" : "py-10 md:py-12";
-  const borders = hairline ? "border-y border-border" : "";
+  const py = size === "lg" ? "section-band" : "py-10 md:py-12";
+  const borders = hairline ? "border-t border-border" : "";
 
   return (
     <section

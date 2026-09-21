@@ -46,13 +46,13 @@ export async function DestinationCountryView({
   const editHref = cmsEditDestinationHref(slug);
 
   return (
-    <main className="bg-white">
+    <main className="bg-white [--carousel-fade:var(--white)]">
       <AdminPublicChrome
         editHref={editHref}
         editLabel="Edit destination"
         showChip={false}
       />
-      <div className="section-shell py-10 md:py-14">
+      <div className="section-shell section-band">
         <div className="mx-auto max-w-3xl">
           <nav aria-label="Breadcrumb" className="text-sm text-muted">
             <ol className="flex flex-wrap items-center gap-2">
@@ -222,7 +222,7 @@ export async function DestinationCountryView({
                         >
                           {formatPostDateShort(post.date)}
                         </time>
-                        <p className="font-display mt-1 text-lg font-semibold leading-snug text-heading transition group-hover:text-accent sm:text-xl">
+                        <p className="card-title mt-1 transition group-hover:text-accent">
                           {post.title}
                         </p>
                         <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-text">

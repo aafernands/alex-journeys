@@ -13,6 +13,7 @@ export function GuidesHubStrip() {
     <Section
       id="guides-hubs"
       tone="white"
+      hairline
       aria-labelledby="guides-hubs-heading"
     >
       <SectionHead
@@ -34,21 +35,19 @@ export function GuidesHubStrip() {
         }
       />
 
-      <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="hub-follow grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {guideHubs.map((hub) => (
           <li key={hub.slug}>
             <Link
               href={`/guides/${hub.slug}`}
               className="panel-interactive group flex h-full gap-3 p-4 md:p-5"
             >
-              <span className="panel-nested flex size-10 shrink-0 items-center justify-center bg-white text-accent">
+              <span className="icon-tile">
                 <NavIcon name={hub.icon} size={18} />
               </span>
               <span className="min-w-0">
-                <span className="font-display block text-base font-bold text-heading">
-                  {hub.title}
-                </span>
-                <span className="mt-1 block text-sm leading-snug text-text line-clamp-2">
+                <span className="card-title block">{hub.title}</span>
+                <span className="card-body mt-1 block line-clamp-2">
                   {hub.description}
                 </span>
               </span>

@@ -62,16 +62,16 @@ export function MobileNavDrawer({
       >
         {/* 1. Header: logo + close */}
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
-          <BrandLogo className="h-9 w-auto" priority onClick={onClose} />
+          <BrandLogo className="h-10 w-auto" priority onClick={onClose} />
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
             aria-label="Close menu"
             onClick={onClose}
           >
             <svg
-              width="20"
-              height="20"
+              width="22"
+              height="22"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"

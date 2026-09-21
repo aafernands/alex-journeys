@@ -175,7 +175,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           {/* Mobile: search (left) */}
           <button
             type="button"
-            className="relative z-10 inline-flex h-10 w-10 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft md:hidden"
+            className="relative z-10 inline-flex h-11 w-11 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft md:hidden"
             aria-expanded={mobileSearchOpen}
             aria-controls="mobile-search-panel"
             onClick={() => {
@@ -194,8 +194,8 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             </span>
             {mobileSearchOpen ? (
               <svg
-                width="20"
-                height="20"
+                width="22"
+                height="22"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -206,7 +206,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
               </svg>
             ) : (
               <SearchIcon
-                className="h-5 w-5"
+                className="h-[22px] w-[22px]"
                 strokeWidth={2}
                 aria-hidden="true"
               />
@@ -253,7 +253,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
                   id={destMenuId}
                   role="menu"
                   aria-label="Places"
-                  className="absolute left-0 top-full z-50 mt-3 min-w-[14rem] rounded-xl border border-border bg-white py-2"
+                  className="absolute left-0 top-full z-50 mt-3 min-w-[14rem] rounded-xl border border-border bg-white py-2 shadow-lg"
                 >
                   <Link
                     href="/destinations"
@@ -291,7 +291,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
                         {isContinentOpen && (
                           <ul
                             role="menu"
-                            className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-border bg-white py-2"
+                            className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-border bg-white py-2 shadow-lg"
                           >
                             {continent.countries.map((country) => (
                               <li key={country.slug} role="none">
@@ -365,7 +365,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           <div className="relative z-10 flex items-center md:hidden">
             <button
               type="button"
-              className="inline-flex h-12 w-12 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
               aria-expanded={mobileOpen}
               aria-controls="mobile-nav"
               onClick={() => {
@@ -377,8 +377,8 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
                 {mobileOpen ? "Close menu" : "Menu"}
               </span>
               <svg
-                width="26"
-                height="26"
+                width="22"
+                height="22"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -398,7 +398,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
         {mobileSearchOpen && (
           <div
             id="mobile-search-panel"
-            className="border-t border-border bg-white px-4 py-3 md:hidden"
+            className="border-t border-border bg-white px-5 py-3 md:hidden"
           >
             <SearchInput
               ref={mobileSearchRef}

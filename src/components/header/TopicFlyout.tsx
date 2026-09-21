@@ -82,7 +82,7 @@ export function TopicFlyout({
         <div
           id={menuId}
           role="menu"
-          className="absolute left-1/2 top-full z-50 mt-3 w-[22rem] -translate-x-1/2 rounded-xl border border-border bg-white py-2"
+          className="absolute left-1/2 top-full z-50 mt-3 w-[22rem] -translate-x-1/2 rounded-xl border border-border bg-white py-2 shadow-lg"
         >
           <Link
             href={href}
