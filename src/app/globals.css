@@ -1323,6 +1323,10 @@ select.plan-input {
   margin-top: 0;
 }
 
+.plan-actions.plan-follow {
+  margin-top: var(--plan-gap);
+}
+
 .plan-day {
   padding-bottom: var(--plan-section);
 }

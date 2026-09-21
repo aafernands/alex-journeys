@@ -39,6 +39,7 @@ import {
   type TripItemType,
 } from "@/lib/trip-record";
 import type { StoredPlan } from "@/lib/trip-planner-storage";
+import { plan } from "@/components/trip-planner/density";
 import { ForwardBookings } from "@/components/trip-planner/ForwardBookings";
 import { WeekView } from "@/components/trip-planner/WeekView";
 
@@ -77,7 +78,7 @@ function ItineraryAuthLinks({
   onRemember: () => void;
 }) {
   return (
-    <div className="mt-3 flex flex-wrap gap-2">
+    <div className="plan-actions plan-actions-inline plan-follow">
       <Link
         href={planATripLoginHref(tripId, "signin")}
         className="btn btn-ink"
@@ -95,9 +96,6 @@ function ItineraryAuthLinks({
     </div>
   );
 }
-
-const inputClass =
-  "mt-2 min-h-11 w-full rounded-lg border border-border bg-white px-4 text-sm text-heading placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25";
 
 function laneIcon(partner: TripPlannerPartner): string {
   if (partner.showWhen === "flights") return "plane";
@@ -118,7 +116,7 @@ function StatusChips({
   label: string;
 }) {
   return (
-    <div className="flex flex-wrap gap-1.5" role="group" aria-label={label}>
+    <div className="flex flex-wrap gap-2" role="group" aria-label={label}>
       {TRIP_ITEM_STATUSES.map((status) => {
         const pressed = value === status;
         return (
@@ -127,14 +125,14 @@ function StatusChips({
             type="button"
             aria-pressed={pressed}
             onClick={() => onChange(status)}
-            className={`inline-flex min-h-9 items-center rounded-full px-3 text-xs font-semibold transition ${
+            className={`${plan.chip} ${
               pressed
                 ? status === "booked"
-                  ? "bg-ink text-on-solid"
+                  ? "border-ink bg-ink text-on-solid"
                   : status === "skipped"
-                    ? "bg-surface-soft text-muted"
-                    : "bg-accent/15 text-accent"
-                : "border border-border bg-white text-text hover:border-border-strong"
+                    ? "border-border bg-surface-soft text-muted"
+                    : "border-accent/30 bg-accent/15 text-accent"
+                : "border-border bg-white text-text hover:border-border-strong"
             }`}
           >
             {TRIP_STATUS_LABEL[status]}
@@ -234,8 +232,8 @@ function BookingItemForm({
     <form
       className={
         framed
-          ? "space-y-3 rounded-lg border border-border bg-white p-3"
-          : "mt-4 space-y-3 border-t border-border pt-4"
+          ? `${plan.inset} plan-stack-tight`
+          : "plan-stack-tight plan-section border-t border-border pt-4"
       }
       onSubmit={(event) => {
         event.preventDefault();
@@ -290,11 +288,13 @@ function BookingItemForm({
         );
       }}
     >
-      <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-        Paste booking details{" "}
-        <span className="font-normal normal-case tracking-normal">(optional)</span>
+      <label className="plan-field">
+        <span className={plan.label}>
+          Paste booking details{" "}
+          <span className="font-normal normal-case tracking-normal">(optional)</span>
+        </span>
         <textarea
-          className={`${inputClass} min-h-20 py-3`}
+          className={plan.input}
           rows={3}
           placeholder="Paste a confirmation email or summary"
           value={paste}
@@ -304,7 +304,7 @@ function BookingItemForm({
           }}
         />
       </label>
-      <p className="text-sm leading-relaxed text-muted">
+      <p className={`${plan.prose} text-muted`}>
         Looks for a link, a confirmation code, a time, and a trip day in the text
         you paste. It does not open or scrape booking sites.
       </p>
@@ -312,22 +312,22 @@ function BookingItemForm({
         Fill from paste
       </button>
       {pasteNote ? (
-        <p className="text-sm text-text" role="status">
+        <p className={`${plan.body} text-text`} role="status">
           {pasteNote}
         </p>
       ) : null}
-      <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-        Title
+      <label className="plan-field">
+        <span className={plan.label}>Title</span>
         <input
-          className={inputClass}
+          className={plan.input}
           value={title}
           onChange={(event) => setTitle(event.target.value)}
         />
       </label>
-      <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-        Link
+      <label className="plan-field">
+        <span className={plan.label}>Link</span>
         <input
-          className={inputClass}
+          className={plan.input}
           inputMode="url"
           placeholder="https://"
           value={url}
@@ -337,21 +337,23 @@ function BookingItemForm({
           }}
         />
       </label>
-      <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-        Confirmation #{" "}
-        <span className="font-normal normal-case tracking-normal">(optional)</span>
+      <label className="plan-field">
+        <span className={plan.label}>
+          Confirmation #{" "}
+          <span className="font-normal normal-case tracking-normal">(optional)</span>
+        </span>
         <input
-          className={inputClass}
+          className={plan.input}
           maxLength={40}
           value={confirmation}
           onChange={(event) => setConfirmation(event.target.value)}
         />
       </label>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-          Day
+      <div className="plan-grid-2">
+        <label className="plan-field">
+          <span className={plan.label}>Day</span>
           <select
-            className={inputClass}
+            className={plan.input}
             value={dayIndex}
             onChange={(event) => setDayIndex(event.target.value)}
           >
@@ -364,44 +366,44 @@ function BookingItemForm({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-          Time{" "}
-          <span className="font-normal normal-case tracking-normal">(optional)</span>
+        <label className="plan-field">
+          <span className={plan.label}>
+            Time{" "}
+            <span className="font-normal normal-case tracking-normal">(optional)</span>
+          </span>
           <input
-            className={inputClass}
+            className={plan.input}
             type="time"
             value={time}
             onChange={(event) => setTime(event.target.value.slice(0, 5))}
           />
         </label>
       </div>
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-          Status
-        </p>
-        <div className="mt-2">
-          <StatusChips
-            value={status}
-            label="Booking status"
-            onChange={setStatus}
-          />
-        </div>
+      <div className="plan-stack-tight">
+        <p className={plan.label}>Status</p>
+        <StatusChips
+          value={status}
+          label="Booking status"
+          onChange={setStatus}
+        />
       </div>
-      <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-        Notes <span className="font-normal normal-case tracking-normal">(optional)</span>
+      <label className="plan-field">
+        <span className={plan.label}>
+          Notes <span className="font-normal normal-case tracking-normal">(optional)</span>
+        </span>
         <textarea
-          className={`${inputClass} min-h-20 py-3`}
+          className={plan.input}
           rows={2}
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
         />
       </label>
       {error ? (
-        <p className="text-sm text-link" role="alert">
+        <p className={plan.error} role="alert">
           {error}
         </p>
       ) : null}
-      <div className="flex flex-wrap gap-2">
+      <div className="plan-actions plan-actions-inline">
         <button type="submit" className="btn btn-primary">
           {existing ? "Save changes" : "Add to itinerary"}
         </button>
@@ -428,50 +430,48 @@ function ItemCard({
 }) {
   const when = itemWhen(item, days);
   return (
-    <div className="rounded-lg border border-border bg-white p-3">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="font-display font-bold text-heading">{item.title}</p>
-          {when ? <p className="mt-0.5 text-sm text-muted">{when}</p> : null}
+    <div className={`${plan.inset} plan-stack-tight`}>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div className="min-w-0 plan-stack-tight">
+          <p className={plan.h4}>{item.title}</p>
+          {when ? <p className={`${plan.caption} text-muted`}>{when}</p> : null}
           {item.url ? (
             <OutboundLink
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-1 block truncate text-sm text-link hover:text-accent"
+              className={`${plan.textBtn} truncate text-link hover:text-accent`}
             >
               {item.url.replace(/^https?:\/\//, "")}
               <span className="sr-only"> (opens in a new tab)</span>
             </OutboundLink>
           ) : null}
           {item.notes ? (
-            <p className="mt-1 text-sm leading-relaxed text-text">{item.notes}</p>
+            <p className={`${plan.body} text-text`}>{item.notes}</p>
           ) : null}
         </div>
-        <div className="flex gap-3">
+        <div className="plan-inline-actions shrink-0">
           <button
             type="button"
-            className="text-sm font-semibold text-accent hover:underline"
+            className={`${plan.textBtn} text-accent hover:underline`}
             onClick={onEdit}
           >
             Edit
           </button>
           <button
             type="button"
-            className="text-sm font-semibold text-muted transition hover:text-accent"
+            className={`${plan.textBtn} text-muted transition hover:text-accent`}
             onClick={onRemove}
           >
             Remove
           </button>
         </div>
       </div>
-      <div className="mt-3">
-        <StatusChips
-          value={item.status}
-          label={`Status for ${item.title}`}
-          onChange={onStatus}
-        />
-      </div>
+      <StatusChips
+        value={item.status}
+        label={`Status for ${item.title}`}
+        onChange={onStatus}
+      />
     </div>
   );
 }
@@ -507,48 +507,48 @@ function TimelineEntry({
     );
   }
   return (
-    <div>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
+    <div className="plan-stack-tight">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div className="min-w-0 plan-stack-tight">
           <div className="flex flex-wrap items-center gap-2">
             {item.time ? (
-              <span className="inline-flex items-center rounded-full border border-accent/25 bg-accent/10 px-2.5 py-0.5 text-[0.7rem] font-semibold text-accent">
+              <span className={`${plan.badge} border border-accent/25 bg-accent/10 text-accent`}>
                 {item.time}
               </span>
             ) : null}
-            <p className="font-display font-bold text-heading">{item.title}</p>
+            <p className={plan.h4}>{item.title}</p>
           </div>
-          <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+          <p className={plan.label}>
             {[TRIP_STATUS_LABEL[item.status], item.confirmation ? `Conf. ${item.confirmation}` : null]
               .filter(Boolean)
               .join(" · ")}
           </p>
           {item.notes ? (
-            <p className="mt-1 text-sm leading-relaxed text-text">{item.notes}</p>
+            <p className={`${plan.body} text-text`}>{item.notes}</p>
           ) : null}
           {item.url ? (
             <OutboundLink
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-1 inline-flex text-sm font-semibold text-link hover:text-accent"
+              className={`${plan.textBtn} text-link hover:text-accent`}
             >
               Open link
               <span className="sr-only"> (opens in a new tab)</span>
             </OutboundLink>
           ) : null}
         </div>
-        <div className="flex gap-3">
+        <div className="plan-inline-actions shrink-0">
           <button
             type="button"
-            className="text-sm font-semibold text-accent hover:underline"
+            className={`${plan.textBtn} text-accent hover:underline`}
             onClick={onEdit}
           >
             Edit
           </button>
           <button
             type="button"
-            className="text-sm font-semibold text-muted transition hover:text-accent"
+            className={`${plan.textBtn} text-muted transition hover:text-accent`}
             onClick={onRemove}
           >
             Remove
@@ -573,33 +573,32 @@ function JournalNotes({
   const matches = journalNotesForDestination(notes, places, destination);
   const place = destination.split(",")[0]?.trim() || destination.trim();
   return (
-    <section className="mt-8" aria-labelledby={`${headingId}-journal`}>
-      <h3
-        id={`${headingId}-journal`}
-        className="font-display text-lg font-bold text-heading"
-      >
+    <section className="plan-block" aria-labelledby={`${headingId}-journal`}>
+      <h3 id={`${headingId}-journal`} className={plan.h3}>
         Notes from trips I’ve already walked
       </h3>
       {matches.length === 0 ? (
-        <p className="mt-2 text-sm leading-relaxed text-muted">
+        <p className={`${plan.prose} plan-follow text-muted`}>
           No journal notes for {place} yet. When a story from that trip is on the
           site, it will show up here.
         </p>
       ) : (
-        <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+        <ul className="plan-grid-2 plan-follow">
           {matches.map((note) => (
             <li key={note.slug}>
               <Link
                 href={`/${note.slug}`}
-                className="panel-interactive flex h-full flex-col p-4"
+                className="panel-interactive plan-inset flex h-full flex-col"
               >
-                <span className="card-title">{note.title}</span>
+                <span className={plan.h4}>{note.title}</span>
                 {note.excerpt ? (
-                  <span className="mt-2 line-clamp-3 text-sm leading-relaxed text-text">
+                  <span className={`${plan.body} plan-follow line-clamp-3 text-text`}>
                     {note.excerpt}
                   </span>
                 ) : null}
-                <span className="mt-3 text-sm font-semibold text-link">Read story</span>
+                <span className={`${plan.caption} plan-follow font-semibold text-link`}>
+                  Read story
+                </span>
               </Link>
             </li>
           ))}
@@ -656,7 +655,7 @@ export function ItineraryHub({
 
   function renderTimeline(list: TripItem[]) {
     return (
-      <ol className="mt-3 space-y-4">
+      <ol className="plan-stack plan-follow">
         {list.map((item) => (
           <li key={item.id}>
             <TimelineEntry
@@ -737,28 +736,25 @@ export function ItineraryHub({
 
   return (
     <>
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h2
-            id={headingId}
-            className="font-display text-2xl font-bold tracking-tight text-heading"
-          >
+      <div className="plan-toolbar">
+        <div className="min-w-0 plan-stack-tight">
+          <h2 id={headingId} className={plan.h2}>
             {config.steps.next.heading}
           </h2>
-          <p className="mt-2 font-display text-xl font-bold text-heading">
+          <p className={plan.h3}>
             {tripTitle?.trim() || state.destination.trim()}
           </p>
           {tripTitle?.trim() ? (
-            <p className="mt-1 text-sm text-muted">{state.destination.trim()}</p>
+            <p className={`${plan.caption} text-muted`}>{state.destination.trim()}</p>
           ) : null}
-          <p className="mt-1 text-sm text-muted">
+          <p className={`${plan.caption} text-muted`}>
             {[dates, travelers].filter(Boolean).join(" · ")}
           </p>
-          <p className="mt-2 text-sm leading-relaxed text-muted md:text-base">
+          <p className={`${plan.prose} text-muted`}>
             {subhead}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="plan-actions plan-actions-inline">
           <button
             type="button"
             className="btn btn-secondary"
@@ -790,20 +786,20 @@ export function ItineraryHub({
         </div>
       </div>
       {copied ? (
-        <p className="mt-3 text-sm font-semibold text-heading" role="status">
+        <p className={`${plan.caption} plan-follow font-semibold text-heading`} role="status">
           Link copied. Anyone with it can open this itinerary.
         </p>
       ) : null}
 
       {saveMode === "local" ? (
-        <aside className="panel-soft mt-5 px-4 py-4" aria-label="Save itinerary">
-          <p className="text-sm leading-relaxed text-text">
+        <aside className={`${plan.soft} plan-section plan-stack-tight`} aria-label="Save itinerary">
+          <p className={`${plan.prose} text-text`}>
             {tripId
               ? "You’re signed out. This itinerary stays in this browser. Sign in to keep saving it to your account."
               : config.checklistHint}
           </p>
           {tripId ? null : (
-            <p className="mt-2 text-sm leading-relaxed text-text">
+            <p className={`${plan.prose} text-text`}>
               Sign in or create an account and you’ll come back to this itinerary.
             </p>
           )}
@@ -812,11 +808,11 @@ export function ItineraryHub({
       ) : null}
 
       {saveMode === "offer" ? (
-        <aside className="panel-soft mt-5 px-4 py-4" aria-label="Save itinerary to your account">
-          <p className="text-sm leading-relaxed text-text">
+        <aside className={`${plan.soft} plan-section plan-stack-tight`} aria-label="Save itinerary to your account">
+          <p className={`${plan.prose} text-text`}>
             Save this browser itinerary to your account so you can open it later?
           </p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="plan-actions plan-actions-inline">
             <button type="button" className="btn btn-ink" onClick={onSaveToAccount}>
               Save itinerary
             </button>
@@ -828,8 +824,8 @@ export function ItineraryHub({
       ) : null}
 
       {saveMode === "declined" ? (
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-muted">This itinerary stays in this browser.</p>
+        <div className="plan-toolbar plan-section">
+          <p className={`${plan.body} text-muted`}>This itinerary stays in this browser.</p>
           <button type="button" className="btn btn-secondary" onClick={onSaveToAccount}>
             Save to your account
           </button>
@@ -837,7 +833,7 @@ export function ItineraryHub({
       ) : null}
 
       {saveCopy ? (
-        <p className="mt-4 text-sm font-semibold text-heading" role="status">
+        <p className={`${plan.caption} plan-follow font-semibold text-heading`} role="status">
           {saveCopy}
           {saveMode === "saved" ? (
             <>
@@ -850,9 +846,11 @@ export function ItineraryHub({
         </p>
       ) : null}
       {saveMode === "unavailable" || saveMode === "error" ? (
-        <button type="button" className="btn btn-secondary mt-3" onClick={onRetrySave}>
-          Try saving again
-        </button>
+        <div className="plan-actions plan-actions-inline plan-follow">
+          <button type="button" className="btn btn-secondary" onClick={onRetrySave}>
+            Try saving again
+          </button>
+        </div>
       ) : null}
 
       <ForwardBookings
@@ -866,21 +864,20 @@ export function ItineraryHub({
       />
 
       {partners.length > 0 ? (
-        <section className="mt-5" aria-labelledby={`${headingId}-left`}>
-          <h3
-            id={`${headingId}-left`}
-            className="text-xs font-semibold uppercase tracking-[0.08em] text-muted"
-          >
+        <section className="plan-section" aria-labelledby={`${headingId}-left`}>
+          <h3 id={`${headingId}-left`} className={plan.h3}>
             What’s left to book
           </h3>
-          <ul className="mt-2 flex flex-wrap gap-2">
+          <ul className="plan-follow flex flex-wrap gap-2">
             {partners.map((partner) => {
               const progress = laneProgress(itemsForLane(items, partner));
               return (
                 <li key={partner.key}>
-                  <span className="inline-flex min-h-9 items-center rounded-full border border-border bg-white px-3 text-sm">
-                    <span className="font-semibold text-heading">{laneName(partner)}</span>
-                    <span className="ml-2 text-muted">{LANE_PROGRESS_LABEL[progress]}</span>
+                  <span className={`${plan.badge} border border-border bg-white`}>
+                    <span className="text-heading">{laneName(partner)}</span>
+                    <span className="ml-2 font-medium text-muted">
+                      {LANE_PROGRESS_LABEL[progress]}
+                    </span>
                   </span>
                 </li>
               );
@@ -890,18 +887,20 @@ export function ItineraryHub({
       ) : null}
 
       {guestBackup ? (
-        <aside className="panel-nested mt-4 px-4 py-3" aria-label="Browser draft">
-          <p className="text-sm leading-relaxed text-text">
+        <aside className={`${plan.soft} plan-section plan-stack-tight`} aria-label="Browser draft">
+          <p className={`${plan.prose} text-text`}>
             You also have an unsaved itinerary for {guestBackup.state.destination.trim()} in
             this browser.
           </p>
-          <button type="button" className="btn btn-secondary mt-3" onClick={onRestoreBackup}>
-            Restore that draft
-          </button>
+          <div className="plan-actions plan-actions-inline">
+            <button type="button" className="btn btn-secondary" onClick={onRestoreBackup}>
+              Restore that draft
+            </button>
+          </div>
         </aside>
       ) : null}
 
-      <div className="mt-6 space-y-3">
+      <div className="plan-stack plan-block">
         {partners.map((partner) => {
           const href = resolveAffiliateHref(
             partner,
@@ -912,19 +911,19 @@ export function ItineraryHub({
           return (
             <article
               key={partner.key}
-              className={`rounded-xl border border-border p-4 ${
+              className={`plan-inset plan-stack border border-border ${
                 partner.isCore ? "bg-surface-soft" : "bg-white"
               }`}
             >
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 gap-3">
+                <div className="flex min-w-0 items-start gap-3">
                   <span className="icon-tile icon-tile-sm shrink-0">
                     <NavIcon name={laneIcon(partner)} size={16} />
                   </span>
-                  <div className="min-w-0">
-                    <h3 className="font-display font-bold text-heading">{partner.label}</h3>
+                  <div className="min-w-0 plan-stack-tight">
+                    <h3 className={plan.h3}>{partner.label}</h3>
                     {partner.blurb ? (
-                      <p className="mt-0.5 text-sm leading-relaxed text-muted">
+                      <p className={`${plan.body} text-muted`}>
                         {partner.blurb}
                       </p>
                     ) : null}
@@ -945,11 +944,11 @@ export function ItineraryHub({
               </div>
 
               {laneItems.length === 0 ? (
-                <p className="mt-4 text-sm leading-relaxed text-muted">
+                <p className={`${plan.body} text-muted`}>
                   Nothing saved here yet. Search, then add the booking you want to keep.
                 </p>
               ) : (
-                <ul className="mt-4 space-y-3">
+                <ul className="plan-stack-tight">
                   {laneItems.map((item) => {
                     const editing =
                       editor?.kind === "edit" &&
@@ -997,7 +996,7 @@ export function ItineraryHub({
               ) : (
                 <button
                   type="button"
-                  className="mt-4 text-sm font-semibold text-accent hover:underline"
+                  className={`${plan.textBtn} self-start text-accent hover:underline`}
                   onClick={() => setEditor({ kind: "add-lane", laneKey: partner.key })}
                 >
                   Add to itinerary
@@ -1008,15 +1007,12 @@ export function ItineraryHub({
         })}
       </div>
 
-      <section className="mt-8" aria-labelledby={`${headingId}-list`}>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3
-            id={`${headingId}-list`}
-            className="font-display text-lg font-bold text-heading"
-          >
+      <section className="plan-block" aria-labelledby={`${headingId}-list`}>
+        <div className="plan-toolbar">
+          <h3 id={`${headingId}-list`} className={plan.h3}>
             Day by day
           </h3>
-          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Itinerary layout">
+          <div className="plan-inline-actions" role="tablist" aria-label="Itinerary layout">
             {(
               [
                 { id: "timeline", label: "Timeline" },
@@ -1032,7 +1028,7 @@ export function ItineraryHub({
                   id={`${headingId}-${tab.id}-tab`}
                   aria-selected={active}
                   aria-controls={`${headingId}-${tab.id}-panel`}
-                  className={`inline-flex min-h-9 items-center rounded-full border px-4 text-sm font-semibold transition ${
+                  className={`${plan.chip} ${
                     active
                       ? "border-ink bg-ink text-on-solid"
                       : "border-border bg-white text-text hover:border-border-strong hover:bg-surface-soft"
@@ -1046,12 +1042,12 @@ export function ItineraryHub({
           </div>
         </div>
         {sorted.length === 0 ? (
-          <p className="mt-2 text-sm leading-relaxed text-muted">
+          <p className={`${plan.prose} plan-follow text-muted`}>
             Nothing saved yet. Search a partner, then add the booking you want to keep.
           </p>
         ) : null}
         {days.length === 0 ? (
-          <p className="mt-2 text-sm leading-relaxed text-muted">
+          <p className={`${plan.prose} plan-follow text-muted`}>
             Add start and end dates to split this trip into days.
           </p>
         ) : null}
@@ -1062,7 +1058,7 @@ export function ItineraryHub({
           aria-labelledby={`${headingId}-timeline-tab`}
         >
         {days.length > 0 ? (
-          <div className="panel-soft mt-4 p-4 sm:p-5">
+          <div className={`${plan.soft} plan-section`}>
             <nav aria-label="Jump to a day" className="flex gap-2 overflow-x-auto pb-1">
               {days.map((day) => {
                 const count = sorted.filter(
@@ -1072,34 +1068,34 @@ export function ItineraryHub({
                   <a
                     key={day.index}
                     href={`#${headingId}-day-${day.index}`}
-                    className="inline-flex min-h-11 shrink-0 flex-col justify-center rounded-lg border border-border bg-white px-3 py-1.5"
+                    className="plan-control inline-flex min-h-11 shrink-0 flex-col justify-center border border-border bg-white px-4 py-2"
                   >
-                    <span className="text-xs font-semibold text-heading">
+                    <span className={`${plan.caption} font-semibold whitespace-nowrap text-heading`}>
                       {day.label}
                       {count > 0 ? (
                         <span className="ml-1.5 text-accent">{count}</span>
                       ) : null}
                     </span>
                     {day.detail ? (
-                      <span className="text-[0.7rem] text-muted">{day.detail}</span>
+                      <span className={`${plan.caption} whitespace-nowrap text-muted`}>{day.detail}</span>
                     ) : null}
                   </a>
                 );
               })}
               <a
                 href={`#${headingId}-unscheduled`}
-                className="inline-flex min-h-11 shrink-0 flex-col justify-center rounded-lg border border-border bg-white px-3 py-1.5"
+                className="plan-control inline-flex min-h-11 shrink-0 flex-col justify-center border border-border bg-white px-4 py-2"
               >
-                <span className="text-xs font-semibold text-heading">
+                <span className={`${plan.caption} font-semibold whitespace-nowrap text-heading`}>
                   Unscheduled
                   {unscheduled.length > 0 ? (
                     <span className="ml-1.5 text-accent">{unscheduled.length}</span>
                   ) : null}
                 </span>
-                <span className="text-[0.7rem] text-muted">No day yet</span>
+                <span className={`${plan.caption} whitespace-nowrap text-muted`}>No day yet</span>
               </a>
             </nav>
-            <div className="relative mt-6">
+            <div className="plan-section relative">
               <div
                 className="absolute bottom-2 left-[0.95rem] top-2 w-px bg-border"
                 aria-hidden="true"
@@ -1113,25 +1109,25 @@ export function ItineraryHub({
                   <li
                     key={day.index}
                     id={`${headingId}-day-${day.index}`}
-                    className="relative flex scroll-mt-24 gap-3 pb-6 last:pb-0"
+                    className="plan-day relative flex scroll-mt-24 gap-3"
                   >
                     <span
-                      className="relative z-[1] flex size-8 shrink-0 items-center justify-center rounded-full border border-accent/40 bg-white text-xs font-bold text-accent"
+                      className={`${plan.caption} relative z-[1] flex size-8 shrink-0 items-center justify-center rounded-full border border-accent/40 bg-white font-semibold text-accent`}
                       aria-hidden="true"
                     >
                       {day.index}
                     </span>
-                    <div className="min-w-0 flex-1 rounded-lg border border-border bg-white p-4">
+                    <div className={`${plan.inset} min-w-0 flex-1 border border-border bg-white`}>
                       {day.detail ? (
-                        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted">
+                        <p className={`${plan.caption} font-semibold text-muted`}>
                           {day.detail}
                         </p>
                       ) : null}
-                      <h4 className="font-display text-lg font-bold text-heading">
+                      <h4 className={plan.h4}>
                         {day.label}
                       </h4>
                       {dayItems.length === 0 ? (
-                        <p className="mt-2 text-sm text-muted">
+                        <p className={`${plan.body} plan-follow text-muted`}>
                           Nothing on this day yet. Add a booking above and assign it to {day.label}.
                         </p>
                       ) : (
@@ -1148,17 +1144,17 @@ export function ItineraryHub({
 
         <section
             id={`${headingId}-unscheduled`}
-            className="panel-soft mt-4 scroll-mt-24 px-4 py-4"
+            className={`${plan.soft} plan-section scroll-mt-24`}
             aria-labelledby={`${headingId}-unscheduled-title`}
           >
             <h4
               id={`${headingId}-unscheduled-title`}
-              className="font-display font-bold text-heading"
+              className={plan.h4}
             >
               Unscheduled
             </h4>
             {unscheduled.length === 0 ? (
-              <p className="mt-2 text-sm text-muted">
+              <p className={`${plan.body} plan-follow text-muted`}>
                 Bookings without a day land here. Choose a day when you add one.
               </p>
             ) : (
@@ -1173,7 +1169,7 @@ export function ItineraryHub({
             aria-labelledby={`${headingId}-week-tab`}
           >
             {editor?.kind === "edit" && editor.place === "day" ? (
-              <div className="mt-4">
+              <div className="plan-follow">
                 {sorted
                   .filter((item) => item.id === editor.id)
                   .map((item) => (
@@ -1211,7 +1207,7 @@ export function ItineraryHub({
         ) : (
           <button
             type="button"
-            className="mt-4 text-sm font-semibold text-accent hover:underline"
+            className={`${plan.textBtn} plan-follow self-start text-accent hover:underline`}
             onClick={() => setEditor({ kind: "add-note" })}
           >
             Add a note
@@ -1226,18 +1222,15 @@ export function ItineraryHub({
         places={journalPlaceIndex}
       />
 
-      <section className="panel-soft mt-6 px-4 py-4" aria-labelledby={`${headingId}-packing`}>
-        <h3
-          id={`${headingId}-packing`}
-          className="font-display text-lg font-bold text-heading"
-        >
+      <section className={`${plan.soft} plan-block plan-stack-tight`} aria-labelledby={`${headingId}-packing`}>
+        <h3 id={`${headingId}-packing`} className={plan.h3}>
           Packing notes
         </h3>
-        <p className="mt-1 text-sm leading-relaxed text-muted">
+        <p className={`${plan.prose} text-muted`}>
           A list for this trip. One line per item is enough.
         </p>
         <textarea
-          className={`${inputClass} min-h-28 py-3`}
+          className={plan.input}
           rows={5}
           maxLength={4000}
           placeholder={"Layers for the evening\nAdapter\nWalking shoes"}
@@ -1246,8 +1239,8 @@ export function ItineraryHub({
         />
       </section>
 
-      <aside className="panel-soft mt-6 px-4 py-3" aria-label="Affiliate disclosure">
-        <p className="text-sm leading-relaxed text-text">
+      <aside className={`${plan.soft} plan-section`} aria-label="Affiliate disclosure">
+        <p className={`${plan.prose} text-text`}>
           {config.disclosure}{" "}
           <Link href="/affiliate-disclosure" className="text-link hover:text-accent">
             Read the full disclosure
@@ -1256,7 +1249,7 @@ export function ItineraryHub({
         </p>
       </aside>
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+      <div className="plan-actions">
         <button type="button" className="btn btn-secondary" onClick={onEditTrip}>
           {config.editDetailsLabel}
         </button>
