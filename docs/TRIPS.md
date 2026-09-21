@@ -1,6 +1,6 @@
 # Saved trips
 
-Plan a trip (`/guides/plan-a-trip`) ends on an **itinerary hub**: one booking lane per selected partner (flights, stay, car, and extras), each with a partner search that opens through `/out` in a new tab. Readers add a title, link, optional confirmation number, day and time, notes, and a status of **To book**, **Booked**, or **Skip**. The hub groups those items into Day 1 … Day N from the trip dates (or flexible nights). Items without a day stay in **Unscheduled**.
+Plan a trip (`/guides/plan-a-trip`) ends on an **itinerary hub**: one booking lane per selected partner (flights, stay, car, and extras), each with a partner search that opens through `/out` in a new tab. Readers add a title, link, optional confirmation number, day and time, notes, and a status of **To book**, **Booked**, or **Skip**. The hub groups those items into Day 1 … Day N from the trip dates (or flexible nights). **Timeline** is the numbered day list. **Week** lays the same days into a Sunday-start calendar: each column is Day 1 … N with the weekday and date, and bookings show as chips (with a time when one is set). Drag a chip onto a day, or choose a day on the chip. Items without a day stay in **Unscheduled**. Moving a booking only changes `dayIndex`; the time stays put. Guest drafts and signed-in trips store that field the same way.
 
 **Paste booking details** only reads the text the reader pasted. It may fill a link, a confirmation-looking code, a clock time, and a day when that text names one of the trip dates. It does not open or scrape partner sites.
 
@@ -59,7 +59,8 @@ Session required (`session.user.id`). Trips live under that id, so one reader ca
 - `src/lib/trip-record.ts` — types, validation, titles, login return URL
 - `src/lib/trips.ts` — Firestore list / get / create / update / delete
 - `src/app/api/trips/route.ts`, `src/app/api/trips/[id]/route.ts`
-- `src/components/trip-planner/ItineraryHub.tsx` — lanes, day-by-day timeline, add/edit form, sign-in banner
+- `src/components/trip-planner/ItineraryHub.tsx` — lanes, Timeline | Week toggle, add/edit form, sign-in banner
+- `src/components/trip-planner/WeekView.tsx` — week grid and unscheduled tray
 - `src/components/trip-planner/useTripSync.ts` — guest draft, merge offer, account sync
 - `src/components/account/MyTripsList.tsx` — account list
 - `src/lib/trip-planner-storage.ts` — browser draft (and a backup if a saved trip is opened over it)
