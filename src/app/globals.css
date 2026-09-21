@@ -617,16 +617,22 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
   margin: 1.75em 0;
 }
 
-/* Viator partner cards. The script paints its own bordered white card inside this div. */
+/*
+ * Viator partner cards. The script paints its own bordered white card inside
+ * this div. A 1px white border (same as the story sheet) keeps that card fully
+ * in view without a second cream frame. Overflow stays visible so the card's
+ * top and bottom are not clipped.
+ */
 .post-prose .viator-widget,
 .post-prose [data-vi-widget-ref] {
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
   margin: 1.75em auto;
-  overflow: hidden;
+  overflow: visible;
   color-scheme: light;
   background: #ffffff;
+  border: 1px solid #ffffff;
   padding: 0.75rem;
 }
 
