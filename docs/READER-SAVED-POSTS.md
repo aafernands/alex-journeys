@@ -1,6 +1,6 @@
 # Reader Google login & saved posts
 
-Public readers can **Sign in** (email/password or Google — see [READER-AUTH.md](./READER-AUTH.md)) and **Save** blog posts. Saved posts live on the **Account** dashboard (`/account`). Data is stored in **Cloud Firestore** on the existing Firebase project. CMS admin access is unchanged: allowlisted `CMS_ADMIN_EMAILS` or passcode only.
+Public readers can **Sign in** (email/password, Google, or X — see [READER-AUTH.md](./READER-AUTH.md) and [X-SIGN-IN.md](./X-SIGN-IN.md)) and **Save** blog posts. Saved posts live on the **Account** dashboard (`/account`). Data is stored in **Cloud Firestore** on the existing Firebase project. CMS admin access is unchanged: allowlisted `CMS_ADMIN_EMAILS` or passcode only.
 
 ## What readers get
 
@@ -31,9 +31,11 @@ users/{userId}/saved/{slug}
 | `FIREBASE_PRIVATE_KEY` | Yes for save | Full private key; store with `\n` for newlines (code expands them) |
 | `FIREBASE_PRIVATE_KEY_ID` | Optional | From the service account JSON (not required by the Admin SDK init) |
 
-Also required for Google readers (already used by CMS):
+Also required for Google or X readers (Google vars are already used by CMS):
 
-- `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`
+- `AUTH_SECRET`
+- Google: `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`
+- X: `AUTH_TWITTER_ID`, `AUTH_TWITTER_SECRET` — see [X-SIGN-IN.md](./X-SIGN-IN.md). X does not grant CMS access.
 - Optional: `AUTH_TRUST_HOST=true` on Vercel
 
 Build succeeds **without** Firebase env: save APIs return **503** until configured.

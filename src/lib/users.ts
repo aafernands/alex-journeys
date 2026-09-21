@@ -2,8 +2,11 @@
  * Reader user profiles in Cloud Firestore (`users/{userId}`).
  *
  * Document id strategy (keep stable for saved-posts subcollections):
- * - Google / GitHub OAuth: Auth.js provider account id (`account.providerAccountId`),
+ * - Google / X / GitHub OAuth: Auth.js provider account id (`account.providerAccountId`),
  *   same as `session.user.id` today so existing `users/{id}/saved` paths stay valid.
+ *   X (provider id `twitter`) uses that same id. It does not merge with a
+ *   Google or email account unless X returns an email, which OAuth 2 usually
+ *   does not.
  * - Email/password (credentials): `cred_` + first 40 hex chars of SHA-256 of
  *   normalized email (`email:lowercased`). Deterministic across sessions.
  *
@@ -72,7 +75,29 @@ export function credentialsUserId(email: string): string {
 }
 
 function isAuthProviderId(value: unknown): value is AuthProviderId {
-  return value === "google" || value === "github" || value === "credentials";
+  return (
+    value === "google" ||
+    value === "twitter" ||
+    value === "github" ||
+    value === "credentials"
+  );
+}
+
+/**
+ * Copy for a password reset request when the account has no password.
+ * Names the reader sign-in buttons they can use instead.
+ */
+export function oauthOnlySignInMessage(providers: readonly string[]): string {
+  const options: string[] = [];
+  if (providers.includes("google")) options.push("Google");
+  if (providers.includes("twitter")) options.push("X");
+  if (options.length === 0) options.push("Google");
+  const via =
+    options.length === 1
+      ? options[0]
+      : `${options.slice(0, -1).join(", ")} or ${options[options.length - 1]}`;
+  const buttons = options.map((name) => `Continue with ${name}`).join(" or ");
+  return `This account uses ${via} sign-in and has no password. Use ${buttons} on the sign-in page.`;
 }
 
 function toIso(value: unknown): string | null {
@@ -290,7 +315,7 @@ export type UpsertOauthInput = {
   email: string | null | undefined;
   name?: string | null;
   image?: string | null;
-  provider: "google" | "github";
+  provider: "google" | "twitter" | "github";
 };
 
 /**
@@ -520,7 +545,7 @@ export async function createPasswordResetToken(
   options?: CreatePasswordResetTokenOptions,
 ): Promise<{ rawToken: string; expiresAt: string }> {
   if (!user.passwordHash && !options?.allowWithoutPassword) {
-    throw new Error("This account uses Google sign-in. No password to reset.");
+    throw new Error(oauthOnlySignInMessage(user.providers));
   }
   if (user.disabled) {
     throw new Error("This account is disabled.");
@@ -648,7 +673,7 @@ export async function changePasswordForUser(
   const user = await getUserById(userId);
   if (!user?.passwordHash) {
     throw new Error(
-      "This account has no password. Sign in with Google, or use forgot password after adding a password.",
+      "This account has no password. Sign in with Google or X, or use forgot password after adding a password.",
     );
   }
   if (user.disabled) throw new Error("This account is disabled.");

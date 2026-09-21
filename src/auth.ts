@@ -2,82 +2,48 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
+import Twitter from "next-auth/providers/twitter";
+import {
+  grantsCmsAdmin,
+  hasCmsAdminAllowlist,
+  isAdminEmail,
+  isCredentialsAuthConfigured,
+  isGitHubAuthConfigured,
+  isGoogleAuthConfigured,
+  isTwitterAuthConfigured,
+} from "@/lib/auth-config";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
 import {
   authorizeCredentials,
   getUserById,
-  isCredentialsStoreReady,
   upsertOauthUser,
 } from "@/lib/users";
+
+export {
+  grantsCmsAdmin,
+  isAdminEmail,
+  isCredentialsAuthConfigured,
+  isGitHubAuthConfigured,
+  isGoogleAuthConfigured,
+  isOauthConfigured,
+  isReaderAuthConfigured,
+  isTwitterAuthConfigured,
+} from "@/lib/auth-config";
 
 /**
  * Auth.js (next-auth v5).
  *
- * - Google: any signed-in user is a public reader (save posts on /account).
+ * - Google and X (Twitter): any signed-in user is a public reader.
  * - Credentials (email/password): public readers via Firestore + bcrypt.
  * - CMS access still requires email in CMS_ADMIN_EMAILS (or passcode) —
  *   see src/lib/cms/auth.ts. Reader sessions alone never unlock /cms.
+ * - X never grants CMS admin, even when an email matches the allowlist.
  * - GitHub OAuth remains available for CMS admins only.
  *
  * Sign-in UI for readers: `/login`. CMS keeps its own login at `/cms`.
+ * Env helpers (`isTwitterAuthConfigured`, `isReaderAuthConfigured`, …) live in
+ * `src/lib/auth-config.ts` and are re-exported above.
  */
-
-function adminEmails(): Set<string> {
-  const raw = process.env.CMS_ADMIN_EMAILS ?? "";
-  return new Set(
-    raw
-      .split(",")
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean),
-  );
-}
-
-export function isAdminEmail(email: string | null | undefined): boolean {
-  if (!email) return false;
-  return adminEmails().has(email.trim().toLowerCase());
-}
-
-/** True when Google OAuth client env vars are set. */
-export function isGoogleAuthConfigured(): boolean {
-  return Boolean(
-    process.env.AUTH_GOOGLE_ID?.trim() &&
-      process.env.AUTH_GOOGLE_SECRET?.trim(),
-  );
-}
-
-/** True when GitHub OAuth client env vars are set. */
-export function isGitHubAuthConfigured(): boolean {
-  return Boolean(
-    process.env.AUTH_GITHUB_ID?.trim() &&
-      process.env.AUTH_GITHUB_SECRET?.trim(),
-  );
-}
-
-/** True when email/password reader auth can run (AUTH_SECRET + Firebase). */
-export function isCredentialsAuthConfigured(): boolean {
-  return isCredentialsStoreReady();
-}
-
-/**
- * True when Auth.js can run for public readers (secret + Google and/or
- * credentials store).
- */
-export function isReaderAuthConfigured(): boolean {
-  return (
-    Boolean(process.env.AUTH_SECRET?.trim()) &&
-    (isGoogleAuthConfigured() || isCredentialsAuthConfigured())
-  );
-}
-
-/** True when Auth.js can run (secret + at least one provider). */
-export function isOauthConfigured(): boolean {
-  return (
-    Boolean(process.env.AUTH_SECRET?.trim()) &&
-    (isGoogleAuthConfigured() ||
-      isGitHubAuthConfigured() ||
-      isCredentialsAuthConfigured())
-  );
-}
 
 const providers = [
   ...(isGoogleAuthConfigured()
@@ -85,6 +51,18 @@ const providers = [
         Google({
           clientId: process.env.AUTH_GOOGLE_ID!,
           clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+        }),
+      ]
+    : []),
+  ...(isTwitterAuthConfigured()
+    ? [
+        Twitter({
+          clientId: process.env.AUTH_TWITTER_ID!,
+          clientSecret: process.env.AUTH_TWITTER_SECRET!,
+          // Profile only. The provider default also asks for tweet.read,
+          // which this site does not use.
+          authorization:
+            "https://x.com/i/oauth2/authorize?scope=users.read%20offline.access",
         }),
       ]
     : []),
@@ -133,7 +111,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   providers,
   pages: {
-    // Public reader login (email/password + Google). CMS keeps `/cms` UI.
+    // Public reader login (email/password, Google, X). CMS keeps `/cms` UI.
     signIn: "/login",
     error: "/login",
   },
@@ -143,6 +121,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.sub = user.id;
       } else if (account?.providerAccountId) {
         token.sub = account.providerAccountId;
+      }
+
+      if (typeof account?.provider === "string" && account.provider) {
+        token.authProvider = account.provider;
       }
 
       // Client `useSession().update({ name, email, image })` after profile /
@@ -203,7 +185,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         (typeof token.email === "string" ? token.email : undefined) ??
         user?.email ??
         undefined;
-      token.isAdmin = isAdminEmail(email);
+      token.isAdmin = grantsCmsAdmin({
+        email,
+        authProvider:
+          typeof token.authProvider === "string" ? token.authProvider : null,
+      });
       return token;
     },
     async session({ session, token }) {
@@ -230,8 +216,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return true;
       }
 
-      // Public readers: any Google account may sign in (unless disabled in CMS).
-      if (account?.provider === "google") {
+      // Public readers: Google and X may sign in (unless disabled).
+      // X is not an admin provider — do not fall through to the allowlist.
+      if (
+        account?.provider === "google" ||
+        account?.provider === "twitter"
+      ) {
         const id =
           account.providerAccountId ||
           (typeof user.id === "string" ? user.id : "");
@@ -241,14 +231,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           name: user.name,
           image: user.image,
-          provider: "google",
+          provider: account.provider,
         });
         return result.ok;
       }
 
       // GitHub (CMS tooling): allowlisted admins only + upsert profile.
-      const allow = adminEmails();
-      if (allow.size === 0) {
+      if (!hasCmsAdminAllowlist()) {
         return false;
       }
       if (!isAdminEmail(user.email)) {

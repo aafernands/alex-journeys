@@ -20,5 +20,7 @@ declare module "next-auth/jwt" {
     picture?: string | null;
     /** Last time email/name/image were refreshed from Firestore (ms). */
     profileSyncedAt?: number;
+    /** Auth.js provider id from the sign-in that created this token. */
+    authProvider?: string;
   }
 }

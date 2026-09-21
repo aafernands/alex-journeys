@@ -1,6 +1,6 @@
 /** Shared reader user types (safe for client imports). */
 
-export type AuthProviderId = "google" | "github" | "credentials";
+export type AuthProviderId = "google" | "twitter" | "github" | "credentials";
 
 /** Public user profile — never includes passwordHash. */
 export type UserPublic = {

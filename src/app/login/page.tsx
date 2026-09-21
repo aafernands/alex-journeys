@@ -6,6 +6,7 @@ import {
   isCredentialsAuthConfigured,
   isGoogleAuthConfigured,
   isOauthConfigured,
+  isTwitterAuthConfigured,
 } from "@/auth";
 import { ReaderLoginForm } from "@/components/ReaderLoginForm";
 
@@ -38,6 +39,8 @@ export default async function LoginPage({
 
   const googleConfigured =
     isOauthConfigured() && isGoogleAuthConfigured();
+  const twitterConfigured =
+    isOauthConfigured() && isTwitterAuthConfigured();
   const credentialsConfigured = isCredentialsAuthConfigured();
   return (
     <main className="bg-bg">
@@ -52,6 +55,7 @@ export default async function LoginPage({
           >
             <ReaderLoginForm
               googleConfigured={googleConfigured}
+              twitterConfigured={twitterConfigured}
               credentialsConfigured={credentialsConfigured}
             />
           </Suspense>

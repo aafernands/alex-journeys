@@ -67,7 +67,7 @@ Connected to Vercel from `main`. Push to deploy.
 
 ## Reader accounts, saved posts & comments
 
-Public **Sign in** (email/password or Google) in the header; readers manage saved posts on **Account** (`/account`). Password reset uses Resend — see [`docs/READER-AUTH.md`](docs/READER-AUTH.md). Saved posts setup: [`docs/READER-SAVED-POSTS.md`](docs/READER-SAVED-POSTS.md).
+Public **Sign in** (email/password, Google, or X) in the header; readers manage saved posts on **Account** (`/account`). Password reset uses Resend — see [`docs/READER-AUTH.md`](docs/READER-AUTH.md). X setup: [`docs/X-SIGN-IN.md`](docs/X-SIGN-IN.md). Saved posts setup: [`docs/READER-SAVED-POSTS.md`](docs/READER-SAVED-POSTS.md).
 
 Post pages include **Share**, **Comments** (jump), and a moderated comment thread. Comments need Firestore (same env as saved posts) and are approved in **CMS → Comments**. See [`docs/COMMENTS.md`](docs/COMMENTS.md).
 
