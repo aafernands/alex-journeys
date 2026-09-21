@@ -39,6 +39,7 @@ import {
   type TripItemType,
 } from "@/lib/trip-record";
 import type { StoredPlan } from "@/lib/trip-planner-storage";
+import { ForwardBookings } from "@/components/trip-planner/ForwardBookings";
 import { WeekView } from "@/components/trip-planner/WeekView";
 
 type Props = {
@@ -853,6 +854,16 @@ export function ItineraryHub({
           Try saving again
         </button>
       ) : null}
+
+      <ForwardBookings
+        headingId={headingId}
+        tripId={tripId}
+        days={days}
+        partners={partners}
+        nextSort={nextSort}
+        onAddItem={addItem}
+        onRemember={onRememberGuestDraft}
+      />
 
       {partners.length > 0 ? (
         <section className="mt-5" aria-labelledby={`${headingId}-left`}>

@@ -213,5 +213,7 @@ export async function renameTrip(
 /** Remove a trip. Idempotent. Ownership is the `users/{userId}` path. */
 export async function deleteTrip(userId: string, tripId: string): Promise<void> {
   const id = sanitizeTripId(tripId);
+  const { deleteTripInbound } = await import("@/lib/inbound-store");
+  await deleteTripInbound(userId, id);
   await tripsCollection(userId).doc(id).delete();
 }
