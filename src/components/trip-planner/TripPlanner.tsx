@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
+import { plan as tripDensity } from "@/components/trip-planner/density";
 import { ItineraryHub } from "@/components/trip-planner/ItineraryHub";
 import { PlaceCombobox } from "@/components/trip-planner/PlaceCombobox";
 import { useTripSync } from "@/components/trip-planner/useTripSync";
@@ -61,9 +62,6 @@ type Props = {
 const STEPS = [1, 2, 3, 4] as const;
 type Step = (typeof STEPS)[number];
 
-const inputClass =
-  "mt-2 min-h-11 w-full rounded-lg border border-border bg-white px-4 text-sm text-heading placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25";
-
 function Chip({
   pressed,
   dashed,
@@ -80,7 +78,7 @@ function Chip({
       type="button"
       aria-pressed={pressed}
       onClick={onClick}
-      className={`inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-semibold transition ${
+      className={`${tripDensity.chip} ${
         pressed
           ? dashed
             ? "border-dashed border-accent bg-accent/10 text-accent"
@@ -109,10 +107,10 @@ function Pill({
       type="button"
       aria-pressed={pressed}
       onClick={onClick}
-      className={`inline-flex min-h-9 items-center rounded-full px-3.5 text-sm font-semibold transition ${
+      className={`${tripDensity.chip} ${
         pressed
-          ? "bg-ink text-on-solid"
-          : "border border-border bg-white text-text hover:border-border-strong"
+          ? "border-ink bg-ink text-on-solid"
+          : "border-border bg-white text-text hover:border-border-strong"
       }`}
     >
       {children}
@@ -132,16 +130,13 @@ function Field({
   children: ReactNode;
 }) {
   return (
-    <div>
-      <label
-        htmlFor={htmlFor}
-        className="text-xs font-semibold uppercase tracking-[0.08em] text-muted"
-      >
+    <div className="plan-field">
+      <label htmlFor={htmlFor} className={tripDensity.label}>
         {label}
       </label>
       {children}
       {error ? (
-        <p id={`${htmlFor}-error`} className="mt-1 text-sm text-link">
+        <p id={`${htmlFor}-error`} className={tripDensity.error}>
           {error}
         </p>
       ) : null}
@@ -155,9 +150,9 @@ function describedBy(id: string, error?: string): string | undefined {
 
 function PlannerShell() {
   return (
-    <section className="mt-8 max-w-3xl" aria-hidden="true">
+    <section className="plan-trip plan-block max-w-3xl" aria-hidden="true">
       <div className="h-1 rounded-full bg-sand" />
-      <div className="panel mt-6 h-48" />
+      <div className={`${tripDensity.panel} plan-section h-48`} />
     </section>
   );
 }
@@ -328,19 +323,19 @@ export function TripPlanner({
   ) {
     const hasLocalDraft = Boolean(plan.state.destination.trim());
     return (
-      <section className="mt-8 max-w-3xl" aria-labelledby={`${baseId}-heading`}>
-        <div className="panel p-6 md:p-8">
+      <section className="plan-trip plan-block max-w-3xl" aria-labelledby={`${baseId}-heading`}>
+        <div className={tripDensity.panel}>
           <h2
             id={`${baseId}-heading`}
-            className="font-display text-2xl font-bold tracking-tight text-heading"
+            className={tripDensity.h2}
           >
             {config.steps.next.heading}
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-text">
+          <p className={`${tripDensity.prose} plan-follow text-text`}>
             Sign in to open this saved itinerary. You’ll come back to this trip
             after you continue.
           </p>
-          <div className="mt-5 flex flex-wrap gap-3">
+          <div className="plan-actions">
             <Link href={planATripLoginHref(urlTripId, "signin")} className="btn btn-ink">
               Sign in
             </Link>
@@ -363,17 +358,17 @@ export function TripPlanner({
 
   if (urlTripId && sync.signedIn && sync.remote === "missing") {
     return (
-      <section className="mt-8 max-w-3xl" aria-labelledby={`${baseId}-heading`}>
-        <div className="panel p-6 md:p-8">
+      <section className="plan-trip plan-block max-w-3xl" aria-labelledby={`${baseId}-heading`}>
+        <div className={tripDensity.panel}>
           <h2
             id={`${baseId}-heading`}
-            className="font-display text-2xl font-bold text-heading"
+            className={tripDensity.h2}
           >
             That trip isn’t on this account.
           </h2>
           <button
             type="button"
-            className="btn btn-primary mt-5"
+            className="btn btn-primary plan-section"
             onClick={() => sync.dismissUrlTrip()}
           >
             Continue in this browser
@@ -390,24 +385,24 @@ export function TripPlanner({
     plan.tripId !== urlTripId
   ) {
     return (
-      <section className="mt-8 max-w-3xl" aria-labelledby={`${baseId}-heading`}>
-        <div className="panel p-6 md:p-8">
+      <section className="plan-trip plan-block max-w-3xl" aria-labelledby={`${baseId}-heading`}>
+        <div className={tripDensity.panel}>
           <h2
             id={`${baseId}-heading`}
-            className="font-display text-2xl font-bold text-heading"
+            className={tripDensity.h2}
           >
             {sync.remote === "unavailable"
               ? "Saved trips aren’t available right now"
               : "Couldn’t open that trip"}
           </h2>
-          <p className="mt-2 text-sm text-text" role="status">
+          <p className={`${tripDensity.prose} plan-follow text-text`} role="status">
             {sync.remote === "unavailable"
               ? TRIPS_ACCOUNT_UNAVAILABLE
               : "Something went wrong opening that trip. You can still plan in this browser."}
           </p>
           <button
             type="button"
-            className="btn btn-secondary mt-5"
+            className="btn btn-secondary plan-section"
             onClick={() => sync.dismissUrlTrip()}
           >
             Continue in this browser
@@ -418,7 +413,7 @@ export function TripPlanner({
   }
 
   return (
-    <section aria-labelledby={`${baseId}-heading`} className="mt-8 max-w-3xl">
+    <section aria-labelledby={`${baseId}-heading`} className="plan-trip plan-block max-w-3xl">
       <div
         className="flex gap-2"
         role="progressbar"
@@ -435,20 +430,20 @@ export function TripPlanner({
         ))}
       </div>
 
-      <div className="panel mt-6 p-6 md:p-8">
+      <div className={`${tripDensity.panel} plan-section`}>
         {step === 1 ? (
           <>
             <h2
               id={`${baseId}-heading`}
-              className="font-display text-2xl font-bold tracking-tight text-heading"
+              className={tripDensity.h2}
             >
               {config.steps.categories.heading}
             </h2>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted md:text-base">
+            <p className={`${tripDensity.prose} plan-follow text-muted`}>
               {config.steps.categories.helper}
             </p>
             <div
-              className="mt-6 flex flex-wrap gap-2"
+              className="plan-section flex flex-wrap gap-2"
               role="group"
               aria-label={config.steps.categories.heading}
             >
@@ -466,11 +461,11 @@ export function TripPlanner({
               </Chip>
             </div>
             {categoryError ? (
-              <p className="mt-3 text-sm text-link" role="alert">
+              <p className={`${tripDensity.error} plan-follow`} role="alert">
                 {categoryError}
               </p>
             ) : null}
-            <div className="mt-8 flex justify-end">
+            <div className="plan-actions plan-actions-end">
               <button type="button" className="btn btn-primary" onClick={goDetails}>
                 {config.continueLabel}
               </button>
@@ -488,15 +483,15 @@ export function TripPlanner({
           >
             <h2
               id={`${baseId}-heading`}
-              className="font-display text-2xl font-bold tracking-tight text-heading"
+              className={tripDensity.h2}
             >
               {config.steps.details.heading}
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted md:text-base">
+            <p className={`${tripDensity.prose} plan-follow text-muted`}>
               {config.steps.details.helper}
             </p>
 
-            <div className="mt-6 space-y-5">
+            <div className="plan-stack plan-section">
               <Field
                 label="Where are you going?"
                 htmlFor={`${baseId}-destination`}
@@ -504,7 +499,7 @@ export function TripPlanner({
               >
                 <PlaceCombobox
                   id={`${baseId}-destination`}
-                  className={inputClass}
+                  className={tripDensity.input}
                   value={state.destination}
                   journalLabels={journalPlaces}
                   listLabel="Destinations"
@@ -517,12 +512,10 @@ export function TripPlanner({
                 />
               </Field>
 
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-                  Dates
-                </p>
+              <div className="plan-stack-tight">
+                <p className={tripDensity.label}>Dates</p>
                 {flexibleOn ? (
-                  <div className="mt-2 flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Pill
                       pressed={dateMode === "exact"}
                       onClick={() => patch({ dateMode: "exact" })}
@@ -539,15 +532,15 @@ export function TripPlanner({
                 ) : null}
 
                 {dateMode === "exact" ? (
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                    <div>
+                  <div className="plan-grid-2">
+                    <div className="plan-field">
                       <label htmlFor={`${baseId}-start`} className="sr-only">
                         Start date
                       </label>
                       <input
                         id={`${baseId}-start`}
                         type="date"
-                        className={inputClass}
+                        className={tripDensity.input}
                         value={state.startDate}
                         aria-invalid={Boolean(errors.startDate)}
                         aria-describedby={describedBy(
@@ -559,19 +552,19 @@ export function TripPlanner({
                         }
                       />
                       {errors.startDate ? (
-                        <p id={`${baseId}-start-error`} className="mt-1 text-sm text-link">
+                        <p id={`${baseId}-start-error`} className={tripDensity.error}>
                           {errors.startDate}
                         </p>
                       ) : null}
                     </div>
-                    <div>
+                    <div className="plan-field">
                       <label htmlFor={`${baseId}-end`} className="sr-only">
                         End date
                       </label>
                       <input
                         id={`${baseId}-end`}
                         type="date"
-                        className={inputClass}
+                        className={tripDensity.input}
                         value={state.endDate}
                         aria-invalid={Boolean(errors.endDate)}
                         aria-describedby={describedBy(
@@ -583,14 +576,14 @@ export function TripPlanner({
                         }
                       />
                       {errors.endDate ? (
-                        <p id={`${baseId}-end-error`} className="mt-1 text-sm text-link">
+                        <p id={`${baseId}-end-error`} className={tripDensity.error}>
                           {errors.endDate}
                         </p>
                       ) : null}
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <div className="plan-grid-2">
                     <Field
                       label="Month"
                       htmlFor={`${baseId}-month`}
@@ -599,7 +592,7 @@ export function TripPlanner({
                       <input
                         id={`${baseId}-month`}
                         type="month"
-                        className={inputClass}
+                        className={tripDensity.input}
                         value={state.month}
                         aria-invalid={Boolean(errors.month)}
                         aria-describedby={describedBy(
@@ -619,7 +612,7 @@ export function TripPlanner({
                         type="number"
                         min={1}
                         inputMode="numeric"
-                        className={inputClass}
+                        className={tripDensity.input}
                         value={state.nights}
                         aria-invalid={Boolean(errors.nights)}
                         aria-describedby={describedBy(
@@ -637,7 +630,7 @@ export function TripPlanner({
                 )}
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="plan-grid-2">
                 <Field
                   label="Adults"
                   htmlFor={`${baseId}-adults`}
@@ -648,7 +641,7 @@ export function TripPlanner({
                     type="number"
                     min={1}
                     inputMode="numeric"
-                    className={inputClass}
+                    className={tripDensity.input}
                     value={state.adults}
                     aria-invalid={Boolean(errors.adults)}
                     aria-describedby={describedBy(
@@ -670,7 +663,7 @@ export function TripPlanner({
                     type="number"
                     min={0}
                     inputMode="numeric"
-                    className={inputClass}
+                    className={tripDensity.input}
                     value={state.children}
                     aria-invalid={Boolean(errors.children)}
                     aria-describedby={describedBy(
@@ -693,7 +686,7 @@ export function TripPlanner({
                   >
                     <PlaceCombobox
                       id={`${baseId}-origin`}
-                      className={inputClass}
+                      className={tripDensity.input}
                       value={state.origin}
                       journalLabels={journalPlaces}
                       listLabel="Departure cities"
@@ -705,11 +698,9 @@ export function TripPlanner({
                       onChange={(origin) => patch({ origin })}
                     />
                   </Field>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-                      Trip type
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-2">
+                  <div className="plan-stack-tight">
+                    <p className={tripDensity.label}>Trip type</p>
+                    <div className="flex flex-wrap gap-2">
                       {(
                         [
                           ["roundtrip", "Round-trip"],
@@ -740,7 +731,7 @@ export function TripPlanner({
                     type="number"
                     min={1}
                     inputMode="numeric"
-                    className={`${inputClass} max-w-[7.5rem]`}
+                    className={`${tripDensity.input} sm:max-w-[8rem]`}
                     value={state.rooms}
                     aria-invalid={Boolean(errors.rooms)}
                     aria-describedby={describedBy(`${baseId}-rooms`, errors.rooms)}
@@ -752,11 +743,11 @@ export function TripPlanner({
               ) : null}
 
               {cats.includes("car") ? (
-                <div className="space-y-4">
-                  <label className="flex items-center gap-2 text-sm font-semibold text-heading">
+                <div className="plan-stack">
+                  <label className={tripDensity.check}>
                     <input
                       type="checkbox"
-                      className="size-4 accent-[var(--accent)]"
+                      className={tripDensity.checkInput}
                       checked={state.carPickupSameAsDestination}
                       onChange={(event) =>
                         patch({
@@ -774,7 +765,7 @@ export function TripPlanner({
                     >
                       <input
                         id={`${baseId}-pickup`}
-                        className={inputClass}
+                        className={tripDensity.input}
                         value={state.carPickupLocation}
                         aria-invalid={Boolean(errors.carPickupLocation)}
                         aria-describedby={describedBy(
@@ -787,10 +778,10 @@ export function TripPlanner({
                       />
                     </Field>
                   )}
-                  <label className="flex items-center gap-2 text-sm font-semibold text-heading">
+                  <label className={tripDensity.check}>
                     <input
                       type="checkbox"
-                      className="size-4 accent-[var(--accent)]"
+                      className={tripDensity.checkInput}
                       checked={state.carDatesSameAsTrip}
                       onChange={(event) =>
                         patch({ carDatesSameAsTrip: event.target.checked })
@@ -799,7 +790,7 @@ export function TripPlanner({
                     Same dates as the trip
                   </label>
                   {state.carDatesSameAsTrip ? null : (
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="plan-grid-2">
                       <Field
                         label="Pickup date"
                         htmlFor={`${baseId}-car-start`}
@@ -808,7 +799,7 @@ export function TripPlanner({
                         <input
                           id={`${baseId}-car-start`}
                           type="date"
-                          className={inputClass}
+                          className={tripDensity.input}
                           value={state.carPickupDate}
                           aria-invalid={Boolean(errors.carPickupDate)}
                           aria-describedby={describedBy(
@@ -828,7 +819,7 @@ export function TripPlanner({
                         <input
                           id={`${baseId}-car-end`}
                           type="date"
-                          className={inputClass}
+                          className={tripDensity.input}
                           value={state.carDropoffDate}
                           aria-invalid={Boolean(errors.carDropoffDate)}
                           aria-describedby={describedBy(
@@ -846,7 +837,7 @@ export function TripPlanner({
               ) : null}
             </div>
 
-            <div className="mt-8 flex items-center justify-between gap-3">
+            <div className="plan-actions plan-actions-split">
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -865,27 +856,26 @@ export function TripPlanner({
           <>
             <h2
               id={`${baseId}-heading`}
-              className="font-display text-2xl font-bold tracking-tight text-heading"
+              className={tripDensity.h2}
             >
               {config.steps.review.heading}
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted md:text-base">
+            <p className={`${tripDensity.prose} plan-follow text-muted`}>
               {config.steps.review.helper}
             </p>
-            <dl className="mt-6">
+            <dl className="plan-section">
               {rows.map((row) => (
-                <div
-                  key={row.label}
-                  className="flex items-baseline justify-between gap-4 border-b border-border py-3 text-sm"
-                >
-                  <dt className="text-muted">{row.label}</dt>
-                  <dd className="text-right font-semibold text-heading">
+                <div key={row.label} className="plan-review-row">
+                  <dt className={`${tripDensity.caption} font-semibold text-muted`}>
+                    {row.label}
+                  </dt>
+                  <dd className={`${tripDensity.body} font-semibold text-heading sm:text-right`}>
                     {row.value}
                   </dd>
                 </div>
               ))}
             </dl>
-            <div className="mt-8 flex items-center justify-between gap-3">
+            <div className="plan-actions plan-actions-split">
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -938,14 +928,14 @@ export function TripPlanner({
             <>
               <h2
                 id={`${baseId}-heading`}
-                className="font-display text-2xl font-bold tracking-tight text-heading"
+                className={tripDensity.h2}
               >
                 {config.steps.next.heading}
               </h2>
-              <p className="mt-6 text-sm text-muted">
+              <p className={`${tripDensity.prose} plan-section text-muted`}>
                 No booking lanes are turned on for this trip yet.
               </p>
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+              <div className="plan-actions">
                 <button
                   type="button"
                   className="btn btn-secondary"
