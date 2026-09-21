@@ -858,6 +858,19 @@ html.dark .destination-photo-scrim {
   font-family: var(--font-inter), system-ui, sans-serif;
 }
 
+.places-world-map .leaflet-overlay-pane {
+  z-index: 400;
+}
+
+.places-world-map .leaflet-marker-pane,
+.places-world-map .leaflet-tooltip-pane {
+  z-index: 650;
+}
+
+.places-world-map .leaflet-popup-pane {
+  z-index: 700;
+}
+
 html.dark .places-world-map .leaflet-tile-pane {
   filter: invert(0.9) hue-rotate(180deg) saturate(0.4) brightness(0.85);
 }
@@ -913,4 +926,20 @@ html.dark .places-world-map.leaflet-container {
 
 .places-world-map path.places-world-map-visited {
   cursor: pointer;
+}
+
+.places-world-map-pin {
+  background: transparent !important;
+  border: none !important;
+}
+
+.places-world-map-pin span {
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: 2px;
+  border-radius: 999px;
+  background: var(--accent);
+  border: 2px solid var(--on-solid);
+  box-shadow: 0 1px 4px rgba(20, 17, 13, 0.4);
 }

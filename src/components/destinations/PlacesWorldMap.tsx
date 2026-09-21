@@ -145,16 +145,12 @@ export default function PlacesWorldMap({ places }: Props) {
 
       const geojson = (geoMod.default ?? geoMod) as CountryFeatureCollection;
 
-      const icon = L.icon({
-        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        iconRetinaUrl:
-          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        shadowUrl:
-          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
+      const pinIcon = L.divIcon({
+        className: "places-world-map-pin",
+        iconSize: [18, 18],
+        iconAnchor: [9, 9],
+        popupAnchor: [0, -12],
+        html: "<span></span>",
       });
 
       const instance = L.map(container, {
@@ -216,14 +212,20 @@ export default function PlacesWorldMap({ places }: Props) {
             });
           });
           layer.on("click", (event) => {
+            const target = event.originalEvent?.target;
+            if (
+              target instanceof Element &&
+              target.closest(
+                ".leaflet-marker-icon, .places-world-map-pin, .leaflet-popup",
+              )
+            ) {
+              return;
+            }
             L.DomEvent.stopPropagation(event);
             routerRef.current.push(place.href);
           });
         },
       }).addTo(instance);
-
-      const pinPane = instance.createPane("trip-pins");
-      pinPane.style.zIndex = "650";
 
       const bounds = L.latLngBounds([]);
       const placesWithPins = new Set<string>();
@@ -231,16 +233,13 @@ export default function PlacesWorldMap({ places }: Props) {
       for (const place of placesRef.current) {
         for (const pin of place.pins) {
           const marker = L.marker([pin.lat, pin.lng], {
-            icon,
-            pane: "trip-pins",
+            icon: pinIcon,
             bubblingMouseEvents: false,
             riseOnHover: true,
-          })
-            .addTo(instance)
-            .bindPopup(pinPopupHtml(pin, place));
-          marker.on("click", (event) => {
-            L.DomEvent.stopPropagation(event);
-          });
+            zIndexOffset: 800,
+            title: pin.name,
+          }).addTo(instance);
+          marker.bindPopup(pinPopupHtml(pin, place), { closeButton: true });
           bounds.extend([pin.lat, pin.lng]);
           placesWithPins.add(place.slug);
         }
