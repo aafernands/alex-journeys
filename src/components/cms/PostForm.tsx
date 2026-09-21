@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import type { PostItinerary } from "@/lib/post-types";
+import { formatPostDate } from "@/lib/dates";
 import {
   ItineraryEditor,
   itineraryFromInitial,
@@ -23,6 +24,7 @@ export type PostFormInitial = {
   title: string;
   slug: string;
   date: string;
+  updatedAt?: string;
   excerpt: string;
   contentHtml: string;
   featuredImageUrl: string;
@@ -297,7 +299,7 @@ export function PostForm({
             </div>
             <div>
               <label htmlFor="cms-date" className="text-sm font-semibold text-heading">
-                Date <span className="text-accent">*</span>
+                Publish date <span className="text-accent">*</span>
               </label>
               <input
                 id="cms-date"
@@ -310,6 +312,15 @@ export function PostForm({
                 required
                 className={fieldClass}
               />
+              <p className="mt-1 text-xs text-muted">
+                First published date. Update &amp; publish sets a separate last-updated
+                date on the live post.
+              </p>
+              {mode === "edit" && !isDraft && initial?.updatedAt ? (
+                <p className="mt-1 text-xs text-muted">
+                  Last updated {formatPostDate(initial.updatedAt)}
+                </p>
+              ) : null}
             </div>
           </div>
 
