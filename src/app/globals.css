@@ -262,7 +262,7 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
 .text-hero {
   font-size: clamp(2.35rem, 5.5vw, 3.75rem);
   line-height: 1.08;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: -0.025em;
 }
 
