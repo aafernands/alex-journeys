@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Outfit, Inter } from "next/font/google";
-import Script from "next/script";
 import { Header } from "@/components/Header";
 import { Providers } from "@/components/Providers";
 import { Footer } from "@/components/Footer";
@@ -112,12 +111,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: themeInitScript }}
         />
         <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
-        <Script
-          id="adsense"
+        <script
           async
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
           crossOrigin="anonymous"
-          strategy="beforeInteractive"
         />
       </head>
       <body id="top" className="min-h-full flex flex-col font-sans">
