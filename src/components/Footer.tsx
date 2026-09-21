@@ -52,7 +52,7 @@ export function Footer() {
         aria-labelledby="newsletter-heading"
       >
         <div className="section-shell section-band">
-          <div className="newsletter-postcard relative overflow-hidden rounded-xl bg-near-black text-hero-type shadow-[0_20px_50px_-28px_rgba(0,0,0,0.55)]">
+          <div className="newsletter-postcard relative overflow-x-clip overflow-y-hidden rounded-xl bg-near-black text-hero-type shadow-[0_20px_50px_-28px_rgba(0,0,0,0.55)]">
             {/* Airmail stripe frame */}
             <div
               className="pointer-events-none absolute inset-0 rounded-xl opacity-90"
@@ -69,7 +69,7 @@ export function Footer() {
             />
 
             {/* Giant postmark watermark */}
-            <PostmarkWatermark className="pointer-events-none absolute -right-16 -top-10 h-[22rem] w-[22rem] rotate-[-18deg] text-hero-type/25 md:-right-10 md:top-1/2 md:h-[26rem] md:w-[26rem] md:-translate-y-1/2" />
+            <PostmarkWatermark className="pointer-events-none absolute -right-10 -top-8 h-[18rem] w-[18rem] max-w-none rotate-[-18deg] text-hero-type/25 md:-right-6 md:top-1/2 md:h-[22rem] md:w-[22rem] md:-translate-y-1/2" />
 
             {/* Soft paper glow */}
             <div
@@ -89,7 +89,7 @@ export function Footer() {
                     <span className="font-bold">Journal</span>
                   </h2>
                 </div>
-                <PostageStamp className="hidden shrink-0 sm:block" />
+                <PostageStamp className="hidden max-w-[5.5rem] shrink-0 overflow-hidden sm:block" />
               </div>
 
               <div className="mt-8 md:grid md:grid-cols-12 md:gap-12 md:items-start">
@@ -146,8 +146,8 @@ export function Footer() {
       <div className="bg-near-black text-hero-type">
         <div className="section-shell section-band">
           <div className="grid gap-10 md:grid-cols-12 md:gap-8">
-            <div className="md:col-span-4">
-              <BrandLogo className="h-10 w-auto" />
+            <div className="min-w-0 md:col-span-4">
+              <BrandLogo className="h-10 w-auto" variant="on-dark" />
               <p className="mt-2 max-w-xs text-sm leading-relaxed text-hero-type/60">
                 A personal travel journal by {site.authorName}. Places
                 I&apos;ve been, notes from the road.
@@ -178,7 +178,7 @@ export function Footer() {
               </nav>
             </div>
 
-            <div className="md:col-span-3">
+            <div className="min-w-0 md:col-span-3">
               <p className="text-label text-hero-type/45">Explore</p>
               <ul className="mt-3 space-y-2">
                 {explore.map((item) => (
@@ -194,7 +194,7 @@ export function Footer() {
               </ul>
             </div>
 
-            <div className="md:col-span-3">
+            <div className="min-w-0 md:col-span-3">
               <p className="text-label text-hero-type/45">Journal</p>
               <ul className="mt-3 space-y-2">
                 {company.map((item) => (
@@ -210,11 +210,11 @@ export function Footer() {
               </ul>
             </div>
 
-            <div className="md:col-span-2">
+            <div className="min-w-0 md:col-span-2">
               <p className="text-label text-hero-type/45">Contact</p>
               <a
                 href={`mailto:${site.email}`}
-                className="mt-3 inline-block text-sm text-hero-type/70 transition hover:text-accent"
+                className="mt-3 block min-w-0 break-words text-sm text-hero-type/70 transition hover:text-accent"
               >
                 {site.email}
               </a>

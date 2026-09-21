@@ -93,7 +93,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
                     href="/blog"
                     className="text-link transition hover:text-accent"
                   >
-                    Blog
+                    Stories
                   </Link>
                 </li>
                 <li aria-hidden="true">›</li>

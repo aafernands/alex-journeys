@@ -19,7 +19,7 @@ type DestinationPhotoCardProps = {
  */
 export function DestinationPhotoCard({
   destination,
-  sizes = "(max-width: 640px) 76vw, 328px",
+  sizes = "(max-width: 640px) 82vw, 328px",
   preload = false,
 }: DestinationPhotoCardProps) {
   const city = destinationCity(destination);
@@ -40,7 +40,7 @@ export function DestinationPhotoCard({
         className="object-cover transition duration-500 group-hover:scale-[1.04]"
       />
       <span aria-hidden="true" className="destination-photo-scrim" />
-      <span className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-start px-5 pb-5 pt-16">
+      <span className="destination-photo-overlay">
         <span className="overlay-kicker">{destination.name}</span>
         <span className="mt-1 inline-flex items-center gap-1.5 text-hero-type">
           <NavIcon

@@ -109,7 +109,7 @@ body {
 /* Space for fixed mobile bottom tab bar — only when scroll-reveal bar is visible. Desktop unchanged. */
 :root {
   --mobile-nav-bar: 3.5rem;
-  --mobile-nav-gap: 1rem;
+  --mobile-nav-gap: 1.75rem;
   --mobile-nav-clearance: calc(
     var(--mobile-nav-bar) + env(safe-area-inset-bottom, 0px) + var(--mobile-nav-gap)
   );
@@ -640,6 +640,7 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
 /* Newsletter postcard */
 .newsletter-postcard {
   isolation: isolate;
+  overflow-x: clip;
 }
 
 /* Pinterest Pin overlay on story / destination photos */
@@ -710,10 +711,12 @@ html.dark .pinterest-pin-btn {
 /* Destination photo carousel — edge-aligned, peek, snap, no page overflow */
 .destination-carousel {
   --carousel-gutter: 1.25rem;
+  --carousel-gap: 1rem;
+  --carousel-peek: 1.5rem; /* 24px of the next card */
   position: relative;
   margin-left: calc(-1 * var(--carousel-gutter));
   margin-right: calc(-1 * var(--carousel-gutter));
-  overflow: clip;
+  overflow-x: clip;
 }
 
 @media (min-width: 768px) {
@@ -724,7 +727,7 @@ html.dark .pinterest-pin-btn {
 
 .destination-carousel-track {
   display: flex;
-  gap: 1rem;
+  gap: var(--carousel-gap);
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
@@ -765,7 +768,7 @@ html.dark .pinterest-pin-btn {
 }
 
 .destination-carousel-item {
-  width: min(76vw, 20.5rem);
+  width: min(20.5rem, calc(100% - var(--carousel-gap) - var(--carousel-peek)));
   flex-shrink: 0;
   scroll-snap-align: start;
 }
@@ -776,7 +779,7 @@ html.dark .pinterest-pin-btn {
   top: 0.25rem;
   right: 0;
   bottom: 1.25rem;
-  width: 2.5rem;
+  width: calc(var(--carousel-gutter) + 0.75rem);
   pointer-events: none;
   background: linear-gradient(
     to right,
@@ -827,4 +830,22 @@ html.dark .destination-photo-scrim {
     rgba(0, 0, 0, 0.38) 45%,
     transparent 74%
   );
+}
+
+.destination-photo-overlay {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 4rem 1.25rem 1.25rem;
+}
+
+@media (max-width: 767px) {
+  .destination-photo-overlay {
+    /* Sit above the overlay tab bar when the card is near the viewport bottom */
+    padding-bottom: calc(1.15rem + var(--mobile-nav-bar));
+  }
 }

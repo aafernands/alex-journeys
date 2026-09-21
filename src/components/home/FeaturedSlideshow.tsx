@@ -10,7 +10,6 @@ import {
   Compass,
   Leaf,
   Mountain,
-  Pause,
   Play,
   Sun,
   Trees,
@@ -197,25 +196,34 @@ export function FeaturedSlideshowView({ slideshow, slides, headingId }: Props) {
                   <ChevronRight size={18} strokeWidth={2} aria-hidden="true" />
                 </button>
               </div>
-              <div className="flex items-center gap-1.5" role="tablist" aria-label="Field notes">
-                {slides.map((item, i) => {
-                  const selected = i === safeIndex;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={selected}
-                      aria-label={`Show slide ${i + 1}${item.caption ? `: ${item.caption}` : ""}`}
-                      className={`h-2 rounded-full transition ${
-                        selected
-                          ? "w-6 bg-accent"
-                          : "w-2 bg-border-strong/70 hover:bg-heading/40"
-                      }`}
-                      onClick={() => setIndex(i)}
-                    />
-                  );
-                })}
+              <div className="flex min-w-0 items-center gap-2">
+                <p className="shrink-0 text-[11px] font-semibold tabular-nums text-muted">
+                  {safeIndex + 1} of {slides.length}
+                </p>
+                <div
+                  className="flex items-center gap-1.5"
+                  role="tablist"
+                  aria-label="Field notes"
+                >
+                  {slides.map((item, i) => {
+                    const selected = i === safeIndex;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={selected}
+                        aria-label={`Show slide ${i + 1}${item.caption ? `: ${item.caption}` : ""}`}
+                        className={`rounded-full transition ${
+                          selected
+                            ? "h-2.5 w-7 bg-accent"
+                            : "h-2.5 w-2.5 bg-heading/30 hover:bg-heading/50"
+                        }`}
+                        onClick={() => setIndex(i)}
+                      />
+                    );
+                  })}
+                </div>
               </div>
               {canAutoplay ? (
                 <button
@@ -225,9 +233,20 @@ export function FeaturedSlideshowView({ slideshow, slides, headingId }: Props) {
                   aria-label={paused ? "Play slideshow" : "Pause slideshow"}
                 >
                   {paused ? (
-                    <Play size={16} strokeWidth={2} aria-hidden="true" />
+                    <Play
+                      size={16}
+                      strokeWidth={2.5}
+                      fill="currentColor"
+                      aria-hidden="true"
+                    />
                   ) : (
-                    <Pause size={16} strokeWidth={2} aria-hidden="true" />
+                    <span
+                      className="inline-flex h-3.5 items-center gap-[3px]"
+                      aria-hidden="true"
+                    >
+                      <span className="h-full w-[3.5px] rounded-[1px] bg-current" />
+                      <span className="h-full w-[3.5px] rounded-[1px] bg-current" />
+                    </span>
                   )}
                 </button>
               ) : (
