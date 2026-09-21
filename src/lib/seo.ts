@@ -23,6 +23,7 @@ export const siteConfig = {
   twitter: undefined as string | undefined,
   instagram: contentSite.social.instagram,
   youtube: contentSite.social.youtube,
+  pinterest: contentSite.social.pinterest,
   /** Default share image — brand logo under public/brand */
   ogImage: "/brand/logo-alex-journly.png",
   authorPhoto: contentSite.authorPhoto,
@@ -106,7 +107,11 @@ export function organizationJsonLd() {
       "@type": "Person",
       name: siteConfig.author,
     },
-    sameAs: [siteConfig.instagram, siteConfig.youtube].filter(Boolean),
+    sameAs: [
+      siteConfig.instagram,
+      siteConfig.youtube,
+      siteConfig.pinterest,
+    ].filter(Boolean),
   };
 }
 
