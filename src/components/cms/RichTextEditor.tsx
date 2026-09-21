@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { ViatorScript, ViatorWidget } from "./viator-embeds";
+import { HtmlEmbed, renderHtmlEmbedElement } from "./html-embed";
+import { viatorWidgetMarkup } from "@/lib/viator";
 import {
   Bold,
   Italic,
@@ -20,8 +22,10 @@ import {
   Undo2,
   Redo2,
   Code2,
+  Blocks,
 } from "lucide-react";
 import { MediaPicker } from "./MediaPicker";
+import { WidgetInsertDialog, type WidgetInsert } from "./WidgetInsertDialog";
 
 type Props = {
   id?: string;
@@ -29,6 +33,12 @@ type Props = {
   onChange: (html: string) => void;
   required?: boolean;
 };
+
+function htmlCountsAsContent(html: string): boolean {
+  if (/data-vi-widget-ref\s*=/i.test(html)) return true;
+  if (/data-cms-html-embed\s*=/i.test(html)) return true;
+  return Boolean(html.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim());
+}
 
 function ToolbarButton({
   onClick,
@@ -66,6 +76,9 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
   const [showHtml, setShowHtml] = useState(false);
   const [htmlDraft, setHtmlDraft] = useState(value);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [widgetOpen, setWidgetOpen] = useState(false);
+  const htmlAreaRef = useRef<HTMLTextAreaElement>(null);
+  const widgetButtonRef = useRef<HTMLButtonElement>(null);
 
   const extensions = useMemo(
     () => [
@@ -93,6 +106,7 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
       }),
       ViatorWidget,
       ViatorScript,
+      HtmlEmbed,
     ],
     [],
   );
@@ -150,6 +164,73 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
 
   const setImage = () => {
     setLibraryOpen(true);
+  };
+
+  const appendHtml = (snippet: string) => {
+    if (!editor) return;
+    const area = htmlAreaRef.current;
+    const start = area?.selectionStart ?? htmlDraft.length;
+    const end = area?.selectionEnd ?? start;
+    const needsBreak = start > 0 && !/\s$/.test(htmlDraft.slice(0, start));
+    const piece = `${needsBreak ? "\n" : ""}${snippet}`;
+    const next = `${htmlDraft.slice(0, start)}${piece}${htmlDraft.slice(end)}`;
+    setHtmlDraft(next);
+    onChange(next);
+    editor.commands.setContent(next || "", { emitUpdate: false });
+    const cursor = start + piece.length;
+    window.setTimeout(() => {
+      const field = htmlAreaRef.current;
+      if (!field) return;
+      field.focus();
+      field.setSelectionRange(cursor, cursor);
+    }, 0);
+  };
+
+  const insertBlock = (content: Record<string, unknown>) => {
+    if (!editor) return;
+    const { selection } = editor.state;
+    // A selected atom would be replaced. Insert after it so an existing
+    // widget stays put, then leave a text cursor after the new block.
+    if ("node" in selection && selection.node) {
+      editor.chain().insertContentAt(selection.to, content).run();
+    } else {
+      editor.chain().insertContent(content).run();
+    }
+    const pos = editor.state.selection.to;
+    editor.chain().setTextSelection(pos).run();
+    window.setTimeout(() => editor.commands.focus(), 0);
+  };
+
+  const insertWidget = (widget: WidgetInsert) => {
+    if (!editor) return;
+    if (widget.type === "viator") {
+      const markup = viatorWidgetMarkup(widget.widgetRef, widget.partnerId);
+      if (showHtml) {
+        appendHtml(markup);
+        return;
+      }
+      insertBlock({
+        type: "viatorWidget",
+        attrs: {
+          class: "viator-widget",
+          partnerId: widget.partnerId,
+          widgetRef: widget.widgetRef,
+        },
+      });
+      return;
+    }
+
+    if (showHtml) {
+      const element = renderHtmlEmbedElement(widget.html);
+      if (!element) return;
+      appendHtml(element.outerHTML);
+      return;
+    }
+
+    insertBlock({
+      type: "htmlEmbed",
+      attrs: { html: widget.html },
+    });
   };
 
   if (!editor) {
@@ -223,6 +304,20 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
         <ToolbarButton label="Image from URL" onClick={setImageFromUrl}>
           <span className="text-[0.65rem] font-bold">URL</span>
         </ToolbarButton>
+        <button
+          ref={widgetButtonRef}
+          type="button"
+          title="Insert widget"
+          aria-label="Insert widget"
+          aria-haspopup="dialog"
+          aria-expanded={widgetOpen}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => setWidgetOpen(true)}
+          className="inline-flex h-9 items-center gap-1 rounded-md border border-transparent px-2 text-xs font-semibold text-heading/80 transition hover:border-border hover:bg-white"
+        >
+          <Blocks className="h-4 w-4" aria-hidden />
+          Widget
+        </button>
         <span className="mx-1 h-5 w-px bg-border" aria-hidden />
         <ToolbarButton
           label="Undo"
@@ -254,6 +349,8 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
       <div className="rounded-b-lg border border-border bg-white">
         {showHtml ? (
           <textarea
+            ref={htmlAreaRef}
+            aria-label="HTML source"
             value={htmlDraft}
             onChange={(e) => {
               const next = e.target.value;
@@ -274,7 +371,7 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
         tabIndex={-1}
         aria-hidden
         className="pointer-events-none absolute h-0 w-0 opacity-0"
-        value={value?.replace(/<[^>]+>/g, "").trim() ? "ok" : ""}
+        value={htmlCountsAsContent(value || "") ? "ok" : ""}
         onChange={() => {}}
         required={required}
       />
@@ -282,7 +379,8 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
       <p className="mt-1 text-xs text-muted">
         Write normally with the toolbar. HTML is saved automatically for the
         site. Use the code icon if you ever need the raw HTML. Image icon opens
-        the media library; URL inserts by paste.
+        the media library; URL inserts by paste. Widget inserts a Viator card
+        or another HTML embed.
       </p>
 
       <MediaPicker
@@ -293,6 +391,18 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
           editor.chain().focus().setImage({ src: url, alt: alt || "" }).run();
         }}
         title="Insert image from library"
+      />
+
+      <WidgetInsertDialog
+        open={widgetOpen}
+        onClose={() => {
+          setWidgetOpen(false);
+          window.setTimeout(() => widgetButtonRef.current?.focus(), 0);
+        }}
+        onInsert={(widget) => {
+          insertWidget(widget);
+          setWidgetOpen(false);
+        }}
       />
     </div>
   );

@@ -45,6 +45,15 @@ export default async function CmsHelpPage() {
             HTML in the editor).
           </li>
           <li>
+            In Content, <strong>Widget</strong> (next to Link and Image) inserts
+            a Viator booking card or other HTML at the cursor. For Viator, keep
+            the partner id and paste the <code className="rounded bg-surface-soft px-1 text-xs">W-…</code>{" "}
+            ref from the Viator dashboard. Do not paste the script tag — the
+            public post already loads it. <strong>Custom HTML</strong> is for
+            other embeds such as iframes. Script tags in that HTML are saved but
+            do not run on the public page.
+          </li>
+          <li>
             <strong>Save draft</strong> writes{" "}
             <code className="rounded bg-surface-soft px-1 text-xs">
               src/content/drafts/&#123;slug&#125;.json

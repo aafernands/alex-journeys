@@ -6,7 +6,10 @@ import {
   VIATOR_PARTNER_ID,
   VIATOR_WIDGET_SCRIPT_SRC,
   htmlHasViatorWidgets,
+  isViatorPartnerId,
+  isViatorWidgetRef,
   viatorWidgetDiv,
+  viatorWidgetMarkup,
 } from "../src/lib/viator.ts";
 import { cleanHtml } from "./migrate-wp-posts.mjs";
 
@@ -38,6 +41,16 @@ function widgetRefs(html) {
 }
 
 describe("viator embeds", () => {
+  it("checks widget refs and partner ids before building a card shell", () => {
+    assert.equal(isViatorWidgetRef(REF), true);
+    assert.equal(isViatorWidgetRef(`  ${REF}`), false);
+    assert.equal(isViatorWidgetRef("W-not-a-ref"), false);
+    assert.equal(isViatorPartnerId(VIATOR_PARTNER_ID), true);
+    assert.equal(isViatorPartnerId("12345"), false);
+    assert.equal(viatorWidgetMarkup(REF, VIATOR_PARTNER_ID), viatorWidgetDiv(REF));
+    assert.equal(viatorWidgetMarkup(REF, 'P00"><script>').includes("<script>"), false);
+  });
+
   it("builds the partner card shell without inventing tour copy", () => {
     const html = viatorWidgetDiv(REF);
     assert.match(html, new RegExp(`data-vi-partner-id="${VIATOR_PARTNER_ID}"`));

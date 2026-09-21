@@ -643,6 +643,18 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
   background: #ffffff;
 }
 
+.post-prose .cms-html-embed {
+  max-width: 100%;
+  margin: 1.75em 0;
+}
+
+.post-prose .cms-html-embed iframe,
+.post-prose .cms-html-embed embed,
+.post-prose .cms-html-embed video {
+  display: block;
+  max-width: 100%;
+}
+
 .post-prose img {
   display: block;
   width: 100%;
@@ -692,6 +704,51 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
 }
 .tiptap:focus {
   outline: none;
+}
+
+.tiptap .viator-widget-placeholder,
+.tiptap .cms-html-embed-placeholder {
+  margin: 0.75rem 0;
+  border: 1px dashed var(--border-strong);
+  border-radius: 0.75rem;
+  background: var(--surface-soft);
+  padding: 0.75rem 1rem;
+  cursor: default;
+}
+
+.tiptap .viator-widget-placeholder p,
+.tiptap .cms-html-embed-placeholder p {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--heading);
+}
+
+.tiptap .viator-widget-placeholder code,
+.tiptap .cms-html-embed-placeholder pre {
+  display: block;
+  margin: 0.35rem 0 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--muted);
+}
+
+.tiptap .viator-widget-placeholder-partner {
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.tiptap .viator-widget-placeholder.ProseMirror-selectednode,
+.tiptap .cms-html-embed-placeholder.ProseMirror-selectednode {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 

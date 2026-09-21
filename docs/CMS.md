@@ -63,6 +63,8 @@ Never commit secrets. Never put them in client code. The dashboard only shows co
 3. **Publish** → `src/content/posts/{slug}.json` + `_index.json`; matching draft is removed when present.
 4. Vercel redeploys → live at `/{slug}`.
 
+**Widgets:** In the Content toolbar, **Widget** inserts a Viator partner card or a Custom HTML embed at the cursor. Viator asks for the partner id (prefilled from `VIATOR_PARTNER_ID`) and the `W-…` widget ref from the partner dashboard — not the script tag, and not tour copy. The public post loads the Viator script when a widget div is present. Custom HTML is stored in `div.cms-html-embed` so empty divs and iframes survive the visual editor. Script tags in that HTML are kept but do not run on the public page.
+
 Posts list supports search, destination filter, status (published/draft), View live, Edit, Duplicate, Delete (GitHub delete + index update).
 
 ### Pages (CMS-editable)
