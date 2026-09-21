@@ -35,7 +35,7 @@ export function LatestPosts() {
         }
       />
 
-      <ul className="mt-10 grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+      <ul className="hub-follow grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
         {posts.map((post, i) => (
           <li key={post.slug}>
             <PostCard post={post} priority={i < 3} />

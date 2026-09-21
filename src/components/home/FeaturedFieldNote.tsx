@@ -20,7 +20,6 @@ export function FeaturedFieldNote() {
       id="featured-field-note"
       tone="soft"
       hairline
-      size="md"
       aria-labelledby="featured-field-note-heading"
     >
       <div className="relative">

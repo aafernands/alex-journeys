@@ -31,7 +31,7 @@ export default async function SearchPage({ searchParams }: Props) {
         { label: "Search" },
       ]}
     >
-      <div className="mt-8 max-w-3xl">
+      <div className="hub-follow max-w-3xl">
         <SearchPageClient index={index} initialQuery={initialQuery} />
       </div>
     </SitePage>

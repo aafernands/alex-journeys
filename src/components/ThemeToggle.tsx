@@ -166,7 +166,7 @@ export function ThemeAppearanceControl({
               onClick={() => setTheme(value)}
               className={`inline-flex flex-col items-center justify-center gap-1 rounded-lg px-1.5 py-2 text-center text-[11px] font-semibold leading-tight transition ${
                 isSelected
-                  ? "bg-white text-heading shadow-sm"
+                  ? "bg-bg text-heading shadow-sm ring-1 ring-border-strong"
                   : "text-text hover:text-heading"
               }`}
             >

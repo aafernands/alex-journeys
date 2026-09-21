@@ -31,7 +31,7 @@ export default function AppPurposePage() {
         { label: "App purpose" },
       ]}
     >
-      <div className="panel mt-10 space-y-6 p-6 text-base leading-relaxed text-text md:mt-12 md:p-8">
+      <div className="panel hub-follow space-y-6 p-6 text-base leading-relaxed text-text md:p-8">
         <dl className="grid gap-4 sm:grid-cols-[10rem_1fr] sm:gap-x-6 sm:gap-y-4">
           <dt className="text-sm font-semibold uppercase tracking-wide text-muted">
             App name

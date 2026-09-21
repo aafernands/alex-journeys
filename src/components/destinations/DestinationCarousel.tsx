@@ -25,17 +25,14 @@ export function DestinationCarousel({
   if (destinations.length === 0) return null;
 
   return (
-    <div className={`-mx-5 md:-mx-8 ${className}`.trim()}>
+    <div className={`destination-carousel ${className}`.trim()}>
       <ul
         aria-label={labelledBy ? undefined : label}
         aria-labelledby={labelledBy}
-        className="flex gap-4 overflow-x-auto overscroll-x-contain scroll-px-5 scroll-smooth px-5 pb-6 pt-1 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] md:scroll-px-8 md:px-8 [&::-webkit-scrollbar]:hidden"
+        className="destination-carousel-track"
       >
         {destinations.map((destination, index) => (
-          <li
-            key={destination.slug}
-            className="w-[min(76vw,20.5rem)] shrink-0 snap-start"
-          >
+          <li key={destination.slug} className="destination-carousel-item">
             <DestinationPhotoCard
               destination={destination}
               preload={preloadFirst && index === 0}

@@ -33,7 +33,7 @@ export function DestinationPills() {
       </div>
 
       <DestinationCarousel
-        className="mt-10"
+        className="hub-follow"
         destinations={destinations}
         labelledBy="where-next-heading"
       />

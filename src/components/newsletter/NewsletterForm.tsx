@@ -65,7 +65,7 @@ export function NewsletterForm({ className }: Props) {
 
   return (
     <form
-      className={className ?? "mt-8 max-w-md space-y-3"}
+      className={className ?? "hub-follow max-w-md space-y-3"}
       onSubmit={onSubmit}
       aria-label="Newsletter signup"
     >

@@ -88,7 +88,7 @@ export default function MediaKitPage() {
     >
       <section
         aria-labelledby="mk-hero"
-        className="panel mt-10 grid gap-8 p-6 md:mt-12 md:grid-cols-[minmax(0,12rem)_1fr] md:items-center md:gap-10 md:p-8"
+        className="panel hub-follow grid gap-8 p-6 md:grid-cols-[minmax(0,12rem)_1fr] md:items-center md:gap-10 md:p-8"
       >
         <div className="relative mx-auto aspect-[3/4] w-full max-w-[12rem] overflow-hidden rounded-xl border border-border bg-surface-soft md:mx-0">
           <Image
@@ -104,7 +104,7 @@ export default function MediaKitPage() {
           <p className="eyebrow">Fernandes Journeys</p>
           <h2
             id="mk-hero"
-            className="font-display mt-2 text-2xl font-bold tracking-tight text-heading md:text-3xl"
+            className="font-display mt-2 text-title text-heading"
           >
             {site.authorName}
           </h2>
@@ -134,11 +134,11 @@ export default function MediaKitPage() {
         </div>
       </section>
 
-      <section aria-labelledby="mk-about" className="mt-12 md:mt-14">
+      <section aria-labelledby="mk-about" className="hub-block">
         <p className="eyebrow">About</p>
         <h2
           id="mk-about"
-          className="font-display mt-2 text-xl font-bold text-heading md:text-2xl"
+          className="font-display mt-2 text-title text-heading"
         >
           {asString(s.aboutHeading, "One traveler, one journal")}
         </h2>
@@ -150,14 +150,14 @@ export default function MediaKitPage() {
       <section
         id="audience"
         aria-labelledby="mk-audience"
-        className="mt-12 md:mt-14"
+        className="hub-block"
       >
         <p className="eyebrow">
           {asString(audience.eyebrow, "Audience & reach")}
         </p>
         <h2
           id="mk-audience"
-          className="font-display mt-2 text-xl font-bold text-heading md:text-2xl"
+          className="font-display mt-2 text-title text-heading"
         >
           {asString(audience.title, "Current numbers")}
         </h2>
@@ -179,11 +179,11 @@ export default function MediaKitPage() {
         </ul>
       </section>
 
-      <section aria-labelledby="mk-platforms" className="mt-12 md:mt-14">
+      <section aria-labelledby="mk-platforms" className="hub-block">
         <p className="eyebrow">Platforms</p>
         <h2
           id="mk-platforms"
-          className="font-display mt-2 text-xl font-bold text-heading md:text-2xl"
+          className="font-display mt-2 text-title text-heading"
         >
           {asString(s.platformsHeading, "Where to find the journal")}
         </h2>
@@ -194,11 +194,9 @@ export default function MediaKitPage() {
                 href={p.href}
                 className="panel-interactive flex h-full flex-col gap-1 p-5 md:p-6"
               >
-                <span className="font-display text-lg font-bold text-heading">
-                  {p.name}
-                </span>
+                <span className="card-title">{p.name}</span>
                 <span className="text-sm text-muted">{p.handle}</span>
-                <span className="mt-3 text-sm font-semibold text-link">
+                <span className="card-cta mt-3">
                   Visit →
                 </span>
               </OutboundLink>
@@ -207,12 +205,12 @@ export default function MediaKitPage() {
         </ul>
       </section>
 
-      <div className="mt-12 grid gap-8 md:mt-14 md:grid-cols-2 md:gap-6">
+      <div className="hub-block grid gap-8 md:grid-cols-2 md:gap-6">
         <section aria-labelledby="mk-create" className="panel p-6 md:p-8">
           <p className="eyebrow">Content</p>
           <h2
             id="mk-create"
-            className="font-display mt-2 text-xl font-bold text-heading"
+            className="font-display mt-2 text-title text-heading"
           >
             {asString(s.createHeading, "What I create")}
           </h2>
@@ -233,7 +231,7 @@ export default function MediaKitPage() {
           <p className="eyebrow">Collaborate</p>
           <h2
             id="mk-partners"
-            className="font-display mt-2 text-xl font-bold text-heading"
+            className="font-display mt-2 text-title text-heading"
           >
             {asString(s.partnersHeading, "Partnership types")}
           </h2>
@@ -251,11 +249,11 @@ export default function MediaKitPage() {
         </section>
       </div>
 
-      <section aria-labelledby="mk-places" className="mt-12 md:mt-14">
+      <section aria-labelledby="mk-places" className="hub-block">
         <p className="eyebrow">Journal</p>
         <h2
           id="mk-places"
-          className="font-display mt-2 text-xl font-bold text-heading md:text-2xl"
+          className="font-display mt-2 text-title text-heading"
         >
           {asString(s.placesHeading, "Past places")}
         </h2>
@@ -279,9 +277,9 @@ export default function MediaKitPage() {
         </ul>
       </section>
 
-      <aside className="panel-soft mt-12 p-6 md:mt-14 md:p-8">
+      <aside className="panel-soft hub-block p-6 md:p-8">
         <p className="eyebrow">{asString(cta.eyebrow, "Next step")}</p>
-        <p className="font-display mt-2 text-xl font-bold text-heading md:text-2xl">
+        <p className="font-display mt-2 text-title text-heading">
           {asString(cta.title, "Let’s talk")}
         </p>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-text md:text-base">

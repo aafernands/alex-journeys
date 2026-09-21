@@ -105,7 +105,7 @@ export function PostmarkWatermark({ className = "" }: { className?: string }) {
 export function PostageStamp({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`relative select-none ${className}`}
+      className={`relative max-w-full overflow-hidden select-none ${className}`}
       aria-hidden="true"
     >
       <div className="relative overflow-hidden rounded-sm border-2 border-dashed border-hero-type/35 bg-accent/90 px-3 py-2 text-center shadow-lg shadow-black/20">
@@ -118,9 +118,8 @@ export function PostageStamp({ className = "" }: { className?: string }) {
         <p className="mt-1 text-[9px] font-semibold uppercase tracking-wider text-heading/70">
           Journal
         </p>
-        {/* perforated edge hint */}
-        <span className="absolute -left-1 top-1/2 size-2 -translate-y-1/2 rounded-full bg-heading/80" />
-        <span className="absolute -right-1 top-1/2 size-2 -translate-y-1/2 rounded-full bg-heading/80" />
+        <span className="absolute left-0 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-heading/80" />
+        <span className="absolute right-0 top-1/2 size-2 translate-x-1/2 -translate-y-1/2 rounded-full bg-heading/80" />
       </div>
     </div>
   );

@@ -52,17 +52,7 @@ export function ReaderAuthButtons({
   if (loading) {
     if (isDrawer) {
       return (
-        <div
-          className="flex w-full items-center gap-3 rounded-xl px-2 py-2"
-          aria-hidden="true"
-        >
-          <span className="h-10 w-10 shrink-0 rounded-full bg-surface-soft" />
-          <span className="min-w-0 flex-1 space-y-1.5">
-            <span className="block h-2.5 w-16 rounded bg-surface-soft" />
-            <span className="block h-3.5 w-28 rounded bg-surface-soft" />
-            <span className="block h-2.5 w-36 rounded bg-surface-soft" />
-          </span>
-        </div>
+        <div className="h-5 w-16 rounded bg-surface-soft" aria-hidden="true" />
       );
     }
     return (
@@ -87,10 +77,10 @@ export function ReaderAuthButtons({
     return (
       <Link
         href={loginHref}
-        className="btn btn-primary btn-block"
+        className="inline-flex items-center py-1 text-sm font-semibold text-muted transition hover:text-accent"
         onClick={() => onNavigate?.()}
       >
-        Sign in / Create account
+        Sign in
       </Link>
     );
   }

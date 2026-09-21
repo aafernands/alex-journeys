@@ -35,15 +35,15 @@ export function PostCard({ post, priority = false }: Props) {
           >
             {formatPostDateShort(post.date)}
           </time>
-          <h2 className="font-display mt-2 text-lg font-semibold leading-snug tracking-tight text-heading md:text-xl">
+          <h2 className="card-title mt-2">
             {post.title}
           </h2>
           {post.excerpt ? (
-            <p className="mt-3 flex-1 text-sm leading-relaxed text-text line-clamp-3">
+            <p className="card-body mt-3 line-clamp-3 overflow-hidden break-words">
               {post.excerpt}
             </p>
           ) : null}
-          <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-link transition group-hover:text-accent">
+          <span className="card-cta mt-auto pt-5 inline-flex items-center gap-1.5 transition group-hover:text-accent">
             Read story
             <span aria-hidden="true">→</span>
           </span>

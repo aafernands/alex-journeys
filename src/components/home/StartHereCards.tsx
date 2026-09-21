@@ -12,6 +12,7 @@ export function StartHereCards() {
     <Section
       id="start-here-cards"
       tone="white"
+      hairline
       aria-labelledby="start-here-cards-heading"
     >
       <div className="relative">
@@ -30,7 +31,7 @@ export function StartHereCards() {
       />
       </div>
 
-      <ul className="mt-10 grid gap-4 sm:grid-cols-3 sm:gap-5">
+      <ul className="hub-follow grid gap-4 sm:grid-cols-3 sm:gap-5">
         {startHere.cards.map((card) => (
           <li key={card.href}>
             <Link
@@ -43,14 +44,12 @@ export function StartHereCards() {
                   size={22}
                   className="shrink-0 text-accent"
                 />
-                <span className="font-display text-lg font-bold tracking-tight text-heading md:text-xl">
-                  {card.title}
-                </span>
+                <span className="card-title">{card.title}</span>
               </span>
-              <span className="mt-3 flex-1 text-sm leading-relaxed text-text md:text-[0.9375rem]">
+              <span className="card-body mt-3 flex-1">
                 {card.description}
               </span>
-              <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-link transition group-hover:gap-2.5 group-hover:text-accent">
+              <span className="card-cta mt-5 inline-flex items-center gap-1.5 transition group-hover:gap-2.5 group-hover:text-accent">
                 {card.cta}
                 <span aria-hidden="true">→</span>
               </span>

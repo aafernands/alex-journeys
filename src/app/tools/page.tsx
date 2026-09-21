@@ -33,7 +33,7 @@ export default function ToolsPage() {
       ]}
     >
       <aside
-        className="panel-nested mt-8 bg-surface-soft px-5 py-4"
+        className="panel-nested hub-follow bg-surface-soft px-5 py-4"
         aria-label="Affiliate disclosure"
       >
         <p className="font-display text-sm font-bold text-heading">
@@ -51,7 +51,7 @@ export default function ToolsPage() {
         </p>
       </aside>
 
-      <ul className="mt-10 grid gap-4 sm:grid-cols-2">
+      <ul className="hub-follow grid gap-4 sm:grid-cols-2">
         {tripPlannerTools.map((tool) => (
           <li key={tool.href}>
             <ToolCard tool={tool} />

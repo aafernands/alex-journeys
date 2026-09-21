@@ -50,7 +50,7 @@ export function BlogFilters({ posts }: Props) {
   return (
     <div>
       <div
-        className="mt-8 flex flex-wrap gap-2"
+        className="hub-follow flex flex-wrap gap-2"
         role="tablist"
         aria-label="Filter stories"
       >

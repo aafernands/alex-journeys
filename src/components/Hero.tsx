@@ -52,7 +52,7 @@ export function Hero() {
         <div className="max-w-xl xl:max-w-2xl">
           <h1
             id="hero-heading"
-            className="animate-fade-up font-display text-hero text-hero-type [text-shadow:0_1px_3px_rgba(0,0,0,0.45)]"
+            className="animate-fade-up font-display text-hero font-extrabold text-hero-type [text-shadow:0_1px_3px_rgba(0,0,0,0.45)]"
           >
             {hero.tagline}
           </h1>

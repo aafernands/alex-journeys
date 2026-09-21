@@ -63,7 +63,7 @@ export default function StartHerePage() {
         { label: "Start Here" },
       ]}
     >
-      <ul className="mt-10 grid gap-4 sm:grid-cols-2">
+      <ul className="hub-follow grid gap-4 sm:grid-cols-2">
         {steps.map((step) => (
           <li key={step.href}>
             <Link
@@ -76,14 +76,12 @@ export default function StartHerePage() {
                   size={22}
                   className="shrink-0 text-accent"
                 />
-                <span className="font-display text-xl font-bold tracking-tight text-heading">
-                  {step.title}
-                </span>
+                <span className="card-title">{step.title}</span>
               </span>
-              <span className="mt-3 flex-1 text-sm leading-relaxed text-text md:text-[0.9375rem]">
+              <span className="card-body mt-3 flex-1">
                 {step.description}
               </span>
-              <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-link transition group-hover:gap-2.5 group-hover:text-accent">
+              <span className="card-cta mt-5 inline-flex items-center gap-1.5 transition group-hover:gap-2.5 group-hover:text-accent">
                 {step.cta}
                 <span aria-hidden="true">→</span>
               </span>
@@ -92,7 +90,7 @@ export default function StartHerePage() {
         ))}
       </ul>
 
-      <div className="panel-soft mt-12 p-6 text-center">
+      <div className="panel-soft hub-block p-6 text-center">
         <p className="text-sm text-text">
           {teaser}{" "}
           <Link

@@ -95,7 +95,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
                     href="/blog"
                     className="text-link transition hover:text-accent"
                   >
-                    Blog
+                    Stories
                   </Link>
                 </li>
                 <li aria-hidden="true">›</li>
@@ -181,7 +181,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
         ) : null}
       </header>
 
-      <article className="section-shell py-10 md:py-14">
+      <article className="section-shell section-band">
         <div className="mx-auto max-w-3xl">
           {post.excerpt ? (
             <p className="text-lead text-text">{post.excerpt}</p>

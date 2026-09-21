@@ -14,13 +14,13 @@ export function ToolCard({ tool }: ToolCardProps) {
       affiliate
       className="panel-interactive group flex h-full items-start gap-3.5 p-4 sm:p-5"
     >
-      <span className="panel-nested flex size-11 shrink-0 items-center justify-center bg-white text-accent">
+      <span className="icon-tile">
         <NavIcon name={tool.icon} size={20} />
       </span>
 
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1.5">
-          <span className="font-display text-base font-bold leading-snug text-heading sm:text-lg">
+          <span className="card-title">
             {tool.title}
           </span>
           <ExternalLink

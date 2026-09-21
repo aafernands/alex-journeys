@@ -37,7 +37,7 @@ export function ToolsStrip() {
         }
       />
 
-      <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <ul className="hub-follow grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {preview.map((tool) => (
           <li key={tool.href}>
             <OutboundLink
@@ -45,7 +45,7 @@ export function ToolsStrip() {
               affiliate
               className="panel-interactive group flex h-full items-center gap-3 p-4"
             >
-              <span className="panel-nested flex size-9 shrink-0 items-center justify-center bg-white text-accent">
+              <span className="icon-tile icon-tile-sm">
                 <NavIcon name={tool.icon} size={16} />
               </span>
               <span className="min-w-0">
