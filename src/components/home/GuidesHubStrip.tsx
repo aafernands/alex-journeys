@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { AdminSectionEdit } from "@/components/admin/AdminPublicChrome";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { Section, SectionHead } from "@/components/ui/Section";
 import { guideHubs } from "@/data/guides";
+import { CMS_DESIGN_HREF } from "@/lib/admin-edit";
 import { getSiteDesign } from "@/lib/site-design";
 
 export function GuidesHubStrip() {
@@ -19,10 +21,16 @@ export function GuidesHubStrip() {
         titleId="guides-hubs-heading"
         description={guides.description}
         action={
-          <Link href="/guides" className="btn btn-secondary">
-            {guides.ctaLabel || "All guides"}
-            <span aria-hidden="true">→</span>
-          </Link>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <AdminSectionEdit
+              href={`${CMS_DESIGN_HREF}#design-guides`}
+              label="Edit section"
+            />
+            <Link href="/guides" className="btn btn-secondary">
+              {guides.ctaLabel || "All guides"}
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
         }
       />
 

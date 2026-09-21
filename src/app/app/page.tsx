@@ -22,6 +22,7 @@ export default function AppPurposePage() {
 
   return (
     <SitePage
+      cmsSlug="app"
       label={page.label}
       title={page.title}
       description={page.description}

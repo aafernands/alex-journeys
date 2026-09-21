@@ -20,6 +20,7 @@ export default function GuidesPage() {
 
   return (
     <SitePage
+      cmsSlug="guides"
       label={page.label}
       title={page.title}
       description={page.description}

@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { AdminSectionEdit } from "@/components/admin/AdminPublicChrome";
 import { Section } from "@/components/ui/Section";
 import { site } from "@/data/content";
+import { CMS_DESIGN_HREF } from "@/lib/admin-edit";
 import { getSiteDesign } from "@/lib/site-design";
 
 /**
@@ -19,7 +21,13 @@ export function OauthAppNote() {
       size="md"
       aria-labelledby="oauth-app-heading"
     >
-      <div className="panel border border-border px-5 py-5 md:px-6 md:py-6">
+      <div className="panel relative border border-border px-5 py-5 md:px-6 md:py-6">
+        <div className="absolute right-4 top-4 md:right-5 md:top-5">
+          <AdminSectionEdit
+            href={`${CMS_DESIGN_HREF}#design-oauth`}
+            label="Edit note"
+          />
+        </div>
         <p className="eyebrow">{oauthNote.eyebrow}</p>
         <h2
           id="oauth-app-heading"

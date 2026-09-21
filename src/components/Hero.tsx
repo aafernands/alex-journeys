@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Leaf, Trees } from "lucide-react";
+import { AdminSectionEdit } from "@/components/admin/AdminPublicChrome";
+import { CMS_DESIGN_HREF } from "@/lib/admin-edit";
 import { getSiteDesign } from "@/lib/site-design";
 
 /**
@@ -30,6 +32,14 @@ export function Hero() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/15 sm:via-black/35 sm:to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/25" />
+      </div>
+
+      <div className="absolute right-4 top-24 z-10 md:right-8 md:top-28">
+        <AdminSectionEdit
+          href={`${CMS_DESIGN_HREF}#design-hero`}
+          label="Edit hero"
+          variant="on-photo"
+        />
       </div>
 
       {hero.imageCaption ? (

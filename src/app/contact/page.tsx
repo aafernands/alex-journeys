@@ -27,6 +27,7 @@ export default function ContactPage() {
 
   return (
     <SitePage
+      cmsSlug="contact"
       label={page.label}
       title={page.title}
       description={page.description}

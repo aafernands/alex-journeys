@@ -53,6 +53,7 @@ export default function StartHerePage() {
 
   return (
     <SitePage
+      cmsSlug="start-here"
       label={page.label}
       title={page.title}
       description={page.description}

@@ -17,6 +17,7 @@ import {
 import "./globals.css";
 
 const googleSiteVerification = getGoogleSiteVerification();
+const adsenseClientId = "ca-pub-6769938844993028";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -78,6 +79,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
+  other: {
+    "google-adsense-account": adsenseClientId,
+  },
   ...(googleSiteVerification
     ? { verification: { google: googleSiteVerification } }
     : {}),
@@ -107,6 +111,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: themeInitScript }}
         />
         <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
+          crossOrigin="anonymous"
+        />
       </head>
       <body id="top" className="min-h-full flex flex-col font-sans">
         <Providers>

@@ -16,6 +16,7 @@ export default function TermsPage() {
 
   return (
     <SitePage
+      cmsSlug="terms"
       label={page.label}
       title={page.title}
       description={page.description}

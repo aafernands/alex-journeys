@@ -35,6 +35,7 @@ export default function AboutPage() {
 
   return (
     <SitePage
+      cmsSlug="about"
       label={page.label}
       title={page.title}
       description={page.description}

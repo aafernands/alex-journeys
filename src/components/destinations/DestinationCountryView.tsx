@@ -1,6 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import {
+  AdminPublicChrome,
+  AdminSectionEdit,
+} from "@/components/admin/AdminPublicChrome";
 import { DestinationClimate } from "@/components/destinations/DestinationClimate";
 import { DestinationItinerary } from "@/components/destinations/DestinationItinerary";
 import { DestinationQuickFacts } from "@/components/destinations/DestinationQuickFacts";
@@ -10,6 +14,7 @@ import {
   formatPostDateShort,
   getPostsByDestination,
 } from "@/lib/posts";
+import { cmsEditDestinationHref } from "@/lib/admin-edit";
 import { publicPostPath } from "@/lib/public-paths";
 
 type DestinationCountryViewProps = {
@@ -32,8 +37,15 @@ export async function DestinationCountryView({
       ? publicPostPath(related[0].slug)
       : null;
 
+  const editHref = cmsEditDestinationHref(slug);
+
   return (
     <main className="bg-white">
+      <AdminPublicChrome
+        editHref={editHref}
+        editLabel="Edit destination"
+        showChip={false}
+      />
       <div className="section-shell py-10 md:py-14">
         <div className="mx-auto max-w-3xl">
           <nav aria-label="Breadcrumb" className="text-sm text-muted">
@@ -79,9 +91,12 @@ export async function DestinationCountryView({
               </span>
             ) : null}
           </div>
-          <h1 className="font-display mt-2 text-display text-heading">
-            {dest.name}
-          </h1>
+          <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+            <h1 className="font-display text-display text-heading">
+              {dest.name}
+            </h1>
+            <AdminSectionEdit href={editHref} label="Edit destination" />
+          </div>
           <p className="mt-6 text-lead text-text">{dest.blurb}</p>
 
           <DestinationQuickFacts
