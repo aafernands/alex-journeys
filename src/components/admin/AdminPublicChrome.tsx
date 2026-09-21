@@ -1,11 +1,10 @@
-"use client";
-
+import { Suspense } from "react";
 import { AdminBar } from "@/components/admin/AdminBar";
 import { AdminEditShortcut } from "@/components/admin/AdminEditShortcut";
-import { AdminGate } from "@/components/admin/AdminGate";
 import type { AdminEditLink } from "@/lib/admin-edit";
+import { hasOauthAdminSession } from "@/lib/cms/auth";
 
-type Props = {
+type ChromeProps = {
   editHref: string;
   editLabel: string;
   extraLinks?: AdminEditLink[];
@@ -14,20 +13,17 @@ type Props = {
   chipVariant?: "chip" | "on-photo";
 };
 
-/**
- * Admin-only public chrome: slim bar (CMS / Edit this / Comments)
- * plus an optional inline Edit chip. Session-gated — not rendered
- * for readers or non-admin signed-in users.
- */
-export function AdminPublicChrome({
+async function AdminPublicChromeInner({
   editHref,
   editLabel,
   extraLinks,
   showChip = true,
   chipVariant = "chip",
-}: Props) {
+}: ChromeProps) {
+  if (!(await hasOauthAdminSession())) return null;
+
   return (
-    <AdminGate>
+    <>
       <AdminBar
         editHref={editHref}
         editLabel={editLabel}
@@ -40,12 +36,24 @@ export function AdminPublicChrome({
           variant={chipVariant}
         />
       ) : null}
-    </AdminGate>
+    </>
   );
 }
 
-/** Standalone gated chip for homepage section heads and similar. */
-export function AdminSectionEdit({
+/**
+ * Admin-only public chrome: slim bar (CMS / Edit this / Comments)
+ * plus an optional inline Edit chip. Server-gated via Auth.js
+ * `session.user.isAdmin` — not present in HTML for anyone else.
+ */
+export function AdminPublicChrome(props: ChromeProps) {
+  return (
+    <Suspense fallback={null}>
+      <AdminPublicChromeInner {...props} />
+    </Suspense>
+  );
+}
+
+async function AdminSectionEditInner({
   href,
   label,
   variant = "chip",
@@ -54,9 +62,19 @@ export function AdminSectionEdit({
   label: string;
   variant?: "chip" | "on-photo";
 }) {
+  if (!(await hasOauthAdminSession())) return null;
+  return <AdminEditShortcut href={href} label={label} variant={variant} />;
+}
+
+/** Standalone gated chip for homepage section heads and similar. */
+export function AdminSectionEdit(props: {
+  href: string;
+  label: string;
+  variant?: "chip" | "on-photo";
+}) {
   return (
-    <AdminGate>
-      <AdminEditShortcut href={href} label={label} variant={variant} />
-    </AdminGate>
+    <Suspense fallback={null}>
+      <AdminSectionEditInner {...props} />
+    </Suspense>
   );
 }
