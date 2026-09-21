@@ -161,6 +161,7 @@ export default async function PublicSlugPage({ params }: PageProps) {
     if (page) {
       return (
         <SitePage
+          cmsSlug={page.slug}
           label={page.label}
           title={page.title}
           description={page.description}

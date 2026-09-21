@@ -1,3 +1,4 @@
+import { AdminPublicChrome } from "@/components/admin/AdminPublicChrome";
 import { Hero } from "@/components/Hero";
 import { AuthorIntro } from "@/components/home/AuthorIntro";
 import { FeaturedFieldNote } from "@/components/home/FeaturedFieldNote";
@@ -7,6 +8,7 @@ import { StartHereCards } from "@/components/home/StartHereCards";
 import { ToolsStrip } from "@/components/home/ToolsStrip";
 import { DestinationPills } from "@/components/DestinationPills";
 import { LatestPosts } from "@/components/LatestPosts";
+import { CMS_DESIGN_HREF } from "@/lib/admin-edit";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -23,6 +25,11 @@ export default function HomePage() {
         Skip to start here
       </a>
       <main className="flex-1">
+        <AdminPublicChrome
+          editHref={CMS_DESIGN_HREF}
+          editLabel="Edit design"
+          showChip={false}
+        />
         <Hero />
         <AuthorIntro />
         <StartHereCards />

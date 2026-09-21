@@ -1,6 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import {
+  AdminPublicChrome,
+  AdminSectionEdit,
+} from "@/components/admin/AdminPublicChrome";
 import { PostContent } from "@/components/blog/PostContent";
 import { PostItineraryTimeline } from "@/components/blog/PostItineraryTimeline";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
@@ -16,6 +20,7 @@ import {
 import { publicPostPath } from "@/lib/public-paths";
 import { blogPostingJsonLd } from "@/lib/seo";
 import { site } from "@/data/content";
+import { cmsEditPostHref } from "@/lib/admin-edit";
 
 /** Pull simple TOC from h2 text in HTML when present */
 function extractToc(html: string): { id: string; label: string }[] {
@@ -53,8 +58,15 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
     image: post.featuredImage?.url ?? null,
   });
 
+  const editHref = cmsEditPostHref(slug);
+
   return (
     <main className="bg-bg">
+      <AdminPublicChrome
+        editHref={editHref}
+        editLabel="Edit post"
+        showChip={false}
+      />
       <JsonLd data={jsonLd} />
       {/* Product-style article header — no magazine dark hero */}
       <header className="border-b border-border bg-white">
@@ -91,9 +103,12 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
             </nav>
 
             <p className="mt-8 eyebrow">Journal</p>
-            <h1 className="font-display text-display mt-2 text-heading">
-              {post.title}
-            </h1>
+            <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+              <h1 className="font-display text-display text-heading">
+                {post.title}
+              </h1>
+              <AdminSectionEdit href={editHref} label="Edit post" />
+            </div>
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-4">

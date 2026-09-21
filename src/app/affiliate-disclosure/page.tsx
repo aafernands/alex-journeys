@@ -16,6 +16,7 @@ export default function AffiliateDisclosurePage() {
 
   return (
     <SitePage
+      cmsSlug="affiliate-disclosure"
       label={page.label}
       title={page.title}
       description={page.description}

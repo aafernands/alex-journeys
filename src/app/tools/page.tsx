@@ -22,6 +22,7 @@ export default function ToolsPage() {
 
   return (
     <SitePage
+      cmsSlug="tools"
       label={page.label}
       title={page.title}
       description={page.description}

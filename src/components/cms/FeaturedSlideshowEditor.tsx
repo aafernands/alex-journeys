@@ -92,7 +92,7 @@ export function FeaturedSlideshowEditor({ value, onChange, onError }: Props) {
   }
 
   return (
-    <section className="panel overflow-hidden">
+    <section id="design-featured" className="panel scroll-mt-28 overflow-hidden">
       <div className="border-b border-border bg-surface-soft px-5 py-3">
         <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
           Featured slideshow

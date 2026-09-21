@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import { AdminSectionEdit } from "@/components/admin/AdminPublicChrome";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { Section, SectionHead } from "@/components/ui/Section";
+import { CMS_DESIGN_HREF } from "@/lib/admin-edit";
 import {
   destinationCity,
   getAllDestinations,
@@ -20,6 +22,13 @@ export function DestinationPills() {
       hairline
       aria-labelledby="where-next-heading"
     >
+      <div className="relative">
+        <div className="absolute right-0 top-0 z-[1]">
+          <AdminSectionEdit
+            href={`${CMS_DESIGN_HREF}#design-places`}
+            label="Edit section"
+          />
+        </div>
       <SectionHead
         eyebrow={places.eyebrow}
         title={places.title}
@@ -27,6 +36,7 @@ export function DestinationPills() {
         description={places.description}
         align="center"
       />
+      </div>
 
       <ul className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-3 lg:gap-5 [&::-webkit-scrollbar]:hidden">
         {destinations.map((dest) => {
