@@ -127,7 +127,10 @@ Optional: `POST /api/auth/change-email/cancel` clears pending tokens for the sig
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google button on `/login` |
 | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Required for email/password + user profiles + reset tokens |
 | `FIREBASE_FIRESTORE_DATABASE_ID` | Optional named DB |
-| `RESEND_API_KEY` | **Required to send** reset + email-change emails via Resend HTTP API |
+| `RESEND_API_KEY` | **Required to send** reset + email-change emails via Resend HTTP API. The same key reads inbound booking mail when it has full access. See [TRIPS-INBOUND.md](./TRIPS-INBOUND.md). |
+| `RESEND_WEBHOOK_SECRET` | Signing secret for `POST /api/inbound/email` (`email.received`). |
+| `INBOUND_EMAIL_DOMAIN` | Optional. Default `inbound.fernandesjourneys.com`. |
+| `INBOUND_SAMPLE_SECRET` | Optional. Unlocks the inbound sample harness. |
 | `EMAIL_FROM` | Optional. Default for testing: `Fernandes Journeys <onboarding@resend.dev>` (Resend’s shared sender). With that default, Resend **only sends to the Resend account owner email** until you verify a domain and set `EMAIL_FROM` to an address on it (e.g. `Fernandes Journeys <contact@fernandesjourneys.com>`). |
 | `CMS_ADMIN_EMAILS` / `CMS_PASSCODE` | CMS only (unchanged). Admin matching is by email string — after an email change, update the allowlist if needed. |
 
