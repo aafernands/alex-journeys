@@ -39,6 +39,8 @@ function readFileAsDataUrl(file: File): Promise<string> {
 export function DesignForm({ initial }: Props) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
+  const logoLightFileRef = useRef<HTMLInputElement>(null);
+  const logoDarkFileRef = useRef<HTMLInputElement>(null);
 
   const [hero, setHero] = useState(initial.hero);
   const [featuredSlideshow, setFeaturedSlideshow] = useState(
@@ -51,10 +53,26 @@ export function DesignForm({ initial }: Props) {
     initial.flags.showHeroStats,
   );
   const [homeSections, setHomeSections] = useState(initial.homeSections);
+  const [branding, setBranding] = useState(initial.branding);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [authorLibraryOpen, setAuthorLibraryOpen] = useState(false);
+  const [logoPicker, setLogoPicker] = useState<
+    "logoOnLight" | "logoOnDark" | null
+  >(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const [pendingLogoOnLight, setPendingLogoOnLight] = useState<File | null>(
+    null,
+  );
+  const [pendingLogoOnDark, setPendingLogoOnDark] = useState<File | null>(
+    null,
+  );
+  const [localLogoOnLightPreview, setLocalLogoOnLightPreview] = useState<
+    string | null
+  >(null);
+  const [localLogoOnDarkPreview, setLocalLogoOnDarkPreview] = useState<
+    string | null
+  >(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{
@@ -63,6 +81,29 @@ export function DesignForm({ initial }: Props) {
   } | null>(null);
 
   const previewSrc = localPreview || hero.image;
+  const logoOnLightPreview = localLogoOnLightPreview || branding.logoOnLight;
+  const logoOnDarkPreview = localLogoOnDarkPreview || branding.logoOnDark;
+
+  function patchBranding<K extends keyof typeof branding>(
+    key: K,
+    value: (typeof branding)[K],
+  ) {
+    setBranding((b) => ({ ...b, [key]: value }));
+    setSuccess(null);
+  }
+
+  function assertImageFile(file: File): string | null {
+    if (file.size > MAX_BYTES) {
+      return `Image too large. Max is about ${MAX_MEDIA_UPLOAD_LABEL}.`;
+    }
+    const type = (file.type || "").toLowerCase();
+    if (
+      !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(type)
+    ) {
+      return "Use JPEG, PNG, WebP, or GIF.";
+    }
+    return null;
+  }
 
   function patchHero<K extends keyof typeof hero>(
     key: K,
@@ -85,18 +126,9 @@ export function DesignForm({ initial }: Props) {
             let dataUrl: string | undefined;
             let filename: string | undefined;
             if (pendingFile) {
-              if (pendingFile.size > MAX_BYTES) {
-                setError(`Image too large. Max is about ${MAX_MEDIA_UPLOAD_LABEL}.`);
-                setPending(false);
-                return;
-              }
-              const type = (pendingFile.type || "").toLowerCase();
-              if (
-                !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
-                  type,
-                )
-              ) {
-                setError("Use JPEG, PNG, WebP, or GIF.");
+              const errMsg = assertImageFile(pendingFile);
+              if (errMsg) {
+                setError(errMsg);
                 setPending(false);
                 return;
               }
@@ -104,8 +136,35 @@ export function DesignForm({ initial }: Props) {
               filename = pendingFile.name;
             }
 
+            let logoOnLightDataUrl: string | undefined;
+            let logoOnLightFilename: string | undefined;
+            if (pendingLogoOnLight) {
+              const errMsg = assertImageFile(pendingLogoOnLight);
+              if (errMsg) {
+                setError(`Logo (on light): ${errMsg}`);
+                setPending(false);
+                return;
+              }
+              logoOnLightDataUrl = await readFileAsDataUrl(pendingLogoOnLight);
+              logoOnLightFilename = pendingLogoOnLight.name;
+            }
+
+            let logoOnDarkDataUrl: string | undefined;
+            let logoOnDarkFilename: string | undefined;
+            if (pendingLogoOnDark) {
+              const errMsg = assertImageFile(pendingLogoOnDark);
+              if (errMsg) {
+                setError(`Logo (on dark): ${errMsg}`);
+                setPending(false);
+                return;
+              }
+              logoOnDarkDataUrl = await readFileAsDataUrl(pendingLogoOnDark);
+              logoOnDarkFilename = pendingLogoOnDark.name;
+            }
+
             const design: SiteDesign = {
               updatedAt: initial.updatedAt,
+              branding,
               hero,
               featuredSlideshow,
               homeSections,
@@ -116,7 +175,15 @@ export function DesignForm({ initial }: Props) {
             const res = await fetch("/api/cms/design", {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ design, dataUrl, filename }),
+              body: JSON.stringify({
+                design,
+                dataUrl,
+                filename,
+                logoOnLightDataUrl,
+                logoOnLightFilename,
+                logoOnDarkDataUrl,
+                logoOnDarkFilename,
+              }),
             });
             const data = (await res.json()) as {
               error?: string;
@@ -131,6 +198,7 @@ export function DesignForm({ initial }: Props) {
               return;
             }
             if (data.design) {
+              setBranding(data.design.branding);
               setHero(data.design.hero);
               setFeaturedSlideshow(data.design.featuredSlideshow);
               setHomeSections(data.design.homeSections);
@@ -140,6 +208,12 @@ export function DesignForm({ initial }: Props) {
             setPendingFile(null);
             setLocalPreview(null);
             if (fileRef.current) fileRef.current.value = "";
+            setPendingLogoOnLight(null);
+            setPendingLogoOnDark(null);
+            setLocalLogoOnLightPreview(null);
+            setLocalLogoOnDarkPreview(null);
+            if (logoLightFileRef.current) logoLightFileRef.current.value = "";
+            if (logoDarkFileRef.current) logoDarkFileRef.current.value = "";
             setSuccess({
               commitUrl: data.commitUrl || "#",
               note:
@@ -154,6 +228,183 @@ export function DesignForm({ initial }: Props) {
           }
         }}
       >
+        {/* Brand logos */}
+        <section id="design-branding" className="panel scroll-mt-28 overflow-hidden">
+          <div className="border-b border-border bg-surface-soft px-5 py-3">
+            <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
+              Brand logos
+            </h2>
+          </div>
+          <div className="space-y-6 p-5 md:p-6">
+            <p className="text-sm text-muted">
+              Sitewide wordmark used in the header, footer, mobile drawer, and
+              outbound interstitial. Dark mark for light backgrounds; white mark
+              for dark mode and the near-black footer. The dark mark is also the
+              Organization JSON-LD logo. Choose from the media library or upload
+              a file (JPEG, PNG, WebP, GIF · max ~{MAX_MEDIA_UPLOAD_LABEL}).
+              Live after Vercel redeploy.
+            </p>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="space-y-4 rounded-xl border border-border bg-surface-soft/40 p-4">
+                <div>
+                  <p className="text-sm font-bold text-heading">
+                    Logo on light
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted">
+                    Dark / black mark for light UI backgrounds
+                  </p>
+                </div>
+                <div className="flex min-h-24 items-center justify-center rounded-lg border border-border bg-white p-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={logoOnLightPreview}
+                    alt="Logo on light preview"
+                    className="max-h-16 w-auto object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.opacity = "0.3";
+                    }}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-secondary text-sm"
+                    onClick={() => setLogoPicker("logoOnLight")}
+                  >
+                    Choose from library
+                  </button>
+                  <label className="btn btn-secondary cursor-pointer text-sm">
+                    Upload new
+                    <input
+                      ref={logoLightFileRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif,image/*"
+                      className="sr-only"
+                      onChange={(e) => {
+                        setError(null);
+                        setSuccess(null);
+                        const file = e.target.files?.[0];
+                        if (!file) {
+                          setPendingLogoOnLight(null);
+                          setLocalLogoOnLightPreview(null);
+                          return;
+                        }
+                        setPendingLogoOnLight(file);
+                        setLocalLogoOnLightPreview(URL.createObjectURL(file));
+                      }}
+                    />
+                  </label>
+                </div>
+                {pendingLogoOnLight ? (
+                  <p className="text-xs text-muted">
+                    Will upload on save: {pendingLogoOnLight.name}
+                  </p>
+                ) : null}
+                <div>
+                  <label
+                    htmlFor="design-logo-on-light"
+                    className="text-sm font-semibold text-heading"
+                  >
+                    Path / URL
+                  </label>
+                  <input
+                    id="design-logo-on-light"
+                    value={branding.logoOnLight}
+                    onChange={(e) => {
+                      setPendingLogoOnLight(null);
+                      setLocalLogoOnLightPreview(null);
+                      if (logoLightFileRef.current)
+                        logoLightFileRef.current.value = "";
+                      patchBranding("logoOnLight", e.target.value);
+                    }}
+                    placeholder="/brand/… or /media/…"
+                    className={fieldClass}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4 rounded-xl border border-border bg-surface-soft/40 p-4">
+                <div>
+                  <p className="text-sm font-bold text-heading">
+                    Logo on dark
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted">
+                    White / light mark for dark UI backgrounds
+                  </p>
+                </div>
+                <div className="flex min-h-24 items-center justify-center rounded-lg border border-border bg-zinc-900 p-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={logoOnDarkPreview}
+                    alt="Logo on dark preview"
+                    className="max-h-16 w-auto object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.opacity = "0.3";
+                    }}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-secondary text-sm"
+                    onClick={() => setLogoPicker("logoOnDark")}
+                  >
+                    Choose from library
+                  </button>
+                  <label className="btn btn-secondary cursor-pointer text-sm">
+                    Upload new
+                    <input
+                      ref={logoDarkFileRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif,image/*"
+                      className="sr-only"
+                      onChange={(e) => {
+                        setError(null);
+                        setSuccess(null);
+                        const file = e.target.files?.[0];
+                        if (!file) {
+                          setPendingLogoOnDark(null);
+                          setLocalLogoOnDarkPreview(null);
+                          return;
+                        }
+                        setPendingLogoOnDark(file);
+                        setLocalLogoOnDarkPreview(URL.createObjectURL(file));
+                      }}
+                    />
+                  </label>
+                </div>
+                {pendingLogoOnDark ? (
+                  <p className="text-xs text-muted">
+                    Will upload on save: {pendingLogoOnDark.name}
+                  </p>
+                ) : null}
+                <div>
+                  <label
+                    htmlFor="design-logo-on-dark"
+                    className="text-sm font-semibold text-heading"
+                  >
+                    Path / URL
+                  </label>
+                  <input
+                    id="design-logo-on-dark"
+                    value={branding.logoOnDark}
+                    onChange={(e) => {
+                      setPendingLogoOnDark(null);
+                      setLocalLogoOnDarkPreview(null);
+                      if (logoDarkFileRef.current)
+                        logoDarkFileRef.current.value = "";
+                      patchBranding("logoOnDark", e.target.value);
+                    }}
+                    placeholder="/brand/… or /media/…"
+                    className={fieldClass}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Homepage hero image */}
         <section id="design-hero" className="panel scroll-mt-28 overflow-hidden">
           <div className="border-b border-border bg-surface-soft px-5 py-3">
@@ -1031,6 +1282,30 @@ export function DesignForm({ initial }: Props) {
             imageAlt: item.alt || h.imageAlt,
           }));
           setSuccess(null);
+        }}
+      />
+
+      <MediaPicker
+        open={logoPicker !== null}
+        onClose={() => setLogoPicker(null)}
+        title={
+          logoPicker === "logoOnDark"
+            ? "Choose logo (on dark)"
+            : "Choose logo (on light)"
+        }
+        onSelect={(item) => {
+          if (logoPicker === "logoOnDark") {
+            setPendingLogoOnDark(null);
+            setLocalLogoOnDarkPreview(null);
+            if (logoDarkFileRef.current) logoDarkFileRef.current.value = "";
+            patchBranding("logoOnDark", item.url);
+          } else {
+            setPendingLogoOnLight(null);
+            setLocalLogoOnLightPreview(null);
+            if (logoLightFileRef.current) logoLightFileRef.current.value = "";
+            patchBranding("logoOnLight", item.url);
+          }
+          setLogoPicker(null);
         }}
       />
 
