@@ -111,6 +111,25 @@ function StatusChips({
   );
 }
 
+function laneName(partner: TripPlannerPartner): string {
+  if (partner.showWhen === "flights") return "Flights";
+  if (partner.showWhen === "hotel") return "Stay";
+  if (partner.showWhen === "car") return "Car";
+  return partner.label;
+}
+
+function laneProgress(items: TripItem[]): "open" | "booked" | "skipped" {
+  if (items.length === 0 || items.some((item) => item.status === "todo")) return "open";
+  if (items.some((item) => item.status === "booked")) return "booked";
+  return "skipped";
+}
+
+const LANE_PROGRESS_LABEL = {
+  open: "still open",
+  booked: "booked",
+  skipped: "skipped",
+} as const;
+
 function compareScheduled(a: TripItem, b: TripItem): number {
   const ta = a.time ?? "";
   const tb = b.time ?? "";
@@ -777,6 +796,30 @@ export function ItineraryHub({
         </p>
       ) : null}
 
+      {partners.length > 0 ? (
+        <section className="mt-5" aria-labelledby={`${headingId}-left`}>
+          <h3
+            id={`${headingId}-left`}
+            className="text-xs font-semibold uppercase tracking-[0.08em] text-muted"
+          >
+            What’s left to book
+          </h3>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {partners.map((partner) => {
+              const progress = laneProgress(itemsForLane(items, partner));
+              return (
+                <li key={partner.key}>
+                  <span className="inline-flex min-h-9 items-center rounded-full border border-border bg-white px-3 text-sm">
+                    <span className="font-semibold text-heading">{laneName(partner)}</span>
+                    <span className="ml-2 text-muted">{LANE_PROGRESS_LABEL[progress]}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+
       {guestBackup ? (
         <aside className="panel-nested mt-4 px-4 py-3" aria-label="Browser draft">
           <p className="text-sm leading-relaxed text-text">
@@ -832,7 +875,11 @@ export function ItineraryHub({
                 </OutboundLink>
               </div>
 
-              {laneItems.length > 0 ? (
+              {laneItems.length === 0 ? (
+                <p className="mt-4 text-sm leading-relaxed text-muted">
+                  Nothing saved here yet. Search, then add the booking you want to keep.
+                </p>
+              ) : (
                 <ul className="mt-4 space-y-3">
                   {laneItems.map((item) => {
                     const editing =
@@ -867,7 +914,7 @@ export function ItineraryHub({
                     );
                   })}
                 </ul>
-              ) : null}
+              )}
 
               {adding ? (
                 <BookingItemForm
@@ -978,7 +1025,9 @@ export function ItineraryHub({
                         {day.label}
                       </h4>
                       {dayItems.length === 0 ? (
-                        <p className="mt-2 text-sm text-muted">Nothing on this day yet.</p>
+                        <p className="mt-2 text-sm text-muted">
+                          Nothing on this day yet. Add a booking above and assign it to {day.label}.
+                        </p>
                       ) : (
                         renderTimeline(dayItems)
                       )}
@@ -1004,7 +1053,7 @@ export function ItineraryHub({
             </h4>
             {unscheduled.length === 0 ? (
               <p className="mt-2 text-sm text-muted">
-                Bookings without a day show up here.
+                Bookings without a day land here. Choose a day when you add one.
               </p>
             ) : (
               renderTimeline(unscheduled)
