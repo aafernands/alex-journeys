@@ -53,6 +53,17 @@ describe("place suggestions", () => {
     assert.equal(colorado.journal, true);
   });
 
+  it("does not match letters buried inside another word", () => {
+    const labels = suggestPlaces("lis", JOURNAL).map((place) => place.label);
+    assert.equal(labels[0], "Lisbon, Portugal");
+    assert.equal(labels.includes("Minneapolis, United States"), false);
+  });
+
+  it("matches a city from the middle of its name", () => {
+    const labels = suggestPlaces("new y").map((place) => place.label);
+    assert.equal(labels[0], "New York, United States");
+  });
+
   it("returns nothing for a blank or unknown query", () => {
     assert.deepEqual(suggestPlaces("   ", JOURNAL), []);
     assert.deepEqual(suggestPlaces("zzzz-not-a-place", JOURNAL), []);

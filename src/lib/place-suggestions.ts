@@ -98,7 +98,7 @@ function bucket(place: Entry, query: string): number | null {
   }
   const words = place.normLabel.split(/[^a-z0-9]+/);
   if (words.some((word) => word.startsWith(query))) return 3;
-  if (place.normLabel.includes(query)) return 4;
+  if (query.includes(" ") && place.normLabel.includes(query)) return 4;
   return null;
 }
 
