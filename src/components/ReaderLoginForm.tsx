@@ -33,9 +33,12 @@ export function ReaderLoginForm({
     () => safeCallbackUrl(searchParams.get("callbackUrl")),
     [searchParams],
   );
+  const returningToItinerary = callbackUrl.startsWith("/guides/plan-a-trip");
   const authError = searchParams.get("error");
 
-  const [mode, setMode] = useState<Mode>("signin");
+  const [mode, setMode] = useState<Mode>(
+    searchParams.get("mode") === "signup" ? "signup" : "signin",
+  );
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -141,7 +144,9 @@ export function ReaderLoginForm({
         {mode === "signin" ? "Welcome back" : "Create your account"}
       </h1>
       <p className="mt-3 text-sm text-muted">
-        Save stories across devices. Reader accounts never unlock the CMS.
+        {returningToItinerary
+          ? "After you continue, you’ll return to this itinerary. A draft in this browser can be saved to your account."
+          : "Save stories across devices. Reader accounts never unlock the CMS."}
       </p>
 
       {credentialsConfigured ? (

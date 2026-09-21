@@ -21,9 +21,8 @@ import {
   type TripPlannerPartner,
   type TripType,
 } from "@/lib/trip-planner-model";
-import { decodeSharedPlan, planATripLoginHref } from "@/lib/trip-record";
-import type { JournalNote, JournalPlace } from "@/lib/trip-journal";
 import {
+  clearGuestSaveFlags,
   clearGuestBackup,
   getActivePlanSnapshot,
   getServerActivePlan,
@@ -33,6 +32,14 @@ import {
   type PendingPlan,
   type StoredPlan,
 } from "@/lib/trip-planner-storage";
+import type { JournalNote, JournalPlace } from "@/lib/trip-journal";
+import {
+  decodeSharedPlan,
+  planATripHref,
+  planATripLoginHref,
+  shouldPromptTripSignIn,
+  TRIPS_ACCOUNT_UNAVAILABLE,
+} from "@/lib/trip-record";
 
 const EMPTY_PLAN: StoredPlan = {
   step: 1,
@@ -208,6 +215,8 @@ export function TripPlanner({
     items?: StoredPlan["items"];
     tripId?: string | null;
     packingNotes?: string;
+    title?: string;
+    titleCustom?: boolean;
   }) {
     writeActivePlan({
       step: next.step,
@@ -216,6 +225,9 @@ export function TripPlanner({
       tripId: next.tripId !== undefined ? next.tripId : plan.tripId,
       packingNotes:
         next.packingNotes !== undefined ? next.packingNotes : plan.packingNotes,
+      title: next.title !== undefined ? next.title : plan.title,
+      titleCustom:
+        next.titleCustom !== undefined ? next.titleCustom : plan.titleCustom,
     });
   }
 
@@ -280,12 +292,15 @@ export function TripPlanner({
   function startOver() {
     sync.dismissUrlTrip();
     clearGuestBackup();
+    clearGuestSaveFlags();
     writeActivePlan({
       step: 1,
       state: initialPlannerState(),
       items: [],
       tripId: null,
       packingNotes: "",
+      title: "",
+      titleCustom: false,
     });
     setCategoryError(null);
     setErrors({});
@@ -303,7 +318,15 @@ export function TripPlanner({
     return <PlannerShell />;
   }
 
-  if (urlTripId && !sync.signedIn) {
+  if (
+    shouldPromptTripSignIn({
+      urlTripId,
+      signedIn: sync.signedIn,
+      authLoading: sync.authLoading,
+      planTripId: plan.tripId,
+    })
+  ) {
+    const hasLocalDraft = Boolean(plan.state.destination.trim());
     return (
       <section className="mt-8 max-w-3xl" aria-labelledby={`${baseId}-heading`}>
         <div className="panel p-6 md:p-8">
@@ -314,15 +337,24 @@ export function TripPlanner({
             {config.steps.next.heading}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-text">
-            Sign in to open this saved itinerary.
+            Sign in to open this saved itinerary. You’ll come back to this trip
+            after you continue.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <Link href={planATripLoginHref(urlTripId)} className="btn btn-ink">
-              Sign in to save this itinerary
+            <Link href={planATripLoginHref(urlTripId, "signin")} className="btn btn-ink">
+              Sign in
             </Link>
-            <Link href="/guides/plan-a-trip" className="btn btn-secondary">
-              Use the draft in this browser
+            <Link
+              href={planATripLoginHref(urlTripId, "signup")}
+              className="btn btn-secondary"
+            >
+              Create account
             </Link>
+            {hasLocalDraft ? (
+              <Link href={planATripHref()} className="btn btn-secondary">
+                Use the draft in this browser
+              </Link>
+            ) : null}
           </div>
         </div>
       </section>
@@ -351,7 +383,12 @@ export function TripPlanner({
     );
   }
 
-  if (urlTripId && sync.signedIn && sync.remote === "error") {
+  if (
+    urlTripId &&
+    sync.signedIn &&
+    (sync.remote === "error" || sync.remote === "unavailable") &&
+    plan.tripId !== urlTripId
+  ) {
     return (
       <section className="mt-8 max-w-3xl" aria-labelledby={`${baseId}-heading`}>
         <div className="panel p-6 md:p-8">
@@ -359,10 +396,14 @@ export function TripPlanner({
             id={`${baseId}-heading`}
             className="font-display text-2xl font-bold text-heading"
           >
-            Couldn’t open that trip.
+            {sync.remote === "unavailable"
+              ? "Saved trips aren’t available right now"
+              : "Couldn’t open that trip"}
           </h2>
           <p className="mt-2 text-sm text-text" role="status">
-            Account save may be unavailable. You can still plan in this browser.
+            {sync.remote === "unavailable"
+              ? TRIPS_ACCOUNT_UNAVAILABLE
+              : "Something went wrong opening that trip. You can still plan in this browser."}
           </p>
           <button
             type="button"
@@ -874,7 +915,9 @@ export function TripPlanner({
               flexibleOn={flexibleOn}
               subhead={subhead}
               tripId={plan.tripId}
+              tripTitle={plan.titleCustom ? plan.title : undefined}
               saveMode={sync.mode}
+              saveDetail={sync.saveDetail}
               guestBackup={sync.guestBackup}
               journalNotes={journalNotes}
               journalPlaceIndex={journalPlaceIndex}
@@ -887,6 +930,7 @@ export function TripPlanner({
               onStartOver={startOver}
               onSaveToAccount={sync.saveToAccount}
               onDeclineMerge={sync.declineMerge}
+              onRetrySave={sync.retrySave}
               onRestoreBackup={sync.restoreGuestBackup}
               onRememberGuestDraft={sync.rememberGuestDraft}
             />

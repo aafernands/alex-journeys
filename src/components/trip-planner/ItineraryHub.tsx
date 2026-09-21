@@ -26,6 +26,7 @@ import {
   itemsForLane,
   itemTypeForPartner,
   planATripLoginHref,
+  TRIPS_ACCOUNT_UNAVAILABLE,
   sharePlanHref,
   scheduledDayIndex,
   tripDays,
@@ -47,6 +48,7 @@ type Props = {
   flexibleOn: boolean;
   subhead: string;
   tripId: string | null;
+  tripTitle?: string;
   saveMode: TripSaveMode;
   guestBackup: StoredPlan | null;
   journalNotes: readonly JournalNote[];
@@ -56,11 +58,40 @@ type Props = {
   onPackingNotesChange: (notes: string) => void;
   onEditTrip: () => void;
   onStartOver: () => void;
+  saveDetail: string | null;
   onSaveToAccount: () => void;
   onDeclineMerge: () => void;
+  onRetrySave: () => void;
   onRestoreBackup: () => void;
   onRememberGuestDraft: () => void;
 };
+
+function ItineraryAuthLinks({
+  tripId,
+  onRemember,
+}: {
+  tripId: string | null;
+  onRemember: () => void;
+}) {
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      <Link
+        href={planATripLoginHref(tripId, "signin")}
+        className="btn btn-ink"
+        onClick={onRemember}
+      >
+        Sign in
+      </Link>
+      <Link
+        href={planATripLoginHref(tripId, "signup")}
+        className="btn btn-secondary"
+        onClick={onRemember}
+      >
+        Create account
+      </Link>
+    </div>
+  );
+}
 
 const inputClass =
   "mt-2 min-h-11 w-full rounded-lg border border-border bg-white px-4 text-sm text-heading placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25";
@@ -593,6 +624,7 @@ export function ItineraryHub({
   flexibleOn,
   subhead,
   tripId,
+  tripTitle,
   saveMode,
   guestBackup,
   journalNotes,
@@ -602,8 +634,10 @@ export function ItineraryHub({
   onPackingNotesChange,
   onEditTrip,
   onStartOver,
+  saveDetail,
   onSaveToAccount,
   onDeclineMerge,
+  onRetrySave,
   onRestoreBackup,
   onRememberGuestDraft,
 }: Props) {
@@ -677,15 +711,18 @@ export function ItineraryHub({
   }
 
   const saveCopy =
-    saveMode === "saving"
-      ? "Saving…"
-      : saveMode === "saved"
-        ? "Saved to your account"
-        : saveMode === "unavailable"
-          ? "Account save is unavailable. This copy stays in this browser."
-          : saveMode === "error"
-            ? "Couldn’t save to your account. This copy stays in this browser."
-            : null;
+    saveMode === "pending"
+      ? "Unsaved changes"
+      : saveMode === "saving"
+        ? "Saving…"
+        : saveMode === "saved"
+          ? "Saved to your account"
+          : saveMode === "unavailable"
+            ? saveDetail || TRIPS_ACCOUNT_UNAVAILABLE
+            : saveMode === "error"
+              ? saveDetail ||
+                "Couldn’t save to your account. This copy stays in this browser."
+              : null;
 
   return (
     <>
@@ -698,8 +735,11 @@ export function ItineraryHub({
             {config.steps.next.heading}
           </h2>
           <p className="mt-2 font-display text-xl font-bold text-heading">
-            {state.destination.trim()}
+            {tripTitle?.trim() || state.destination.trim()}
           </p>
+          {tripTitle?.trim() ? (
+            <p className="mt-1 text-sm text-muted">{state.destination.trim()}</p>
+          ) : null}
           <p className="mt-1 text-sm text-muted">
             {[dates, travelers].filter(Boolean).join(" · ")}
           </p>
@@ -746,14 +786,17 @@ export function ItineraryHub({
 
       {saveMode === "local" ? (
         <aside className="panel-soft mt-5 px-4 py-4" aria-label="Save itinerary">
-          <p className="text-sm leading-relaxed text-text">{config.checklistHint}</p>
-          <Link
-            href={planATripLoginHref(tripId)}
-            className="btn btn-ink mt-3"
-            onClick={onRememberGuestDraft}
-          >
-            Sign in to save this itinerary
-          </Link>
+          <p className="text-sm leading-relaxed text-text">
+            {tripId
+              ? "You’re signed out. This itinerary stays in this browser. Sign in to keep saving it to your account."
+              : config.checklistHint}
+          </p>
+          {tripId ? null : (
+            <p className="mt-2 text-sm leading-relaxed text-text">
+              Sign in or create an account and you’ll come back to this itinerary.
+            </p>
+          )}
+          <ItineraryAuthLinks tripId={tripId} onRemember={onRememberGuestDraft} />
         </aside>
       ) : null}
 
@@ -788,12 +831,17 @@ export function ItineraryHub({
           {saveMode === "saved" ? (
             <>
               {" "}
-              <Link href="/account" className="text-link hover:text-accent">
-                View in account
+              <Link href="/account#trips" className="text-link hover:text-accent">
+                View in My trips
               </Link>
             </>
           ) : null}
         </p>
+      ) : null}
+      {saveMode === "unavailable" || saveMode === "error" ? (
+        <button type="button" className="btn btn-secondary mt-3" onClick={onRetrySave}>
+          Try saving again
+        </button>
       ) : null}
 
       {partners.length > 0 ? (

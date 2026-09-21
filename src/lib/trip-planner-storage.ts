@@ -97,6 +97,8 @@ export function parseStoredPlan(value: unknown): StoredPlan | null {
     items?: unknown;
     tripId?: unknown;
     packingNotes?: unknown;
+    title?: unknown;
+    titleCustom?: unknown;
   };
   if (
     record.step !== 1 &&
@@ -112,12 +114,16 @@ export function parseStoredPlan(value: unknown): StoredPlan | null {
     /^[A-Za-z0-9_-]{1,128}$/.test(record.tripId.trim())
       ? record.tripId.trim()
       : null;
+  const title =
+    typeof record.title === "string" ? record.title.trim().slice(0, 160) : "";
   return {
     step: record.step,
     state: record.state,
     items: normalizeTripItems(record.items),
     tripId,
     packingNotes: cleanPackingNotes(record.packingNotes),
+    title,
+    titleCustom: record.titleCustom === true && title.length > 0,
   };
 }
 
@@ -265,4 +271,92 @@ export function clearGuestBackup() {
   } catch {
     /* private mode */
   }
+}
+
+const GUEST_ORIGIN_KEY = "fj.plan-a-trip.guest-origin.v1";
+const MERGE_DISMISS_KEY = "fj.plan-a-trip.merge-dismissed.v1";
+const LEGACY_MERGE_FLAG = "fj.plan-a-trip.merge-offer";
+const LEGACY_DISMISS_FLAG = "fj.plan-a-trip.merge-dismissed";
+
+function sessionStore(): Storage | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
+/** Remember that the current draft was edited while signed out. */
+export function markGuestOrigin() {
+  const store = browserStorage();
+  if (!store) return;
+  try {
+    store.setItem(GUEST_ORIGIN_KEY, "1");
+  } catch {
+    /* private mode or quota */
+  }
+}
+
+export function hasGuestOrigin(): boolean {
+  try {
+    if (browserStorage()?.getItem(GUEST_ORIGIN_KEY) === "1") return true;
+    return sessionStore()?.getItem(LEGACY_MERGE_FLAG) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function isAccountMergeDismissed(): boolean {
+  try {
+    if (browserStorage()?.getItem(MERGE_DISMISS_KEY) === "1") return true;
+    return sessionStore()?.getItem(LEGACY_DISMISS_FLAG) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function dismissAccountMerge() {
+  const store = browserStorage();
+  try {
+    store?.setItem(MERGE_DISMISS_KEY, "1");
+  } catch {
+    /* private mode or quota */
+  }
+  try {
+    sessionStore()?.removeItem(LEGACY_MERGE_FLAG);
+  } catch {
+    /* private mode */
+  }
+}
+
+export function clearGuestSaveFlags() {
+  const store = browserStorage();
+  try {
+    store?.removeItem(GUEST_ORIGIN_KEY);
+    store?.removeItem(MERGE_DISMISS_KEY);
+  } catch {
+    /* private mode */
+  }
+  try {
+    sessionStore()?.removeItem(LEGACY_MERGE_FLAG);
+    sessionStore()?.removeItem(LEGACY_DISMISS_FLAG);
+  } catch {
+    /* private mode */
+  }
+}
+
+/** Keep a renamed title on the open draft so the next auto-save does not revert it. */
+export function renameActivePlanTitle(tripId: string, title: string) {
+  const current = getActivePlanSnapshot();
+  if (!current || current.tripId !== tripId) return;
+  writeActivePlan({ ...current, title, titleCustom: true });
+}
+
+/** Drop the account id after a delete so the next save does not update a missing trip. */
+export function detachActivePlan(tripId: string) {
+  const current = getActivePlanSnapshot();
+  if (!current || current.tripId !== tripId) return;
+  writeActivePlan({ ...current, tripId: null });
+  markGuestOrigin();
 }

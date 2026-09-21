@@ -1,24 +1,24 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
-import { parseTripWrite } from "@/lib/trip-record";
+import {
+  parseTitleOnlyPatch,
+  parseTripWrite,
+  TRIPS_ACCOUNT_UNAVAILABLE,
+  TRIPS_LIST_UNAVAILABLE,
+} from "@/lib/trip-record";
 import {
   deleteTrip,
   getTrip,
+  renameTrip,
   TripsUnavailableError,
   updateTrip,
 } from "@/lib/trips";
 
 export const runtime = "nodejs";
 
-function firebaseUnavailable() {
-  return NextResponse.json(
-    {
-      error:
-        "Trips are unavailable. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY.",
-    },
-    { status: 503 },
-  );
+function firebaseUnavailable(error: string) {
+  return NextResponse.json({ error }, { status: 503 });
 }
 
 async function requireReaderId(): Promise<{ userId: string } | NextResponse> {
@@ -46,10 +46,9 @@ function invalidIdResponse(err: unknown): NextResponse | null {
 
 /** GET /api/trips/[id] — one trip for the current reader. */
 export async function GET(_request: Request, context: RouteContext) {
-  if (!isFirebaseConfigured()) return firebaseUnavailable();
-
   const gate = await requireReaderId();
   if (gate instanceof NextResponse) return gate;
+  if (!isFirebaseConfigured()) return firebaseUnavailable(TRIPS_LIST_UNAVAILABLE);
 
   const { id } = await context.params;
   try {
@@ -57,7 +56,9 @@ export async function GET(_request: Request, context: RouteContext) {
     if (!trip) return clientError("Trip not found.", 404);
     return NextResponse.json({ trip });
   } catch (err) {
-    if (err instanceof TripsUnavailableError) return firebaseUnavailable();
+    if (err instanceof TripsUnavailableError) {
+      return firebaseUnavailable(TRIPS_LIST_UNAVAILABLE);
+    }
     const invalid = invalidIdResponse(err);
     if (invalid) return invalid;
     console.error("[api/trips/id] GET failed:", err);
@@ -65,12 +66,11 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 }
 
-/** PATCH /api/trips/[id] — replace trip fields from the itinerary hub. */
+/** PATCH /api/trips/[id] — replace trip fields, or `{ title }` to rename. */
 export async function PATCH(request: Request, context: RouteContext) {
-  if (!isFirebaseConfigured()) return firebaseUnavailable();
-
   const gate = await requireReaderId();
   if (gate instanceof NextResponse) return gate;
+  if (!isFirebaseConfigured()) return firebaseUnavailable(TRIPS_ACCOUNT_UNAVAILABLE);
 
   const { id } = await context.params;
   let body: unknown;
@@ -78,6 +78,24 @@ export async function PATCH(request: Request, context: RouteContext) {
     body = await request.json();
   } catch {
     return clientError("Invalid JSON body.", 400);
+  }
+
+  const titlePatch = parseTitleOnlyPatch(body);
+  if (titlePatch) {
+    if (!titlePatch.ok) return clientError(titlePatch.error, 400);
+    try {
+      const trip = await renameTrip(gate.userId, id, titlePatch.title);
+      if (!trip) return clientError("Trip not found.", 404);
+      return NextResponse.json({ ok: true, trip });
+    } catch (err) {
+      if (err instanceof TripsUnavailableError) {
+        return firebaseUnavailable(TRIPS_ACCOUNT_UNAVAILABLE);
+      }
+      const invalid = invalidIdResponse(err);
+      if (invalid) return invalid;
+      console.error("[api/trips/id] rename failed:", err);
+      return NextResponse.json({ error: "Could not rename trip." }, { status: 500 });
+    }
   }
 
   const parsed = parseTripWrite(body);
@@ -88,7 +106,9 @@ export async function PATCH(request: Request, context: RouteContext) {
     if (!trip) return clientError("Trip not found.", 404);
     return NextResponse.json({ ok: true, trip });
   } catch (err) {
-    if (err instanceof TripsUnavailableError) return firebaseUnavailable();
+    if (err instanceof TripsUnavailableError) {
+      return firebaseUnavailable(TRIPS_ACCOUNT_UNAVAILABLE);
+    }
     const invalid = invalidIdResponse(err);
     if (invalid) return invalid;
     console.error("[api/trips/id] PATCH failed:", err);
@@ -98,17 +118,18 @@ export async function PATCH(request: Request, context: RouteContext) {
 
 /** DELETE /api/trips/[id] — remove a saved trip. */
 export async function DELETE(_request: Request, context: RouteContext) {
-  if (!isFirebaseConfigured()) return firebaseUnavailable();
-
   const gate = await requireReaderId();
   if (gate instanceof NextResponse) return gate;
+  if (!isFirebaseConfigured()) return firebaseUnavailable(TRIPS_ACCOUNT_UNAVAILABLE);
 
   const { id } = await context.params;
   try {
     await deleteTrip(gate.userId, id);
     return NextResponse.json({ ok: true });
   } catch (err) {
-    if (err instanceof TripsUnavailableError) return firebaseUnavailable();
+    if (err instanceof TripsUnavailableError) {
+      return firebaseUnavailable(TRIPS_ACCOUNT_UNAVAILABLE);
+    }
     const invalid = invalidIdResponse(err);
     if (invalid) return invalid;
     console.error("[api/trips/id] DELETE failed:", err);

@@ -7,6 +7,7 @@ import {
   bookedChecklist,
   normalizeTripItems,
   parseTripWrite,
+  tripCapacityMessage,
   type TripItem,
   type TripRecord,
   type TripWrite,
@@ -16,6 +17,13 @@ export class TripsUnavailableError extends Error {
   constructor(message = "Firestore is not configured.") {
     super(message);
     this.name = "TripsUnavailableError";
+  }
+}
+
+export class TripLimitError extends Error {
+  constructor(message = tripCapacityMessage(Number.POSITIVE_INFINITY) ?? "Too many trips.") {
+    super(message);
+    this.name = "TripLimitError";
   }
 }
 
@@ -141,6 +149,10 @@ export async function createTrip(
   userId: string,
   write: TripWrite,
 ): Promise<TripRecord> {
+  const counted = await tripsCollection(userId).count().get();
+  const capacity = tripCapacityMessage(counted.data().count);
+  if (capacity) throw new TripLimitError(capacity);
+
   const now = new Date().toISOString();
   const ref = tripsCollection(userId).doc();
   const payload = firestorePayload(write, now, now);
@@ -179,7 +191,26 @@ export async function updateTrip(
   };
 }
 
-/** Remove a trip. Idempotent. */
+/** Rename a trip the reader owns. Other fields stay as stored. */
+export async function renameTrip(
+  userId: string,
+  tripId: string,
+  title: string,
+): Promise<TripRecord | null> {
+  const id = sanitizeTripId(tripId);
+  const ref = tripsCollection(userId).doc(id);
+  const existing = await ref.get();
+  if (!existing.exists) return null;
+  const updatedAt = new Date().toISOString();
+  await ref.update({ title, updatedAt });
+  return recordFromData(id, {
+    ...(existing.data() as Record<string, unknown>),
+    title,
+    updatedAt,
+  });
+}
+
+/** Remove a trip. Idempotent. Ownership is the `users/{userId}` path. */
 export async function deleteTrip(userId: string, tripId: string): Promise<void> {
   const id = sanitizeTripId(tripId);
   await tripsCollection(userId).doc(id).delete();

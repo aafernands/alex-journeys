@@ -9,15 +9,20 @@ import {
   encodeSharedPlan,
   extractBookingPaste,
   mentionedTripDay,
+  accountSaveIntent,
   isReasonableTripDraft,
   isSafeHttpUrl,
   normalizeTripItems,
+  parseTitleOnlyPatch,
   parseTripWrite,
   planATripLoginHref,
   scheduledDayIndex,
+  shouldPromptTripSignIn,
   suggestTripTitle,
+  tripCapacityMessage,
   tripDays,
   tripWriteFromPlan,
+  MAX_SAVED_TRIPS,
 } from "../src/lib/trip-record.ts";
 
 function lisbonState() {
@@ -238,6 +243,112 @@ describe("saved trips", () => {
     assert.equal(
       planATripLoginHref(null),
       "/login?callbackUrl=%2Fguides%2Fplan-a-trip",
+    );
+    assert.equal(
+      planATripLoginHref(null, "signup"),
+      "/login?callbackUrl=%2Fguides%2Fplan-a-trip&mode=signup",
+    );
+  });
+
+  it("keeps a renamed title and still suggests one by default", () => {
+    const suggested = tripWriteFromPlan({ state: lisbonState(), items: [] }, true);
+    assert.equal(suggested.title, "Lisbon · Apr 2027");
+    const renamed = tripWriteFromPlan(
+      {
+        state: lisbonState(),
+        items: [],
+        title: "Spring in Lisbon",
+        titleCustom: true,
+      },
+      true,
+    );
+    assert.equal(renamed.title, "Spring in Lisbon");
+  });
+
+  it("treats a title-only patch as a rename", () => {
+    const renamed = parseTitleOnlyPatch({ title: "  Spring in Lisbon  " });
+    assert.equal(renamed?.ok, true);
+    if (renamed?.ok) assert.equal(renamed.title, "Spring in Lisbon");
+    assert.equal(parseTitleOnlyPatch({ title: "   " })?.ok, false);
+    assert.equal(parseTitleOnlyPatch({ title: "Hi", destination: "Lisbon" }), null);
+  });
+
+  it("offers a guest draft after login and auto-saves a signed-in trip", () => {
+    assert.equal(
+      accountSaveIntent({
+        authenticated: true,
+        tripId: null,
+        step: 4,
+        hasDestination: true,
+        guestOrigin: true,
+        dismissed: false,
+      }),
+      "offer",
+    );
+    assert.equal(
+      accountSaveIntent({
+        authenticated: true,
+        tripId: null,
+        step: 4,
+        hasDestination: true,
+        guestOrigin: true,
+        dismissed: true,
+      }),
+      "declined",
+    );
+    assert.equal(
+      accountSaveIntent({
+        authenticated: true,
+        tripId: "abc",
+        step: 4,
+        hasDestination: true,
+        guestOrigin: true,
+        dismissed: false,
+      }),
+      "autosave",
+    );
+    assert.equal(
+      accountSaveIntent({
+        authenticated: false,
+        tripId: "abc",
+        step: 4,
+        hasDestination: true,
+        guestOrigin: false,
+        dismissed: false,
+      }),
+      "local",
+    );
+    assert.equal(tripCapacityMessage(MAX_SAVED_TRIPS)?.includes("50"), true);
+    assert.equal(tripCapacityMessage(3), null);
+  });
+
+  it("keeps a signed-out editor on the trip already open in this browser", () => {
+    assert.equal(
+      shouldPromptTripSignIn({
+        urlTripId: "abc",
+        signedIn: false,
+        authLoading: false,
+        planTripId: "abc",
+      }),
+      false,
+    );
+    assert.equal(
+      shouldPromptTripSignIn({
+        urlTripId: "abc",
+        signedIn: false,
+        authLoading: false,
+        planTripId: null,
+      }),
+      true,
+    );
+    assert.equal(
+      shouldPromptTripSignIn({
+        urlTripId: "abc",
+        signedIn: true,
+        authLoading: false,
+        planTripId: null,
+      }),
+      false,
     );
   });
 });
