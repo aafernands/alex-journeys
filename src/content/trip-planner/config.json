@@ -1,0 +1,40 @@
+{
+  "title": "Plan a trip",
+  "label": "Guides",
+  "intro": "Start with what you need — flights, a stay, a car, or all three. I’ll hand you next steps with the tools I actually use.",
+  "guidesEyebrow": "From the journal",
+  "guidesHeading": "Notes from trips I’ve already walked",
+  "disclosure": "Some links are affiliates. If you book through them I may earn a commission at no extra cost to you.",
+  "flexibleDates": true,
+  "extras": true,
+  "continueLabel": "Continue",
+  "backLabel": "Back",
+  "editLabel": "Edit",
+  "getStepsLabel": "Get my next steps",
+  "editDetailsLabel": "Edit trip details",
+  "startOverLabel": "Start over",
+  "chips": {
+    "flights": "Flights",
+    "hotel": "Hotel or stay",
+    "car": "Car rental",
+    "unsure": "Not sure yet — help me plan"
+  },
+  "steps": {
+    "categories": {
+      "heading": "What do you want to book?",
+      "helper": "Pick one or combine them. I’ll give you next steps with the tools I actually use."
+    },
+    "details": {
+      "heading": "Trip details",
+      "helper": "A few basics so the next steps match your trip."
+    },
+    "review": {
+      "heading": "Look good?",
+      "helper": "Quick check before I build your next steps."
+    },
+    "next": {
+      "heading": "Your next steps",
+      "helper": "Based on {destination} · {dates} · {travelers}"
+    }
+  }
+}

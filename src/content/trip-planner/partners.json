@@ -1,0 +1,76 @@
+{
+  "partners": [
+    {
+      "key": "expedia",
+      "label": "Compare flights",
+      "buttonLabel": "Search flights",
+      "blurb": "Start with the routes I’d actually price-check first.",
+      "affiliateUrlTemplate": "https://expedia.com/affiliates/nyc/plan_trip",
+      "affiliateUrl": "https://expedia.com/affiliates/nyc/plan_trip",
+      "showWhen": "flights",
+      "enabled": true,
+      "sortOrder": 1,
+      "isCore": true
+    },
+    {
+      "key": "booking",
+      "label": "Find a place to stay",
+      "buttonLabel": "Search stays",
+      "blurb": "Where I usually start when hunting a place to sleep.",
+      "affiliateUrlTemplate": "https://www.awin1.com/cread.php?awinmid=6776&awinaffid=1762577&clickref=plan-a-trip&ued=https%3A%2F%2Fwww.booking.com%2Fsearchresults.html%3Fss%3D{destination}%26checkin%3D{startDate}%26checkout%3D{endDate}%26group_adults%3D{adults}%26no_rooms%3D{rooms}",
+      "affiliateUrl": "https://tidd.ly/4kgHAYw",
+      "showWhen": "hotel",
+      "enabled": true,
+      "sortOrder": 2,
+      "isCore": true
+    },
+    {
+      "key": "rentcars",
+      "label": "Sort out a rental car",
+      "buttonLabel": "Search cars",
+      "blurb": "Road-trip wheels without sticker shock.",
+      "affiliateUrlTemplate": "https://rentcars.com/en/?requestorid=9563&utm_source=fernandesjourneys.com&utm_medium=afiliado-link&utm_campaign=rent-car",
+      "affiliateUrl": "https://rentcars.com/en/?requestorid=9563&utm_source=fernandesjourneys.com&utm_medium=afiliado-link&utm_campaign=rent-car",
+      "showWhen": "car",
+      "enabled": true,
+      "sortOrder": 3,
+      "isCore": true
+    },
+    {
+      "key": "world-nomads",
+      "label": "Cover the trip",
+      "buttonLabel": "Look at insurance",
+      "blurb": "Coverage I look at before longer trips.",
+      "affiliateUrlTemplate": "https://www.tkqlhce.com/click-101054501-15417474?sid=find_insurance&url=https%3A%2F%2Fwww.worldnomads.com%2Ftravel-insurance",
+      "affiliateUrl": "https://www.tkqlhce.com/click-101054501-15417474?sid=find_insurance&url=https%3A%2F%2Fwww.worldnomads.com%2Ftravel-insurance",
+      "showWhen": "extra",
+      "enabled": true,
+      "sortOrder": 4,
+      "isCore": false
+    },
+    {
+      "key": "saily",
+      "label": "Stay online",
+      "buttonLabel": "Get an eSIM",
+      "blurb": "eSIM data when I need a local connection.",
+      "affiliateUrlTemplate": "https://go.saily.site/aff_c?offer_id=101&aff_id=9600",
+      "affiliateUrl": "https://go.saily.site/aff_c?offer_id=101&aff_id=9600",
+      "showWhen": "extra",
+      "enabled": true,
+      "sortOrder": 5,
+      "isCore": false
+    },
+    {
+      "key": "viator",
+      "label": "Book something to do",
+      "buttonLabel": "Browse experiences",
+      "blurb": "Day tours and activities from past trips.",
+      "affiliateUrlTemplate": "https://www.viator.com/searchResults/all?text={destination}&pid=P00143772&mcid=42383&medium=link&campaign=book-experience",
+      "affiliateUrl": "https://www.viator.com/?pid=P00143772&mcid=42383&medium=link&campaign=book-experience",
+      "showWhen": "extra",
+      "enabled": true,
+      "sortOrder": 6,
+      "isCore": false
+    }
+  ]
+}

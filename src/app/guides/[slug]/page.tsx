@@ -9,6 +9,11 @@ import {
   getGuideHub,
   getGuideHubSlugs,
 } from "@/data/guides";
+import { PLAN_A_TRIP_SLUG } from "@/lib/trip-planner-model";
+import {
+  getTripPlannerConfig,
+  getTripPlannerPartners,
+} from "@/lib/trip-planner";
 import { cmsEditPageHref } from "@/lib/admin-edit";
 import {
   getPostBySlug,
@@ -28,20 +33,23 @@ export async function generateMetadata({
   const { slug } = await params;
   const hub = getGuideHub(slug);
   if (!hub) return { title: "Guides" };
+  const planner = slug === PLAN_A_TRIP_SLUG ? getTripPlannerConfig() : null;
+  const title = planner?.title || hub.title;
+  const description = planner?.intro || hub.description;
   return {
-    title: hub.title,
-    description: hub.description,
+    title,
+    description,
     alternates: { canonical: `/guides/${slug}` },
     openGraph: {
-      title: hub.title,
-      description: hub.description,
+      title,
+      description,
       type: "website",
       url: `/guides/${slug}`,
     },
     twitter: {
       card: "summary_large_image",
-      title: hub.title,
-      description: hub.description,
+      title,
+      description,
     },
   };
 }
@@ -81,21 +89,28 @@ export default async function GuideHubPage({ params }: PageProps) {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
-  const isPlanner = slug === "plan-a-trip";
+  const isPlanner = slug === PLAN_A_TRIP_SLUG;
+  const plannerConfig = isPlanner ? getTripPlannerConfig() : null;
+  const plannerPartners = isPlanner ? getTripPlannerPartners() : [];
 
   return (
     <SitePage
-      adminEdit={{
-        href: cmsEditPageHref("guides"),
-        label: "Edit guides hub",
-      }}
-      label="Guides"
-      title={hub.title}
-      description={
+      adminEdit={
         isPlanner
-          ? "Start with what you need — flights, a stay, a car, or all three. I’ll hand you next steps with the tools I actually use."
-          : hub.description
+          ? { href: "/cms/trip-planner", label: "Edit trip planner" }
+          : {
+              href: cmsEditPageHref("guides"),
+              label: "Edit guides hub",
+            }
       }
+      extraAdminLinks={
+        isPlanner
+          ? [{ href: cmsEditPageHref("guides"), label: "Edit guides hub" }]
+          : undefined
+      }
+      label={plannerConfig?.label || "Guides"}
+      title={plannerConfig?.title || hub.title}
+      description={plannerConfig?.intro || hub.description}
       narrow={false}
       tone={isPlanner ? "default" : "white"}
       crumbs={[
@@ -104,13 +119,15 @@ export default async function GuideHubPage({ params }: PageProps) {
         { label: hub.title },
       ]}
     >
-      {isPlanner ? <TripPlanner /> : null}
+      {plannerConfig ? (
+        <TripPlanner config={plannerConfig} partners={plannerPartners} />
+      ) : null}
 
-      {isPlanner ? (
+      {plannerConfig ? (
         <div className="mt-14 border-t border-border pt-10">
-          <p className="eyebrow">From the journal</p>
+          <p className="eyebrow">{plannerConfig.guidesEyebrow}</p>
           <h2 className="font-display mt-2 text-3xl font-bold tracking-tight text-heading md:text-4xl">
-            Notes from trips I’ve already walked
+            {plannerConfig.guidesHeading}
           </h2>
         </div>
       ) : (
