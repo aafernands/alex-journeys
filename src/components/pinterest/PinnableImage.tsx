@@ -19,6 +19,7 @@ function cx(...parts: Array<string | undefined | false>) {
 /**
  * Overlay a Pinterest Pin control on a content photo (typically next/image).
  * Decorative srcs (brand, logos, avatars) render children unchanged.
+ * Visibility: CSS hover/focus + tap-to-reveal via `PinterestPinReveal`.
  */
 export function PinnableImage({
   pagePath,

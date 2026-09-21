@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, Inter } from "next/font/google";
 import { Header } from "@/components/Header";
+import { PinterestPinReveal } from "@/components/pinterest/PinterestPinReveal";
 import { Providers } from "@/components/Providers";
 import { Footer } from "@/components/Footer";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
@@ -123,6 +124,7 @@ export default function RootLayout({
             latestPost={latestPost}
             googleConfigured={googleConfigured}
           />
+          <PinterestPinReveal />
           <div className="flex min-h-0 flex-1 flex-col mobile-bottom-nav-pad">
             <div className="flex-1">{children}</div>
             <Footer />

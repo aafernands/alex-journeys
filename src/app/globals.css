@@ -572,6 +572,9 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
   background: #e60023;
   color: #fff;
   box-shadow: 0 1px 4px rgba(20, 17, 13, 0.28);
+  /* Hidden until hover (desktop), focus, or tap-to-reveal (touch). */
+  opacity: 0;
+  pointer-events: none;
   transition:
     opacity 0.15s ease,
     transform 0.15s ease;
@@ -592,14 +595,14 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
   text-decoration: none;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .pinnable-image .pinterest-pin-btn {
-    opacity: 0;
-    pointer-events: none;
-  }
+.pinnable-image:focus-within .pinterest-pin-btn,
+.pinnable-image.is-pin-revealed .pinterest-pin-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
 
-  .pinnable-image:hover .pinterest-pin-btn,
-  .pinnable-image:focus-within .pinterest-pin-btn {
+@media (hover: hover) and (pointer: fine) {
+  .pinnable-image:hover .pinterest-pin-btn {
     opacity: 1;
     pointer-events: auto;
   }
