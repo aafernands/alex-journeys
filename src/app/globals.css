@@ -525,6 +525,38 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
 }
 
 
+/*
+ * Story sheet. Viator Book Now cards are white and do not follow the theme,
+ * so the post header + article stay on a real white surface in light and dark.
+ * Tokens are pinned to the light palette so prose, panels, and comments stay
+ * readable. Site header, footer, and the related-posts band stay on the theme.
+ */
+.post-paper {
+  color-scheme: light;
+  background: #ffffff;
+  color: #3f382e;
+  --accent: #d97706;
+  --accent-deep: #b45309;
+  --bg: #ffffff;
+  --surface: #ebe2d3;
+  --surface-soft: #faf6ee;
+  --text: #3f382e;
+  --heading: #1f1a14;
+  --near-black: #14110d;
+  --ink: #2a241c;
+  --link: #9a3412;
+  --muted: #8a7d6b;
+  --muted-light: #c4b8a5;
+  --sand: #d9ccb8;
+  --steel: #6b7c6e;
+  --white: #ffffff;
+  --hero-type: #f6f0e6;
+  --ring: #d97706;
+  --border: #e0d4c2;
+  --border-strong: #cbbba3;
+  --on-solid: #fffcf7;
+}
+
 /* Migrated WordPress post body */
 .post-prose {
   color: var(--text);
@@ -585,20 +617,30 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
   margin: 1.75em 0;
 }
 
-/* Viator partner cards. The script paints the card inside this div. */
+/*
+ * Viator partner cards. The script paints its own bordered white card inside
+ * this div. A 1px white border (same as the story sheet) keeps that card fully
+ * in view without a second cream frame. Overflow stays visible so the card's
+ * top and bottom are not clipped.
+ */
 .post-prose .viator-widget,
 .post-prose [data-vi-widget-ref] {
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
   margin: 1.75em auto;
-  overflow: hidden;
+  overflow: visible;
+  color-scheme: light;
+  background: #ffffff;
+  border: 1px solid #ffffff;
+  padding: 0.75rem;
 }
 
 .post-prose .viator-widget iframe,
 .post-prose [data-vi-widget-ref] iframe {
   display: block;
   max-width: 100%;
+  background: #ffffff;
 }
 
 .post-prose .cms-html-embed {
