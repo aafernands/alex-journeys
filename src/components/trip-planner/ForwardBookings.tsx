@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { NavIcon } from "@/components/icons/NavIcon";
+import { plan } from "@/components/trip-planner/density";
 import {
   formatInboundWhen,
   laneKeyForImport,
@@ -63,26 +64,26 @@ function SuggestionCard({
 }) {
   const when = formatInboundWhen(suggestion);
   return (
-    <li className="rounded-lg border border-border bg-white px-3 py-3">
-      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+    <li className={`${plan.inset} plan-stack-tight border border-border bg-white`}>
+      <p className={plan.label}>
         {TYPE_LABEL[suggestion.type]} · From email
       </p>
-      <p className="mt-1 font-semibold text-heading">{suggestion.title}</p>
-      {when ? <p className="mt-1 text-sm text-muted">{when}</p> : null}
+      <p className={plan.h4}>{suggestion.title}</p>
+      {when ? <p className={`${plan.caption} text-muted`}>{when}</p> : null}
       {suggestion.subject && suggestion.subject !== suggestion.title ? (
-        <p className="mt-1 text-sm leading-relaxed text-text">{suggestion.subject}</p>
+        <p className={`${plan.body} text-text`}>{suggestion.subject}</p>
       ) : null}
       {suggestion.url ? (
         <a
           href={suggestion.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-1 inline-block text-sm font-semibold text-link hover:text-accent"
+          className={`${plan.textBtn} self-start text-link hover:text-accent`}
         >
           {hostOf(suggestion.url)}
         </a>
       ) : null}
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="plan-actions plan-actions-inline">
         <button type="button" className="btn btn-ink disabled:opacity-60" disabled={busy} onClick={onAdd}>
           Add to itinerary
         </button>
@@ -252,32 +253,32 @@ export function ForwardBookings({
   const titleId = `${headingId}-forward`;
 
   return (
-    <section className="panel-soft mt-5 px-4 py-4" aria-labelledby={titleId}>
-      <div className="flex gap-3">
+    <section className={`${plan.soft} plan-block`} aria-labelledby={titleId}>
+      <div className="flex items-start gap-3">
         <span className="icon-tile icon-tile-sm shrink-0">
           <NavIcon name="mail" size={16} />
         </span>
-        <div className="min-w-0 flex-1">
-          <h3 id={titleId} className="font-display text-lg font-bold text-heading">
+        <div className="min-w-0 flex-1 plan-stack-tight">
+          <h3 id={titleId} className={plan.h3}>
             Forward bookings here
           </h3>
-          <p className="mt-1 text-sm leading-relaxed text-text">
+          <p className={`${plan.prose} text-text`}>
             Forward airline, hotel, or car confirmation emails. We’ll suggest items — you
             approve before they land on the itinerary.
           </p>
 
           {status === "loading" || (status === "authenticated" && loading && !primary) ? (
-            <p className="mt-3 text-sm text-muted" role="status">
+            <p className={`${plan.caption} text-muted`} role="status">
               Loading your forward address…
             </p>
           ) : null}
 
           {status === "unauthenticated" ? (
             <>
-              <p className="mt-3 text-sm leading-relaxed text-text">
+              <p className={`${plan.prose} text-text`}>
                 Sign in to get a forward address.
               </p>
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="plan-actions plan-actions-inline">
                 <Link
                   href={planATripLoginHref(tripId, "signin")}
                   className="btn btn-ink"
@@ -297,25 +298,25 @@ export function ForwardBookings({
           ) : null}
 
           {status === "authenticated" && error ? (
-            <p className="mt-3 text-sm text-heading" role="status">
+            <p className={`${plan.body} text-heading`} role="status">
               {error}
             </p>
           ) : null}
 
           {status === "authenticated" && primary ? (
             <>
-              <p className="mt-2 text-sm leading-relaxed text-muted">
+              <p className={`${plan.prose} text-muted`}>
                 {tripId
                   ? "This address is only for this trip."
                   : "This address is tied to your account. Save the itinerary when you want an address just for this trip."}
               </p>
               <p
-                className="mt-3 break-all rounded-lg border border-border bg-white px-4 py-3 text-sm text-heading"
+                className={`${plan.input} plan-control break-all`}
                 aria-label="Forwarding address"
               >
                 {primary.address}
               </p>
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="plan-actions plan-actions-inline">
                 <button
                   type="button"
                   className="btn btn-secondary"
@@ -360,30 +361,30 @@ export function ForwardBookings({
                 )}
               </div>
               {copied ? (
-                <p className="mt-2 text-sm font-semibold text-heading" role="status">
+                <p className={`${plan.caption} font-semibold text-heading`} role="status">
                   Address copied.
                 </p>
               ) : null}
               {replaceArmed ? (
-                <p className="mt-2 text-sm leading-relaxed text-muted">
+                <p className={`${plan.prose} text-muted`}>
                   The current address will stop accepting mail.
                 </p>
               ) : null}
               {!primary.enabled ? (
-                <p className="mt-2 text-sm leading-relaxed text-muted">
+                <p className={`${plan.prose} text-muted`}>
                   Forwarding is off. New mail to this address won’t be suggested.
                 </p>
               ) : null}
 
-              <h4 className="mt-5 text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+              <h4 className={`${plan.h4} plan-follow`}>
                 Suggested imports
               </h4>
               {primary.suggestions.length === 0 ? (
-                <p className="mt-2 text-sm leading-relaxed text-muted">
+                <p className={`${plan.prose} text-muted`}>
                   Nothing waiting. Forward a confirmation, then add or dismiss what we find.
                 </p>
               ) : (
-                <ul className="mt-3 space-y-3" aria-label="Suggested imports">
+                <ul className="plan-stack-tight" aria-label="Suggested imports">
                   {primary.suggestions.map((suggestion) => (
                     <SuggestionCard
                       key={suggestion.id}
@@ -402,10 +403,10 @@ export function ForwardBookings({
 
               {extraSuggestions.length > 0 ? (
                 <>
-                  <h4 className="mt-5 text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+                  <h4 className={`${plan.h4} plan-follow`}>
                     Also waiting on your account address
                   </h4>
-                  <ul className="mt-3 space-y-3" aria-label="Account suggestions">
+                  <ul className="plan-stack-tight" aria-label="Account suggestions">
                     {extraSuggestions.map((suggestion) => (
                       <SuggestionCard
                         key={suggestion.id}
@@ -422,7 +423,7 @@ export function ForwardBookings({
           ) : null}
 
           {actionError ? (
-            <p className="mt-3 text-sm text-heading" role="status">
+            <p className={`${plan.body} text-heading`} role="status">
               {actionError}
             </p>
           ) : null}
