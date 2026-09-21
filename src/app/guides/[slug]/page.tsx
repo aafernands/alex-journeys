@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostCard } from "@/components/blog/PostCard";
+import { destinationCity, getAllDestinations } from "@/data/destinations";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { SitePage } from "@/components/pages/SitePage";
 import { TripPlanner } from "@/components/trip-planner/TripPlanner";
@@ -120,7 +121,13 @@ export default async function GuideHubPage({ params }: PageProps) {
       ]}
     >
       {plannerConfig ? (
-        <TripPlanner config={plannerConfig} partners={plannerPartners} />
+        <TripPlanner
+          config={plannerConfig}
+          partners={plannerPartners}
+          journalPlaces={getAllDestinations().map(
+            (dest) => `${destinationCity(dest)}, ${dest.name}`,
+          )}
+        />
       ) : null}
 
       {plannerConfig ? (

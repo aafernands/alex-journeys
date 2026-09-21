@@ -3,6 +3,7 @@
 import { useId, useState, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
+import { PlaceCombobox } from "@/components/trip-planner/PlaceCombobox";
 import {
   effectiveCategories,
   initialPlannerState,
@@ -41,6 +42,7 @@ const EMPTY_PLAN: StoredPlan = { step: 1, state: initialPlannerState() };
 type Props = {
   config: TripPlannerConfig;
   partners: TripPlannerPartner[];
+  journalPlaces: readonly string[];
 };
 
 const STEPS = [1, 2, 3, 4] as const;
@@ -138,7 +140,7 @@ function describedBy(id: string, error?: string): string | undefined {
   return error ? `${id}-error` : undefined;
 }
 
-export function TripPlanner({ config, partners }: Props) {
+export function TripPlanner({ config, partners, journalPlaces }: Props) {
   const baseId = useId();
   const storedPlan = useSyncExternalStore<StoredPlan | null | PendingPlan>(
     subscribeTripStore,
@@ -338,19 +340,18 @@ export function TripPlanner({ config, partners }: Props) {
                 htmlFor={`${baseId}-destination`}
                 error={errors.destination}
               >
-                <input
+                <PlaceCombobox
                   id={`${baseId}-destination`}
                   className={inputClass}
                   value={state.destination}
-                  aria-invalid={Boolean(errors.destination)}
-                  aria-describedby={describedBy(
+                  journalLabels={journalPlaces}
+                  listLabel="Destinations"
+                  invalid={Boolean(errors.destination)}
+                  describedBy={describedBy(
                     `${baseId}-destination`,
                     errors.destination,
                   )}
-                  autoComplete="off"
-                  onChange={(event) =>
-                    patch({ destination: event.target.value })
-                  }
+                  onChange={(destination) => patch({ destination })}
                 />
               </Field>
 
@@ -528,17 +529,18 @@ export function TripPlanner({ config, partners }: Props) {
                     htmlFor={`${baseId}-origin`}
                     error={errors.origin}
                   >
-                    <input
+                    <PlaceCombobox
                       id={`${baseId}-origin`}
                       className={inputClass}
                       value={state.origin}
-                      autoComplete="off"
-                      aria-invalid={Boolean(errors.origin)}
-                      aria-describedby={describedBy(
+                      journalLabels={journalPlaces}
+                      listLabel="Departure cities"
+                      invalid={Boolean(errors.origin)}
+                      describedBy={describedBy(
                         `${baseId}-origin`,
                         errors.origin,
                       )}
-                      onChange={(event) => patch({ origin: event.target.value })}
+                      onChange={(origin) => patch({ origin })}
                     />
                   </Field>
                   <div>
