@@ -186,6 +186,21 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
     }, 0);
   };
 
+  const insertBlock = (content: Record<string, unknown>) => {
+    if (!editor) return;
+    const { selection } = editor.state;
+    // A selected atom would be replaced. Insert after it so an existing
+    // widget stays put, then leave a text cursor after the new block.
+    if ("node" in selection && selection.node) {
+      editor.chain().insertContentAt(selection.to, content).run();
+    } else {
+      editor.chain().insertContent(content).run();
+    }
+    const pos = editor.state.selection.to;
+    editor.chain().setTextSelection(pos).run();
+    window.setTimeout(() => editor.commands.focus(), 0);
+  };
+
   const insertWidget = (widget: WidgetInsert) => {
     if (!editor) return;
     if (widget.type === "viator") {
@@ -194,18 +209,14 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
         appendHtml(markup);
         return;
       }
-      editor
-        .chain()
-        .insertContent({
-          type: "viatorWidget",
-          attrs: {
-            class: "viator-widget",
-            partnerId: widget.partnerId,
-            widgetRef: widget.widgetRef,
-          },
-        })
-        .run();
-      window.setTimeout(() => editor.commands.focus(), 0);
+      insertBlock({
+        type: "viatorWidget",
+        attrs: {
+          class: "viator-widget",
+          partnerId: widget.partnerId,
+          widgetRef: widget.widgetRef,
+        },
+      });
       return;
     }
 
@@ -216,14 +227,10 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
       return;
     }
 
-    editor
-      .chain()
-      .insertContent({
-        type: "htmlEmbed",
-        attrs: { html: widget.html },
-      })
-      .run();
-    window.setTimeout(() => editor.commands.focus(), 0);
+    insertBlock({
+      type: "htmlEmbed",
+      attrs: { html: widget.html },
+    });
   };
 
   if (!editor) {
