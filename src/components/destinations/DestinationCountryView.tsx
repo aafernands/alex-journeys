@@ -10,7 +10,11 @@ import { DestinationClimate } from "@/components/destinations/DestinationClimate
 import { DestinationItinerary } from "@/components/destinations/DestinationItinerary";
 import { DestinationQuickFacts } from "@/components/destinations/DestinationQuickFacts";
 import { DestinationMap } from "@/components/destinations/DestinationMap";
-import { getDestinationBySlug } from "@/data/destinations";
+import { DestinationCarousel } from "@/components/destinations/DestinationCarousel";
+import {
+  getDestinationBySlug,
+  getRelatedDestinations,
+} from "@/data/destinations";
 import {
   formatPostDateShort,
   getPostsByDestination,
@@ -29,6 +33,7 @@ export async function DestinationCountryView({
   if (!dest) notFound();
 
   const related = getPostsByDestination(slug);
+  const morePlaces = getRelatedDestinations(slug);
   const coverImages = dest.coverImages?.length
     ? dest.coverImages
     : undefined;
@@ -244,6 +249,28 @@ export async function DestinationCountryView({
               </p>
             </div>
           )}
+
+          {morePlaces.length > 0 ? (
+            <section
+              className="mt-12"
+              aria-labelledby="more-places-heading"
+            >
+              <h2
+                id="more-places-heading"
+                className="font-display text-title text-heading"
+              >
+                More places
+              </h2>
+              <p className="mt-2 text-sm text-muted">
+                Other stops from the journal — swipe to browse.
+              </p>
+              <DestinationCarousel
+                className="mt-6"
+                destinations={morePlaces}
+                labelledBy="more-places-heading"
+              />
+            </section>
+          ) : null}
 
           <div className="mt-10 flex flex-wrap gap-3">
             <Link href="/destinations" className="btn btn-secondary">

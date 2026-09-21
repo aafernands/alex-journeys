@@ -131,4 +131,16 @@ export function destinationCity(dest: DestinationCountry): string {
   return city || dest.name;
 }
 
+/** Other places for a country page, same continent first. */
+export function getRelatedDestinations(
+  slug: string,
+): DestinationCountry[] {
+  const current = getDestinationBySlug(slug);
+  const others = getAllDestinations().filter((d) => d.slug !== slug);
+  if (!current) return others;
+  const sameContinent = others.filter((d) => d.continent === current.continent);
+  const rest = others.filter((d) => d.continent !== current.continent);
+  return [...sameContinent, ...rest];
+}
+
 export const destinationSlugs = getAllDestinations().map((d) => d.slug);
