@@ -256,6 +256,7 @@ export function TripPlanner({ config, partners }: Props) {
 
         {step === 2 ? (
           <form
+            noValidate
             onSubmit={(event) => {
               event.preventDefault();
               goReview();
@@ -349,7 +350,6 @@ export function TripPlanner({ config, partners }: Props) {
                         type="date"
                         className={inputClass}
                         value={state.endDate}
-                        min={state.startDate || undefined}
                         aria-invalid={Boolean(errors.endDate)}
                         aria-describedby={describedBy(
                           `${baseId}-end`,
@@ -606,7 +606,6 @@ export function TripPlanner({ config, partners }: Props) {
                           type="date"
                           className={inputClass}
                           value={state.carDropoffDate}
-                          min={state.carPickupDate || undefined}
                           aria-invalid={Boolean(errors.carDropoffDate)}
                           aria-describedby={describedBy(
                             `${baseId}-car-end`,
