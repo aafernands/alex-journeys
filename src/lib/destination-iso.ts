@@ -2,7 +2,7 @@
  * Map journal destinations to ISO 3166-1 alpha-2 codes for the Places world map.
  *
  * Codes below were verified against vendored Natural Earth 110m properties
- * (`src/content/geo/world-countries.geojson`: name, iso_a2, iso_a3):
+ * (`src/content/geo/world-countries.json`: name, iso_a2, iso_a3):
  *   Iceland → IS / ISL
  *   Canada → CA / CAN
  *   United States → US / USA  (GeoJSON name "United States")

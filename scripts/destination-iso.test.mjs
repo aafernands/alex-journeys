@@ -10,7 +10,7 @@ import {
   isoA2ForDestination,
 } from "../src/lib/destination-iso.ts";
 
-const GEO_PATH = path.resolve("src/content/geo/world-countries.geojson");
+const GEO_PATH = path.resolve("src/content/geo/world-countries.json");
 
 const tree = JSON.parse(
   fs.readFileSync("src/content/destinations/tree.json", "utf8"),

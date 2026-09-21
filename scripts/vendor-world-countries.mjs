@@ -12,7 +12,7 @@ import path from "node:path";
 
 const SOURCE_URL =
   "https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson";
-const OUT_PATH = path.resolve("src/content/geo/world-countries.geojson");
+const OUT_PATH = path.resolve("src/content/geo/world-countries.json");
 
 function roundCoords(coords, decimals = 3) {
   if (typeof coords[0] === "number") {

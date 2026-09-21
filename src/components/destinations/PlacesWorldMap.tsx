@@ -142,7 +142,7 @@ export default function PlacesWorldMap({ places }: Props) {
     async function init() {
       const [{ default: L }, geoMod] = await Promise.all([
         import("leaflet"),
-        import("@/content/geo/world-countries.geojson"),
+        import("@/content/geo/world-countries.json"),
       ]);
       if (cancelled || !container) return;
 
