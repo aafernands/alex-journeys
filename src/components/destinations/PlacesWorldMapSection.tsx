@@ -25,7 +25,7 @@ function PlacesWorldMapFallback() {
         id="places-world-map-heading"
         className="font-display text-title text-heading"
       >
-        Places I’ve been
+        Places on the map
       </h2>
       <p className="mt-1 text-xs text-muted">
         Visited countries in orange — tap a country or a pin to explore that
@@ -33,7 +33,7 @@ function PlacesWorldMapFallback() {
       </p>
       <div className="panel mt-5 max-w-full overflow-hidden p-0">
         <div
-          className="flex h-[min(70vw,22rem)] w-full items-center justify-center bg-surface-soft text-sm text-muted sm:h-[26rem] md:h-[30rem]"
+          className="flex h-[18rem] w-full items-center justify-center bg-surface-soft text-sm text-muted sm:h-[26rem] md:h-[32rem] lg:h-[36rem]"
           role="status"
         >
           Loading map…

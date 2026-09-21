@@ -858,6 +858,14 @@ html.dark .destination-photo-scrim {
   font-family: var(--font-inter), system-ui, sans-serif;
 }
 
+html.dark .places-world-map .leaflet-tile-pane {
+  filter: invert(0.9) hue-rotate(180deg) saturate(0.4) brightness(0.85);
+}
+
+html.dark .places-world-map.leaflet-container {
+  background: #14110d;
+}
+
 .places-world-map .leaflet-control-attribution {
   background: color-mix(in srgb, var(--white) 92%, transparent);
   color: var(--muted);

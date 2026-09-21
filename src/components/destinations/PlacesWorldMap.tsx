@@ -44,12 +44,9 @@ type PathLayer = Path & {
   getBounds?: () => LatLngBounds;
 };
 
-const CARTO_LIGHT =
-  "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png";
-const CARTO_DARK =
-  "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png";
-const CARTO_ATTR =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+const OSM_TILES = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+const OSM_ATTR =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 
 function readMapTheme(): MapTheme {
   const root = getComputedStyle(document.documentElement);
@@ -165,10 +162,12 @@ export default function PlacesWorldMap({ places }: Props) {
         // wheel zoom would steal scroll. Pan, pinch, and +/- still work.
         scrollWheelZoom: false,
         attributionControl: true,
-        minZoom: 1,
+        minZoom: 2,
         maxZoom: 12,
-        worldCopyJump: true,
-      }).setView([20, -40], 2);
+        worldCopyJump: false,
+        maxBounds: L.latLngBounds([-85, -180], [85, 180]),
+        maxBoundsViscosity: 0.8,
+      }).setView([30, -50], 3);
       if (cancelled) {
         instance.remove();
         return;
@@ -177,10 +176,10 @@ export default function PlacesWorldMap({ places }: Props) {
 
       let theme = readMapTheme();
 
-      const tiles = L.tileLayer(theme.dark ? CARTO_DARK : CARTO_LIGHT, {
-        attribution: CARTO_ATTR,
+      L.tileLayer(OSM_TILES, {
+        attribution: OSM_ATTR,
         maxZoom: 12,
-        subdomains: "abcd",
+        noWrap: true,
       }).addTo(instance);
 
       const placeForFeature = (props: CountryFeatureProperties | undefined) =>
@@ -191,7 +190,10 @@ export default function PlacesWorldMap({ places }: Props) {
           const visited = Boolean(
             placeForFeature(feature?.properties as CountryFeatureProperties),
           );
-          return countryStyle(theme, visited);
+          return {
+            ...countryStyle(theme, visited),
+            bubblingMouseEvents: false,
+          };
         },
         onEachFeature: (feature, layer) => {
           const place = placeForFeature(
@@ -201,13 +203,20 @@ export default function PlacesWorldMap({ places }: Props) {
 
           layer.on("mouseover", () => {
             const path = layer as Path;
-            path.setStyle(countryStyle(theme, true, true));
+            path.setStyle({
+              ...countryStyle(theme, true, true),
+              bubblingMouseEvents: false,
+            });
             path.bringToFront();
           });
           layer.on("mouseout", () => {
-            (layer as Path).setStyle(countryStyle(theme, true));
+            (layer as Path).setStyle({
+              ...countryStyle(theme, true),
+              bubblingMouseEvents: false,
+            });
           });
-          layer.on("click", () => {
+          layer.on("click", (event) => {
+            L.DomEvent.stopPropagation(event);
             routerRef.current.push(place.href);
           });
         },
@@ -217,32 +226,43 @@ export default function PlacesWorldMap({ places }: Props) {
       pinPane.style.zIndex = "650";
 
       const bounds = L.latLngBounds([]);
-
-      geoLayer.eachLayer((layer) => {
-        const path = layer as PathLayer;
-        const place = placeForFeature(path.feature?.properties);
-        if (place && path.getBounds) {
-          const layerBounds = path.getBounds();
-          if (layerBounds.isValid()) bounds.extend(layerBounds);
-        }
-      });
+      const placesWithPins = new Set<string>();
 
       for (const place of placesRef.current) {
         for (const pin of place.pins) {
-          L.marker([pin.lat, pin.lng], { icon, pane: "trip-pins" })
+          const marker = L.marker([pin.lat, pin.lng], {
+            icon,
+            pane: "trip-pins",
+            bubblingMouseEvents: false,
+            riseOnHover: true,
+          })
             .addTo(instance)
             .bindPopup(pinPopupHtml(pin, place));
+          marker.on("click", (event) => {
+            L.DomEvent.stopPropagation(event);
+          });
           bounds.extend([pin.lat, pin.lng]);
+          placesWithPins.add(place.slug);
         }
       }
 
+      // Fit to trip pins so Iceland stays readable. Full Canada/US polygons
+      // include Alaska/Arctic and zoom the world so far that visited spots vanish.
+      // Destinations with no pins still contribute their country bounds.
+      geoLayer.eachLayer((layer) => {
+        const path = layer as PathLayer;
+        const place = placeForFeature(path.feature?.properties);
+        if (!place || placesWithPins.has(place.slug) || !path.getBounds) return;
+        const layerBounds = path.getBounds();
+        if (layerBounds.isValid()) bounds.extend(layerBounds);
+      });
+
       if (bounds.isValid()) {
-        instance.fitBounds(bounds, { padding: [36, 36], maxZoom: 4 });
+        instance.fitBounds(bounds, { padding: [48, 48], maxZoom: 4 });
       }
 
       const applyTheme = () => {
         theme = readMapTheme();
-        tiles.setUrl(theme.dark ? CARTO_DARK : CARTO_LIGHT);
         geoLayer.eachLayer((layer) => {
           const path = layer as PathLayer;
           const visited = Boolean(
@@ -251,7 +271,10 @@ export default function PlacesWorldMap({ places }: Props) {
               path.feature?.properties,
             ),
           );
-          path.setStyle(countryStyle(theme, visited));
+          path.setStyle({
+            ...countryStyle(theme, visited),
+            bubblingMouseEvents: false,
+          });
         });
       };
 
@@ -282,7 +305,7 @@ export default function PlacesWorldMap({ places }: Props) {
         id="places-world-map-heading"
         className="font-display text-title text-heading"
       >
-        Places I’ve been
+        Places on the map
       </h2>
       <p className="mt-1 text-xs text-muted">
         Visited countries in orange — tap a country or a pin to explore that
@@ -291,7 +314,7 @@ export default function PlacesWorldMap({ places }: Props) {
       <div className="panel mt-5 max-w-full overflow-hidden p-0">
         <div
           ref={containerRef}
-          className="places-world-map h-[min(70vw,22rem)] w-full max-w-full sm:h-[26rem] md:h-[30rem]"
+          className="places-world-map h-[18rem] w-full max-w-full sm:h-[26rem] md:h-[32rem] lg:h-[36rem]"
           role="application"
           aria-label="Interactive world map of visited places"
         />
