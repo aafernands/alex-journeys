@@ -17,6 +17,7 @@ import {
   formatPostDate,
   getPostBySlug,
   getRelatedPosts,
+  postUpdatedDisplayDate,
 } from "@/lib/posts";
 import { publicPostPath } from "@/lib/public-paths";
 import { blogPostingJsonLd } from "@/lib/seo";
@@ -50,12 +51,13 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
 
   const toc = extractToc(post.contentHtml);
   const related = getRelatedPosts(slug, 3);
+  const updatedAt = postUpdatedDisplayDate(post);
   const jsonLd = blogPostingJsonLd({
     title: post.title,
     description: post.excerpt || undefined,
     path: publicPostPath(slug),
     datePublished: post.date,
-    dateModified: post.date,
+    dateModified: post.updatedAt ?? post.date,
     image: post.featuredImage?.url ?? null,
   });
 
@@ -149,8 +151,8 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
                   </OutboundLink>
                 </p>
                 <p className="mt-0.5 text-sm text-muted">
-                  <time dateTime={post.date}>
-                    Updated {formatPostDate(post.date)}
+                  <time dateTime={updatedAt}>
+                    Updated {formatPostDate(updatedAt)}
                   </time>
                 </p>
               </div>

@@ -3,7 +3,11 @@ import path from "node:path";
 import type { Post, PostMeta } from "@/lib/post-types";
 
 export type { FeaturedImage, Post, PostMeta } from "@/lib/post-types";
-export { formatPostDate, formatPostDateShort } from "@/lib/dates";
+export {
+  formatPostDate,
+  formatPostDateShort,
+  postUpdatedDisplayDate,
+} from "@/lib/dates";
 
 type PostsIndex = {
   count: number;

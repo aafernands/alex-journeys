@@ -9,7 +9,8 @@ import {
   normalizeMediaUrl,
   uploadPathFromUrl,
 } from "@/lib/cms/media";
-import { toPostMeta, type ValidatedPost } from "@/lib/cms/validate";
+import { applyExistingPostPublish } from "@/lib/cms/stamp-post";
+import { toPostJson, toPostMeta, type ValidatedPost } from "@/lib/cms/validate";
 import type { SiteDesign } from "@/lib/site-design";
 import {
   MAX_MEDIA_UPLOAD_BYTES,
@@ -191,28 +192,28 @@ export async function publishPost(
   validated: ValidatedPost,
   options?: { update?: boolean },
 ): Promise<{ commitUrl: string; slug: string; created: boolean }> {
-  const post = {
-    title: validated.title,
-    slug: validated.slug,
-    date: validated.date,
-    excerpt: validated.excerpt,
-    featuredImage: validated.featuredImage,
-    destinations: validated.destinations,
-    ...(validated.guideHubs.length > 0
-      ? { guideHubs: validated.guideHubs }
-      : {}),
-    contentHtml: validated.contentHtml,
-    source: "cms" as const,
-    ...(validated.itinerary ? { itinerary: validated.itinerary } : {}),
-  } satisfies Post;
-
   const postPath = `${POSTS_PATH}/${validated.slug}.json`;
-  const existingSha = await getFileSha(postPath);
+  const existingFile = await getFileJson<Post>(postPath);
+  const existingSha = existingFile?.sha ?? null;
   const created = !existingSha;
 
   if (!options?.update && existingSha) {
     throw new Error(`A post with slug "${validated.slug}" already exists.`);
   }
+
+  const stamped = applyExistingPostPublish(
+    { date: validated.date },
+    {
+      update: options?.update,
+      existingDate: existingFile?.data.date ?? null,
+    },
+    new Date().toISOString(),
+  );
+  const post = toPostJson({
+    ...validated,
+    date: stamped.date,
+    updatedAt: stamped.updatedAt,
+  });
 
   const postResult = await putFile(
     postPath,
@@ -228,7 +229,14 @@ export async function publishPost(
   if (!indexFile) {
     throw new Error("Could not read posts _index.json from GitHub.");
   }
-  const nextIndex = upsertIndex(indexFile.data, toPostMeta(validated));
+  const nextIndex = upsertIndex(
+    indexFile.data,
+    toPostMeta({
+      ...validated,
+      date: post.date,
+      updatedAt: post.updatedAt,
+    }),
+  );
   const indexResult = await putFile(
     indexPath,
     `${JSON.stringify(nextIndex, null, 2)}\n`,

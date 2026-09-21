@@ -20,6 +20,8 @@ export type PostInput = {
   title?: unknown;
   slug?: unknown;
   date?: unknown;
+  /** Ignored on write; GitHub publish stamps `updatedAt` server-side. */
+  updatedAt?: unknown;
   excerpt?: unknown;
   contentHtml?: unknown;
   featuredImageUrl?: unknown;
@@ -33,6 +35,8 @@ export type ValidatedPost = {
   title: string;
   slug: string;
   date: string;
+  /** Set by the GitHub write path on Update & publish; optional on first publish. */
+  updatedAt?: string;
   excerpt: string;
   contentHtml: string;
   featuredImage: FeaturedImage | null;
@@ -268,6 +272,11 @@ export function validatePostInput(
     return { ok: false, error: "Invalid date." };
   }
 
+  const updatedAtRaw = asString(input.updatedAt);
+  if (updatedAtRaw && Number.isNaN(Date.parse(updatedAtRaw))) {
+    return { ok: false, error: "Invalid updatedAt." };
+  }
+
   const excerpt = asString(input.excerpt);
   if (!excerpt || excerpt.length > 600) {
     return { ok: false, error: "Excerpt is required (max 600 characters)." };
@@ -345,6 +354,7 @@ export function toPostJson(data: ValidatedPost): Post {
     title: data.title,
     slug: data.slug,
     date: data.date,
+    ...(data.updatedAt ? { updatedAt: data.updatedAt } : {}),
     excerpt: data.excerpt,
     featuredImage: data.featuredImage,
     destinations: data.destinations,
@@ -360,6 +370,7 @@ export function toPostMeta(data: ValidatedPost): PostMeta {
     title: data.title,
     slug: data.slug,
     date: data.date,
+    ...(data.updatedAt ? { updatedAt: data.updatedAt } : {}),
     excerpt: data.excerpt,
     featuredImage: data.featuredImage,
     destinations: data.destinations,

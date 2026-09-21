@@ -111,7 +111,7 @@ export async function generateMetadata({
         description,
         type: "article",
         publishedTime: post.date,
-        modifiedTime: post.date,
+        modifiedTime: post.updatedAt ?? post.date,
         url: path,
         images,
       },

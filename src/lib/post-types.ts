@@ -9,6 +9,12 @@ export type PostMeta = {
   slug: string;
   title: string;
   date: string;
+  /**
+   * ISO timestamp of the last CMS Update & publish.
+   * Omitted when the post has never been updated after first publish.
+   * `date` remains the first-published date.
+   */
+  updatedAt?: string;
   excerpt: string;
   featuredImage: FeaturedImage | null;
   destinations: string[];

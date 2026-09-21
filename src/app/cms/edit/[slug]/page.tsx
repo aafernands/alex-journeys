@@ -112,6 +112,10 @@ export default async function CmsEditPostPage({ params, searchParams }: PageProp
           title: source.title,
           slug: source.slug,
           date: source.date,
+          updatedAt:
+            "updatedAt" in source && typeof source.updatedAt === "string"
+              ? source.updatedAt
+              : undefined,
           excerpt: source.excerpt,
           contentHtml: source.contentHtml,
           featuredImageUrl: source.featuredImage?.url ?? "",
