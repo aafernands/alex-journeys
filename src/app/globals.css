@@ -849,3 +849,97 @@ html.dark .destination-photo-scrim {
     padding-bottom: calc(1.15rem + var(--mobile-nav-bar));
   }
 }
+
+/* Places hub world map (Leaflet) */
+.places-world-map.leaflet-container {
+  width: 100%;
+  max-width: 100%;
+  background: var(--surface);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.places-world-map .leaflet-overlay-pane {
+  z-index: 400;
+}
+
+.places-world-map .leaflet-marker-pane,
+.places-world-map .leaflet-tooltip-pane {
+  z-index: 650;
+}
+
+.places-world-map .leaflet-popup-pane {
+  z-index: 700;
+}
+
+html.dark .places-world-map .leaflet-tile-pane {
+  filter: invert(0.9) hue-rotate(180deg) saturate(0.4) brightness(0.85);
+}
+
+html.dark .places-world-map.leaflet-container {
+  background: #14110d;
+}
+
+.places-world-map .leaflet-control-attribution {
+  background: color-mix(in srgb, var(--white) 92%, transparent);
+  color: var(--muted);
+}
+
+.places-world-map .leaflet-popup-content-wrapper {
+  background: var(--white);
+  color: var(--heading);
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 28px -16px rgba(20, 17, 13, 0.45);
+}
+
+.places-world-map .leaflet-popup-tip {
+  background: var(--white);
+}
+
+.places-world-map .leaflet-popup-content {
+  margin: 0.85rem 1rem;
+}
+
+.places-world-map-popup strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--heading);
+}
+
+.places-world-map-popup-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.places-world-map-popup a {
+  display: inline-block;
+  margin-top: 0.65rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--link);
+}
+
+.places-world-map-popup a:hover {
+  color: var(--accent);
+}
+
+.places-world-map path.places-world-map-visited {
+  cursor: pointer;
+}
+
+.places-world-map-pin {
+  background: transparent !important;
+  border: none !important;
+}
+
+.places-world-map-pin span {
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: 2px;
+  border-radius: 999px;
+  background: var(--accent);
+  border: 2px solid var(--on-solid);
+  box-shadow: 0 1px 4px rgba(20, 17, 13, 0.4);
+}
