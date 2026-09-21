@@ -5,7 +5,7 @@
   "guidesEyebrow": "From the journal",
   "guidesHeading": "Notes from trips I’ve already walked",
   "disclosure": "Some links are affiliates. If you book through them I may earn a commission at no extra cost to you.",
-  "checklistHint": "This checklist stays on this page — mark what’s done when you come back.",
+  "checklistHint": "Guests keep this itinerary in this browser. Sign in to save it on your account.",
   "flexibleDates": true,
   "extras": true,
   "continueLabel": "Continue",
@@ -34,7 +34,7 @@
       "helper": "Quick check before I build your next steps."
     },
     "next": {
-      "heading": "Your next steps",
+      "heading": "Your itinerary",
       "helper": "Based on {destination} · {dates} · {travelers}"
     }
   }

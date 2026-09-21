@@ -2,15 +2,20 @@ import {
   TRIP_CATEGORIES,
   type PlannerState,
 } from "@/lib/trip-planner-model";
+import {
+  normalizeTripItems,
+  type StoredTripPlan,
+  type TripItem,
+} from "@/lib/trip-record";
 
 const CHECKS_KEY = "fj.plan-a-trip.checks.v1";
 const ACTIVE_KEY = "fj.plan-a-trip.active.v1";
+const BACKUP_KEY = "fj.plan-a-trip.backup.v1";
 const MAX_PLANS = 30;
 
-export type StoredPlan = {
-  step: 1 | 2 | 3 | 4;
-  state: PlannerState;
-};
+export type StoredPlan = StoredTripPlan;
+
+export type { TripItem };
 
 /** Server/hydration snapshot. The client snapshot replaces it after hydrate. */
 export const PENDING_PLAN = { pending: true } as const;
@@ -29,7 +34,13 @@ export function subscribeTripStore(listener: () => void): () => void {
     return () => listeners.delete(listener);
   }
   const onStorage = (event: StorageEvent) => {
-    if (event.key === CHECKS_KEY || event.key === ACTIVE_KEY) listener();
+    if (
+      event.key === CHECKS_KEY ||
+      event.key === ACTIVE_KEY ||
+      event.key === BACKUP_KEY
+    ) {
+      listener();
+    }
   };
   window.addEventListener("storage", onStorage);
   return () => {
@@ -79,7 +90,12 @@ export function isPlannerState(value: unknown): value is PlannerState {
 
 export function parseStoredPlan(value: unknown): StoredPlan | null {
   if (!value || typeof value !== "object") return null;
-  const record = value as { step?: unknown; state?: unknown };
+  const record = value as {
+    step?: unknown;
+    state?: unknown;
+    items?: unknown;
+    tripId?: unknown;
+  };
   if (
     record.step !== 1 &&
     record.step !== 2 &&
@@ -89,7 +105,17 @@ export function parseStoredPlan(value: unknown): StoredPlan | null {
     return null;
   }
   if (!isPlannerState(record.state)) return null;
-  return { step: record.step, state: record.state };
+  const tripId =
+    typeof record.tripId === "string" &&
+    /^[A-Za-z0-9_-]{1,128}$/.test(record.tripId.trim())
+      ? record.tripId.trim()
+      : null;
+  return {
+    step: record.step,
+    state: record.state,
+    items: normalizeTripItems(record.items),
+    tripId,
+  };
 }
 
 let activeRaw: string | null = null;
@@ -201,5 +227,39 @@ export function writeActivePlan(plan: StoredPlan) {
     emit();
   } catch {
     /* private mode or quota */
+  }
+}
+
+/** Keep a guest draft when a saved trip is opened over it. */
+export function backupGuestDraft(plan: StoredPlan) {
+  if (plan.tripId || !plan.state.destination.trim()) return;
+  const store = browserStorage();
+  if (!store) return;
+  try {
+    store.setItem(BACKUP_KEY, JSON.stringify(plan));
+    emit();
+  } catch {
+    /* private mode or quota */
+  }
+}
+
+export function readGuestBackup(): StoredPlan | null {
+  const raw = browserStorage()?.getItem(BACKUP_KEY);
+  if (!raw) return null;
+  try {
+    return parseStoredPlan(JSON.parse(raw) as unknown);
+  } catch {
+    return null;
+  }
+}
+
+export function clearGuestBackup() {
+  const store = browserStorage();
+  if (!store) return;
+  try {
+    store.removeItem(BACKUP_KEY);
+    emit();
+  } catch {
+    /* private mode */
   }
 }

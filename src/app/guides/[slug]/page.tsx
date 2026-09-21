@@ -22,7 +22,10 @@ import {
   type PostMeta,
 } from "@/lib/posts";
 
-type PageProps = { params: Promise<{ slug: string }> };
+type PageProps = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ trip?: string | string[] }>;
+};
 
 export function generateStaticParams() {
   return getGuideHubSlugs().map((slug) => ({ slug }));
@@ -55,8 +58,10 @@ export async function generateMetadata({
   };
 }
 
-export default async function GuideHubPage({ params }: PageProps) {
+export default async function GuideHubPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
+  const query = await searchParams;
+  const rawTrip = Array.isArray(query.trip) ? query.trip[0] : query.trip;
   const hub = getGuideHub(slug);
   if (!hub) notFound();
 
@@ -124,6 +129,7 @@ export default async function GuideHubPage({ params }: PageProps) {
         <TripPlanner
           config={plannerConfig}
           partners={plannerPartners}
+          urlTripId={rawTrip?.trim() || null}
           journalPlaces={getAllDestinations().map(
             (dest) => `${destinationCity(dest)}, ${dest.name}`,
           )}

@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --experimental-default-type=module --test scripts/*.test.mjs",
+    "test": "node --experimental-strip-types --experimental-default-type=module --import ./scripts/alias-register.mjs --test scripts/*.test.mjs",
     "seed:media": "node scripts/seed-media-library.mjs"
   },
   "dependencies": {
