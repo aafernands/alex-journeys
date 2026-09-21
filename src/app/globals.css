@@ -556,12 +556,14 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
 /* Pinterest Pin overlay on story / destination photos */
 .pinnable-image {
   position: relative;
+  display: block;
+  width: 100%;
 }
 
 .pinterest-pin-btn {
   position: absolute;
-  top: 0.7rem;
-  right: 0.7rem;
+  top: 0.75rem;
+  right: 0.75rem;
   z-index: 2;
   display: inline-flex;
   align-items: center;

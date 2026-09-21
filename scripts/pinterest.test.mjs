@@ -92,7 +92,7 @@ describe("wrapHtmlImagesWithPinterestPins", () => {
       description: "Iceland trip",
     });
 
-    assert.match(out, /class="pinnable-image"/);
+    assert.match(out, /<div class="pinnable-image">/);
     assert.match(out, /aria-label="Pin on Pinterest"/);
     assert.match(out, /target="_blank"/);
     assert.match(out, /rel="noopener noreferrer"/);
@@ -113,7 +113,7 @@ describe("wrapHtmlImagesWithPinterestPins", () => {
     assert.equal(out, html);
 
     const wrapped =
-      '<span class="pinnable-image"><img src="/media/a.jpg" alt="A" /></span>';
+      '<div class="pinnable-image"><img src="/media/a.jpg" alt="A" /></div>';
     assert.equal(
       wrapHtmlImagesWithPinterestPins(wrapped, { pageUrl }),
       wrapped,
@@ -124,7 +124,7 @@ describe("wrapHtmlImagesWithPinterestPins", () => {
     const html =
       '<a href="/media/full.jpg"><img src="/media/full.jpg" alt="Falls" width="800" height="600" /></a>';
     const out = wrapHtmlImagesWithPinterestPins(html, { pageUrl });
-    assert.match(out, /<span class="pinnable-image"><a href="\/media\/full.jpg">/);
+    assert.match(out, /<div class="pinnable-image"><a href="\/media\/full.jpg">/);
     assert.ok(
       !/<a href="\/media\/full.jpg">[\s\S]*<a class="pinterest-pin-btn"[\s\S]*<\/a>\s*<\/a>/i.test(
         out,
