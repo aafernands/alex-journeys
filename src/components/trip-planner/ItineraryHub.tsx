@@ -25,6 +25,7 @@ import {
   isSafeHttpUrl,
   itemsForLane,
   itemTypeForPartner,
+  compareScheduledItems,
   planATripLoginHref,
   TRIPS_ACCOUNT_UNAVAILABLE,
   sharePlanHref,
@@ -38,6 +39,7 @@ import {
   type TripItemType,
 } from "@/lib/trip-record";
 import type { StoredPlan } from "@/lib/trip-planner-storage";
+import { WeekView } from "@/components/trip-planner/WeekView";
 
 type Props = {
   headingId: string;
@@ -160,15 +162,6 @@ const LANE_PROGRESS_LABEL = {
   booked: "booked",
   skipped: "skipped",
 } as const;
-
-function compareScheduled(a: TripItem, b: TripItem): number {
-  const ta = a.time ?? "";
-  const tb = b.time ?? "";
-  if (ta && tb && ta !== tb) return ta.localeCompare(tb);
-  if (ta && !tb) return -1;
-  if (!ta && tb) return 1;
-  return a.sortOrder - b.sortOrder || a.updatedAt.localeCompare(b.updatedAt);
-}
 
 function itemWhen(item: TripItem, days: TripDay[]): string {
   const dayCount = days.length;
@@ -642,6 +635,7 @@ export function ItineraryHub({
   onRememberGuestDraft,
 }: Props) {
   const [copied, setCopied] = useState(false);
+  const [layout, setLayout] = useState<"timeline" | "week">("timeline");
   const [editor, setEditor] = useState<
     | { kind: "add-lane"; laneKey: string }
     | { kind: "add-note" }
@@ -708,6 +702,22 @@ export function ItineraryHub({
   function addItem(item: TripItem) {
     onItemsChange([...items, item]);
     setEditor(null);
+  }
+
+  function assignDay(id: string, dayIndex: number | null) {
+    const nextIndex =
+      dayIndex != null && dayIndex >= 1 && dayIndex <= days.length ? dayIndex : null;
+    onItemsChange(
+      items.map((item) => {
+        if (item.id !== id) return item;
+        const current = scheduledDayIndex(item, days.length);
+        if (current === nextIndex) return item;
+        const next: TripItem = { ...item, updatedAt: new Date().toISOString() };
+        if (nextIndex == null) delete next.dayIndex;
+        else next.dayIndex = nextIndex;
+        return next;
+      }),
+    );
   }
 
   const saveCopy =
@@ -988,12 +998,42 @@ export function ItineraryHub({
       </div>
 
       <section className="mt-8" aria-labelledby={`${headingId}-list`}>
-        <h3
-          id={`${headingId}-list`}
-          className="font-display text-lg font-bold text-heading"
-        >
-          Day by day
-        </h3>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3
+            id={`${headingId}-list`}
+            className="font-display text-lg font-bold text-heading"
+          >
+            Day by day
+          </h3>
+          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Itinerary layout">
+            {(
+              [
+                { id: "timeline", label: "Timeline" },
+                { id: "week", label: "Week" },
+              ] as const
+            ).map((tab) => {
+              const active = layout === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  id={`${headingId}-${tab.id}-tab`}
+                  aria-selected={active}
+                  aria-controls={`${headingId}-${tab.id}-panel`}
+                  className={`inline-flex min-h-9 items-center rounded-full border px-4 text-sm font-semibold transition ${
+                    active
+                      ? "border-ink bg-ink text-on-solid"
+                      : "border-border bg-white text-text hover:border-border-strong hover:bg-surface-soft"
+                  }`}
+                  onClick={() => setLayout(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
         {sorted.length === 0 ? (
           <p className="mt-2 text-sm leading-relaxed text-muted">
             Nothing saved yet. Search a partner, then add the booking you want to keep.
@@ -1003,7 +1043,14 @@ export function ItineraryHub({
           <p className="mt-2 text-sm leading-relaxed text-muted">
             Add start and end dates to split this trip into days.
           </p>
-        ) : (
+        ) : null}
+        {layout === "timeline" ? (
+        <div
+          role="tabpanel"
+          id={`${headingId}-timeline-panel`}
+          aria-labelledby={`${headingId}-timeline-tab`}
+        >
+        {days.length > 0 ? (
           <div className="panel-soft mt-4 p-4 sm:p-5">
             <nav aria-label="Jump to a day" className="flex gap-2 overflow-x-auto pb-1">
               {days.map((day) => {
@@ -1050,7 +1097,7 @@ export function ItineraryHub({
               {days.map((day) => {
                 const dayItems = sorted
                   .filter((item) => scheduledDayIndex(item, days.length) === day.index)
-                  .sort(compareScheduled);
+                  .sort(compareScheduledItems);
                 return (
                   <li
                     key={day.index}
@@ -1086,7 +1133,7 @@ export function ItineraryHub({
               </ol>
             </div>
           </div>
-        )}
+        ) : null}
 
         <section
             id={`${headingId}-unscheduled`}
@@ -1107,6 +1154,40 @@ export function ItineraryHub({
               renderTimeline(unscheduled)
             )}
           </section>
+        </div>
+        ) : (
+          <div
+            role="tabpanel"
+            id={`${headingId}-week-panel`}
+            aria-labelledby={`${headingId}-week-tab`}
+          >
+            {editor?.kind === "edit" && editor.place === "day" ? (
+              <div className="mt-4">
+                {sorted
+                  .filter((item) => item.id === editor.id)
+                  .map((item) => (
+                    <BookingItemForm
+                      key={item.id}
+                      framed
+                      type={item.type}
+                      existing={item}
+                      days={days}
+                      sortOrder={item.sortOrder}
+                      onSave={replaceItem}
+                      onCancel={() => setEditor(null)}
+                    />
+                  ))}
+              </div>
+            ) : null}
+            <WeekView
+              headingId={headingId}
+              days={days}
+              items={sorted}
+              onAssignDay={assignDay}
+              onEdit={(id) => setEditor({ kind: "edit", id, place: "day" })}
+            />
+          </div>
+        )}
 
         {editor?.kind === "add-note" ? (
           <BookingItemForm

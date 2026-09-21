@@ -16,11 +16,14 @@ import {
   parseTitleOnlyPatch,
   parseTripWrite,
   planATripLoginHref,
+  compareScheduledItems,
+  formatTripWeekRange,
   scheduledDayIndex,
   shouldPromptTripSignIn,
   suggestTripTitle,
   tripCapacityMessage,
   tripDays,
+  tripWeeks,
   tripWriteFromPlan,
   MAX_SAVED_TRIPS,
 } from "../src/lib/trip-record.ts";
@@ -142,6 +145,48 @@ describe("saved trips", () => {
     assert.equal(flexible.length, 6);
     assert.equal(flexible[0]?.date, "2027-05-01");
     assert.equal(flexible[5]?.date, "2027-05-06");
+  });
+
+  it("lays trip days onto Sunday-start weeks", () => {
+    const exact = tripWeeks(tripDays(lisbonState(), true));
+    assert.equal(exact.length, 2);
+    assert.equal(exact[0]?.startDate, "2027-04-11");
+    assert.equal(formatTripWeekRange(exact[0]?.startDate ?? ""), "Apr 11 – 17");
+    assert.equal(exact[0]?.cells[0], null);
+    assert.equal(exact[0]?.cells[1]?.label, "Day 1");
+    assert.equal(exact[0]?.cells[1]?.detail, "Mon, Apr 12");
+    assert.equal(exact[0]?.cells[6]?.label, "Day 6");
+    assert.equal(exact[1]?.startDate, "2027-04-18");
+    assert.equal(formatTripWeekRange(exact[1]?.startDate ?? ""), "Apr 18 – 24");
+    assert.equal(exact[1]?.cells[0]?.label, "Day 7");
+    assert.equal(exact[1]?.cells[1]?.date, "2027-04-19");
+    assert.equal(exact[1]?.cells[2], null);
+    assert.equal(exact[1]?.cells.length, 7);
+
+    const flexible = tripWeeks(
+      tripDays(
+        {
+          ...initialPlannerState(),
+          destination: "Lisbon, Portugal",
+          dateMode: "flexible",
+          month: "2027-05",
+          nights: 5,
+        },
+        true,
+      ),
+    );
+    assert.equal(flexible[0]?.cells[6]?.date, "2027-05-01");
+    assert.equal(flexible[1]?.cells[4]?.date, "2027-05-06");
+    assert.equal(flexible[1]?.cells[5], null);
+    assert.deepEqual(tripWeeks([]), []);
+
+    const early = { dayIndex: 1, time: "14:00", sortOrder: 2, updatedAt: "b" };
+    const later = { dayIndex: 1, time: "09:00", sortOrder: 1, updatedAt: "a" };
+    const untimed = { dayIndex: 1, sortOrder: 0, updatedAt: "c" };
+    assert.deepEqual(
+      [early, untimed, later].sort(compareScheduledItems).map((item) => item.time ?? ""),
+      ["09:00", "14:00", ""],
+    );
   });
 
   it("keeps day, time, and confirmation, and reads a pasted blurb", () => {

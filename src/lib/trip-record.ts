@@ -73,7 +73,14 @@ export type TripDay = {
   detail: string;
 };
 
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+/** One calendar week, Sunday through Saturday. Null cells sit outside the trip. */
+export type TripWeek = {
+  /** Sunday that opens the week, `YYYY-MM-DD`. */
+  startDate: string;
+  cells: Array<TripDay | null>;
+};
+
+export const TRIP_WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 const DAY_MONTHS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
@@ -366,7 +373,66 @@ export function formatTripDayDetail(isoDate: string): string {
   const parsed = parseIsoDate(isoDate);
   if (!parsed) return "";
   const utc = new Date(Date.UTC(parsed.y, parsed.m - 1, parsed.d));
-  return `${WEEKDAYS[utc.getUTCDay()]}, ${DAY_MONTHS[parsed.m - 1]} ${parsed.d}`;
+  return `${TRIP_WEEKDAYS[utc.getUTCDay()]}, ${DAY_MONTHS[parsed.m - 1]} ${parsed.d}`;
+}
+
+function utcWeekday(isoDate: string): number | null {
+  const parsed = parseIsoDate(isoDate);
+  if (!parsed) return null;
+  return new Date(Date.UTC(parsed.y, parsed.m - 1, parsed.d)).getUTCDay();
+}
+
+/**
+ * Groups trip days into Sunday-start calendar weeks covering start through end.
+ * Leading and trailing cells are null when the trip starts or ends mid-week.
+ */
+export function tripWeeks(days: TripDay[]): TripWeek[] {
+  const sorted = [...days].sort((a, b) => a.date.localeCompare(b.date));
+  const bySunday = new Map<string, Array<TripDay | null>>();
+  const order: string[] = [];
+  for (const day of sorted) {
+    const parsed = parseIsoDate(day.date);
+    const weekday = utcWeekday(day.date);
+    if (!parsed || weekday == null) continue;
+    const sunday = new Date(Date.UTC(parsed.y, parsed.m - 1, parsed.d - weekday));
+    const startDate = sunday.toISOString().slice(0, 10);
+    let cells = bySunday.get(startDate);
+    if (!cells) {
+      cells = [null, null, null, null, null, null, null];
+      bySunday.set(startDate, cells);
+      order.push(startDate);
+    }
+    cells[weekday] = day;
+  }
+  return order.map((startDate) => ({
+    startDate,
+    cells: bySunday.get(startDate) ?? [null, null, null, null, null, null, null],
+  }));
+}
+
+/** Short range for a week row, such as `Apr 11 – 17` or `Apr 26 – May 2`. */
+export function formatTripWeekRange(startDate: string): string {
+  const parsed = parseIsoDate(startDate);
+  if (!parsed) return "";
+  const end = new Date(Date.UTC(parsed.y, parsed.m - 1, parsed.d + 6));
+  const endParsed = parseIsoDate(end.toISOString().slice(0, 10));
+  if (!endParsed) return "";
+  const startLabel = `${DAY_MONTHS[parsed.m - 1]} ${parsed.d}`;
+  const endLabel =
+    parsed.m === endParsed.m && parsed.y === endParsed.y
+      ? String(endParsed.d)
+      : `${DAY_MONTHS[endParsed.m - 1]} ${endParsed.d}`;
+  return `${startLabel} – ${endLabel}`;
+}
+
+/** Timed items first, then earlier sort order. Untimed items stay in entry order. */
+export function compareScheduledItems(a: TripItem, b: TripItem): number {
+  const ta = a.time ?? "";
+  const tb = b.time ?? "";
+  if (ta && tb && ta !== tb) return ta.localeCompare(tb);
+  if (ta && !tb) return -1;
+  if (!ta && tb) return 1;
+  return a.sortOrder - b.sortOrder || a.updatedAt.localeCompare(b.updatedAt);
 }
 
 export function scheduledDayIndex(item: TripItem, dayCount: number): number | null {
