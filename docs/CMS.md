@@ -34,9 +34,12 @@ Admins sign in with Google and/or GitHub. Only emails listed in **`CMS_ADMIN_EMA
 | `AUTH_TRUST_HOST` | Recommended on Vercel | Set to `true` so Auth.js trusts the `Host` / `X-Forwarded-Host` headers. |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | For Google | OAuth 2.0 client from Google Cloud Console. |
 | `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | For GitHub | OAuth App credentials. |
+| `AUTH_TWITTER_ID` / `AUTH_TWITTER_SECRET` | For reader X sign-in only | OAuth 2.0 Client ID and Client Secret from the X Developer Portal. Does **not** unlock `/cms`. See [`docs/X-SIGN-IN.md`](./X-SIGN-IN.md). |
 | `CMS_ADMIN_EMAILS` | Yes for OAuth | Comma-separated allowlist, e.g. `fernandesjourneys@gmail.com` (must include this address on Vercel for Admin console to appear in the header menu). |
 
 Redirect URIs: `https://www.fernandesjourneys.com/api/auth/callback/{google\|github}` and local `http://localhost:3000/api/auth/callback/...`.
+
+X (Twitter) is a **public reader** provider only. It is not shown on the CMS login, and an X session never sets `isAdmin`. Checklist: [`docs/X-SIGN-IN.md`](./X-SIGN-IN.md).
 
 ### 2. Passcode (optional backup)
 

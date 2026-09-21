@@ -12,6 +12,7 @@ import {
 import {
   createPasswordResetToken,
   getUserByEmail,
+  oauthOnlySignInMessage,
   UsersUnavailableError,
 } from "@/lib/users";
 import {
@@ -106,15 +107,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, message: GENERIC_OK });
     }
 
-    // Google-only (or OAuth-only) — no passwordHash. Clear message; do not
-    // pretend an email was sent.
+    // OAuth-only — no passwordHash. Clear message; do not pretend an email
+    // was sent. X-only accounts name Continue with X.
     if (!user.passwordHash) {
       return NextResponse.json(
         {
           ok: false,
-          error:
-            "This account uses Google sign-in and has no password. Use Continue with Google on the sign-in page.",
-          code: "google_only",
+          error: oauthOnlySignInMessage(user.providers),
+          code: "oauth_only",
         },
         { status: 400 },
       );

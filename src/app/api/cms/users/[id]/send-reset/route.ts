@@ -143,6 +143,7 @@ export async function POST(_request: Request, ctx: Ctx) {
     if (
       message.includes("no email") ||
       message.includes("disabled") ||
+      message.includes("has no password") ||
       message.includes("Google sign-in")
     ) {
       return NextResponse.json({ error: message }, { status: 400 });

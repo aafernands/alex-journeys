@@ -290,7 +290,7 @@ export function ProfileSettingsForm({
           </label>
           <p className="mt-1 text-xs text-muted">
             JPEG, PNG, or WebP, up to about 400KB. Or paste an image link. A
-            Google photo stays until you set your own.
+            Google or X photo stays until you set your own.
           </p>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
             <AvatarPreview

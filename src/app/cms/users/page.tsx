@@ -37,9 +37,9 @@ export default async function CmsUsersPage() {
         <p className="eyebrow text-accent">Readers</p>
         <h1 className="font-display mt-2 text-display text-heading">Users</h1>
         <p className="mt-3 max-w-2xl text-sm text-muted md:text-base">
-          Google and email/password reader accounts stored in Firestore. Disabling
-          a user blocks credentials login and Google sign-in. Email signup alone
-          never grants CMS access.
+          Google, X, and email/password reader accounts stored in Firestore.
+          Disabling a user blocks credentials login and Google or X sign-in.
+          X sign-in alone never grants CMS access.
         </p>
       </div>
 

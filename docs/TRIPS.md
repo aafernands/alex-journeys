@@ -10,7 +10,7 @@ Reader auth is the existing Auth.js email/password + Google session. Trips do no
 
 ## Auth
 
-Guests on the itinerary hub see **Sign in** and **Create account**. Both go to `/login` with `callbackUrl` set to `/guides/plan-a-trip` (or `?trip=` when they were opening a saved trip). Create account adds `mode=signup`. After email, password, or Google sign-in, Auth.js sends them back to that URL. The draft is already in this browser, so the hub comes back with it.
+Guests on the itinerary hub see **Sign in** and **Create account**. Both go to `/login` with `callbackUrl` set to `/guides/plan-a-trip` (or `?trip=` when they were opening a saved trip). Create account adds `mode=signup`. After email, password, Google, or X sign-in, Auth.js sends them back to that URL. The draft is already in this browser, so the hub comes back with it.
 
 A draft edited while signed out is not written to Firestore until the reader chooses **Save itinerary**. **Keep it on this device** leaves it in `localStorage`. A reader who was signed in the whole time auto-saves. The hub shows **Unsaved changes**, **Saving…**, or **Saved to your account**.
 

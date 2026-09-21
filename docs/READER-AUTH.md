@@ -1,15 +1,15 @@
 # Reader email/password auth & CMS users
 
-Public readers can sign in with **email + password** or **Google** at `/login`. Profiles live in **Cloud Firestore** (`users/{userId}`). CMS admins can list and disable users at `/cms/users`.
+Public readers can sign in with **email + password**, **Google**, or **X** at `/login`. Profiles live in **Cloud Firestore** (`users/{userId}`). CMS admins can list and disable users at `/cms/users`.
 
-Reader sessions **never** unlock `/cms`. CMS still requires `CMS_ADMIN_EMAILS` (OAuth) and/or `CMS_PASSCODE`.
+Reader sessions **never** unlock `/cms`. CMS still requires `CMS_ADMIN_EMAILS` (Google or GitHub) and/or `CMS_PASSCODE`. **X never grants CMS admin**, even if an email on the profile is allowlisted. X setup: [X-SIGN-IN.md](./X-SIGN-IN.md).
 
 ## What readers get
 
 | Surface | Behavior |
 | --- | --- |
 | Header **Sign in** | Goes to `/login` (not direct Google). On a phone it sits in the sticky bar beside the menu. The menu opens with a full-width **Sign in / Create account**. |
-| `/login` | Sign in / Create account (name, email, password ≥ 8) + Continue with Google + **Forgot password?** |
+| `/login` | Sign in / Create account (name, email, password ≥ 8) + Continue with Google + Continue with X (when configured) + **Forgot password?** |
 | `/forgot-password` | Request a time-limited reset email (Resend) |
 | `/reset-password?token=…` | Set a new password, then sign in |
 | `/account` | Dashboard; **Profile settings** (name, photo, email change) + **Change password** for credentials users |
@@ -22,24 +22,26 @@ Document id strategy (stable for `users/{id}/saved`):
 
 | Provider | Document id |
 | --- | --- |
-| Google / GitHub | Auth.js `providerAccountId` (same as today — do not change) |
+| Google / X / GitHub | Auth.js `providerAccountId` (same as today — do not change). X stores provider id `twitter`. |
 | Email/password only | `cred_` + first 40 hex of SHA-256(`email:` + lowercased email) |
 | Email signup when Google profile already exists for that email | Credentials are **merged onto the existing OAuth doc** so saves stay unified |
 
 Fields:
 
 ```
-email, name, passwordHash | null, providers: ["google"|"github"|"credentials"],
+email, name, passwordHash | null, providers: ["google"|"twitter"|"github"|"credentials"],
 image, createdAt, updatedAt, lastLoginAt, disabled,
 emailManagedLocally, nameManagedLocally, imageManagedLocally
 ```
 
 - Passwords are **bcrypt** hashes via `bcryptjs`. Never stored plaintext.
 - `passwordHash` is **never** returned from CMS/list APIs or register responses.
-- Google sign-in **upserts** the profile and **never clears** `passwordHash`.
+- Google and X sign-in **upsert** the profile and **never clear** `passwordHash`.
+- X uses the same disabled check as Google. An X session does **not** set `isAdmin`.
+- X’s OAuth 2 user lookup usually has **no email**, so an X account stays its own Firestore doc (it does not merge onto a Google or email account).
 - When `emailManagedLocally` / `nameManagedLocally` / `imageManagedLocally` is true, OAuth upsert **does not overwrite** that field (so a verified email change or custom name/photo sticks).
 - **Changing email never recreates the Firestore doc id** (saved posts stay under the same `users/{id}`).
-- `disabled: true` → credentials `authorize` fails; Google `signIn` callback denies.
+- `disabled: true` → credentials `authorize` fails; Google and X `signIn` callbacks deny.
 
 ## Password reset tokens
 
@@ -71,7 +73,7 @@ On successful reset: `passwordHash` updated (bcrypt), token marked `usedAt`, and
 | --- | --- |
 | `RESEND_API_KEY` missing | **503** — clear message that reset email isn’t configured (build still succeeds) |
 | Unknown / disabled email | **200** generic success (same wording whether or not the email exists) |
-| User exists but **no** `passwordHash` (Google-only) | **400** — tell them to use **Continue with Google**; do **not** claim an email was sent |
+| User exists but **no** `passwordHash` (Google-only, X-only, or both) | **400** — tell them to use **Continue with Google** and/or **Continue with X**; do **not** claim an email was sent |
 | Credentials user + Resend OK | Send email → **200** same generic success message |
 | Resend returns non-2xx | **502** — `{ error }` is Resend’s `message` (prefixed), e.g. testing-only recipient restriction |
 
@@ -115,7 +117,7 @@ Optional: `POST /api/auth/change-email/cancel` clears pending tokens for the sig
 
 - JSON `{ name?, image? | imageUrl?, clearImage? }` or multipart (`name`, `file`, `imageUrl`, `clearImage`).
 - Photo: https URL, or small JPEG/PNG/WebP upload stored as a data URL on the user doc (max ~400KB). Firebase Storage is not required.
-- Sets `nameManagedLocally` / `imageManagedLocally` so Google login keeps custom values.
+- Sets `nameManagedLocally` / `imageManagedLocally` so Google and X login keep custom values.
 - Client refreshes session via `useSession().update({ name, image })`.
 
 ## Env vars
@@ -125,6 +127,7 @@ Optional: `POST /api/auth/change-email/cancel` clears pending tokens for the sig
 | `AUTH_SECRET` | Required for all Auth.js |
 | `AUTH_URL` | Optional canonical site URL for reset links (e.g. `https://www.fernandesjourneys.com`). Falls back to `NEXTAUTH_URL`, then the production domain. |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google button on `/login` |
+| `AUTH_TWITTER_ID` / `AUTH_TWITTER_SECRET` | **Continue with X** on `/login` when both are set. OAuth 2.0 Client ID + Client Secret (not the OAuth 1.0 API key). Does not unlock CMS. Full checklist: [X-SIGN-IN.md](./X-SIGN-IN.md). |
 | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Required for email/password + user profiles + reset tokens |
 | `FIREBASE_FIRESTORE_DATABASE_ID` | Optional named DB |
 | `RESEND_API_KEY` | **Required to send** reset + email-change emails via Resend HTTP API. The same key reads inbound booking mail when it has full access. See [TRIPS-INBOUND.md](./TRIPS-INBOUND.md). |
@@ -142,7 +145,7 @@ Admin-only (existing CMS auth gate):
 
 - List: name, email, providers, created, last login, disabled
 - **Send reset link** — emails the same 1-hour reset URL as self-serve forgot-password (Resend). Works for Google-only users too (link *sets* a password). Disabled users / missing email → clear error. Token is never returned in the API response.
-- **Disable / Enable** — blocks future credentials and Google sign-in
+- **Disable / Enable** — blocks future credentials, Google, and X sign-in
 - **Delete** — removes the user **document** only (confirm in UI). `saved` subcollections may remain as Firestore orphans
 
 APIs: `GET /api/cms/users`, `PATCH|DELETE /api/cms/users/[id]`, `POST /api/cms/users/[id]/send-reset`.
@@ -151,7 +154,8 @@ APIs: `GET /api/cms/users`, `PATCH|DELETE /api/cms/users/[id]`, `POST /api/cms/u
 
 - `src/lib/users.ts` — register, authorize, upsert OAuth, list, disable, delete, **password reset / change**, **email-change tokens**, **profile update**
 - `src/lib/email.ts` — Resend HTTP send + `publicSiteOrigin()`
-- `src/auth.ts` — Credentials + Google + GitHub; JWT `trigger: "update"` for live session name/email/image
+- `src/auth.ts` — Credentials + Google + X (Twitter) + GitHub; JWT `trigger: "update"` for live session name/email/image. X never sets `isAdmin`.
+- `src/lib/auth-config.ts` — `isTwitterAuthConfigured`, `isReaderAuthConfigured`, `grantsCmsAdmin` (re-exported from `src/auth.ts`)
 - `src/app/login/page.tsx`, `src/components/ReaderLoginForm.tsx`
 - `src/app/forgot-password/`, `src/app/reset-password/`
 - `src/app/account/`, `src/app/account/confirm-email/`
@@ -180,7 +184,8 @@ APIs: `GET /api/cms/users`, `PATCH|DELETE /api/cms/users/[id]`, `POST /api/cms/u
 2. **Create account** → land on `/account` → save a post from a blog page → confirm it lists under Saved.
 3. Sign out → **Sign in** with the same email/password.
 4. **Continue with Google** (if configured) → profile appears; saves use Google `sub` id as before.
-5. As CMS admin, open `/cms/users` → disable the test user → credentials and Google sign-in for that account should fail → re-enable.
+5. **Continue with X** (if `AUTH_TWITTER_ID` / `AUTH_TWITTER_SECRET` are set) → profile appears under the X user id. That session must **not** show Admin console, even if you also have a Google admin email.
+6. As CMS admin, open `/cms/users` → disable the test user → credentials, Google, and X sign-in for that account should fail → re-enable.
 
 ### Password reset
 
@@ -188,7 +193,7 @@ APIs: `GET /api/cms/users`, `PATCH|DELETE /api/cms/users/[id]`, `POST /api/cms/u
 2. With a credentials account, open `/login` → **Forgot password?** → submit email.
    - **Testing sender:** until a domain is verified, default `onboarding@resend.dev` only delivers to the email on your Resend account. Other recipients get a **502** whose UI text includes Resend’s “You can only send testing emails…” message.
 3. Check the inbox (Resend dashboard / email) for the link → open `/reset-password?token=…` → set a new password → sign in.
-4. Submit a **Google-only** email on forgot-password → expect a message to use Google (no “email sent” claim).
+4. Submit a **Google-only** email on forgot-password → expect a message to use Google (no “email sent” claim). An **X-only** account that has an email on file should be told to use **Continue with X**. X often does not share an email, so forgot-password cannot find those accounts by address.
 5. With `RESEND_API_KEY` unset → forgot-password returns a clear 503-style error; site still builds.
 6. Signed-in credentials user: `/account` → **Change password** with current + new.
 7. As CMS admin on `/cms/users` → **Send reset link** for a user with an email → expect success “Reset email sent to …” and the same Resend inbox / dashboard delivery as forgot-password. Try a Google-only user (no password yet) → link should still arrive and allow setting a password. Disabled / no-email rows should refuse clearly.

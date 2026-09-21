@@ -412,7 +412,7 @@ export function UsersList({ users }: Props) {
         <div className="panel p-6">
           <p className="text-sm text-muted">
             {users.length === 0
-              ? "No users yet. Profiles appear after Google or email sign-in."
+              ? "No users yet. Profiles appear after Google, X, or email sign-in."
               : "No users match your search."}
           </p>
         </div>

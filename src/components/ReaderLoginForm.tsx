@@ -14,8 +14,11 @@ type Mode = "signin" | "signup";
 
 type Props = {
   googleConfigured: boolean;
+  twitterConfigured: boolean;
   credentialsConfigured: boolean;
 };
+
+type OauthProvider = "google" | "twitter";
 
 function safeCallbackUrl(raw: string | null): string {
   if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return "/account";
@@ -24,6 +27,7 @@ function safeCallbackUrl(raw: string | null): string {
 
 export function ReaderLoginForm({
   googleConfigured,
+  twitterConfigured,
   credentialsConfigured,
 }: Props) {
   const router = useRouter();
@@ -43,12 +47,29 @@ export function ReaderLoginForm({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [oauthPending, setOauthPending] = useState(false);
+  const [oauthPending, setOauthPending] = useState<OauthProvider | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileFieldHandle>(null);
   const widgetEnabled = isTurnstileWidgetEnabled();
 
-  const anyAuth = googleConfigured || credentialsConfigured;
+  const anyAuth =
+    googleConfigured || twitterConfigured || credentialsConfigured;
+  const oauthConfigured = googleConfigured || twitterConfigured;
+
+  async function startOauth(provider: OauthProvider) {
+    setError(null);
+    setOauthPending(provider);
+    try {
+      await signIn(provider, { callbackUrl });
+    } catch {
+      setError(
+        provider === "twitter"
+          ? "X sign-in failed. Try again."
+          : "Google sign-in failed. Try again.",
+      );
+      setOauthPending(null);
+    }
+  }
 
   if (!anyAuth) {
     return (
@@ -273,7 +294,7 @@ export function ReaderLoginForm({
             type="submit"
             disabled={
               pending ||
-              oauthPending ||
+              oauthPending !== null ||
               (mode === "signup" && widgetEnabled && !turnstileToken)
             }
             className="btn btn-primary btn-block disabled:cursor-not-allowed disabled:opacity-60 disabled:grayscale"
@@ -289,32 +310,43 @@ export function ReaderLoginForm({
         </form>
       ) : null}
 
-      {googleConfigured && credentialsConfigured ? (
+      {oauthConfigured && credentialsConfigured ? (
         <p className="my-6 text-center text-xs font-semibold uppercase tracking-wide text-muted">
           Or
         </p>
-      ) : googleConfigured ? (
+      ) : oauthConfigured ? (
         <div className="mt-6" />
       ) : null}
 
-      {googleConfigured ? (
-        <button
-          type="button"
-          disabled={pending || oauthPending}
-          className="btn btn-secondary btn-block disabled:opacity-60"
-          onClick={async () => {
-            setError(null);
-            setOauthPending(true);
-            try {
-              await signIn("google", { callbackUrl });
-            } catch {
-              setError("Google sign-in failed. Try again.");
-              setOauthPending(false);
-            }
-          }}
+      {oauthConfigured ? (
+        <div
+          className={
+            googleConfigured && twitterConfigured
+              ? "grid grid-cols-1 gap-3 sm:grid-cols-2"
+              : "flex flex-col gap-3"
+          }
         >
-          {oauthPending ? "Redirecting…" : "Continue with Google"}
-        </button>
+          {googleConfigured ? (
+            <button
+              type="button"
+              disabled={pending || oauthPending !== null}
+              className="btn btn-secondary btn-block whitespace-nowrap px-3 text-sm disabled:opacity-60"
+              onClick={() => startOauth("google")}
+            >
+              {oauthPending === "google" ? "Redirecting…" : "Continue with Google"}
+            </button>
+          ) : null}
+          {twitterConfigured ? (
+            <button
+              type="button"
+              disabled={pending || oauthPending !== null}
+              className="btn btn-secondary btn-block whitespace-nowrap px-3 text-sm disabled:opacity-60"
+              onClick={() => startOauth("twitter")}
+            >
+              {oauthPending === "twitter" ? "Redirecting…" : "Continue with X"}
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       <p className="mt-5 text-center text-xs leading-relaxed text-muted">
