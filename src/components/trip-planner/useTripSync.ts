@@ -6,7 +6,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   backupGuestDraft,
   clearGuestBackup,
+  clearGuestSaveFlags,
+  dismissAccountMerge,
   getActivePlanSnapshot,
+  hasGuestOrigin,
+  isAccountMergeDismissed,
+  markGuestOrigin,
   readGuestBackup,
   writeActivePlan,
   type StoredPlan,
@@ -16,27 +21,34 @@ import {
   validateDetails,
 } from "@/lib/trip-planner-model";
 import {
+  accountSaveIntent,
   isReasonableTripDraft,
   planATripHref,
   storedPlanFromTrip,
+  TRIPS_ACCOUNT_UNAVAILABLE,
+  tripCapacityMessage,
   tripWriteFromPlan,
   type TripRecord,
 } from "@/lib/trip-record";
-
-const MERGE_FLAG = "fj.plan-a-trip.merge-offer";
-const DISMISS_FLAG = "fj.plan-a-trip.merge-dismissed";
 
 export type TripSaveMode =
   | "checking"
   | "local"
   | "offer"
   | "declined"
+  | "pending"
   | "saving"
   | "saved"
   | "unavailable"
   | "error";
 
-export type RemoteTripState = "idle" | "loading" | "ready" | "missing" | "error";
+export type RemoteTripState =
+  | "idle"
+  | "loading"
+  | "ready"
+  | "missing"
+  | "unavailable"
+  | "error";
 
 type Options = {
   plan: StoredPlan;
@@ -49,23 +61,6 @@ function detailsReady(state: StoredPlan["state"], flexibleOn: boolean): boolean 
   return Object.keys(validateDetails(state, flexibleOn)).length === 0;
 }
 
-function rememberGuestDraft() {
-  try {
-    sessionStorage.setItem(MERGE_FLAG, "1");
-  } catch {
-    /* private mode */
-  }
-}
-
-function clearMergeFlags() {
-  try {
-    sessionStorage.removeItem(MERGE_FLAG);
-    sessionStorage.removeItem(DISMISS_FLAG);
-  } catch {
-    /* private mode */
-  }
-}
-
 /**
  * Guest drafts stay in localStorage. Signed-in readers sync step 4 to
  * Firestore. A draft started while signed out is offered as a merge after login.
@@ -74,17 +69,18 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
   const router = useRouter();
   const { status } = useSession();
   const [mode, setMode] = useState<TripSaveMode>("checking");
+  const [saveDetail, setSaveDetail] = useState<string | null>(null);
   const [remote, setRemote] = useState<RemoteTripState>(
     urlTripId ? "loading" : "idle",
   );
   const [guestBackup, setGuestBackup] = useState<StoredPlan | null>(null);
-  const [mergeReady, setMergeReady] = useState(false);
-  const [mergeOffer, setMergeOffer] = useState(false);
-  const [mergeDeclined, setMergeDeclined] = useState(false);
   const suppressUrlTrip = useRef<string | null>(null);
   const loadedUrlTrip = useRef<string | null>(null);
   const savingRef = useRef(false);
   const pendingRef = useRef(false);
+  const authRejectedRef = useRef(false);
+  const unavailableRef = useRef(false);
+  const saveGen = useRef(0);
   const tripIdRef = useRef<string | null>(plan.tripId);
   tripIdRef.current = plan.tripId;
 
@@ -98,32 +94,10 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      if (
-        plan.step === 4 &&
-        plan.state.destination.trim() &&
-        !plan.tripId
-      ) {
-        rememberGuestDraft();
-      }
-      setMergeReady(true);
-      setMergeOffer(false);
-      return;
+      authRejectedRef.current = false;
+      if (plan.state.destination.trim()) markGuestOrigin();
     }
-    if (status !== "authenticated") return;
-
-    let offer = false;
-    let declined = false;
-    try {
-      offer = sessionStorage.getItem(MERGE_FLAG) === "1" && !plan.tripId;
-      declined = sessionStorage.getItem(DISMISS_FLAG) === "1" && !plan.tripId;
-    } catch {
-      offer = false;
-      declined = false;
-    }
-    setMergeOffer(offer && plan.step === 4);
-    setMergeDeclined(declined && plan.step === 4);
-    setMergeReady(true);
-  }, [status, plan.step, plan.tripId, plan.state.destination]);
+  }, [status, plan.state.destination]);
 
   const replaceTripUrl = useCallback(
     (id: string | null) => {
@@ -139,9 +113,6 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
   const dismissUrlTrip = useCallback(() => {
     if (urlTripId) suppressUrlTrip.current = urlTripId;
     loadedUrlTrip.current = null;
-    clearMergeFlags();
-    setMergeOffer(false);
-    setMergeDeclined(false);
     setRemote("idle");
     replaceTripUrl(null);
   }, [replaceTripUrl, urlTripId]);
@@ -162,6 +133,13 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
       return;
     }
 
+    const current = getActivePlanSnapshot();
+    if (current?.tripId === urlTripId && current.step === 4) {
+      loadedUrlTrip.current = urlTripId;
+      setRemote("ready");
+      return;
+    }
+
     let cancelled = false;
     setRemote("loading");
     (async () => {
@@ -170,6 +148,16 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
         if (cancelled || suppressUrlTrip.current === urlTripId) return;
         if (res.status === 404) {
           setRemote("missing");
+          return;
+        }
+        if (res.status === 503) {
+          setRemote("unavailable");
+          return;
+        }
+        if (res.status === 401) {
+          authRejectedRef.current = true;
+          setRemote("idle");
+          setMode("local");
           return;
         }
         if (!res.ok) {
@@ -182,21 +170,19 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
           setRemote("error");
           return;
         }
-        const current = getActivePlanSnapshot();
+        const latest = getActivePlanSnapshot();
         if (
-          current &&
-          !current.tripId &&
-          current.step === 4 &&
-          current.state.destination.trim()
+          latest &&
+          !latest.tripId &&
+          latest.step === 4 &&
+          latest.state.destination.trim()
         ) {
-          backupGuestDraft(current);
-          setGuestBackup({ ...current });
+          backupGuestDraft(latest);
+          setGuestBackup({ ...latest });
         }
         loadedUrlTrip.current = urlTripId;
         writeActivePlan(storedPlanFromTrip(data.trip));
-        clearMergeFlags();
-        setMergeOffer(false);
-        setMergeDeclined(false);
+        clearGuestSaveFlags();
         setRemote("ready");
       } catch {
         if (!cancelled) setRemote("error");
@@ -209,11 +195,20 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
   }, [urlTripId, status]);
 
   const persist = useCallback(async () => {
-    if (status !== "authenticated") return;
+    if (status !== "authenticated" || authRejectedRef.current) return;
     const current = getActivePlanSnapshot();
     if (!current || !isReasonableTripDraft(current)) return;
     if (!detailsReady(current.state, flexibleOn)) return;
     if (urlTripId && remote !== "ready" && current.tripId !== urlTripId) return;
+    const intent = accountSaveIntent({
+      authenticated: true,
+      tripId: current.tripId,
+      step: current.step,
+      hasDestination: Boolean(current.state.destination.trim()),
+      guestOrigin: hasGuestOrigin(),
+      dismissed: isAccountMergeDismissed(),
+    });
+    if (intent !== "autosave") return;
 
     if (savingRef.current) {
       pendingRef.current = true;
@@ -221,6 +216,7 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
     }
     savingRef.current = true;
     setMode("saving");
+    setSaveDetail(null);
     try {
       const body = JSON.stringify(tripWriteFromPlan(current, flexibleOn));
       const id = tripIdRef.current;
@@ -230,14 +226,38 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
         body,
       });
       if (res.status === 503) {
+        unavailableRef.current = true;
+        setSaveDetail(TRIPS_ACCOUNT_UNAVAILABLE);
         setMode("unavailable");
         return;
       }
       if (res.status === 401) {
+        authRejectedRef.current = true;
         setMode("local");
         return;
       }
+      if (res.status === 404 && id) {
+        const latest = getActivePlanSnapshot();
+        if (latest?.tripId === id) {
+          writeActivePlan({ ...latest, tripId: null });
+        }
+        tripIdRef.current = null;
+        markGuestOrigin();
+        setMode("offer");
+        return;
+      }
       if (!res.ok) {
+        let detail: string | null = null;
+        try {
+          const data = (await res.json()) as { error?: string };
+          detail = typeof data.error === "string" ? data.error : null;
+        } catch {
+          detail = null;
+        }
+        if (res.status === 409 && !detail) {
+          detail = tripCapacityMessage(Number.POSITIVE_INFINITY);
+        }
+        setSaveDetail(detail);
         setMode("error");
         return;
       }
@@ -252,11 +272,12 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
         loadedUrlTrip.current = savedId;
         replaceTripUrl(savedId);
       }
-      clearMergeFlags();
-      setMergeOffer(false);
-      setMergeDeclined(false);
+      unavailableRef.current = false;
+      clearGuestSaveFlags();
+      setSaveDetail(null);
       setMode("saved");
     } catch {
+      setSaveDetail(null);
       setMode("error");
     } finally {
       savingRef.current = false;
@@ -271,40 +292,61 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
     step: plan.step,
     state: plan.state,
     items: plan.items,
+    packingNotes: plan.packingNotes,
+    title: plan.title,
+    titleCustom: plan.titleCustom,
     tripId: plan.tripId,
   });
 
   useEffect(() => {
-    if (status === "loading" || !mergeReady) {
+    if (status === "loading") {
       setMode("checking");
       return;
     }
-    if (status !== "authenticated") {
+
+    const intent = accountSaveIntent({
+      authenticated: status === "authenticated",
+      tripId: plan.tripId,
+      step: plan.step,
+      hasDestination: Boolean(plan.state.destination.trim()),
+      guestOrigin: hasGuestOrigin(),
+      dismissed: isAccountMergeDismissed(),
+    });
+
+    if (intent === "local") {
       setMode("local");
       return;
     }
-    if (plan.step !== 4 || !isReasonableTripDraft(plan)) return;
-    if (urlTripId && remote !== "ready") return;
-    if (!detailsReady(plan.state, flexibleOn)) return;
-
-    if (!plan.tripId && mergeOffer) {
+    if (intent === "offer") {
       setMode("offer");
       return;
     }
-    if (!plan.tripId && mergeDeclined) {
+    if (intent === "declined") {
       setMode("declined");
       return;
     }
+    if (intent !== "autosave") return;
+    if (authRejectedRef.current) {
+      setMode("local");
+      return;
+    }
+    if (unavailableRef.current) {
+      setSaveDetail(TRIPS_ACCOUNT_UNAVAILABLE);
+      setMode("unavailable");
+      return;
+    }
+    if (urlTripId && remote !== "ready" && plan.tripId !== urlTripId) return;
+    if (urlTripId && (remote === "loading" || remote === "missing")) return;
+    if (!detailsReady(plan.state, flexibleOn)) return;
 
+    setMode((current) => (current === "saving" ? current : "pending"));
+    const gen = ++saveGen.current;
     const timer = window.setTimeout(() => {
-      void persist();
+      if (saveGen.current === gen) void persist();
     }, 700);
     return () => window.clearTimeout(timer);
   }, [
     flexibleOn,
-    mergeDeclined,
-    mergeOffer,
-    mergeReady,
     persist,
     plan.step,
     plan.tripId,
@@ -315,24 +357,55 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
     urlTripId,
   ]);
 
+  useEffect(() => {
+    const flush = () => {
+      if (status !== "authenticated" || authRejectedRef.current || unavailableRef.current) {
+        return;
+      }
+      const current = getActivePlanSnapshot();
+      if (!current?.tripId || !isReasonableTripDraft(current)) return;
+      if (!detailsReady(current.state, flexibleOn)) return;
+      const intent = accountSaveIntent({
+        authenticated: true,
+        tripId: current.tripId,
+        step: current.step,
+        hasDestination: Boolean(current.state.destination.trim()),
+        guestOrigin: hasGuestOrigin(),
+        dismissed: isAccountMergeDismissed(),
+      });
+      if (intent !== "autosave") return;
+      saveGen.current += 1;
+      const body = JSON.stringify(tripWriteFromPlan(current, flexibleOn));
+      void fetch(`/api/trips/${encodeURIComponent(current.tripId)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body,
+        keepalive: true,
+      });
+    };
+    window.addEventListener("pagehide", flush);
+    return () => window.removeEventListener("pagehide", flush);
+  }, [flexibleOn, status]);
+
   const saveToAccount = useCallback(() => {
-    clearMergeFlags();
-    setMergeOffer(false);
-    setMergeDeclined(false);
+    clearGuestSaveFlags();
+    unavailableRef.current = false;
+    authRejectedRef.current = false;
+    setSaveDetail(null);
     void persist();
   }, [persist]);
 
   const declineMerge = useCallback(() => {
-    try {
-      sessionStorage.removeItem(MERGE_FLAG);
-      sessionStorage.setItem(DISMISS_FLAG, "1");
-    } catch {
-      /* private mode */
-    }
-    setMergeOffer(false);
-    setMergeDeclined(true);
+    dismissAccountMerge();
     setMode("declined");
   }, []);
+
+  const retrySave = useCallback(() => {
+    unavailableRef.current = false;
+    authRejectedRef.current = false;
+    setSaveDetail(null);
+    void persist();
+  }, [persist]);
 
   const restoreGuestBackup = useCallback(() => {
     const backup = readGuestBackup();
@@ -341,24 +414,24 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
     clearGuestBackup();
     setGuestBackup(null);
     writeActivePlan({ ...backup, tripId: null });
-    rememberGuestDraft();
-    try {
-      sessionStorage.removeItem(DISMISS_FLAG);
-    } catch {
-      /* private mode */
-    }
-    setMergeDeclined(false);
-    setMergeOffer(true);
+    markGuestOrigin();
+    setMode("offer");
   }, [dismissUrlTrip]);
+
+  const rememberGuestDraft = useCallback(() => {
+    markGuestOrigin();
+  }, []);
 
   return {
     mode,
+    saveDetail,
     remote,
     guestBackup,
     signedIn: status === "authenticated",
     authLoading: status === "loading",
     saveToAccount,
     declineMerge,
+    retrySave,
     restoreGuestBackup,
     dismissUrlTrip,
     rememberGuestDraft,

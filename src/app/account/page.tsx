@@ -34,7 +34,10 @@ import {
 } from "@/lib/saved-posts";
 import { dateSummary } from "@/lib/trip-planner-model";
 import { getTripPlannerConfig } from "@/lib/trip-planner";
-import { plannerStateFromTrip } from "@/lib/trip-record";
+import {
+  plannerStateFromTrip,
+  TRIPS_LIST_UNAVAILABLE,
+} from "@/lib/trip-record";
 import { listTrips, TripsUnavailableError } from "@/lib/trips";
 
 export const metadata: Metadata = {
@@ -162,7 +165,7 @@ export default async function AccountPage() {
   if (signedIn && userId) {
     if (!isFirebaseConfigured()) {
       tripsError =
-        "Saved trips are not configured yet. Ask the site owner to enable Firestore.";
+        "Saving trips to your account isn’t available on this site yet. You can still plan in this browser.";
     } else {
       try {
         const flexibleDates = getTripPlannerConfig().flexibleDates;
@@ -174,7 +177,7 @@ export default async function AccountPage() {
         }));
       } catch (err) {
         if (err instanceof TripsUnavailableError) {
-          tripsError = "Saved trips are temporarily unavailable. Try again later.";
+          tripsError = TRIPS_LIST_UNAVAILABLE;
         } else {
           console.error("[account] list trips failed:", err);
           tripsError = "Could not load your trips.";

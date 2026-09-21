@@ -123,7 +123,19 @@ export type StoredTripPlan = {
   items: TripItem[];
   tripId: string | null;
   packingNotes: string;
+  /** Set when the reader named the trip. Empty uses the suggested title. */
+  title?: string;
+  titleCustom?: boolean;
 };
+
+/** Shown when Firestore env is missing or the trips API returns 503. */
+export const TRIPS_ACCOUNT_UNAVAILABLE =
+  "We can’t save trips to your account right now. This itinerary stays in this browser.";
+
+export const TRIPS_LIST_UNAVAILABLE =
+  "We can’t load your saved trips right now. Try again in a little while.";
+
+export const MAX_SAVED_TRIPS = 50;
 
 export function cleanPackingNotes(value: unknown): string {
   if (typeof value !== "string") return "";
@@ -160,12 +172,17 @@ export function decodeSharedPlan(token: string): StoredTripPlan | null {
     const json = new TextDecoder().decode(base64UrlToBytes(token.trim()));
     const parsed = parseTripWrite(JSON.parse(json) as unknown);
     if (!parsed.ok) return null;
+    const state = plannerStateFromTrip(parsed.data);
+    const suggested = suggestTripTitle(state, true);
+    const custom = parsed.data.title.trim() !== suggested;
     return {
       step: 4,
-      state: plannerStateFromTrip(parsed.data),
+      state,
       items: parsed.data.items,
       tripId: null,
       packingNotes: parsed.data.packingNotes,
+      title: custom ? parsed.data.title : "",
+      titleCustom: custom,
     };
   } catch {
     return null;
@@ -186,8 +203,72 @@ export function planATripHref(tripId?: string | null): string {
   return `${path}?trip=${encodeURIComponent(tripId)}`;
 }
 
-export function planATripLoginHref(tripId?: string | null): string {
-  return `/login?callbackUrl=${encodeURIComponent(planATripHref(tripId))}`;
+export function planATripLoginHref(
+  tripId?: string | null,
+  intent: "signin" | "signup" = "signin",
+): string {
+  const params = new URLSearchParams();
+  params.set("callbackUrl", planATripHref(tripId));
+  if (intent === "signup") params.set("mode", "signup");
+  return `/login?${params.toString()}`;
+}
+
+/**
+ * Signed-out readers who open `?trip=` need to sign in, unless this browser
+ * already has that itinerary open (they signed out while editing).
+ */
+export function shouldPromptTripSignIn(input: {
+  urlTripId: string | null;
+  signedIn: boolean;
+  authLoading: boolean;
+  planTripId: string | null;
+}): boolean {
+  if (!input.urlTripId || input.signedIn || input.authLoading) return false;
+  return input.planTripId !== input.urlTripId;
+}
+
+/**
+ * What to do with a step-4 draft once we know whether this browser started it
+ * while signed out. Signed-in readers who never had a guest draft auto-save.
+ */
+export function accountSaveIntent(input: {
+  authenticated: boolean;
+  tripId: string | null;
+  step: number;
+  hasDestination: boolean;
+  guestOrigin: boolean;
+  dismissed: boolean;
+}): "local" | "offer" | "declined" | "autosave" | "idle" {
+  if (!input.authenticated) return "local";
+  if (input.step !== 4 || !input.hasDestination) return "idle";
+  if (!input.tripId && input.guestOrigin && input.dismissed) return "declined";
+  if (!input.tripId && input.guestOrigin) return "offer";
+  return "autosave";
+}
+
+export function tripCapacityMessage(count: number): string | null {
+  if (!Number.isFinite(count) || count < MAX_SAVED_TRIPS) return null;
+  return `You can save up to ${MAX_SAVED_TRIPS} trips. Remove one from My trips to save another.`;
+}
+
+export function parseTripTitle(
+  raw: unknown,
+): { ok: true; title: string } | { ok: false; error: string } {
+  if (typeof raw !== "string") return { ok: false, error: "Add a trip name." };
+  const title = raw.trim().slice(0, 160);
+  if (!title) return { ok: false, error: "Add a trip name." };
+  return { ok: true, title };
+}
+
+/** `{ title }` alone renames a trip. Any other body is a full itinerary write. */
+export function parseTitleOnlyPatch(
+  raw: unknown,
+): { ok: true; title: string } | { ok: false; error: string } | null {
+  const record = asRecord(raw);
+  if (!record) return null;
+  const keys = Object.keys(record);
+  if (!(keys.length === 1 && keys[0] === "title")) return null;
+  return parseTripTitle(record.title);
 }
 
 export function isSafeHttpUrl(value: string): boolean {
@@ -578,12 +659,19 @@ export function parseTripWrite(
 }
 
 export function tripWriteFromPlan(
-  plan: { state: PlannerState; items: TripItem[]; packingNotes?: string },
+  plan: {
+    state: PlannerState;
+    items: TripItem[];
+    packingNotes?: string;
+    title?: string;
+    titleCustom?: boolean;
+  },
   flexibleDatesEnabled: boolean,
 ): TripWrite {
   const { state, items } = plan;
+  const customTitle = plan.titleCustom ? plan.title?.trim().slice(0, 160) : "";
   return {
-    title: suggestTripTitle(state, flexibleDatesEnabled),
+    title: customTitle || suggestTripTitle(state, flexibleDatesEnabled),
     destination: state.destination.trim(),
     dateMode: state.dateMode,
     startDate: state.startDate,
@@ -633,12 +721,17 @@ export function plannerStateFromTrip(trip: TripWrite): PlannerState {
 }
 
 export function storedPlanFromTrip(trip: TripRecord): StoredTripPlan {
+  const state = plannerStateFromTrip(trip);
+  const suggested = suggestTripTitle(state, true);
+  const custom = trip.title.trim() !== suggested;
   return {
     step: 4,
-    state: plannerStateFromTrip(trip),
+    state,
     items: trip.items,
     tripId: trip.id,
     packingNotes: trip.packingNotes,
+    title: custom ? trip.title : "",
+    titleCustom: custom,
   };
 }
 

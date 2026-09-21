@@ -6,16 +6,22 @@ Plan a trip (`/guides/plan-a-trip`) ends on an **itinerary hub**: one booking la
 
 Reader auth is the existing Auth.js email/password + Google session. Trips do not add a second login.
 
+## Auth
+
+Guests on the itinerary hub see **Sign in** and **Create account**. Both go to `/login` with `callbackUrl` set to `/guides/plan-a-trip` (or `?trip=` when they were opening a saved trip). Create account adds `mode=signup`. After email, password, or Google sign-in, Auth.js sends them back to that URL. The draft is already in this browser, so the hub comes back with it.
+
+A draft edited while signed out is not written to Firestore until the reader chooses **Save itinerary**. **Keep it on this device** leaves it in `localStorage`. A reader who was signed in the whole time auto-saves. The hub shows **Unsaved changes**, **Saving…**, or **Saved to your account**.
+
+If Firebase env is missing, save returns **503** and the hub says the itinerary stays in this browser, with **Try saving again**. Signing out mid-edit keeps the hub open when this browser already has that trip; **Sign in** returns to it. A save that comes back **401** stops auto-save and shows the same sign-in actions.
+
+`/account` **My trips** lists title, destination, and dates. **Open** loads `/guides/plan-a-trip?trip={id}` and restores the hub. **Rename** sends `{ title }` only. **Delete** removes that reader’s trip. An empty list points back to Plan a trip.
+
 ## Who can save
 
 | Reader | Where the itinerary lives |
 | --- | --- |
 | Guest | `localStorage` draft in this browser (`fj.plan-a-trip.active.v1`) |
 | Signed in | Firestore `users/{userId}/trips/{tripId}`, plus the same browser draft |
-
-Guests see **Sign in to save this itinerary**, which returns to `/guides/plan-a-trip` (or `?trip=` when they were opening a saved trip). After login, a draft that already has a destination is offered as **Save itinerary** / **Keep it on this device**. A reader who was signed in the whole time auto-saves when they reach the hub.
-
-`/account` lists **My trips** (title, destination, dates). **Open** loads that trip’s hub.
 
 ## Firestore
 
@@ -38,14 +44,14 @@ users/{userId}/trips/{tripId}
 
 ## API
 
-Session required. **503** when `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, or `FIREBASE_PRIVATE_KEY` is missing (same as saved posts).
+Session required (`session.user.id`). Trips live under that id, so one reader cannot read or change another’s. **401** when signed out. **503** when `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, or `FIREBASE_PRIVATE_KEY` is missing — the JSON `error` is a short human sentence, not the env var list. Create stops at 50 trips (**409**).
 
 | Method | Path | Behavior |
 | --- | --- | --- |
 | GET | `/api/trips` | List the reader’s trips, newest first |
 | POST | `/api/trips` | Create a trip |
 | GET | `/api/trips/[id]` | Load one trip |
-| PATCH | `/api/trips/[id]` | Replace trip fields |
+| PATCH | `/api/trips/[id]` | Replace trip fields, or `{ title }` to rename |
 | DELETE | `/api/trips/[id]` | Remove a trip |
 
 ## Code map
