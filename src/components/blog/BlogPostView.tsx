@@ -64,13 +64,15 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
   const editHref = cmsEditPostHref(slug);
 
   return (
-    <main className="bg-bg">
+    <main>
       <AdminPublicChrome
         editHref={editHref}
         editLabel="Edit post"
         showChip={false}
       />
       <JsonLd data={jsonLd} />
+      {/* White story sheet so Viator cards (always white) sit on white in both themes. */}
+      <div className="post-paper">
       {/* Product-style article header — no magazine dark hero */}
       <header className="border-b border-border bg-white">
         <div
@@ -280,6 +282,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
           </footer>
         </div>
       </article>
+      </div>
 
       {related.length > 0 ? (
         <div className="border-t border-border bg-surface-soft">
