@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DestinationCarousel } from "@/components/destinations/DestinationCarousel";
+import { PlacesWorldMapSection } from "@/components/destinations/PlacesWorldMapSection";
 import { SitePage } from "@/components/pages/SitePage";
 import {
   destinationsTree,
@@ -8,6 +9,7 @@ import {
 import { CMS_DESTINATIONS_HREF } from "@/lib/admin-edit";
 import { PAGE_DEFAULTS } from "@/lib/page-defaults";
 import { getPageWithFallback } from "@/lib/pages";
+import { publicDestinationPath } from "@/lib/public-paths";
 
 export function generateMetadata(): Metadata {
   const page = getPageWithFallback("destinations", PAGE_DEFAULTS.destinations);
@@ -37,6 +39,15 @@ export default function DestinationsIndexPage() {
         { label: "Places" },
       ]}
     >
+      <PlacesWorldMapSection
+        places={all.map((d) => ({
+          slug: d.slug,
+          name: d.name,
+          href: publicDestinationPath(d.slug),
+          pins: d.map?.pins ?? [],
+        }))}
+      />
+
       <DestinationCarousel
         className="hub-follow"
         destinations={all}
