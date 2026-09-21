@@ -1,7 +1,19 @@
 import type { Metadata } from "next";
 import { site as contentSite } from "@/data/content";
+import { getSiteDesign } from "@/lib/site-design";
 
 const DEFAULT_SITE_URL = "https://www.fernandesjourneys.com";
+
+/** Prefer CMS branding.logoOnLight; falls back if design JSON is incomplete. */
+function designLogoOnLight(): string {
+  try {
+    const logo = getSiteDesign().branding.logoOnLight?.trim();
+    if (logo) return logo;
+  } catch {
+    // ignore — use hardcoded default below
+  }
+  return "/brand/logo-fernandes-journeys.png";
+}
 
 function normalizeSiteUrl(raw: string): string {
   return raw.replace(/\/+$/, "");
@@ -26,6 +38,8 @@ export const siteConfig = {
   pinterest: contentSite.social.pinterest,
   /** Default share image — brand logo under public/brand */
   ogImage: "/brand/logo-alex-journly.png",
+  /** Organization JSON-LD logo — prefers CMS branding.logoOnLight. */
+  logo: designLogoOnLight(),
   authorPhoto: contentSite.authorPhoto,
   keywords: [
     "travel journal",
@@ -102,7 +116,7 @@ export function organizationJsonLd() {
     name: siteConfig.name,
     url: siteConfig.url,
     email: siteConfig.email,
-    logo: absoluteUrl(siteConfig.ogImage),
+    logo: absoluteUrl(siteConfig.logo),
     founder: {
       "@type": "Person",
       name: siteConfig.author,
@@ -127,7 +141,7 @@ export function websiteJsonLd() {
       name: siteConfig.name,
       logo: {
         "@type": "ImageObject",
-        url: absoluteUrl(siteConfig.ogImage),
+        url: absoluteUrl(siteConfig.logo),
       },
     },
     potentialAction: {
@@ -174,7 +188,7 @@ export function blogPostingJsonLd({
       name: siteConfig.name,
       logo: {
         "@type": "ImageObject",
-        url: absoluteUrl(siteConfig.ogImage),
+        url: absoluteUrl(siteConfig.logo),
       },
     },
     mainEntityOfPage: {

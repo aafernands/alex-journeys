@@ -16,7 +16,7 @@ After sign-in, the shell provides:
 | Pages | `/cms/pages` | List/create/edit/delete JSON pages under `src/content/pages` |
 | Destinations | `/cms/destinations` | Countries, map, climate, itinerary → `tree.json` |
 | Media | `/cms/media` | Post image library + author photo |
-| Website design | `/cms/design` | Homepage hero (headline photo), featured slideshow, section chrome |
+| Website design | `/cms/design` | Brand logos (black on light, white on dark), homepage hero, featured slideshow, section chrome |
 | Help | `/cms/help` | Short publish checklist |
 
 CMS layout sets `robots: noindex`.
@@ -116,12 +116,13 @@ Post editor: featured image **Choose from library**; rich text **Image** opens t
 
 **Media → Author photo** tab → upload JPEG/PNG/WebP → commits `public/brand/alex-fernandes.*` + `src/data/author-photo.json`.
 
-### Website design (homepage hero + sections)
+### Website design (brand logos + homepage)
 
 **Website design** (`/cms/design`) edits `src/data/site-design.json` (Git-backed like the author photo).
 
 | Control | Notes |
 | --- | --- |
+| Brand logos | **Logo on light** (black mark) and **Logo on dark** (white mark). Library pick or upload → `public/brand/logo-on-light.*` / `logo-on-dark.*`. Defaults: `/brand/logo-fernandes-journeys.png` and `/brand/logo-fernandes-journeys-white.png`. Header uses both (theme); footer always uses the white mark. JSON-LD organization logo uses the black mark. |
 | Hero image | Full-bleed headline photo only. Library or upload → `public/media/hero-…` |
 | Alt + location label | Small location label on the hero photo |
 | Eyebrow, tagline, subtitle | Copy over the hero photo |
@@ -147,5 +148,5 @@ Public reader save/bookmarks: see [`READER-SAVED-POSTS.md`](./READER-SAVED-POSTS
 
 1. Env vars on Vercel (Auth.js + allowlist, optional passcode, GitHub token).
 2. Go to `https://www.fernandesjourneys.com/cms` → sign in.
-3. Dashboard → check publish readiness → **New post**, Posts/Pages/Destinations/Media, or **Website design** for the homepage hero.
+3. Dashboard → check publish readiness → **New post**, Posts/Pages/Destinations/Media, or **Website design** for brand logos and the homepage hero.
 4. Publish → wait for Vercel → open the live URL.

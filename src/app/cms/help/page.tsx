@@ -184,8 +184,13 @@ export default async function CmsHelpPage() {
             .
           </li>
           <li>
-            Under <strong>Homepage hero image</strong>, choose from the media
-            library or upload. Set alt text and window chrome location label.
+            Under <strong>Brand logos</strong>, set the black mark (logo on
+            light) and the white mark (logo on dark). Choose from the library
+            or upload, then save.
+          </li>
+          <li>
+            Under <strong>Homepage hero</strong>, choose from the media library
+            or upload. Set alt text and the location label on the hero photo.
           </li>
           <li>
             Edit hero tagline, subtitle, CTAs, then scroll to{" "}
