@@ -4,6 +4,8 @@ Plan a trip (`/guides/plan-a-trip`) ends on an **itinerary hub**: one booking la
 
 **Paste booking details** only reads the text the reader pasted. It may fill a link, a confirmation-looking code, a clock time, and a day when that text names one of the trip dates. It does not open or scrape partner sites.
 
+**Forward bookings here** gives a signed-in reader a unique address for the account, or for that saved trip. Forwarded confirmations become suggestions. Add and Dismiss are explicit — nothing is written onto the itinerary until Add. See [TRIPS-INBOUND.md](./TRIPS-INBOUND.md).
+
 Reader auth is the existing Auth.js email/password + Google session. Trips do not add a second login.
 
 ## Auth
@@ -67,4 +69,4 @@ Session required (`session.user.id`). Trips live under that id, so one reader ca
 
 ## Related
 
-Saved stories use the same Firebase project — see [READER-SAVED-POSTS.md](./READER-SAVED-POSTS.md). Sign-in is documented in [READER-AUTH.md](./READER-AUTH.md).
+Saved stories use the same Firebase project — see [READER-SAVED-POSTS.md](./READER-SAVED-POSTS.md). Sign-in is documented in [READER-AUTH.md](./READER-AUTH.md). Forwarded booking mail is documented in [TRIPS-INBOUND.md](./TRIPS-INBOUND.md).

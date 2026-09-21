@@ -1,0 +1,6 @@
+{
+  "to": "REPLACE_WITH_THE_ADDRESS_COPIED_FROM_THE_ITINERARY",
+  "subject": "Your United Airlines booking confirmation",
+  "text": "Thanks for booking with United.\nConfirmation number: ABC123\nFlight UA 1234\nDeparting April 12, 2027 at 6:15 PM from EWR to LIS.\nManage your trip: https://www.united.com/en/us/manageres\n",
+  "messageId": "sample-united-abc123"
+}
