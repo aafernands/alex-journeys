@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Password reset is unavailable. Set AUTH_SECRET and Firebase env vars.",
+          "Password reset isn’t available right now. Please try again later.",
       },
       { status: 503 },
     );
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Password reset email is not configured. Set RESEND_API_KEY on the server.",
+          "Password reset email isn’t available right now. Please try again later.",
       },
       { status: 503 },
     );
@@ -147,7 +147,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, message: GENERIC_OK });
   } catch (err) {
     if (err instanceof EmailNotConfiguredError) {
-      return NextResponse.json({ error: err.message }, { status: 503 });
+      return NextResponse.json(
+        {
+          error:
+            "Password reset email isn’t available right now. Please try again later.",
+        },
+        { status: 503 },
+      );
     }
     if (err instanceof UsersUnavailableError) {
       return NextResponse.json(

@@ -96,16 +96,19 @@ export function SavedPostsList({ posts }: Props) {
   if (items.length === 0) {
     return (
       <div className="panel p-6 md:p-8">
-        <p className="text-sm leading-relaxed text-text">
-          Nothing saved yet. Open any story and tap <strong>Save</strong> to
-          add it here.
+        <h3 className="font-display text-lg font-bold text-heading">
+          No stories saved yet
+        </h3>
+        <p className="mt-2 max-w-md text-sm leading-relaxed text-text">
+          Open any story and tap <strong>Save</strong> to keep it here for the
+          next time you travel.
         </p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/blog" className="btn btn-primary">
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <Link href="/blog" className="btn btn-primary w-full sm:w-auto">
             Browse stories
           </Link>
-          <Link href="/destinations" className="btn btn-secondary">
-            Destinations
+          <Link href="/destinations" className="btn btn-secondary w-full sm:w-auto">
+            Places
           </Link>
         </div>
       </div>

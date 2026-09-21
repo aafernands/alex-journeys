@@ -125,8 +125,10 @@ export function MyTripsList({ trips }: Props) {
   if (items.length === 0) {
     return (
       <div className="panel p-6 md:p-8">
-        <h3 className="font-display text-lg font-bold text-heading">No saved trips yet</h3>
-        <p className="mt-2 text-sm leading-relaxed text-text">
+        <h3 className="font-display text-lg font-bold text-heading">
+          No trips saved yet
+        </h3>
+        <p className="mt-2 max-w-md text-sm leading-relaxed text-text">
           Plan a trip, then save the itinerary to your account. It will show up
           here so you can open it, rename it, or delete it.
         </p>

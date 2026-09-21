@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Email sign-up is unavailable. Set AUTH_SECRET and Firebase env vars.",
+          "Email sign-up isn’t available right now. Please try again later.",
       },
       { status: 503 },
     );

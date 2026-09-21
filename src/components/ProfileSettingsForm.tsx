@@ -14,20 +14,31 @@ export type ProfileSettingsFormProps = {
   emailConfigured: boolean;
 };
 
+function previewInitials(name: string, email: string): string {
+  const source = name.trim() || email.trim() || "FJ";
+  const parts = source.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+  }
+  return source.slice(0, 2).toUpperCase();
+}
+
 function AvatarPreview({
   src,
   alt,
+  fallback,
 }: {
   src: string | null;
   alt: string;
+  fallback: string;
 }) {
   if (!src) {
     return (
       <span
-        className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-surface-soft text-sm font-semibold text-muted"
+        className="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-dashed border-border bg-surface-soft font-display text-lg font-bold text-accent"
         aria-hidden="true"
       >
-        ?
+        {fallback}
       </span>
     );
   }
@@ -107,7 +118,6 @@ export function ProfileSettingsForm({
   // Prefer server Firestore email (initialEmail) over a stale client JWT.
   // Session is only a fallback when the server did not supply an email.
   const displayEmail = serverEmail || session?.user?.email || "";
-  const displayName = session?.user?.name ?? name;
   const displayImage = session?.user?.image ?? preview;
 
   async function onSaveProfile(e: FormEvent) {
@@ -253,16 +263,6 @@ export function ProfileSettingsForm({
   return (
     <div className="mt-6 space-y-8">
       <form className="space-y-4" onSubmit={onSaveProfile}>
-        <div className="flex items-center gap-4">
-          <AvatarPreview src={displayImage} alt="" />
-          <div className="min-w-0 text-sm text-muted">
-            <p className="font-semibold text-heading">
-              {displayName?.trim() || "Reader"}
-            </p>
-            <p className="truncate">{displayEmail}</p>
-          </div>
-        </div>
-
         <div>
           <label
             htmlFor="profile-name"
@@ -289,17 +289,24 @@ export function ProfileSettingsForm({
             Profile photo
           </label>
           <p className="mt-1 text-xs text-muted">
-            Upload a JPEG/PNG/WebP (max ~400KB), or paste an https image URL.
-            Google avatar stays until you set a custom photo.
+            JPEG, PNG, or WebP, up to about 400KB. Or paste an image link. A
+            Google photo stays until you set your own.
           </p>
-          <input
-            ref={fileRef}
-            id="profile-photo-file"
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            className="mt-2 block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-surface-soft file:px-3 file:py-2 file:text-sm file:font-semibold file:text-heading"
-            onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
-          />
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <AvatarPreview
+              src={displayImage}
+              alt=""
+              fallback={previewInitials(name, displayEmail)}
+            />
+            <input
+              ref={fileRef}
+              id="profile-photo-file"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="block min-w-0 flex-1 text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-surface-soft file:px-3 file:py-2 file:text-sm file:font-semibold file:text-heading"
+              onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
+            />
+          </div>
           <input
             id="profile-photo-url"
             type="url"
@@ -363,11 +370,7 @@ export function ProfileSettingsForm({
 
         {!emailConfigured ? (
           <p className="mt-3 text-sm text-muted" role="status">
-            Email change is unavailable until the site owner sets{" "}
-            <code className="rounded bg-surface-soft px-1.5 py-0.5 text-xs">
-              RESEND_API_KEY
-            </code>
-            .
+            Changing your email isn’t available right now. Try again later.
           </p>
         ) : (
           <form className="mt-4 space-y-4" onSubmit={onRequestEmailChange}>
@@ -408,18 +411,10 @@ export function ProfileSettingsForm({
               </div>
             ) : (
               <p className="text-xs text-muted">
-                Google/GitHub accounts can change email without a password.
-                After you confirm, future Google logins will keep your new
-                address.
+                You can change this email without a password. After you confirm
+                the link, future sign-ins use the new address.
               </p>
             )}
-            <p className="text-xs text-muted">
-              If you use CMS admin access, changing away from an address in{" "}
-              <code className="rounded bg-surface-soft px-1 text-[11px]">
-                CMS_ADMIN_EMAILS
-              </code>{" "}
-              removes admin until the allowlist is updated.
-            </p>
             <button
               type="submit"
               disabled={emailPending}

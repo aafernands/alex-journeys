@@ -19,7 +19,6 @@ type Props = {
 
 function safeCallbackUrl(raw: string | null): string {
   if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return "/account";
-  // Keep admins who somehow land here able to return to CMS after OAuth.
   return raw;
 }
 
@@ -54,21 +53,22 @@ export function ReaderLoginForm({
   if (!anyAuth) {
     return (
       <div className="panel p-6 md:p-8">
-        <p className="eyebrow text-accent">Sign in</p>
+        <p className="eyebrow text-accent">Fernandes Journeys</p>
         <h1 className="font-display mt-2 text-2xl font-bold text-heading md:text-3xl">
-          Sign-in unavailable
+          Sign-in isn’t available yet
         </h1>
         <p className="mt-4 text-sm leading-relaxed text-text">
-          Reader authentication is not configured on this deployment. Ask the
-          site owner to set Google OAuth and/or Firebase +{" "}
-          <code className="rounded bg-surface-soft px-1.5 py-0.5 text-xs">
-            AUTH_SECRET
-          </code>
-          .
+          You can still read stories and sketch a trip in this browser. Saving
+          them to an account will be back soon.
         </p>
-        <Link href="/" className="btn btn-secondary mt-6">
-          Back home
-        </Link>
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+          <Link href="/" className="btn btn-secondary">
+            Back home
+          </Link>
+          <Link href="/blog" className="btn btn-secondary">
+            Browse stories
+          </Link>
+        </div>
       </div>
     );
   }
@@ -143,10 +143,10 @@ export function ReaderLoginForm({
       <h1 className="font-display mt-2 text-2xl font-bold text-heading md:text-3xl">
         {mode === "signin" ? "Welcome back" : "Create your account"}
       </h1>
-      <p className="mt-3 text-sm text-muted">
+      <p className="mt-3 text-sm leading-relaxed text-muted">
         {returningToItinerary
           ? "After you continue, you’ll return to this itinerary. A draft in this browser can be saved to your account."
-          : "Save stories across devices. Reader accounts never unlock the CMS."}
+          : "Keep the stories you love and the trips you’re planning, ready on any device."}
       </p>
 
       {credentialsConfigured ? (
@@ -155,7 +155,7 @@ export function ReaderLoginForm({
             type="button"
             className={`flex-1 rounded-md px-3 py-2 text-sm font-semibold transition ${
               mode === "signin"
-                ? "bg-white text-heading shadow-sm"
+                ? "bg-white text-heading shadow-sm ring-1 ring-border"
                 : "text-muted hover:text-heading"
             }`}
             onClick={() => {
@@ -171,7 +171,7 @@ export function ReaderLoginForm({
             type="button"
             className={`flex-1 rounded-md px-3 py-2 text-sm font-semibold transition ${
               mode === "signup"
-                ? "bg-white text-heading shadow-sm"
+                ? "bg-white text-heading shadow-sm ring-1 ring-border"
                 : "text-muted hover:text-heading"
             }`}
             onClick={() => {
@@ -329,7 +329,7 @@ export function ReaderLoginForm({
       </p>
 
       {error || authError ? (
-        <p className="mt-4 text-sm font-medium text-red-600" role="alert">
+        <p className="mt-4 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
           {error ||
             (authError === "AccessDenied"
               ? "Sign-in was denied. Your account may be disabled."
@@ -338,8 +338,8 @@ export function ReaderLoginForm({
       ) : null}
 
       <p className="mt-6 text-center text-sm text-muted">
-        <Link href="/account" className="font-semibold text-accent hover:underline">
-          Account dashboard
+        <Link href="/blog" className="font-semibold text-accent hover:underline">
+          Browse stories
         </Link>
         {" · "}
         <Link href="/" className="font-semibold text-accent hover:underline">

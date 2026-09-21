@@ -14,7 +14,7 @@ A draft edited while signed out is not written to Firestore until the reader cho
 
 If Firebase env is missing, save returns **503** and the hub says the itinerary stays in this browser, with **Try saving again**. Signing out mid-edit keeps the hub open when this browser already has that trip; **Sign in** returns to it. A save that comes back **401** stops auto-save and shows the same sign-in actions.
 
-`/account` **My trips** lists title, destination, and dates. **Open** loads `/guides/plan-a-trip?trip={id}` and restores the hub. **Rename** sends `{ title }` only. **Delete** removes that reader’s trip. An empty list points back to Plan a trip.
+`/account` **Trips** lists title, destination, and dates. **Open** loads `/guides/plan-a-trip?trip={id}` and restores the hub. **Rename** sends `{ title }` only. **Delete** removes that reader’s trip. An empty list points back to Plan a trip.
 
 ## Who can save
 

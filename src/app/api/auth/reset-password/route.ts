@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Password reset is unavailable. Set AUTH_SECRET and Firebase env vars.",
+          "Password reset isn’t available right now. Please try again later.",
       },
       { status: 503 },
     );

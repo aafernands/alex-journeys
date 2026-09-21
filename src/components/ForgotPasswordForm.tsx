@@ -29,7 +29,8 @@ export function ForgotPasswordForm({ credentialsConfigured }: Props) {
           Reset unavailable
         </h1>
         <p className="mt-4 text-sm leading-relaxed text-text">
-          Email/password accounts are not configured on this deployment.
+          Password reset isn’t available right now. You can still browse stories
+          and try again later.
         </p>
         <Link href="/login" className="btn btn-secondary mt-6">
           Back to sign in

@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Email change is not configured. Set RESEND_API_KEY on the server.",
+          "Changing your email isn’t available right now. Please try again later.",
       },
       { status: 503 },
     );
@@ -150,7 +150,13 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     if (err instanceof EmailNotConfiguredError) {
-      return NextResponse.json({ error: err.message }, { status: 503 });
+      return NextResponse.json(
+        {
+          error:
+            "Changing your email isn’t available right now. Please try again later.",
+        },
+        { status: 503 },
+      );
     }
     if (err instanceof UsersUnavailableError) {
       return NextResponse.json(
