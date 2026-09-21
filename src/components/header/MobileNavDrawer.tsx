@@ -94,8 +94,8 @@ export function MobileNavDrawer({
           </div>
         ) : null}
 
-        {/* Scrollable Explore + Browse */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        {/* Scrollable body: Explore + Browse accordions + Appearance in document flow */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4">
           {/* 3. Explore */}
           <section aria-labelledby="drawer-explore-label">
             <h2
@@ -140,7 +140,7 @@ export function MobileNavDrawer({
             </ul>
           </section>
 
-          {/* 4. Browse — Places / Guides expanders */}
+          {/* 4. Browse — Places / Guides expanders (push Appearance down when open) */}
           <section
             aria-labelledby="drawer-browse-label"
             className="mt-5 border-t border-border pt-4"
@@ -224,57 +224,57 @@ export function MobileNavDrawer({
               />
             </ul>
           </section>
-        </div>
 
-        {/* 5. Sticky footer: appearance + socials */}
-        <div className="shrink-0 space-y-3 border-t border-border px-4 pb-3 pt-3">
-          <ThemeAppearanceControl />
+          {/* 5. Appearance + socials — in flow below nav, not sticky */}
+          <div className="mt-5 space-y-3 border-t border-border pt-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
+            <ThemeAppearanceControl />
 
-          <ul
-            className="flex flex-row items-center justify-center gap-5"
-            aria-label="Social"
-          >
-            <li>
-              <OutboundLink
-                href={site.social.instagram}
-                className="inline-flex h-10 w-10 items-center justify-center text-heading transition hover:text-accent"
-                aria-label="Instagram"
-                onClick={onClose}
-              >
-                <SocialInstagramIcon />
-              </OutboundLink>
-            </li>
-            <li>
-              <OutboundLink
-                href={site.social.youtube}
-                className="inline-flex h-10 w-10 items-center justify-center text-heading transition hover:text-accent"
-                aria-label="YouTube"
-                onClick={onClose}
-              >
-                <SocialYouTubeIcon />
-              </OutboundLink>
-            </li>
-            <li>
-              <OutboundLink
-                href={site.social.pinterest}
-                className="inline-flex h-10 w-10 items-center justify-center text-heading transition hover:text-accent"
-                aria-label="Pinterest"
-                onClick={onClose}
-              >
-                <SocialPinterestIcon />
-              </OutboundLink>
-            </li>
-            <li>
-              <OutboundLink
-                href={site.social.coffee}
-                className="inline-flex h-10 w-10 items-center justify-center text-accent transition hover:text-accent-deep"
-                aria-label="Buy me a coffee"
-                onClick={onClose}
-              >
-                <SocialCoffeeIcon />
-              </OutboundLink>
-            </li>
-          </ul>
+            <ul
+              className="flex flex-row items-center justify-center gap-5"
+              aria-label="Social"
+            >
+              <li>
+                <OutboundLink
+                  href={site.social.instagram}
+                  className="inline-flex h-10 w-10 items-center justify-center text-heading transition hover:text-accent"
+                  aria-label="Instagram"
+                  onClick={onClose}
+                >
+                  <SocialInstagramIcon />
+                </OutboundLink>
+              </li>
+              <li>
+                <OutboundLink
+                  href={site.social.youtube}
+                  className="inline-flex h-10 w-10 items-center justify-center text-heading transition hover:text-accent"
+                  aria-label="YouTube"
+                  onClick={onClose}
+                >
+                  <SocialYouTubeIcon />
+                </OutboundLink>
+              </li>
+              <li>
+                <OutboundLink
+                  href={site.social.pinterest}
+                  className="inline-flex h-10 w-10 items-center justify-center text-heading transition hover:text-accent"
+                  aria-label="Pinterest"
+                  onClick={onClose}
+                >
+                  <SocialPinterestIcon />
+                </OutboundLink>
+              </li>
+              <li>
+                <OutboundLink
+                  href={site.social.coffee}
+                  className="inline-flex h-10 w-10 items-center justify-center text-accent transition hover:text-accent-deep"
+                  aria-label="Buy me a coffee"
+                  onClick={onClose}
+                >
+                  <SocialCoffeeIcon />
+                </OutboundLink>
+              </li>
+            </ul>
+          </div>
         </div>
       </nav>
     </div>
