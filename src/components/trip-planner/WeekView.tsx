@@ -99,7 +99,6 @@ function WeekChip({
         {days.map((day) => (
           <option key={day.index} value={day.index}>
             {day.label}
-            {day.detail ? ` · ${day.detail}` : ""}
           </option>
         ))}
       </select>
