@@ -2,6 +2,10 @@
 
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import {
+  Chevron,
+  MobileTopicSection,
+} from "@/components/header/MobileTopicSection";
+import {
   SocialCoffeeIcon,
   SocialInstagramIcon,
   SocialPinterestIcon,
@@ -11,7 +15,10 @@ import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
 import { ThemeAppearanceControl } from "@/components/ThemeToggle";
 import { site } from "@/data/content";
+import { destinationsTree } from "@/data/destinations";
+import { guidesNav } from "@/data/guides";
 import Link from "next/link";
+import { useState } from "react";
 
 type Props = {
   open: boolean;
@@ -19,24 +26,29 @@ type Props = {
   googleConfigured?: boolean;
 };
 
-const PRIMARY_LINKS = [
-  { href: "/start-here", label: "Start here" },
-  { href: "/destinations", label: "Places" },
-  { href: "/guides", label: "Guides" },
-  { href: "/tools", label: "Tools I use" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-] as const;
+const topLinkClass =
+  "font-display block py-3 text-3xl font-semibold leading-none tracking-tight text-heading transition hover:text-accent";
+const topButtonClass =
+  "font-display flex w-full items-center justify-between gap-3 py-3 text-left text-3xl font-semibold leading-none tracking-tight text-heading transition hover:text-accent";
+const midLinkClass =
+  "font-display block py-2 text-xl font-semibold leading-snug tracking-tight text-heading transition hover:text-accent";
+const midButtonClass =
+  "font-display flex w-full items-center justify-between gap-3 py-2 text-left text-xl font-semibold leading-snug tracking-tight text-heading transition hover:text-accent";
+const leafLinkClass =
+  "block py-1.5 text-sm leading-snug text-text transition hover:text-accent";
 
 /**
- * Mobile hamburger drawer: oversized editorial list of hub links.
- * Places / Stories / Guides / Saved also live in the scroll-reveal bottom bar.
+ * Mobile hamburger drawer: oversized editorial hub list.
+ * Places and Guides restore nested expanders (no leading icons).
  */
 export function MobileNavDrawer({
   open,
   onClose,
   googleConfigured = false,
 }: Props) {
+  const [placesOpen, setPlacesOpen] = useState(false);
+  const [openContinent, setOpenContinent] = useState<string | null>(null);
+
   if (!open) return null;
 
   return (
@@ -92,17 +104,99 @@ export function MobileNavDrawer({
 
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pt-4">
           <ul className="flex flex-col" aria-label="Primary">
-            {PRIMARY_LINKS.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className="font-display block py-3 text-3xl font-semibold leading-none tracking-tight text-heading transition hover:text-accent"
-                  onClick={onClose}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+            <li>
+              <Link
+                href="/start-here"
+                className={topLinkClass}
+                onClick={onClose}
+              >
+                Start here
+              </Link>
+            </li>
+
+            <li>
+              <button
+                type="button"
+                className={topButtonClass}
+                aria-expanded={placesOpen}
+                onClick={() => setPlacesOpen((v) => !v)}
+              >
+                Places
+                <Chevron open={placesOpen} size={20} />
+              </button>
+              {placesOpen ? (
+                <ul className="mb-3 ml-0.5 border-l border-border pl-4">
+                  <li>
+                    <Link
+                      href="/destinations"
+                      className={midLinkClass}
+                      onClick={onClose}
+                    >
+                      All places
+                    </Link>
+                  </li>
+                  {destinationsTree.map((continent) => {
+                    const continentOpen = openContinent === continent.id;
+                    return (
+                      <li key={continent.id}>
+                        <button
+                          type="button"
+                          className={midButtonClass}
+                          aria-expanded={continentOpen}
+                          onClick={() =>
+                            setOpenContinent(
+                              continentOpen ? null : continent.id,
+                            )
+                          }
+                        >
+                          {continent.name}
+                          <Chevron open={continentOpen} size={16} />
+                        </button>
+                        {continentOpen ? (
+                          <ul className="mb-2 ml-1 border-l border-border pl-3">
+                            {continent.countries.map((country) => (
+                              <li key={country.slug}>
+                                <Link
+                                  href={`/${country.slug}`}
+                                  className={leafLinkClass}
+                                  onClick={onClose}
+                                >
+                                  {country.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : null}
+            </li>
+
+            <MobileTopicSection
+              label="Guides"
+              href="/guides"
+              allLabel="All guides"
+              items={guidesNav}
+              onNavigate={onClose}
+            />
+
+            <li>
+              <Link href="/tools" className={topLinkClass} onClick={onClose}>
+                Tools I use
+              </Link>
+            </li>
+            <li>
+              <Link href="/about" className={topLinkClass} onClick={onClose}>
+                About
+              </Link>
+            </li>
+            <li>
+              <Link href="/contact" className={topLinkClass} onClick={onClose}>
+                Contact
+              </Link>
+            </li>
           </ul>
 
           <div className="mt-auto space-y-3 border-t border-border pt-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
