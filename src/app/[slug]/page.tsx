@@ -166,6 +166,7 @@ export default async function PublicSlugPage({ params }: PageProps) {
           title={page.title}
           description={page.description}
           html={page.contentHtml}
+          path={`/${slug}`}
           crumbs={[
             { href: "/", label: "Home" },
             { label: page.title },

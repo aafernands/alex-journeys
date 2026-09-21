@@ -20,6 +20,8 @@ type Props = {
   children?: ReactNode;
   /** Cleaned HTML body */
   html?: string;
+  /** Canonical path for Pinterest pins on content images. */
+  path?: string;
   narrow?: boolean;
   tone?: "default" | "white";
   /** CMS page slug → `/cms/pages/edit/{slug}` for allowlisted admins. */
@@ -37,6 +39,7 @@ export function SitePage({
   crumbs,
   children,
   html,
+  path,
   narrow = true,
   tone = "white",
   cmsSlug,
@@ -101,7 +104,11 @@ export function SitePage({
 
           {html ? (
             <div className="mt-10 md:mt-12">
-              <PostContent html={html} />
+              <PostContent
+                html={html}
+                pagePath={path}
+                shareDescription={title}
+              />
             </div>
           ) : null}
 
