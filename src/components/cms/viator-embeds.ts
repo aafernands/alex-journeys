@@ -44,6 +44,50 @@ export const ViatorWidget = Node.create({
   renderHTML({ HTMLAttributes }) {
     return ["div", mergeAttributes(HTMLAttributes)];
   },
+
+  addNodeView() {
+    if (typeof document === "undefined") return null;
+    return ({ node }) => {
+      const dom = document.createElement("div");
+      dom.className = "viator-widget-placeholder";
+      dom.setAttribute("contenteditable", "false");
+      const title = document.createElement("p");
+      title.textContent = "Viator widget";
+      const ref = document.createElement("code");
+      const partner = document.createElement("p");
+      partner.className = "viator-widget-placeholder-partner";
+
+      const paint = (current: typeof node) => {
+        const widgetRef = current.attrs.widgetRef
+          ? String(current.attrs.widgetRef)
+          : "Missing widget ref";
+        const partnerId = current.attrs.partnerId
+          ? String(current.attrs.partnerId)
+          : "";
+        ref.textContent = widgetRef;
+        partner.textContent = partnerId
+          ? `Partner ${partnerId}`
+          : "Missing partner id";
+        dom.setAttribute(
+          "aria-label",
+          partnerId
+            ? `Viator widget ${widgetRef}, partner ${partnerId}`
+            : `Viator widget ${widgetRef}`,
+        );
+      };
+      paint(node);
+      dom.append(title, ref, partner);
+      return {
+        dom,
+        ignoreMutation: () => true,
+        update: (updated) => {
+          if (updated.type.name !== "viatorWidget") return false;
+          paint(updated);
+          return true;
+        },
+      };
+    };
+  },
 });
 
 /**
