@@ -6,6 +6,7 @@ import {
   AdminSectionEdit,
 } from "@/components/admin/AdminPublicChrome";
 import { PostContent } from "@/components/blog/PostContent";
+import { PinnableImage } from "@/components/pinterest/PinnableImage";
 import { PostItineraryTimeline } from "@/components/blog/PostItineraryTimeline";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { CommentSection } from "@/components/blog/CommentSection";
@@ -160,7 +161,12 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
         </div>
 
         {post.featuredImage ? (
-          <div className="relative mt-10 aspect-[16/10] w-full bg-surface">
+          <PinnableImage
+            className="relative mt-10 aspect-[16/10] w-full bg-surface"
+            pagePath={publicPostPath(slug)}
+            mediaSrc={post.featuredImage.url}
+            description={post.featuredImage.alt || post.title}
+          >
             <Image
               src={post.featuredImage.url}
               alt={post.featuredImage.alt || post.title}
@@ -169,7 +175,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
               sizes="100vw"
               className="object-cover object-center"
             />
-          </div>
+          </PinnableImage>
         ) : null}
       </header>
 
@@ -226,7 +232,11 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
           ) : null}
 
           <div className="mt-10 md:mt-12">
-            <PostContent html={post.contentHtml} />
+            <PostContent
+              html={post.contentHtml}
+              pagePath={publicPostPath(slug)}
+              shareDescription={post.title}
+            />
           </div>
 
           {post.itinerary?.enabled && post.itinerary.days.length > 0 ? (

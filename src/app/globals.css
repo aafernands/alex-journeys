@@ -552,3 +552,55 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
 .newsletter-postcard {
   isolation: isolate;
 }
+
+/* Pinterest Pin overlay on story / destination photos */
+.pinnable-image {
+  position: relative;
+}
+
+.pinterest-pin-btn {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: #e60023;
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(20, 17, 13, 0.28);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+
+.pinterest-pin-btn:hover {
+  transform: scale(1.06);
+}
+
+.pinterest-pin-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.post-prose a.pinterest-pin-btn,
+.post-prose a.pinterest-pin-btn:hover {
+  color: #fff;
+  text-decoration: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pinnable-image .pinterest-pin-btn {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .pinnable-image:hover .pinterest-pin-btn,
+  .pinnable-image:focus-within .pinterest-pin-btn {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

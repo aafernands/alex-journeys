@@ -5,6 +5,7 @@ import {
   AdminPublicChrome,
   AdminSectionEdit,
 } from "@/components/admin/AdminPublicChrome";
+import { PinnableImage } from "@/components/pinterest/PinnableImage";
 import { DestinationClimate } from "@/components/destinations/DestinationClimate";
 import { DestinationItinerary } from "@/components/destinations/DestinationItinerary";
 import { DestinationQuickFacts } from "@/components/destinations/DestinationQuickFacts";
@@ -15,7 +16,7 @@ import {
   getPostsByDestination,
 } from "@/lib/posts";
 import { cmsEditDestinationHref } from "@/lib/admin-edit";
-import { publicPostPath } from "@/lib/public-paths";
+import { publicDestinationPath, publicPostPath } from "@/lib/public-paths";
 
 type DestinationCountryViewProps = {
   slug: string;
@@ -69,7 +70,12 @@ export async function DestinationCountryView({
             </ol>
           </nav>
 
-          <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+          <PinnableImage
+            className="relative mt-8 aspect-[16/9] overflow-hidden rounded-xl border border-border bg-surface shadow-sm"
+            pagePath={publicDestinationPath(slug)}
+            mediaSrc={dest.image}
+            description={dest.imageAlt || dest.name}
+          >
             <Image
               src={dest.image}
               alt={dest.imageAlt}
@@ -78,7 +84,7 @@ export async function DestinationCountryView({
               sizes="(max-width: 768px) 100vw, 768px"
               className="object-cover"
             />
-          </div>
+          </PinnableImage>
 
           <div className="mt-8 flex flex-wrap items-center gap-2">
             <p className="eyebrow">
@@ -157,17 +163,21 @@ export async function DestinationCountryView({
               </h2>
               <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {coverImages.map((img) => (
-                  <li
-                    key={img.src}
-                    className="relative aspect-[3/4] overflow-hidden rounded-lg border border-border bg-surface shadow-sm"
-                  >
-                    <Image
-                      src={img.src}
-                      alt={img.alt}
-                      fill
-                      sizes="(max-width: 640px) 45vw, 180px"
-                      className="object-cover"
-                    />
+                  <li key={img.src}>
+                    <PinnableImage
+                      className="relative aspect-[3/4] overflow-hidden rounded-lg border border-border bg-surface shadow-sm"
+                      pagePath={publicDestinationPath(slug)}
+                      mediaSrc={img.src}
+                      description={img.alt || dest.name}
+                    >
+                      <Image
+                        src={img.src}
+                        alt={img.alt}
+                        fill
+                        sizes="(max-width: 640px) 45vw, 180px"
+                        className="object-cover"
+                      />
+                    </PinnableImage>
                   </li>
                 ))}
               </ul>
