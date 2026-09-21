@@ -22,6 +22,7 @@ import {
   type TripType,
 } from "@/lib/trip-planner-model";
 import { planATripLoginHref } from "@/lib/trip-record";
+import type { JournalNote, JournalPlace } from "@/lib/trip-journal";
 import {
   clearGuestBackup,
   getActivePlanSnapshot,
@@ -45,6 +46,8 @@ type Props = {
   config: TripPlannerConfig;
   partners: TripPlannerPartner[];
   journalPlaces: readonly string[];
+  journalNotes?: readonly JournalNote[];
+  journalPlaceIndex?: readonly JournalPlace[];
   urlTripId?: string | null;
 };
 
@@ -156,6 +159,8 @@ export function TripPlanner({
   config,
   partners,
   journalPlaces,
+  journalNotes = [],
+  journalPlaceIndex = [],
   urlTripId = null,
 }: Props) {
   const baseId = useId();
@@ -854,6 +859,8 @@ export function TripPlanner({
               tripId={plan.tripId}
               saveMode={sync.mode}
               guestBackup={sync.guestBackup}
+              journalNotes={journalNotes}
+              journalPlaceIndex={journalPlaceIndex}
               packingNotes={plan.packingNotes}
               onItemsChange={(items) => savePlan({ step, state, items })}
               onPackingNotesChange={(packingNotes) =>

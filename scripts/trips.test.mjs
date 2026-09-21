@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { journalNotesForDestination } from "../src/lib/trip-journal.ts";
 import { initialPlannerState } from "../src/lib/trip-planner-model.ts";
 import {
   bookedChecklist,
@@ -175,6 +176,32 @@ describe("saved trips", () => {
       confirmation: "",
       time: "",
     });
+  });
+
+  it("matches journal notes for a real destination and stays quiet otherwise", () => {
+    const places = [
+      { slug: "iceland", name: "Iceland", city: "Reykjavík" },
+      { slug: "canada", name: "Canada", city: "Toronto" },
+    ];
+    const notes = [
+      {
+        slug: "discovering-iceland",
+        title: "Discovering Iceland",
+        excerpt: "A week on the ring road.",
+        date: "2025-07-01",
+        destinations: ["iceland"],
+      },
+      {
+        slug: "toronto-weekend",
+        title: "A weekend in Toronto",
+        excerpt: "Neighborhood walks.",
+        date: "2025-08-01",
+        destinations: ["canada"],
+      },
+    ];
+    const iceland = journalNotesForDestination(notes, places, "Reykjavík, Iceland");
+    assert.deepEqual(iceland.map((note) => note.slug), ["discovering-iceland"]);
+    assert.deepEqual(journalNotesForDestination(notes, places, "Lisbon, Portugal"), []);
   });
 
   it("sends sign-in back to the itinerary", () => {

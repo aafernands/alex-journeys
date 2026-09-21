@@ -17,6 +17,7 @@ import {
 } from "@/lib/trip-planner";
 import { cmsEditPageHref } from "@/lib/admin-edit";
 import {
+  getAllPosts,
   getPostBySlug,
   getPostsByGuideHub,
   type PostMeta,
@@ -133,6 +134,18 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
           journalPlaces={getAllDestinations().map(
             (dest) => `${destinationCity(dest)}, ${dest.name}`,
           )}
+          journalNotes={getAllPosts().map((post) => ({
+            slug: post.slug,
+            title: post.title,
+            excerpt: post.excerpt,
+            date: post.date,
+            destinations: post.destinations,
+          }))}
+          journalPlaceIndex={getAllDestinations().map((dest) => ({
+            slug: dest.slug,
+            name: dest.name,
+            city: destinationCity(dest),
+          }))}
         />
       ) : null}
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { journalNotesForDestination, type JournalNote, type JournalPlace } from "@/lib/trip-journal";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { NavIcon } from "@/components/icons/NavIcon";
 import type { TripSaveMode } from "@/components/trip-planner/useTripSync";
@@ -47,6 +48,8 @@ type Props = {
   tripId: string | null;
   saveMode: TripSaveMode;
   guestBackup: StoredPlan | null;
+  journalNotes: readonly JournalNote[];
+  journalPlaceIndex: readonly JournalPlace[];
   packingNotes: string;
   onItemsChange: (items: TripItem[]) => void;
   onPackingNotesChange: (notes: string) => void;
@@ -511,6 +514,56 @@ function TimelineEntry({
   );
 }
 
+function JournalNotes({
+  headingId,
+  destination,
+  notes,
+  places,
+}: {
+  headingId: string;
+  destination: string;
+  notes: readonly JournalNote[];
+  places: readonly JournalPlace[];
+}) {
+  const matches = journalNotesForDestination(notes, places, destination);
+  const place = destination.split(",")[0]?.trim() || destination.trim();
+  return (
+    <section className="mt-8" aria-labelledby={`${headingId}-journal`}>
+      <h3
+        id={`${headingId}-journal`}
+        className="font-display text-lg font-bold text-heading"
+      >
+        Notes from trips I’ve already walked
+      </h3>
+      {matches.length === 0 ? (
+        <p className="mt-2 text-sm leading-relaxed text-muted">
+          No journal notes for {place} yet. When a story from that trip is on the
+          site, it will show up here.
+        </p>
+      ) : (
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+          {matches.map((note) => (
+            <li key={note.slug}>
+              <Link
+                href={`/${note.slug}`}
+                className="panel-interactive flex h-full flex-col p-4"
+              >
+                <span className="card-title">{note.title}</span>
+                {note.excerpt ? (
+                  <span className="mt-2 line-clamp-3 text-sm leading-relaxed text-text">
+                    {note.excerpt}
+                  </span>
+                ) : null}
+                <span className="mt-3 text-sm font-semibold text-link">Read story</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 export function ItineraryHub({
   headingId,
   config,
@@ -522,6 +575,8 @@ export function ItineraryHub({
   tripId,
   saveMode,
   guestBackup,
+  journalNotes,
+  journalPlaceIndex,
   packingNotes,
   onItemsChange,
   onPackingNotesChange,
@@ -940,6 +995,13 @@ export function ItineraryHub({
           </button>
         )}
       </section>
+
+      <JournalNotes
+        headingId={headingId}
+        destination={state.destination}
+        notes={journalNotes}
+        places={journalPlaceIndex}
+      />
 
       <section className="panel-soft mt-6 px-4 py-4" aria-labelledby={`${headingId}-packing`}>
         <h3
