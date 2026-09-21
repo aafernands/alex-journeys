@@ -1,3 +1,4 @@
+import { ViatorWidgets } from "@/components/blog/ViatorWidgets";
 import { rewriteHtmlExternalLinks } from "@/lib/outbound";
 import { wrapHtmlImagesWithPinterestPins } from "@/lib/pinterest";
 import { absoluteUrl } from "@/lib/seo";
@@ -36,9 +37,12 @@ export function PostContent({ html, pagePath, shareDescription }: Props) {
   }
 
   return (
-    <div
-      className="post-prose"
-      dangerouslySetInnerHTML={{ __html: prepared }}
-    />
+    <>
+      <div
+        className="post-prose"
+        dangerouslySetInnerHTML={{ __html: prepared }}
+      />
+      <ViatorWidgets html={prepared} />
+    </>
   );
 }
