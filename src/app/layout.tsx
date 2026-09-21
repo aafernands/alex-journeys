@@ -99,6 +99,7 @@ export default function RootLayout({
   const latestPost = latest
     ? { slug: latest.slug, title: latest.title }
     : null;
+  // Email/password and/or Google — not the Google client id alone.
   const googleConfigured = isReaderAuthConfigured();
 
   return (

@@ -23,6 +23,10 @@ import { useState } from "react";
 type Props = {
   open: boolean;
   onClose: () => void;
+  /**
+   * Reader auth available (email/password and/or Google).
+   * Prop name matches Header; this is not Google-only.
+   */
   googleConfigured?: boolean;
 };
 
@@ -93,9 +97,9 @@ export function MobileNavDrawer({
         </div>
 
         {googleConfigured ? (
-          <div className="shrink-0 border-b border-border px-5 py-2.5">
+          <div className="shrink-0 border-b border-border px-5 py-4">
             <ReaderAuthButtons
-              variant="drawer"
+              variant="drawer-cta"
               googleConfigured={googleConfigured}
               onNavigate={onClose}
             />

@@ -171,7 +171,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           </div>
         </div>
 
-        <div className="section-shell relative flex h-[4.5rem] items-center md:h-20 justify-between gap-3 md:justify-start md:gap-4 lg:gap-6">
+        <div className="section-shell relative grid h-[4.5rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 md:flex md:h-20 md:justify-start md:gap-4 lg:gap-6">
           {/* Mobile: search (left) */}
           <button
             type="button"
@@ -213,10 +213,10 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             )}
           </button>
 
-          {/* Logo: centered on mobile, left on desktop */}
-          <div className="absolute left-1/2 z-10 flex -translate-x-1/2 items-center md:static md:shrink-0 md:translate-x-0">
+          {/* Logo: centered in the middle column on mobile, left on desktop */}
+          <div className="z-10 flex min-w-0 items-center justify-center md:shrink-0">
             <BrandLogo
-              className="h-12 w-auto sm:h-14 md:h-16"
+              className="h-9 w-auto max-w-full object-contain sm:h-12 md:h-16 md:max-w-none"
               width={260}
               height={78}
               priority
@@ -361,8 +361,12 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             </Link>
           </div>
 
-          {/* Mobile: hamburger opens oversized hub list; bottom bar has Places/Stories/Guides/Saved */}
-          <div className="relative z-10 flex items-center md:hidden">
+          {/* Mobile: Sign in stays in the sticky bar; menu opens the drawer. */}
+          <div className="relative z-10 flex shrink-0 items-center gap-0.5 md:hidden">
+            <ReaderAuthButtons
+              variant="header-mobile"
+              googleConfigured={googleConfigured}
+            />
             <button
               type="button"
               className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
