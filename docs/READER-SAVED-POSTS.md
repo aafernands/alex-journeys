@@ -80,3 +80,5 @@ Leave unset to use `(default)`.
 ## Related
 
 Post **comments** (moderated) also use this Firestore project — see [COMMENTS.md](./COMMENTS.md).
+
+Saved **trip itineraries** use `users/{userId}/trips` — see [TRIPS.md](./TRIPS.md).

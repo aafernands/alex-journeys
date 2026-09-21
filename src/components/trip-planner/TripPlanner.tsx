@@ -1,16 +1,14 @@
 "use client";
 
-import { useId, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
-import { OutboundLink } from "@/components/outbound/OutboundLink";
+import { ItineraryHub } from "@/components/trip-planner/ItineraryHub";
 import { PlaceCombobox } from "@/components/trip-planner/PlaceCombobox";
+import { useTripSync } from "@/components/trip-planner/useTripSync";
 import {
   effectiveCategories,
   initialPlannerState,
   nextStepsSubhead,
-  partnerUrlValues,
-  planFingerprint,
-  resolveAffiliateHref,
   reviewRows,
   TRIP_CATEGORIES,
   validateCategories,
@@ -23,26 +21,34 @@ import {
   type TripPlannerPartner,
   type TripType,
 } from "@/lib/trip-planner-model";
+import { decodeSharedPlan, planATripLoginHref } from "@/lib/trip-record";
+import type { JournalNote, JournalPlace } from "@/lib/trip-journal";
 import {
-  checksForFingerprint,
+  clearGuestBackup,
   getActivePlanSnapshot,
-  getChecksRaw,
   getServerActivePlan,
-  getServerChecksRaw,
   isPendingPlan,
   subscribeTripStore,
   writeActivePlan,
-  writeChecks,
   type PendingPlan,
   type StoredPlan,
 } from "@/lib/trip-planner-storage";
 
-const EMPTY_PLAN: StoredPlan = { step: 1, state: initialPlannerState() };
+const EMPTY_PLAN: StoredPlan = {
+  step: 1,
+  state: initialPlannerState(),
+  items: [],
+  tripId: null,
+  packingNotes: "",
+};
 
 type Props = {
   config: TripPlannerConfig;
   partners: TripPlannerPartner[];
   journalPlaces: readonly string[];
+  journalNotes?: readonly JournalNote[];
+  journalPlaceIndex?: readonly JournalPlace[];
+  urlTripId?: string | null;
 };
 
 const STEPS = [1, 2, 3, 4] as const;
@@ -140,17 +146,28 @@ function describedBy(id: string, error?: string): string | undefined {
   return error ? `${id}-error` : undefined;
 }
 
-export function TripPlanner({ config, partners, journalPlaces }: Props) {
+function PlannerShell() {
+  return (
+    <section className="mt-8 max-w-3xl" aria-hidden="true">
+      <div className="h-1 rounded-full bg-sand" />
+      <div className="panel mt-6 h-48" />
+    </section>
+  );
+}
+
+export function TripPlanner({
+  config,
+  partners,
+  journalPlaces,
+  journalNotes = [],
+  journalPlaceIndex = [],
+  urlTripId = null,
+}: Props) {
   const baseId = useId();
   const storedPlan = useSyncExternalStore<StoredPlan | null | PendingPlan>(
     subscribeTripStore,
     getActivePlanSnapshot,
     getServerActivePlan,
-  );
-  const checksRaw = useSyncExternalStore(
-    subscribeTripStore,
-    getChecksRaw,
-    getServerChecksRaw,
   );
   const plan: StoredPlan = isPendingPlan(storedPlan)
     ? EMPTY_PLAN
@@ -162,11 +179,44 @@ export function TripPlanner({ config, partners, journalPlaces }: Props) {
   const cats = effectiveCategories(state);
   const flexibleOn = config.flexibleDates;
   const dateMode = flexibleOn ? state.dateMode : "exact";
-  const fingerprint = planFingerprint(state, flexibleOn);
-  const checked = checksForFingerprint(checksRaw, fingerprint);
+  const sync = useTripSync({
+    plan,
+    flexibleOn,
+    urlTripId,
+  });
+  const sharedHashApplied = useRef(false);
 
-  function savePlan(next: StoredPlan) {
-    writeActivePlan(next);
+  useEffect(() => {
+    if (sharedHashApplied.current || isPendingPlan(storedPlan)) return;
+    const prefix = "#itinerary=";
+    const hash = window.location.hash;
+    if (!hash.startsWith(prefix)) return;
+    sharedHashApplied.current = true;
+    const shared = decodeSharedPlan(decodeURIComponent(hash.slice(prefix.length)));
+    if (!shared) return;
+    writeActivePlan(shared);
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${window.location.search}`,
+    );
+  }, [storedPlan]);
+
+  function savePlan(next: {
+    step: Step;
+    state: PlannerState;
+    items?: StoredPlan["items"];
+    tripId?: string | null;
+    packingNotes?: string;
+  }) {
+    writeActivePlan({
+      step: next.step,
+      state: next.state,
+      items: next.items ?? plan.items,
+      tripId: next.tripId !== undefined ? next.tripId : plan.tripId,
+      packingNotes:
+        next.packingNotes !== undefined ? next.packingNotes : plan.packingNotes,
+    });
   }
 
   function patch(partial: Partial<PlannerState>) {
@@ -227,16 +277,16 @@ export function TripPlanner({ config, partners, journalPlaces }: Props) {
     setStep(3);
   }
 
-  function toggleDone(key: string) {
-    const next = checked.includes(key)
-      ? checked.filter((item) => item !== key)
-      : [...checked, key];
-    writeChecks(fingerprint, next);
-  }
-
   function startOver() {
-    writeChecks(fingerprint, []);
-    writeActivePlan({ step: 1, state: initialPlannerState() });
+    sync.dismissUrlTrip();
+    clearGuestBackup();
+    writeActivePlan({
+      step: 1,
+      state: initialPlannerState(),
+      items: [],
+      tripId: null,
+      packingNotes: "",
+    });
     setCategoryError(null);
     setErrors({});
   }
@@ -244,13 +294,84 @@ export function TripPlanner({ config, partners, journalPlaces }: Props) {
   const rows = reviewRows(state, flexibleOn);
   const steps = visiblePartners(partners, state, config.extras);
   const subhead = nextStepsSubhead(config.steps.next.helper, state, flexibleOn);
-  const doneCount = steps.filter((partner) => checked.includes(partner.key)).length;
 
   if (isPendingPlan(storedPlan)) {
+    return <PlannerShell />;
+  }
+
+  if (urlTripId && (sync.authLoading || (sync.signedIn && sync.remote === "loading"))) {
+    return <PlannerShell />;
+  }
+
+  if (urlTripId && !sync.signedIn) {
     return (
-      <section className="mt-8 max-w-3xl" aria-hidden="true">
-        <div className="h-1 rounded-full bg-sand" />
-        <div className="panel mt-6 h-48" />
+      <section className="mt-8 max-w-3xl" aria-labelledby={`${baseId}-heading`}>
+        <div className="panel p-6 md:p-8">
+          <h2
+            id={`${baseId}-heading`}
+            className="font-display text-2xl font-bold tracking-tight text-heading"
+          >
+            {config.steps.next.heading}
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-text">
+            Sign in to open this saved itinerary.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link href={planATripLoginHref(urlTripId)} className="btn btn-ink">
+              Sign in to save this itinerary
+            </Link>
+            <Link href="/guides/plan-a-trip" className="btn btn-secondary">
+              Use the draft in this browser
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (urlTripId && sync.signedIn && sync.remote === "missing") {
+    return (
+      <section className="mt-8 max-w-3xl" aria-labelledby={`${baseId}-heading`}>
+        <div className="panel p-6 md:p-8">
+          <h2
+            id={`${baseId}-heading`}
+            className="font-display text-2xl font-bold text-heading"
+          >
+            That trip isn’t on this account.
+          </h2>
+          <button
+            type="button"
+            className="btn btn-primary mt-5"
+            onClick={() => sync.dismissUrlTrip()}
+          >
+            Continue in this browser
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  if (urlTripId && sync.signedIn && sync.remote === "error") {
+    return (
+      <section className="mt-8 max-w-3xl" aria-labelledby={`${baseId}-heading`}>
+        <div className="panel p-6 md:p-8">
+          <h2
+            id={`${baseId}-heading`}
+            className="font-display text-2xl font-bold text-heading"
+          >
+            Couldn’t open that trip.
+          </h2>
+          <p className="mt-2 text-sm text-text" role="status">
+            Account save may be unavailable. You can still plan in this browser.
+          </p>
+          <button
+            type="button"
+            className="btn btn-secondary mt-5"
+            onClick={() => sync.dismissUrlTrip()}
+          >
+            Continue in this browser
+          </button>
+        </div>
       </section>
     );
   }
@@ -743,119 +864,57 @@ export function TripPlanner({ config, partners, journalPlaces }: Props) {
         ) : null}
 
         {step === 4 ? (
-          <>
-            <h2
-              id={`${baseId}-heading`}
-              className="font-display text-2xl font-bold tracking-tight text-heading"
-            >
-              {config.steps.next.heading}
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted md:text-base">
-              {subhead}
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-text">
-              {config.checklistHint}
-            </p>
-            {steps.length > 0 ? (
-              <p className="mt-1 text-sm font-semibold text-muted">
-                {doneCount} of {steps.length} done
-              </p>
-            ) : null}
-            {steps.length > 0 ? (
-              <ol className="mt-4 space-y-3">
-                {steps.map((partner, index) => {
-                  const href = resolveAffiliateHref(
-                    partner,
-                    partnerUrlValues(partner, state, flexibleOn),
-                  );
-                  const done = checked.includes(partner.key);
-                  const checkId = `${baseId}-done-${partner.key}`;
-                  return (
-                    <li
-                      key={partner.key}
-                      className={`flex flex-col gap-4 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between ${
-                        partner.isCore ? "bg-surface-soft" : "bg-white"
-                      }`}
-                    >
-                      <div className="flex min-w-0 gap-3">
-                        <input
-                          id={checkId}
-                          type="checkbox"
-                          className="mt-1 size-4 shrink-0 accent-[var(--accent)]"
-                          checked={done}
-                          onChange={() => toggleDone(partner.key)}
-                        />
-                        <span
-                          className={`flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                            partner.isCore
-                              ? "bg-ink text-on-solid"
-                              : "bg-surface text-muted"
-                          }`}
-                          aria-hidden="true"
-                        >
-                          {index + 1}
-                        </span>
-                        <label htmlFor={checkId} className="min-w-0 cursor-pointer">
-                          <span
-                            className={`font-display block font-bold ${
-                              done ? "text-muted line-through" : "text-heading"
-                            }`}
-                          >
-                            {partner.label}
-                          </span>
-                          {partner.blurb ? (
-                            <span className="mt-0.5 block text-sm leading-relaxed text-muted">
-                              {partner.blurb}
-                            </span>
-                          ) : null}
-                        </label>
-                      </div>
-                      <OutboundLink
-                        href={href}
-                        affiliate
-                        target="_blank"
-                        rel="noopener noreferrer sponsored"
-                        className={`btn w-full shrink-0 sm:w-auto ${
-                          partner.isCore ? "btn-primary" : "btn-secondary"
-                        }`}
-                      >
-                        {partner.buttonLabel}
-                        <span className="sr-only"> (opens in a new tab)</span>
-                      </OutboundLink>
-                    </li>
-                  );
-                })}
-              </ol>
-            ) : (
-              <p className="mt-6 text-sm text-muted">
-                No next steps are turned on for this trip yet.
-              </p>
-            )}
-            <aside className="panel-soft mt-4 px-4 py-3" aria-label="Affiliate disclosure">
-              <p className="text-sm leading-relaxed text-text">
-                {config.disclosure}{" "}
-                <Link
-                  href="/affiliate-disclosure"
-                  className="text-link hover:text-accent"
-                >
-                  Read the full disclosure
-                </Link>
-                .
-              </p>
-            </aside>
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setStep(2)}
+          steps.length > 0 ? (
+            <ItineraryHub
+              headingId={`${baseId}-heading`}
+              config={config}
+              partners={steps}
+              state={state}
+              items={plan.items}
+              flexibleOn={flexibleOn}
+              subhead={subhead}
+              tripId={plan.tripId}
+              saveMode={sync.mode}
+              guestBackup={sync.guestBackup}
+              journalNotes={journalNotes}
+              journalPlaceIndex={journalPlaceIndex}
+              packingNotes={plan.packingNotes}
+              onItemsChange={(items) => savePlan({ step, state, items })}
+              onPackingNotesChange={(packingNotes) =>
+                savePlan({ step, state, packingNotes })
+              }
+              onEditTrip={() => setStep(2)}
+              onStartOver={startOver}
+              onSaveToAccount={sync.saveToAccount}
+              onDeclineMerge={sync.declineMerge}
+              onRestoreBackup={sync.restoreGuestBackup}
+              onRememberGuestDraft={sync.rememberGuestDraft}
+            />
+          ) : (
+            <>
+              <h2
+                id={`${baseId}-heading`}
+                className="font-display text-2xl font-bold tracking-tight text-heading"
               >
-                {config.editDetailsLabel}
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={startOver}>
-                {config.startOverLabel}
-              </button>
-            </div>
-          </>
+                {config.steps.next.heading}
+              </h2>
+              <p className="mt-6 text-sm text-muted">
+                No booking lanes are turned on for this trip yet.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setStep(2)}
+                >
+                  {config.editDetailsLabel}
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={startOver}>
+                  {config.startOverLabel}
+                </button>
+              </div>
+            </>
+          )
         ) : null}
       </div>
     </section>

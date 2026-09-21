@@ -227,7 +227,7 @@ export function TripPlannerForm({ config: initialConfig, partners: initialPartne
           {"{travelers}"}.
         </p>
         <label className="block text-sm font-semibold text-heading">
-          Checklist note
+          Itinerary note
           <textarea
             className={areaClass}
             rows={2}
@@ -238,8 +238,8 @@ export function TripPlannerForm({ config: initialConfig, partners: initialPartne
           />
         </label>
         <p className="text-xs text-muted">
-          Shown on the next-steps list. Checked items are saved in this
-          browser for the same plan, not in a reader account.
+          Shown on the itinerary. Guests keep a draft in this browser;
+          signed-in readers can save it to their account.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           {(

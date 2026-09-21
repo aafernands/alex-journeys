@@ -131,7 +131,7 @@ export const DEFAULT_CONFIG: TripPlannerConfig = {
   disclosure:
     "Some links are affiliates. If you book through them I may earn a commission at no extra cost to you.",
   checklistHint:
-    "This checklist stays on this page — mark what’s done when you come back.",
+    "Guests keep this itinerary in this browser. Sign in to save it on your account.",
   flexibleDates: true,
   extras: true,
   continueLabel: "Continue",
@@ -161,7 +161,7 @@ export const DEFAULT_CONFIG: TripPlannerConfig = {
       helper: "Quick check before I build your next steps.",
     },
     next: {
-      heading: "Your next steps",
+      heading: "Your itinerary",
       helper: "Based on {destination} · {dates} · {travelers}",
     },
   },
@@ -297,6 +297,12 @@ export function parseIsoDate(
   const d = Number(match[3]);
   if (m < 1 || m > 12 || d < 1 || d > 31) return null;
   return { y, m, d };
+}
+
+export function formatMonthYear(isoDate: string): string {
+  const parsed = parseIsoDate(isoDate);
+  if (!parsed) return "";
+  return `${MONTHS[parsed.m - 1]} ${parsed.y}`;
 }
 
 export function formatDateRange(start: string, end: string): string {

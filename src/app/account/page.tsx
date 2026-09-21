@@ -5,11 +5,16 @@ import {
   BookOpen,
   Compass,
   ExternalLink,
+  Luggage,
   MapPin,
   User,
 } from "lucide-react";
 import { auth, isReaderAuthConfigured } from "@/auth";
 import { AccountAuthActions } from "@/components/AccountAuthActions";
+import {
+  MyTripsList,
+  type AccountTripRow,
+} from "@/components/account/MyTripsList";
 import { ChangePasswordForm } from "@/components/ChangePasswordForm";
 import { ProfileSettingsForm } from "@/components/ProfileSettingsForm";
 import {
@@ -27,11 +32,15 @@ import {
   listSavedPosts,
   SavedPostsUnavailableError,
 } from "@/lib/saved-posts";
+import { dateSummary } from "@/lib/trip-planner-model";
+import { getTripPlannerConfig } from "@/lib/trip-planner";
+import { plannerStateFromTrip } from "@/lib/trip-record";
+import { listTrips, TripsUnavailableError } from "@/lib/trips";
 
 export const metadata: Metadata = {
   title: "Account",
   description:
-    "Your Fernandes Journeys dashboard — profile, saved stories, and quick links.",
+    "Your Fernandes Journeys dashboard — profile, saved trips, and saved stories.",
   robots: { index: false, follow: false },
   alternates: { canonical: "/account" },
 };
@@ -148,6 +157,32 @@ export default async function AccountPage() {
     }
   }
 
+  let trips: AccountTripRow[] = [];
+  let tripsError: string | null = null;
+  if (signedIn && userId) {
+    if (!isFirebaseConfigured()) {
+      tripsError =
+        "Saved trips are not configured yet. Ask the site owner to enable Firestore.";
+    } else {
+      try {
+        const flexibleDates = getTripPlannerConfig().flexibleDates;
+        trips = (await listTrips(userId)).map((trip) => ({
+          id: trip.id,
+          title: trip.title,
+          destination: trip.destination,
+          dates: dateSummary(plannerStateFromTrip(trip), flexibleDates),
+        }));
+      } catch (err) {
+        if (err instanceof TripsUnavailableError) {
+          tripsError = "Saved trips are temporarily unavailable. Try again later.";
+        } else {
+          console.error("[account] list trips failed:", err);
+          tripsError = "Could not load your trips.";
+        }
+      }
+    }
+  }
+
   const emailConfigured = isEmailConfigured();
 
   return (
@@ -160,8 +195,8 @@ export default async function AccountPage() {
               Account
             </h1>
             <p className="mt-3 max-w-xl text-sm text-muted md:text-base">
-              Profile, saved stories, and shortcuts. Sign in with email or Google
-              to keep bookmarks across devices.
+              Profile, saved trips, and saved stories. Sign in with email or Google
+              to keep them across devices.
             </p>
           </div>
         </div>
@@ -182,7 +217,7 @@ export default async function AccountPage() {
                     Sign in to continue
                   </h2>
                   <p className="mt-2 text-sm leading-relaxed text-text">
-                    Save stories across devices and manage them here. Use email
+                    Save stories and trip itineraries across devices. Use email
                     and password or Google. Signing in does not grant CMS access.
                   </p>
                   <div className="mt-5">
@@ -245,6 +280,35 @@ export default async function AccountPage() {
                   pendingNewEmail={pendingNewEmail}
                   emailConfigured={emailConfigured}
                 />
+              </section>
+
+              <section id="trips" aria-labelledby="account-trips">
+                <div className="mb-4 flex items-center gap-2">
+                  <Luggage
+                    className="h-5 w-5 text-accent"
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                  <h2
+                    id="account-trips"
+                    className="font-display text-xl font-bold text-heading"
+                  >
+                    My trips
+                  </h2>
+                </div>
+                <p className="mb-4 text-sm text-muted">
+                  Itineraries you save from Plan a trip. Open one to pick up the
+                  booking lanes.
+                </p>
+                {tripsError ? (
+                  <div className="panel p-6 md:p-8">
+                    <p className="text-sm text-text" role="status">
+                      {tripsError}
+                    </p>
+                  </div>
+                ) : (
+                  <MyTripsList trips={trips} />
+                )}
               </section>
 
               <section id="saved" aria-labelledby="account-saved">

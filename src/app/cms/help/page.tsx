@@ -149,7 +149,8 @@ export default async function CmsHelpPage() {
             <code className="rounded bg-surface-soft px-1 text-xs">
               /guides/plan-a-trip
             </code>{" "}
-            — headings, flexible-date and extras flags, and affiliate partners
+            — headings, flexible-date and extras flags, affiliate partners, and the
+            itinerary readers save to their account
             under{" "}
             <code className="rounded bg-surface-soft px-1 text-xs">
               src/content/trip-planner
