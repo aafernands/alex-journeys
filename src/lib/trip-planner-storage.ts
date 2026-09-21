@@ -12,6 +12,10 @@ export type StoredPlan = {
   state: PlannerState;
 };
 
+/** Server/hydration snapshot. The client snapshot replaces it after hydrate. */
+export const PENDING_PLAN = { pending: true } as const;
+export type PendingPlan = typeof PENDING_PLAN;
+
 const listeners = new Set<() => void>();
 
 function emit() {
@@ -107,8 +111,14 @@ export function getActivePlanSnapshot(): StoredPlan | null {
   return activeSnapshot;
 }
 
-export function getServerActivePlan(): StoredPlan | null {
-  return null;
+export function getServerActivePlan(): PendingPlan {
+  return PENDING_PLAN;
+}
+
+export function isPendingPlan(
+  value: StoredPlan | null | PendingPlan,
+): value is PendingPlan {
+  return value === PENDING_PLAN;
 }
 
 export function getChecksRaw(): string {

@@ -28,9 +28,11 @@ import {
   getChecksRaw,
   getServerActivePlan,
   getServerChecksRaw,
+  isPendingPlan,
   subscribeTripStore,
   writeActivePlan,
   writeChecks,
+  type PendingPlan,
   type StoredPlan,
 } from "@/lib/trip-planner-storage";
 
@@ -138,7 +140,7 @@ function describedBy(id: string, error?: string): string | undefined {
 
 export function TripPlanner({ config, partners }: Props) {
   const baseId = useId();
-  const storedPlan = useSyncExternalStore(
+  const storedPlan = useSyncExternalStore<StoredPlan | null | PendingPlan>(
     subscribeTripStore,
     getActivePlanSnapshot,
     getServerActivePlan,
@@ -148,7 +150,9 @@ export function TripPlanner({ config, partners }: Props) {
     getChecksRaw,
     getServerChecksRaw,
   );
-  const plan = storedPlan ?? EMPTY_PLAN;
+  const plan: StoredPlan = isPendingPlan(storedPlan)
+    ? EMPTY_PLAN
+    : (storedPlan ?? EMPTY_PLAN);
   const { step, state } = plan;
   const [categoryError, setCategoryError] = useState<string | null>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -239,6 +243,15 @@ export function TripPlanner({ config, partners }: Props) {
   const steps = visiblePartners(partners, state, config.extras);
   const subhead = nextStepsSubhead(config.steps.next.helper, state, flexibleOn);
   const doneCount = steps.filter((partner) => checked.includes(partner.key)).length;
+
+  if (isPendingPlan(storedPlan)) {
+    return (
+      <section className="mt-8 max-w-3xl" aria-hidden="true">
+        <div className="h-1 rounded-full bg-sand" />
+        <div className="panel mt-6 h-48" />
+      </section>
+    );
+  }
 
   return (
     <section aria-labelledby={`${baseId}-heading`} className="mt-8 max-w-3xl">
