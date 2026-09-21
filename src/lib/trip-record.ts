@@ -9,6 +9,7 @@ import {
   initialPlannerState,
   parseIsoDate,
   PLAN_A_TRIP_SLUG,
+  resolvedTripDates,
   TRIP_CATEGORIES,
   usesFlexibleDates,
   type DateMode,
@@ -57,7 +58,27 @@ export type TripItem = {
   updatedAt: string;
   /** Partner lane this item was added from, when it has one. */
   laneKey?: string;
+  /** Optional booking confirmation code the reader typed or pasted. */
+  confirmation?: string;
+  /** 1-based day on this trip. Missing means unscheduled. */
+  dayIndex?: number;
+  /** Optional local time, `HH:MM`. */
+  time?: string;
 };
+
+export type TripDay = {
+  index: number;
+  date: string;
+  label: string;
+  detail: string;
+};
+
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+const DAY_MONTHS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+] as const;
+const MAX_TRIP_DAYS = 45;
 
 export type TripWrite = {
   title: string;
@@ -155,26 +176,119 @@ export function suggestTripTitle(
   return dates ? `${place} · ${dates}` : place;
 }
 
+export function cleanConfirmation(value: string): string {
+  return value.trim().slice(0, 40).replace(/[^A-Za-z0-9-]/g, "");
+}
+
+export function cleanTime(value: string): string {
+  const match = /^(\d{2}):(\d{2})$/.exec(value.trim());
+  if (!match) return "";
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours > 23 || minutes > 59) return "";
+  return `${match[1]}:${match[2]}`;
+}
+
+export function cleanDayIndex(value: unknown): number | null {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isInteger(n) || n < 1 || n > 90) return null;
+  return n;
+}
+
+/** Calendar days from the trip start through the end, inclusive. */
+export function tripDays(
+  state: PlannerState,
+  flexibleDatesEnabled: boolean,
+): TripDay[] {
+  const range = resolvedTripDates(state, flexibleDatesEnabled);
+  if (!range) return [];
+  const start = parseIsoDate(range.startDate);
+  const end = parseIsoDate(range.endDate);
+  if (!start || !end) return [];
+  const startUtc = Date.UTC(start.y, start.m - 1, start.d);
+  const endUtc = Date.UTC(end.y, end.m - 1, end.d);
+  if (endUtc < startUtc) return [];
+  const days: TripDay[] = [];
+  for (let t = startUtc, index = 1; t <= endUtc && index <= MAX_TRIP_DAYS; t += 86_400_000, index += 1) {
+    const iso = new Date(t).toISOString().slice(0, 10);
+    days.push({
+      index,
+      date: iso,
+      label: `Day ${index}`,
+      detail: formatTripDayDetail(iso),
+    });
+  }
+  return days;
+}
+
+export function formatTripDayDetail(isoDate: string): string {
+  const parsed = parseIsoDate(isoDate);
+  if (!parsed) return "";
+  const utc = new Date(Date.UTC(parsed.y, parsed.m - 1, parsed.d));
+  return `${WEEKDAYS[utc.getUTCDay()]}, ${DAY_MONTHS[parsed.m - 1]} ${parsed.d}`;
+}
+
+export function scheduledDayIndex(item: TripItem, dayCount: number): number | null {
+  if (item.dayIndex == null || dayCount < 1) return null;
+  if (item.dayIndex < 1 || item.dayIndex > dayCount) return null;
+  return item.dayIndex;
+}
+
+/**
+ * Best-effort read of a pasted confirmation blurb.
+ * Pulls the first http(s) link and a confirmation-looking token.
+ * Does not fetch or scrape a booking site.
+ */
+export function extractBookingPaste(text: string): {
+  url: string;
+  confirmation: string;
+} {
+  const raw = text.trim();
+  let url = "";
+  const urlMatch = raw.match(/https?:\/\/[^\s<>"')\]]+/i);
+  if (urlMatch) {
+    const candidate = urlMatch[0].replace(/[.,;:!?)]+$/, "");
+    if (isSafeHttpUrl(candidate)) url = candidate.slice(0, 2000);
+  }
+  const confMatch = raw.match(
+    /(?:\bconfirmation\b|\bconf\b\.?|\bbooking\s*(?:ref(?:erence)?|code|number|id)\b|\brecord\s*locator\b|\bpnr\b|\breservation\s*(?:code|number)?\b)\s*(?:number|code|no\.?|#|:)?\s*(?:is|:|#|-)?\s*([A-Za-z0-9][A-Za-z0-9-]{4,19})/i,
+  );
+  return {
+    url,
+    confirmation: confMatch ? cleanConfirmation(confMatch[1]) : "",
+  };
+}
+
 export function createTripItem(input: {
   type: TripItemType;
   title?: string;
   url?: string;
   notes?: string;
+  confirmation?: string;
+  dayIndex?: number | null;
+  time?: string;
+  status?: TripItemStatus;
   laneKey?: string;
   sortOrder: number;
 }): TripItem {
   const title = input.title?.trim() || defaultItemTitle(input.type);
   const laneKey = input.laneKey?.trim();
+  const confirmation = cleanConfirmation(input.confirmation ?? "");
+  const time = cleanTime(input.time ?? "");
+  const dayIndex = cleanDayIndex(input.dayIndex);
   return {
     id: createTripItemId(),
     type: input.type,
     title: title.slice(0, 160),
     url: input.url?.trim() ?? "",
     notes: input.notes?.trim().slice(0, 2000) ?? "",
-    status: "todo",
+    status: input.status ?? "todo",
     sortOrder: input.sortOrder,
     updatedAt: new Date().toISOString(),
     ...(laneKey ? { laneKey } : {}),
+    ...(confirmation ? { confirmation } : {}),
+    ...(dayIndex ? { dayIndex } : {}),
+    ...(time ? { time } : {}),
   };
 }
 
@@ -209,7 +323,12 @@ export function normalizeTripItem(raw: unknown, index: number): TripItem | null 
     typeof record.title === "string" ? record.title.trim().slice(0, 160) : "";
   const notes =
     typeof record.notes === "string" ? record.notes.trim().slice(0, 2000) : "";
-  if (!title && !url && !notes) return null;
+  const confirmation = cleanConfirmation(
+    typeof record.confirmation === "string" ? record.confirmation : "",
+  );
+  const time = cleanTime(typeof record.time === "string" ? record.time : "");
+  const dayIndex = cleanDayIndex(record.dayIndex);
+  if (!title && !url && !notes && !confirmation) return null;
 
   let id = typeof record.id === "string" ? record.id.trim() : "";
   if (!/^[A-Za-z0-9_-]{8,80}$/.test(id)) id = createTripItemId();
@@ -235,6 +354,9 @@ export function normalizeTripItem(raw: unknown, index: number): TripItem | null 
     sortOrder: Number.isFinite(sortOrder) ? Math.trunc(sortOrder) : index,
     updatedAt,
     ...(laneKey ? { laneKey } : {}),
+    ...(confirmation ? { confirmation } : {}),
+    ...(dayIndex ? { dayIndex } : {}),
+    ...(time ? { time } : {}),
   };
 }
 

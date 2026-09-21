@@ -4,12 +4,15 @@ import { initialPlannerState } from "../src/lib/trip-planner-model.ts";
 import {
   bookedChecklist,
   createTripItem,
+  extractBookingPaste,
   isReasonableTripDraft,
   isSafeHttpUrl,
   normalizeTripItems,
   parseTripWrite,
   planATripLoginHref,
+  scheduledDayIndex,
   suggestTripTitle,
+  tripDays,
   tripWriteFromPlan,
 } from "../src/lib/trip-record.ts";
 
@@ -89,6 +92,62 @@ describe("saved trips", () => {
       }),
       false,
     );
+  });
+
+  it("builds inclusive days from exact dates and flexible nights", () => {
+    const exact = tripDays(lisbonState(), true);
+    assert.equal(exact.length, 8);
+    assert.equal(exact[0]?.label, "Day 1");
+    assert.equal(exact[0]?.date, "2027-04-12");
+    assert.equal(exact[0]?.detail, "Mon, Apr 12");
+    assert.equal(exact[7]?.date, "2027-04-19");
+    assert.equal(exact[7]?.label, "Day 8");
+
+    const flexible = tripDays(
+      {
+        ...initialPlannerState(),
+        destination: "Lisbon, Portugal",
+        dateMode: "flexible",
+        month: "2027-05",
+        nights: 5,
+      },
+      true,
+    );
+    assert.equal(flexible.length, 6);
+    assert.equal(flexible[0]?.date, "2027-05-01");
+    assert.equal(flexible[5]?.date, "2027-05-06");
+  });
+
+  it("keeps day, time, and confirmation, and reads a pasted blurb", () => {
+    const item = createTripItem({
+      type: "flight",
+      title: "Outbound",
+      url: "https://www.expedia.com/flights",
+      confirmation: "XK-4M92",
+      dayIndex: 2,
+      time: "09:40",
+      sortOrder: 0,
+    });
+    const parsed = parseTripWrite(
+      tripWriteFromPlan({ state: lisbonState(), items: [item] }, true),
+    );
+    assert.equal(parsed.ok, true);
+    if (!parsed.ok) return;
+    assert.equal(parsed.data.items[0]?.dayIndex, 2);
+    assert.equal(parsed.data.items[0]?.time, "09:40");
+    assert.equal(parsed.data.items[0]?.confirmation, "XK-4M92");
+    assert.equal(scheduledDayIndex(parsed.data.items[0], 8), 2);
+    assert.equal(scheduledDayIndex({ ...parsed.data.items[0], dayIndex: 12 }, 8), null);
+
+    const pasted = extractBookingPaste(
+      "You're confirmed. Confirmation code is XK4M92. https://www.expedia.com/trips/1.",
+    );
+    assert.equal(pasted.url, "https://www.expedia.com/trips/1");
+    assert.equal(pasted.confirmation, "XK4M92");
+    assert.deepEqual(extractBookingPaste("See you in Lisbon"), {
+      url: "",
+      confirmation: "",
+    });
   });
 
   it("sends sign-in back to the itinerary", () => {

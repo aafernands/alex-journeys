@@ -1,6 +1,8 @@
 # Saved trips
 
-Plan a trip (`/guides/plan-a-trip`) ends on an **itinerary hub**: one booking lane per selected partner (flights, stay, car, and extras), each with a partner search that opens through `/out` in a new tab. Readers paste a link, title, and notes after they search, and mark each item **To book**, **Booked**, or **Skip**.
+Plan a trip (`/guides/plan-a-trip`) ends on an **itinerary hub**: one booking lane per selected partner (flights, stay, car, and extras), each with a partner search that opens through `/out` in a new tab. Readers add a title, link, optional confirmation number, day and time, notes, and a status of **To book**, **Booked**, or **Skip**. The hub groups those items into Day 1 … Day N from the trip dates (or flexible nights). Items without a day stay in **Unscheduled**.
+
+**Paste booking details** only reads the text the reader pasted. It may fill a link and a confirmation-looking code. It does not open or scrape partner sites.
 
 Reader auth is the existing Auth.js email/password + Google session. Trips do not add a second login.
 
@@ -21,12 +23,17 @@ Guests see **Sign in to save this itinerary**, which returns to `/guides/plan-a-
 users/{userId}/trips/{tripId}
   title, destination, dateMode, startDate, endDate, month, nights
   adults, children, categories[], origin, tripType, rooms, car fields, unsure
-  items: [{ id, type, title, url, notes, status, sortOrder, updatedAt, laneKey? }]
+  items: [{
+    id, type, title, url, notes, status, sortOrder, updatedAt, laneKey?
+    confirmation?   // optional code, letters, digits, and hyphens
+    dayIndex?       // 1-based day. Missing or outside the trip = unscheduled
+    time?           // optional HH:MM
+  }]
   checklist   // item ids with status "booked"
   createdAt, updatedAt
 ```
 
-`userId` is Auth.js `session.user.id`. Item `type` is `flight | hotel | car | activity | note | other`. `status` is `todo | booked | skipped`.
+`userId` is Auth.js `session.user.id`. Item `type` is `flight | hotel | car | activity | note | other`. `status` is `todo | booked | skipped`. Day 1 is the trip start (inclusive through the end date, or the flexible check-in through checkout). The hub shows at most 45 days. Guest drafts store the same item fields in `localStorage`.
 
 ## API
 
@@ -45,7 +52,7 @@ Session required. **503** when `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, o
 - `src/lib/trip-record.ts` — types, validation, titles, login return URL
 - `src/lib/trips.ts` — Firestore list / get / create / update / delete
 - `src/app/api/trips/route.ts`, `src/app/api/trips/[id]/route.ts`
-- `src/components/trip-planner/ItineraryHub.tsx` — lanes, items, sign-in banner
+- `src/components/trip-planner/ItineraryHub.tsx` — lanes, day-by-day timeline, add/edit form, sign-in banner
 - `src/components/trip-planner/useTripSync.ts` — guest draft, merge offer, account sync
 - `src/components/account/MyTripsList.tsx` — account list
 - `src/lib/trip-planner-storage.ts` — browser draft (and a backup if a saved trip is opened over it)

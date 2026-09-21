@@ -15,13 +15,20 @@ import {
   type TripPlannerPartner,
 } from "@/lib/trip-planner-model";
 import {
+  cleanConfirmation,
+  cleanDayIndex,
+  cleanTime,
   createTripItem,
+  extractBookingPaste,
   isSafeHttpUrl,
   itemsForLane,
   itemTypeForPartner,
   planATripLoginHref,
+  scheduledDayIndex,
+  tripDays,
   TRIP_ITEM_STATUSES,
   TRIP_STATUS_LABEL,
+  type TripDay,
   type TripItem,
   type TripItemStatus,
   type TripItemType,
@@ -97,27 +104,85 @@ function StatusChips({
   );
 }
 
-function AddItemForm({
+function compareScheduled(a: TripItem, b: TripItem): number {
+  const ta = a.time ?? "";
+  const tb = b.time ?? "";
+  if (ta && tb && ta !== tb) return ta.localeCompare(tb);
+  if (ta && !tb) return -1;
+  if (!ta && tb) return 1;
+  return a.sortOrder - b.sortOrder || a.updatedAt.localeCompare(b.updatedAt);
+}
+
+function itemWhen(item: TripItem, days: TripDay[]): string {
+  const dayCount = days.length;
+  const index = scheduledDayIndex(item, dayCount);
+  const day = index == null ? null : days.find((entry) => entry.index === index);
+  return [
+    day ? `${day.label} · ${day.detail}` : null,
+    item.time ?? null,
+    item.confirmation ? `Conf. ${item.confirmation}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function BookingItemForm({
   type,
   laneKey,
   sortOrder,
-  onAdd,
+  existing,
+  days,
+  framed,
+  onSave,
   onCancel,
 }: {
   type: TripItemType;
   laneKey?: string;
   sortOrder: number;
-  onAdd: (item: TripItem) => void;
+  existing?: TripItem;
+  days: TripDay[];
+  framed?: boolean;
+  onSave: (item: TripItem) => void;
   onCancel: () => void;
 }) {
-  const [url, setUrl] = useState("");
-  const [title, setTitle] = useState("");
-  const [notes, setNotes] = useState("");
+  const [paste, setPaste] = useState("");
+  const [pasteNote, setPasteNote] = useState<string | null>(null);
+  const [url, setUrl] = useState(existing?.url ?? "");
+  const [title, setTitle] = useState(existing?.title ?? "");
+  const [confirmation, setConfirmation] = useState(existing?.confirmation ?? "");
+  const [dayIndex, setDayIndex] = useState(() => {
+    if (!existing) return "";
+    const index = scheduledDayIndex(existing, days.length);
+    return index == null ? "" : String(index);
+  });
+  const [time, setTime] = useState(existing?.time ?? "");
+  const [status, setStatus] = useState<TripItemStatus>(existing?.status ?? "todo");
+  const [notes, setNotes] = useState(existing?.notes ?? "");
   const [error, setError] = useState<string | null>(null);
+
+  function fillFromPaste() {
+    const found = extractBookingPaste(paste);
+    if (!found.url && !found.confirmation) {
+      setPasteNote(
+        "No link or confirmation code in that text. Fill the fields yourself.",
+      );
+      return;
+    }
+    if (found.url) setUrl(found.url);
+    if (found.confirmation) setConfirmation(found.confirmation);
+    setError(null);
+    setPasteNote(
+      "Filled from the text you pasted. This only reads that text — it does not open booking sites.",
+    );
+  }
 
   return (
     <form
-      className="mt-4 space-y-3 border-t border-border pt-4"
+      className={
+        framed
+          ? "space-y-3 rounded-lg border border-border bg-white p-3"
+          : "mt-4 space-y-3 border-t border-border pt-4"
+      }
       onSubmit={(event) => {
         event.preventDefault();
         const trimmedUrl = url.trim();
@@ -125,11 +190,37 @@ function AddItemForm({
           setError("Paste a full http:// or https:// link.");
           return;
         }
-        if (!trimmedUrl && !title.trim() && !notes.trim()) {
-          setError("Add a link, a title, or a note.");
+        if (
+          !trimmedUrl &&
+          !title.trim() &&
+          !notes.trim() &&
+          !confirmation.trim()
+        ) {
+          setError("Add a title, a link, a confirmation number, or a note.");
           return;
         }
-        onAdd(
+        const parsedDay = cleanDayIndex(dayIndex || null);
+        const cleanedConfirmation = cleanConfirmation(confirmation);
+        const cleanedTime = cleanTime(time);
+        if (existing) {
+          const next: TripItem = {
+            ...existing,
+            title: title.trim().slice(0, 160) || existing.title,
+            url: trimmedUrl,
+            notes: notes.trim().slice(0, 2000),
+            status,
+            updatedAt: new Date().toISOString(),
+          };
+          if (cleanedConfirmation) next.confirmation = cleanedConfirmation;
+          else delete next.confirmation;
+          if (parsedDay) next.dayIndex = parsedDay;
+          else delete next.dayIndex;
+          if (cleanedTime) next.time = cleanedTime;
+          else delete next.time;
+          onSave(next);
+          return;
+        }
+        onSave(
           createTripItem({
             type,
             laneKey,
@@ -137,16 +228,54 @@ function AddItemForm({
             title,
             url: trimmedUrl,
             notes,
+            confirmation: cleanedConfirmation,
+            dayIndex: parsedDay,
+            time: cleanedTime,
+            status,
           }),
         );
       }}
     >
       <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+        Paste booking details{" "}
+        <span className="font-normal normal-case tracking-normal">(optional)</span>
+        <textarea
+          className={`${inputClass} min-h-20 py-3`}
+          rows={3}
+          placeholder="Paste a confirmation email or summary"
+          value={paste}
+          onChange={(event) => {
+            setPaste(event.target.value);
+            setPasteNote(null);
+          }}
+        />
+      </label>
+      <p className="text-sm leading-relaxed text-muted">
+        Looks for a link and a confirmation code in the text you paste. It does not
+        open or scrape booking sites.
+      </p>
+      <button type="button" className="btn btn-secondary" onClick={fillFromPaste}>
+        Fill from paste
+      </button>
+      {pasteNote ? (
+        <p className="text-sm text-text" role="status">
+          {pasteNote}
+        </p>
+      ) : null}
+      <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+        Title
+        <input
+          className={inputClass}
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+        />
+      </label>
+      <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
         Link
         <input
           className={inputClass}
           inputMode="url"
-          placeholder="Paste the link from your search"
+          placeholder="https://"
           value={url}
           onChange={(event) => {
             setUrl(event.target.value);
@@ -155,13 +284,55 @@ function AddItemForm({
         />
       </label>
       <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-        Title <span className="font-normal normal-case tracking-normal">(optional)</span>
+        Confirmation #{" "}
+        <span className="font-normal normal-case tracking-normal">(optional)</span>
         <input
           className={inputClass}
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
+          maxLength={40}
+          value={confirmation}
+          onChange={(event) => setConfirmation(event.target.value)}
         />
       </label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+          Day
+          <select
+            className={inputClass}
+            value={dayIndex}
+            onChange={(event) => setDayIndex(event.target.value)}
+          >
+            <option value="">Unscheduled</option>
+            {days.map((day) => (
+              <option key={day.index} value={day.index}>
+                {day.label}
+                {day.detail ? ` · ${day.detail}` : ""}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+          Time{" "}
+          <span className="font-normal normal-case tracking-normal">(optional)</span>
+          <input
+            className={inputClass}
+            type="time"
+            value={time}
+            onChange={(event) => setTime(event.target.value.slice(0, 5))}
+          />
+        </label>
+      </div>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+          Status
+        </p>
+        <div className="mt-2">
+          <StatusChips
+            value={status}
+            label="Booking status"
+            onChange={setStatus}
+          />
+        </div>
+      </div>
       <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-muted">
         Notes <span className="font-normal normal-case tracking-normal">(optional)</span>
         <textarea
@@ -178,7 +349,7 @@ function AddItemForm({
       ) : null}
       <div className="flex flex-wrap gap-2">
         <button type="submit" className="btn btn-primary">
-          Add to itinerary
+          {existing ? "Save changes" : "Add to itinerary"}
         </button>
         <button type="button" className="btn btn-secondary" onClick={onCancel}>
           Cancel
@@ -190,18 +361,24 @@ function AddItemForm({
 
 function ItemCard({
   item,
+  days,
   onStatus,
+  onEdit,
   onRemove,
 }: {
   item: TripItem;
+  days: TripDay[];
   onStatus: (status: TripItemStatus) => void;
+  onEdit: () => void;
   onRemove: () => void;
 }) {
+  const when = itemWhen(item, days);
   return (
     <div className="rounded-lg border border-border bg-white p-3">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-display font-bold text-heading">{item.title}</p>
+          {when ? <p className="mt-0.5 text-sm text-muted">{when}</p> : null}
           {item.url ? (
             <OutboundLink
               href={item.url}
@@ -217,13 +394,22 @@ function ItemCard({
             <p className="mt-1 text-sm leading-relaxed text-text">{item.notes}</p>
           ) : null}
         </div>
-        <button
-          type="button"
-          className="text-sm font-semibold text-muted transition hover:text-accent"
-          onClick={onRemove}
-        >
-          Remove
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            className="text-sm font-semibold text-accent hover:underline"
+            onClick={onEdit}
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            className="text-sm font-semibold text-muted transition hover:text-accent"
+            onClick={onRemove}
+          >
+            Remove
+          </button>
+        </div>
       </div>
       <div className="mt-3">
         <StatusChips
@@ -231,6 +417,95 @@ function ItemCard({
           label={`Status for ${item.title}`}
           onChange={onStatus}
         />
+      </div>
+    </div>
+  );
+}
+
+function TimelineEntry({
+  item,
+  days,
+  editing,
+  onEdit,
+  onRemove,
+  onSave,
+  onCancel,
+}: {
+  item: TripItem;
+  days: TripDay[];
+  editing: boolean;
+  onEdit: () => void;
+  onRemove: () => void;
+  onSave: (item: TripItem) => void;
+  onCancel: () => void;
+}) {
+  if (editing) {
+    return (
+      <BookingItemForm
+        framed
+        type={item.type}
+        existing={item}
+        days={days}
+        sortOrder={item.sortOrder}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    );
+  }
+  return (
+    <div className="relative">
+      <span
+        className={`absolute -left-[1.4rem] top-1.5 size-2.5 rounded-full ${
+          item.status === "booked"
+            ? "bg-ink"
+            : item.status === "skipped"
+              ? "bg-border-strong"
+              : "bg-accent"
+        }`}
+        aria-hidden="true"
+      />
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-display font-bold text-heading">
+            {item.time ? <span className="text-muted">{item.time} · </span> : null}
+            {item.title}
+          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+            {[TRIP_STATUS_LABEL[item.status], item.confirmation ? `Conf. ${item.confirmation}` : null]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+          {item.notes ? (
+            <p className="mt-1 text-sm leading-relaxed text-text">{item.notes}</p>
+          ) : null}
+          {item.url ? (
+            <OutboundLink
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 inline-flex text-sm font-semibold text-link hover:text-accent"
+            >
+              Open link
+              <span className="sr-only"> (opens in a new tab)</span>
+            </OutboundLink>
+          ) : null}
+        </div>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            className="text-sm font-semibold text-accent hover:underline"
+            onClick={onEdit}
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            className="text-sm font-semibold text-muted transition hover:text-accent"
+            onClick={onRemove}
+          >
+            Remove
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -255,14 +530,46 @@ export function ItineraryHub({
   onRestoreBackup,
   onRememberGuestDraft,
 }: Props) {
-  const [openLane, setOpenLane] = useState<string | null>(null);
-  const [noteOpen, setNoteOpen] = useState(false);
+  const [editor, setEditor] = useState<
+    | { kind: "add-lane"; laneKey: string }
+    | { kind: "add-note" }
+    | { kind: "edit"; id: string; place: "lane" | "day" }
+    | null
+  >(null);
   const dates = dateSummary(state, flexibleOn);
   const travelers = travelerSummary(state);
+  const days = tripDays(state, flexibleOn);
   const sorted = [...items].sort(
     (a, b) => a.sortOrder - b.sortOrder || a.updatedAt.localeCompare(b.updatedAt),
   );
   const nextSort = sorted.reduce((max, item) => Math.max(max, item.sortOrder), -1) + 1;
+  const unscheduled = sorted.filter(
+    (item) => scheduledDayIndex(item, days.length) == null,
+  );
+
+  function renderTimeline(list: TripItem[]) {
+    return (
+      <ol className="mt-3 space-y-4 border-l border-border pl-5">
+        {list.map((item) => (
+          <li key={item.id}>
+            <TimelineEntry
+              item={item}
+              days={days}
+              editing={
+                editor?.kind === "edit" &&
+                editor.place === "day" &&
+                editor.id === item.id
+              }
+              onEdit={() => setEditor({ kind: "edit", id: item.id, place: "day" })}
+              onRemove={() => removeItem(item.id)}
+              onSave={replaceItem}
+              onCancel={() => setEditor(null)}
+            />
+          </li>
+        ))}
+      </ol>
+    );
+  }
 
   function updateItem(id: string, patch: Partial<TripItem>) {
     onItemsChange(
@@ -276,6 +583,19 @@ export function ItineraryHub({
 
   function removeItem(id: string) {
     onItemsChange(items.filter((item) => item.id !== id));
+    setEditor((current) =>
+      current?.kind === "edit" && current.id === id ? null : current,
+    );
+  }
+
+  function replaceItem(next: TripItem) {
+    onItemsChange(items.map((item) => (item.id === next.id ? next : item)));
+    setEditor(null);
+  }
+
+  function addItem(item: TripItem) {
+    onItemsChange([...items, item]);
+    setEditor(null);
   }
 
   const saveCopy =
@@ -385,7 +705,7 @@ export function ItineraryHub({
             partnerUrlValues(partner, state, flexibleOn),
           );
           const laneItems = itemsForLane(items, partner);
-          const adding = openLane === partner.key;
+          const adding = editor?.kind === "add-lane" && editor.laneKey === partner.key;
           return (
             <article
               key={partner.key}
@@ -423,37 +743,55 @@ export function ItineraryHub({
 
               {laneItems.length > 0 ? (
                 <ul className="mt-4 space-y-3">
-                  {laneItems.map((item) => (
-                    <li key={item.id}>
-                      <ItemCard
-                        item={item}
-                        onStatus={(status) => updateItem(item.id, { status })}
-                        onRemove={() => removeItem(item.id)}
-                      />
-                    </li>
-                  ))}
+                  {laneItems.map((item) => {
+                    const editing =
+                      editor?.kind === "edit" &&
+                      editor.place === "lane" &&
+                      editor.id === item.id;
+                    return (
+                      <li key={item.id}>
+                        {editing ? (
+                          <BookingItemForm
+                            framed
+                            type={item.type}
+                            laneKey={item.laneKey}
+                            sortOrder={item.sortOrder}
+                            existing={item}
+                            days={days}
+                            onCancel={() => setEditor(null)}
+                            onSave={replaceItem}
+                          />
+                        ) : (
+                          <ItemCard
+                            item={item}
+                            days={days}
+                            onStatus={(status) => updateItem(item.id, { status })}
+                            onEdit={() =>
+                              setEditor({ kind: "edit", id: item.id, place: "lane" })
+                            }
+                            onRemove={() => removeItem(item.id)}
+                          />
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : null}
 
               {adding ? (
-                <AddItemForm
+                <BookingItemForm
                   type={itemTypeForPartner(partner)}
                   laneKey={partner.key}
                   sortOrder={nextSort}
-                  onCancel={() => setOpenLane(null)}
-                  onAdd={(item) => {
-                    onItemsChange([...items, item]);
-                    setOpenLane(null);
-                  }}
+                  days={days}
+                  onCancel={() => setEditor(null)}
+                  onSave={addItem}
                 />
               ) : (
                 <button
                   type="button"
                   className="mt-4 text-sm font-semibold text-accent hover:underline"
-                  onClick={() => {
-                    setNoteOpen(false);
-                    setOpenLane(partner.key);
-                  }}
+                  onClick={() => setEditor({ kind: "add-lane", laneKey: partner.key })}
                 >
                   Add to itinerary
                 </button>
@@ -468,67 +806,85 @@ export function ItineraryHub({
           id={`${headingId}-list`}
           className="font-display text-lg font-bold text-heading"
         >
-          Itinerary
+          Day by day
         </h3>
         {sorted.length === 0 ? (
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            Nothing saved yet. Search a partner, then paste the link you want to keep.
+            Nothing saved yet. Search a partner, then add the booking you want to keep.
+          </p>
+        ) : null}
+        {days.length === 0 ? (
+          <p className="mt-2 text-sm leading-relaxed text-muted">
+            Add start and end dates to split this trip into days.
           </p>
         ) : (
-          <ol className="mt-4 space-y-4 border-l border-border pl-5">
-            {sorted.map((item) => (
-              <li key={item.id} className="relative">
-                <span
-                  className={`absolute -left-[1.45rem] top-1.5 size-2.5 rounded-full ${
-                    item.status === "booked"
-                      ? "bg-ink"
-                      : item.status === "skipped"
-                        ? "bg-border-strong"
-                        : "bg-accent"
-                  }`}
-                  aria-hidden="true"
-                />
-                <p className="font-display font-bold text-heading">{item.title}</p>
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-                  {TRIP_STATUS_LABEL[item.status]}
-                </p>
-                {item.notes ? (
-                  <p className="mt-1 text-sm leading-relaxed text-text">{item.notes}</p>
-                ) : null}
-                {item.url ? (
-                  <OutboundLink
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-1 inline-flex text-sm font-semibold text-link hover:text-accent"
-                  >
-                    Open link
-                    <span className="sr-only"> (opens in a new tab)</span>
-                  </OutboundLink>
-                ) : null}
-              </li>
-            ))}
-          </ol>
+          <div className="mt-4 space-y-4">
+            {days.map((day) => {
+              const dayItems = sorted
+                .filter((item) => scheduledDayIndex(item, days.length) === day.index)
+                .sort(compareScheduled);
+              return (
+                <section
+                  key={day.index}
+                  className="rounded-xl border border-border bg-white p-4"
+                  aria-labelledby={`${headingId}-day-${day.index}`}
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <h4
+                      id={`${headingId}-day-${day.index}`}
+                      className="font-display font-bold text-heading"
+                    >
+                      {day.label}
+                    </h4>
+                    {day.detail ? (
+                      <p className="text-sm text-muted">{day.detail}</p>
+                    ) : null}
+                  </div>
+                  {dayItems.length === 0 ? (
+                    <p className="mt-2 text-sm text-muted">Nothing on this day yet.</p>
+                  ) : (
+                    renderTimeline(dayItems)
+                  )}
+                </section>
+              );
+            })}
+          </div>
         )}
 
-        {noteOpen ? (
-          <AddItemForm
+        {unscheduled.length > 0 || days.length === 0 ? (
+          <section
+            className="panel-soft mt-4 px-4 py-4"
+            aria-labelledby={`${headingId}-unscheduled`}
+          >
+            <h4
+              id={`${headingId}-unscheduled`}
+              className="font-display font-bold text-heading"
+            >
+              Unscheduled
+            </h4>
+            {unscheduled.length === 0 ? (
+              <p className="mt-2 text-sm text-muted">
+                Bookings without a day show up here.
+              </p>
+            ) : (
+              renderTimeline(unscheduled)
+            )}
+          </section>
+        ) : null}
+
+        {editor?.kind === "add-note" ? (
+          <BookingItemForm
             type="note"
             sortOrder={nextSort}
-            onCancel={() => setNoteOpen(false)}
-            onAdd={(item) => {
-              onItemsChange([...items, item]);
-              setNoteOpen(false);
-            }}
+            days={days}
+            onCancel={() => setEditor(null)}
+            onSave={addItem}
           />
         ) : (
           <button
             type="button"
             className="mt-4 text-sm font-semibold text-accent hover:underline"
-            onClick={() => {
-              setOpenLane(null);
-              setNoteOpen(true);
-            }}
+            onClick={() => setEditor({ kind: "add-note" })}
           >
             Add a note
           </button>
