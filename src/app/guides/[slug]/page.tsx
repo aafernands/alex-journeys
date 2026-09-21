@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { PostCard } from "@/components/blog/PostCard";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { SitePage } from "@/components/pages/SitePage";
+import { TripPlanner } from "@/components/trip-planner/TripPlanner";
 import {
   getGuideHub,
   getGuideHubSlugs,
@@ -80,6 +81,8 @@ export default async function GuideHubPage({ params }: PageProps) {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
+  const isPlanner = slug === "plan-a-trip";
+
   return (
     <SitePage
       adminEdit={{
@@ -88,19 +91,35 @@ export default async function GuideHubPage({ params }: PageProps) {
       }}
       label="Guides"
       title={hub.title}
-      description={hub.description}
+      description={
+        isPlanner
+          ? "Start with what you need — flights, a stay, a car, or all three. I’ll hand you next steps with the tools I actually use."
+          : hub.description
+      }
       narrow={false}
+      tone={isPlanner ? "default" : "white"}
       crumbs={[
         { href: "/", label: "Home" },
         { href: "/guides", label: "Guides" },
         { label: hub.title },
       ]}
     >
-      <div className="hub-follow inline-flex items-center gap-2 rounded-full bg-surface-soft px-3 py-1.5 text-sm font-semibold text-heading">
-        <NavIcon name={hub.icon} size={16} className="text-accent" />
-        {posts.length + pages.length}{" "}
-        {posts.length + pages.length === 1 ? "note" : "notes"} from the journal
-      </div>
+      {isPlanner ? <TripPlanner /> : null}
+
+      {isPlanner ? (
+        <div className="mt-14 border-t border-border pt-10">
+          <p className="eyebrow">From the journal</p>
+          <h2 className="font-display mt-2 text-3xl font-bold tracking-tight text-heading md:text-4xl">
+            Notes from trips I’ve already walked
+          </h2>
+        </div>
+      ) : (
+        <div className="hub-follow inline-flex items-center gap-2 rounded-full bg-surface-soft px-3 py-1.5 text-sm font-semibold text-heading">
+          <NavIcon name={hub.icon} size={16} className="text-accent" />
+          {posts.length + pages.length}{" "}
+          {posts.length + pages.length === 1 ? "note" : "notes"} from the journal
+        </div>
+      )}
 
       {pages.length > 0 ? (
         <ul className="mt-8 grid gap-3 sm:grid-cols-2">
