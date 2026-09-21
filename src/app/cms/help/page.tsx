@@ -133,6 +133,21 @@ export default async function CmsHelpPage() {
             .
           </li>
           <li>
+            <Link href="/cms/trip-planner" className="text-link hover:text-accent">
+              Trip planner
+            </Link>{" "}
+            edits the Plan a trip flow on{" "}
+            <code className="rounded bg-surface-soft px-1 text-xs">
+              /guides/plan-a-trip
+            </code>{" "}
+            — headings, flexible-date and extras flags, and affiliate partners
+            under{" "}
+            <code className="rounded bg-surface-soft px-1 text-xs">
+              src/content/trip-planner
+            </code>
+            . Partner buttons still leave through /out.
+          </li>
+          <li>
             <Link href="/cms/destinations" className="text-link hover:text-accent">
               Destinations
             </Link>{" "}

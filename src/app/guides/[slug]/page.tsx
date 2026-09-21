@@ -2,12 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostCard } from "@/components/blog/PostCard";
+import { destinationCity, getAllDestinations } from "@/data/destinations";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { SitePage } from "@/components/pages/SitePage";
+import { TripPlanner } from "@/components/trip-planner/TripPlanner";
 import {
   getGuideHub,
   getGuideHubSlugs,
 } from "@/data/guides";
+import { PLAN_A_TRIP_SLUG } from "@/lib/trip-planner-model";
+import {
+  getTripPlannerConfig,
+  getTripPlannerPartners,
+} from "@/lib/trip-planner";
 import { cmsEditPageHref } from "@/lib/admin-edit";
 import {
   getPostBySlug,
@@ -27,20 +34,23 @@ export async function generateMetadata({
   const { slug } = await params;
   const hub = getGuideHub(slug);
   if (!hub) return { title: "Guides" };
+  const planner = slug === PLAN_A_TRIP_SLUG ? getTripPlannerConfig() : null;
+  const title = planner?.title || hub.title;
+  const description = planner?.intro || hub.description;
   return {
-    title: hub.title,
-    description: hub.description,
+    title,
+    description,
     alternates: { canonical: `/guides/${slug}` },
     openGraph: {
-      title: hub.title,
-      description: hub.description,
+      title,
+      description,
       type: "website",
       url: `/guides/${slug}`,
     },
     twitter: {
       card: "summary_large_image",
-      title: hub.title,
-      description: hub.description,
+      title,
+      description,
     },
   };
 }
@@ -80,27 +90,60 @@ export default async function GuideHubPage({ params }: PageProps) {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
+  const isPlanner = slug === PLAN_A_TRIP_SLUG;
+  const plannerConfig = isPlanner ? getTripPlannerConfig() : null;
+  const plannerPartners = isPlanner ? getTripPlannerPartners() : [];
+
   return (
     <SitePage
-      adminEdit={{
-        href: cmsEditPageHref("guides"),
-        label: "Edit guides hub",
-      }}
-      label="Guides"
-      title={hub.title}
-      description={hub.description}
+      adminEdit={
+        isPlanner
+          ? { href: "/cms/trip-planner", label: "Edit trip planner" }
+          : {
+              href: cmsEditPageHref("guides"),
+              label: "Edit guides hub",
+            }
+      }
+      extraAdminLinks={
+        isPlanner
+          ? [{ href: cmsEditPageHref("guides"), label: "Edit guides hub" }]
+          : undefined
+      }
+      label={plannerConfig?.label || "Guides"}
+      title={plannerConfig?.title || hub.title}
+      description={plannerConfig?.intro || hub.description}
       narrow={false}
+      tone={isPlanner ? "default" : "white"}
       crumbs={[
         { href: "/", label: "Home" },
         { href: "/guides", label: "Guides" },
         { label: hub.title },
       ]}
     >
-      <div className="hub-follow inline-flex items-center gap-2 rounded-full bg-surface-soft px-3 py-1.5 text-sm font-semibold text-heading">
-        <NavIcon name={hub.icon} size={16} className="text-accent" />
-        {posts.length + pages.length}{" "}
-        {posts.length + pages.length === 1 ? "note" : "notes"} from the journal
-      </div>
+      {plannerConfig ? (
+        <TripPlanner
+          config={plannerConfig}
+          partners={plannerPartners}
+          journalPlaces={getAllDestinations().map(
+            (dest) => `${destinationCity(dest)}, ${dest.name}`,
+          )}
+        />
+      ) : null}
+
+      {plannerConfig ? (
+        <div className="mt-14 border-t border-border pt-10">
+          <p className="eyebrow">{plannerConfig.guidesEyebrow}</p>
+          <h2 className="font-display mt-2 text-3xl font-bold tracking-tight text-heading md:text-4xl">
+            {plannerConfig.guidesHeading}
+          </h2>
+        </div>
+      ) : (
+        <div className="hub-follow inline-flex items-center gap-2 rounded-full bg-surface-soft px-3 py-1.5 text-sm font-semibold text-heading">
+          <NavIcon name={hub.icon} size={16} className="text-accent" />
+          {posts.length + pages.length}{" "}
+          {posts.length + pages.length === 1 ? "note" : "notes"} from the journal
+        </div>
+      )}
 
       {pages.length > 0 ? (
         <ul className="mt-8 grid gap-3 sm:grid-cols-2">

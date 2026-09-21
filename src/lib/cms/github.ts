@@ -1,4 +1,8 @@
 import type { DestinationContinent } from "@/data/destinations";
+import type {
+  TripPlannerConfig,
+  TripPlannerPartner,
+} from "@/lib/trip-planner-model";
 import type { MediaIndex, MediaItem } from "@/lib/cms/media-types";
 import type { Post, PostMeta } from "@/lib/post-types";
 import {
@@ -916,6 +920,30 @@ export async function updateMediaItem(
     `cms: update media ${next.id}`,
   );
   return { item: next, commitUrl: result.commitUrl };
+}
+
+const TRIP_PLANNER_CONFIG_PATH = "src/content/trip-planner/config.json";
+const TRIP_PLANNER_PARTNERS_PATH = "src/content/trip-planner/partners.json";
+
+export async function publishTripPlanner(content: {
+  config: TripPlannerConfig;
+  partners: TripPlannerPartner[];
+}): Promise<{ commitUrl: string }> {
+  const configSha = await getFileSha(TRIP_PLANNER_CONFIG_PATH);
+  const partnersSha = await getFileSha(TRIP_PLANNER_PARTNERS_PATH);
+  const configResult = await putFile(
+    TRIP_PLANNER_CONFIG_PATH,
+    `${JSON.stringify(content.config, null, 2)}\n`,
+    "cms: update trip planner config",
+    configSha,
+  );
+  const partnersResult = await putFile(
+    TRIP_PLANNER_PARTNERS_PATH,
+    `${JSON.stringify({ partners: content.partners }, null, 2)}\n`,
+    "cms: update trip planner partners",
+    partnersSha,
+  );
+  return { commitUrl: partnersResult.commitUrl || configResult.commitUrl };
 }
 
 export async function deleteMediaItem(

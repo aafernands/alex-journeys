@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   BookOpen,
+  Compass,
   FileText,
   HelpCircle,
   ImageIcon,
@@ -24,6 +25,7 @@ const NAV = [
   { href: "/cms/posts", label: "Posts", icon: PenLine },
   { href: "/cms/comments", label: "Comments", icon: MessageSquare },
   { href: "/cms/pages", label: "Pages", icon: FileText },
+  { href: "/cms/trip-planner", label: "Trip planner", icon: Compass },
   { href: "/cms/destinations", label: "Destinations", icon: MapPin },
   { href: "/cms/media", label: "Media", icon: ImageIcon },
   { href: "/cms/design", label: "Website design", icon: Palette },

@@ -22,6 +22,7 @@ import { isFirebaseConfigured } from "@/lib/firebase-admin";
 import { formatPostDate, getAllPosts } from "@/lib/posts";
 import {
   CheckCircle2,
+  Compass,
   FileText,
   MapPin,
   PenLine,
@@ -213,6 +214,16 @@ export default async function CmsPage() {
           <div>
             <p className="font-semibold text-heading">Manage pages</p>
             <p className="text-xs text-muted">Culinary, legal hub + separate legal pages</p>
+          </div>
+        </Link>
+        <Link
+          href="/cms/trip-planner"
+          className="panel flex items-center gap-3 p-5 transition hover:ring-2 hover:ring-accent/30"
+        >
+          <Compass className="h-5 w-5 text-accent" aria-hidden />
+          <div>
+            <p className="font-semibold text-heading">Trip planner</p>
+            <p className="text-xs text-muted">Plan a trip copy and partners</p>
           </div>
         </Link>
         <Link
