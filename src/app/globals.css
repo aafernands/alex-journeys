@@ -119,6 +119,20 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
   bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
 }
 
+/* Admin public chrome — below mobile nav / drawers, above page content. */
+.admin-bar {
+  position: fixed;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 120;
+}
+
+@media (max-width: 767px) {
+  body.mobile-bottom-nav-visible .admin-bar {
+    bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px) + 0.75rem);
+  }
+}
+
 @media (min-width: 768px) {
   body.mobile-bottom-nav-visible .mobile-bottom-nav-pad {
     padding-bottom: 0;

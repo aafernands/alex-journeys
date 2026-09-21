@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { AdminSectionEdit } from "@/components/admin/AdminPublicChrome";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { Section, SectionHead } from "@/components/ui/Section";
 import { tripPlannerTools } from "@/data/nav";
+import { CMS_DESIGN_HREF } from "@/lib/admin-edit";
 import { getSiteDesign } from "@/lib/site-design";
 
 export function ToolsStrip() {
@@ -22,10 +24,16 @@ export function ToolsStrip() {
         titleId="tools-strip-heading"
         description={tools.description}
         action={
-          <Link href="/tools" className="btn btn-ink">
-            {tools.ctaLabel || "See all tools"}
-            <span aria-hidden="true">→</span>
-          </Link>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <AdminSectionEdit
+              href={`${CMS_DESIGN_HREF}#design-tools`}
+              label="Edit section"
+            />
+            <Link href="/tools" className="btn btn-ink">
+              {tools.ctaLabel || "See all tools"}
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
         }
       />
 

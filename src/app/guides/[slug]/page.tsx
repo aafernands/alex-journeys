@@ -8,6 +8,7 @@ import {
   getGuideHub,
   getGuideHubSlugs,
 } from "@/data/guides";
+import { cmsEditPageHref } from "@/lib/admin-edit";
 import {
   getPostBySlug,
   getPostsByGuideHub,
@@ -81,6 +82,10 @@ export default async function GuideHubPage({ params }: PageProps) {
 
   return (
     <SitePage
+      adminEdit={{
+        href: cmsEditPageHref("guides"),
+        label: "Edit guides hub",
+      }}
       label="Guides"
       title={hub.title}
       description={hub.description}

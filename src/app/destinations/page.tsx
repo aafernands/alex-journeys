@@ -9,6 +9,7 @@ import {
   getAllDestinations,
   type DestinationCountry,
 } from "@/data/destinations";
+import { CMS_DESTINATIONS_HREF } from "@/lib/admin-edit";
 import { PAGE_DEFAULTS } from "@/lib/page-defaults";
 import { getPageWithFallback } from "@/lib/pages";
 
@@ -28,6 +29,10 @@ export default function DestinationsIndexPage() {
 
   return (
     <SitePage
+      cmsSlug="destinations"
+      extraAdminLinks={[
+        { href: CMS_DESTINATIONS_HREF, label: "Places CMS" },
+      ]}
       label={page.label}
       title={page.title}
       description={page.description}

@@ -1,5 +1,7 @@
+import { AdminSectionEdit } from "@/components/admin/AdminPublicChrome";
 import { Section } from "@/components/ui/Section";
 import { FeaturedSlideshowView } from "@/components/home/FeaturedSlideshow";
+import { CMS_DESIGN_HREF } from "@/lib/admin-edit";
 import { getSiteDesign, visibleFeaturedSlides } from "@/lib/site-design";
 
 /**
@@ -21,11 +23,19 @@ export function FeaturedFieldNote() {
       size="md"
       aria-labelledby="featured-field-note-heading"
     >
+      <div className="relative">
+        <div className="absolute right-0 top-0 z-[1]">
+          <AdminSectionEdit
+            href={`${CMS_DESIGN_HREF}#design-featured`}
+            label="Edit slideshow"
+          />
+        </div>
       <FeaturedSlideshowView
         slideshow={featuredSlideshow}
         slides={slides}
         headingId="featured-field-note-heading"
       />
+      </div>
     </Section>
   );
 }

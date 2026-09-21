@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { AdminSectionEdit } from "@/components/admin/AdminPublicChrome";
 import { PostCard } from "@/components/blog/PostCard";
 import { Section, SectionHead } from "@/components/ui/Section";
+import { CMS_DESIGN_HREF } from "@/lib/admin-edit";
 import { getAllPosts } from "@/lib/posts";
 import { getSiteDesign } from "@/lib/site-design";
 
@@ -20,10 +22,16 @@ export function LatestPosts() {
         title={latest.title}
         titleId="latest-heading"
         action={
-          <Link href="/blog" className="btn btn-secondary">
-            {latest.ctaLabel || "Browse all stories"}
-            <span aria-hidden="true">→</span>
-          </Link>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <AdminSectionEdit
+              href={`${CMS_DESIGN_HREF}#design-latest`}
+              label="Edit section"
+            />
+            <Link href="/blog" className="btn btn-secondary">
+              {latest.ctaLabel || "Browse all stories"}
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
         }
       />
 

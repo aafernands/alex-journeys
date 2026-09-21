@@ -19,6 +19,7 @@ export default function PoliciesPage() {
     <>
       <PoliciesHashRedirect />
       <SitePage
+        cmsSlug="policies"
         label={page.label}
         title={page.title}
         description={page.description}

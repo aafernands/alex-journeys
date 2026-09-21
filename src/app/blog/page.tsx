@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  AdminPublicChrome,
+  AdminSectionEdit,
+} from "@/components/admin/AdminPublicChrome";
 import { BlogFilters } from "@/components/blog/BlogFilters";
+import { cmsEditPageHref } from "@/lib/admin-edit";
 import { asString } from "@/lib/cms-section-utils";
 import { PAGE_DEFAULTS } from "@/lib/page-defaults";
 import { getPageWithFallback } from "@/lib/pages";
@@ -23,9 +28,15 @@ export default function BlogIndexPage() {
     "{count} stories from the road — destination guides, trip notes, and practical travel tips. Filter by place or guide topic.",
   );
   const intro = template.replace("{count}", String(posts.length));
+  const editHref = cmsEditPageHref("blog");
 
   return (
     <main className="bg-white">
+      <AdminPublicChrome
+        editHref={editHref}
+        editLabel="Edit page"
+        showChip={false}
+      />
       <div className="section-shell py-10 md:py-14">
         <nav aria-label="Breadcrumb" className="text-sm text-muted">
           <ol className="flex flex-wrap items-center gap-2">
@@ -40,13 +51,16 @@ export default function BlogIndexPage() {
         </nav>
 
         {page.label ? <p className="mt-8 eyebrow">{page.label}</p> : null}
-        <h1
-          className={`font-display text-display text-heading ${
+        <div
+          className={`flex flex-wrap items-start justify-between gap-3 ${
             page.label ? "mt-2" : "mt-8"
           }`}
         >
-          {page.title}
-        </h1>
+          <h1 className="font-display text-display text-heading">
+            {page.title}
+          </h1>
+          <AdminSectionEdit href={editHref} label="Edit page" />
+        </div>
         <p className="mt-4 max-w-2xl text-lead text-text">{intro}</p>
 
         <BlogFilters posts={posts} />

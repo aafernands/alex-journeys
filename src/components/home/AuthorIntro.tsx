@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import { AdminSectionEdit } from "@/components/admin/AdminPublicChrome";
 import { Section } from "@/components/ui/Section";
 import { site } from "@/data/content";
+import { CMS_DESIGN_HREF } from "@/lib/admin-edit";
 import { getSiteDesign } from "@/lib/site-design";
 
 export function AuthorIntro() {
@@ -33,7 +35,13 @@ export function AuthorIntro() {
           </div>
         </div>
 
-        <div className="lg:col-span-7">
+        <div className="relative lg:col-span-7">
+          <div className="absolute right-0 top-0">
+            <AdminSectionEdit
+              href={`${CMS_DESIGN_HREF}#design-author`}
+              label="Edit intro"
+            />
+          </div>
           <p className="eyebrow">{author.eyebrow}</p>
           <h2
             id="author-heading"

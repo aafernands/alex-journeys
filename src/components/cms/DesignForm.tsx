@@ -151,7 +151,7 @@ export function DesignForm({ initial }: Props) {
         }}
       >
         {/* Homepage hero image */}
-        <section className="panel overflow-hidden">
+        <section id="design-hero" className="panel scroll-mt-28 overflow-hidden">
           <div className="border-b border-border bg-surface-soft px-5 py-3">
             <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
               Homepage hero
@@ -533,7 +533,8 @@ export function DesignForm({ initial }: Props) {
               return (
                 <div
                   key={key}
-                  className="rounded-lg border border-border bg-surface-soft/50 p-4"
+                  id={`design-${key}`}
+                  className="scroll-mt-28 rounded-lg border border-border bg-surface-soft/50 p-4"
                 >
                   <p className="text-sm font-bold text-heading">{label}</p>
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -643,7 +644,10 @@ export function DesignForm({ initial }: Props) {
               />
             </div>
 
-            <div className="rounded-lg border border-border bg-surface-soft/50 p-4">
+            <div
+              id="design-oauth"
+              className="scroll-mt-28 rounded-lg border border-border bg-surface-soft/50 p-4"
+            >
               <p className="text-sm font-bold text-heading">Google Sign-In note</p>
               <div className="mt-3 grid gap-3">
                 <div>
@@ -701,7 +705,10 @@ export function DesignForm({ initial }: Props) {
               </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-surface-soft/50 p-4">
+            <div
+              id="design-author"
+              className="scroll-mt-28 rounded-lg border border-border bg-surface-soft/50 p-4"
+            >
               <p className="text-sm font-bold text-heading">Author intro</p>
               <p className="mt-1 text-xs text-muted">
                 Portrait shown on the homepage right after the hero. Pick from

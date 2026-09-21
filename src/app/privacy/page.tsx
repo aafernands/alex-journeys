@@ -16,6 +16,7 @@ export default function PrivacyPage() {
 
   return (
     <SitePage
+      cmsSlug="privacy"
       label={page.label}
       title={page.title}
       description={page.description}

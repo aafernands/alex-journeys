@@ -76,6 +76,7 @@ export default function MediaKitPage() {
 
   return (
     <SitePage
+      cmsSlug="media-kit"
       label={page.label}
       title={page.title}
       description={page.description}

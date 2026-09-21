@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { AdminSectionEdit } from "@/components/admin/AdminPublicChrome";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { Section, SectionHead } from "@/components/ui/Section";
+import { CMS_DESIGN_HREF } from "@/lib/admin-edit";
 import { getSiteDesign } from "@/lib/site-design";
 
 export function StartHereCards() {
@@ -12,6 +14,13 @@ export function StartHereCards() {
       tone="white"
       aria-labelledby="start-here-cards-heading"
     >
+      <div className="relative">
+        <div className="absolute right-0 top-0 z-[1]">
+          <AdminSectionEdit
+            href={`${CMS_DESIGN_HREF}#design-startHere`}
+            label="Edit section"
+          />
+        </div>
       <SectionHead
         eyebrow={startHere.eyebrow}
         title={startHere.title}
@@ -19,6 +28,7 @@ export function StartHereCards() {
         description={startHere.description}
         align="center"
       />
+      </div>
 
       <ul className="mt-10 grid gap-4 sm:grid-cols-3 sm:gap-5">
         {startHere.cards.map((card) => (
