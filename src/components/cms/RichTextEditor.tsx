@@ -6,6 +6,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
+import { ViatorScript, ViatorWidget } from "./viator-embeds";
 import {
   Bold,
   Italic,
@@ -90,6 +91,8 @@ export function RichTextEditor({ id, value, onChange, required }: Props) {
         placeholder:
           "Write your story… Use the toolbar for headings, lists, and links.",
       }),
+      ViatorWidget,
+      ViatorScript,
     ],
     [],
   );

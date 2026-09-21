@@ -585,6 +585,22 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
   margin: 1.75em 0;
 }
 
+/* Viator partner cards. The script paints the card inside this div. */
+.post-prose .viator-widget,
+.post-prose [data-vi-widget-ref] {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  margin: 1.75em auto;
+  overflow: hidden;
+}
+
+.post-prose .viator-widget iframe,
+.post-prose [data-vi-widget-ref] iframe {
+  display: block;
+  max-width: 100%;
+}
+
 .post-prose img {
   display: block;
   width: 100%;

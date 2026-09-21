@@ -61,21 +61,35 @@ function stripTags(html) {
   );
 }
 
+const VIATOR_WIDGET_DIV_RE =
+  /<div\b[^>]*\bdata-vi-widget-ref\s*=\s*(["'])[^"']+\1[^>]*>\s*<\/div>/gi;
+const VIATOR_WIDGET_SCRIPT_RE =
+  /<script\b[^>]*\bsrc\s*=\s*(["'])https?:\/\/www\.viator\.com\/orion\/partner\/widget\.js\1[^>]*>\s*<\/script>/gi;
+
 function cleanHtml(html) {
   let h = html;
+
+  // Hold partner embeds aside so the tag allow-list does not drop the empty divs.
+  // Reset lastIndex — these patterns are global and reused across calls.
+  VIATOR_WIDGET_DIV_RE.lastIndex = 0;
+  VIATOR_WIDGET_SCRIPT_RE.lastIndex = 0;
+  const viatorSlots = [];
+  h = h.replace(VIATOR_WIDGET_DIV_RE, (markup) => {
+    const token = `VIATORWIDGETSLOT${viatorSlots.length}END`;
+    viatorSlots.push(markup);
+    return `<p>${token}</p>`;
+  });
+  h = h.replace(VIATOR_WIDGET_SCRIPT_RE, (markup) => {
+    const token = `VIATORWIDGETSLOT${viatorSlots.length}END`;
+    viatorSlots.push(markup);
+    return `<p>${token}</p>`;
+  });
 
   // Remove scripts, noscript, style blocks, tracking pixels (1x1), WP embeds junk
   h = h.replace(/<script[\s\S]*?<\/script>/gi, "");
   h = h.replace(/<noscript[\s\S]*?<\/noscript>/gi, "");
   h = h.replace(/<style[\s\S]*?<\/style>/gi, "");
   h = h.replace(/<!--[\s\S]*?-->/g, "");
-
-  // Viator / affiliate widget placeholders
-  h = h.replace(
-    /<div[^>]*class="[^"]*viator[^"]*"[\s\S]*?<\/div>/gi,
-    "",
-  );
-  h = h.replace(/<div[^>]*data-viator[\s\S]*?<\/div>/gi, "");
 
   // Strip event handlers
   h = h.replace(/\s+on\w+=(?:"[^"]*"|'[^']*')/gi, "");
@@ -188,6 +202,10 @@ function cleanHtml(html) {
   h = h.replace(/(<\/h[1-6]>)\s*/gi, "$1\n");
   h = decodeEntities(h).trim();
 
+  viatorSlots.forEach((markup, index) => {
+    h = h.replace(`<p>VIATORWIDGETSLOT${index}END</p>`, markup);
+  });
+
   return h;
 }
 
@@ -295,4 +313,12 @@ function main() {
   console.log("Featured homepage:", FEATURED_HOMEPAGE);
 }
 
-main();
+const isDirectRun =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectRun) {
+  main();
+}
+
+export { cleanHtml };

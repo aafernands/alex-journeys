@@ -1,0 +1,27 @@
+/** Viator Orion partner widgets recovered from alexjournly.com. */
+
+export const VIATOR_PARTNER_ID = "P00143772";
+
+/** Official embed loader. It pulls in widget-main.js, which paints the cards. */
+export const VIATOR_WIDGET_SCRIPT_SRC =
+  "https://www.viator.com/orion/partner/widget.js";
+
+const WIDGET_REF_RE =
+  /^W-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function viatorWidgetDiv(
+  widgetRef: string,
+  partnerId: string = VIATOR_PARTNER_ID,
+): string {
+  if (partnerId !== VIATOR_PARTNER_ID) {
+    throw new Error("Unexpected Viator partner id.");
+  }
+  if (!WIDGET_REF_RE.test(widgetRef)) {
+    throw new Error(`Invalid Viator widget ref: ${widgetRef}`);
+  }
+  return `<div class="viator-widget" data-vi-partner-id="${partnerId}" data-vi-widget-ref="${widgetRef}"></div>`;
+}
+
+export function htmlHasViatorWidgets(html: string): boolean {
+  return /data-vi-widget-ref\s*=\s*["']W-/i.test(html);
+}

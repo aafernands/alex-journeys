@@ -282,6 +282,9 @@ export function validatePostInput(
     return { ok: false, error: "Excerpt is required (max 600 characters)." };
   }
 
+  // Stored verbatim. Empty Viator divs (data-vi-partner-id / data-vi-widget-ref)
+  // and a pasted https://www.viator.com/orion/partner/widget.js script are
+  // intentional — the partner script fills the cards. Do not sanitize them away.
   const contentHtml = asString(input.contentHtml);
   if (!contentHtml) {
     return { ok: false, error: "Content HTML is required." };
