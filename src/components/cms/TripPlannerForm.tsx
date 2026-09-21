@@ -226,6 +226,21 @@ export function TripPlannerForm({ config: initialConfig, partners: initialPartne
           Next-step helper can use {"{destination}"}, {"{dates}"}, and{" "}
           {"{travelers}"}.
         </p>
+        <label className="block text-sm font-semibold text-heading">
+          Checklist note
+          <textarea
+            className={areaClass}
+            rows={2}
+            value={config.checklistHint}
+            onChange={(event) =>
+              updateConfig({ checklistHint: event.target.value })
+            }
+          />
+        </label>
+        <p className="text-xs text-muted">
+          Shown on the next-steps list. Checked items are saved in this
+          browser for the same plan, not in a reader account.
+        </p>
         <div className="grid gap-3 sm:grid-cols-2">
           {(
             [

@@ -6,6 +6,7 @@ import {
   dateSummary,
   effectiveCategories,
   fillAffiliateUrl,
+  planFingerprint,
   flexibleRange,
   formatDateRange,
   formatFlexible,
@@ -149,6 +150,23 @@ describe("plan a trip planner", () => {
       }),
       "https://expedia.com/affiliates/nyc/plan_trip",
     );
+  });
+
+  it("keeps one checklist fingerprint for the same plan", () => {
+    const base = lisbonTrip();
+    const again = { ...base, categories: ["hotel", "flights"] };
+    assert.equal(planFingerprint(base, true), planFingerprint(again, true));
+
+    const allThree = { ...base, categories: ["flights", "hotel", "car"] };
+    const unsure = { ...allThree, categories: [], unsure: true };
+    assert.equal(planFingerprint(allThree, true), planFingerprint(unsure, true));
+    assert.notEqual(planFingerprint(base, true), planFingerprint(unsure, true));
+
+    const otherCity = { ...base, destination: "Porto" };
+    assert.notEqual(planFingerprint(base, true), planFingerprint(otherCity, true));
+
+    const withChild = { ...base, children: 1 };
+    assert.notEqual(planFingerprint(base, true), planFingerprint(withChild, true));
   });
 
   it("shows core steps for the selection and extras after them", () => {

@@ -65,6 +65,12 @@ export function validateTripPlannerInput(
   if (!guidesHeading.ok) return guidesHeading;
   const disclosure = requiredString(configIn.disclosure, "Disclosure", 400);
   if (!disclosure.ok) return disclosure;
+  if (
+    typeof configIn.checklistHint === "string" &&
+    configIn.checklistHint.trim().length > 240
+  ) {
+    return { ok: false, error: "Checklist note max is 240 characters." };
+  }
 
   const steps = asRecord(configIn.steps);
   if (!steps) return { ok: false, error: "Step copy is required." };

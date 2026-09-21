@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type ReactNode } from "react";
+import { useId, useState, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import {
@@ -8,6 +8,7 @@ import {
   initialPlannerState,
   nextStepsSubhead,
   partnerUrlValues,
+  planFingerprint,
   resolveAffiliateHref,
   reviewRows,
   TRIP_CATEGORIES,
@@ -21,6 +22,19 @@ import {
   type TripPlannerPartner,
   type TripType,
 } from "@/lib/trip-planner-model";
+import {
+  checksForFingerprint,
+  getActivePlanSnapshot,
+  getChecksRaw,
+  getServerActivePlan,
+  getServerChecksRaw,
+  subscribeTripStore,
+  writeActivePlan,
+  writeChecks,
+  type StoredPlan,
+} from "@/lib/trip-planner-storage";
+
+const EMPTY_PLAN: StoredPlan = { step: 1, state: initialPlannerState() };
 
 type Props = {
   config: TripPlannerConfig;
@@ -124,17 +138,33 @@ function describedBy(id: string, error?: string): string | undefined {
 
 export function TripPlanner({ config, partners }: Props) {
   const baseId = useId();
-  const [step, setStep] = useState<Step>(1);
-  const [state, setState] = useState<PlannerState>(initialPlannerState);
+  const storedPlan = useSyncExternalStore(
+    subscribeTripStore,
+    getActivePlanSnapshot,
+    getServerActivePlan,
+  );
+  const checksRaw = useSyncExternalStore(
+    subscribeTripStore,
+    getChecksRaw,
+    getServerChecksRaw,
+  );
+  const plan = storedPlan ?? EMPTY_PLAN;
+  const { step, state } = plan;
   const [categoryError, setCategoryError] = useState<string | null>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
 
   const cats = effectiveCategories(state);
   const flexibleOn = config.flexibleDates;
   const dateMode = flexibleOn ? state.dateMode : "exact";
+  const fingerprint = planFingerprint(state, flexibleOn);
+  const checked = checksForFingerprint(checksRaw, fingerprint);
+
+  function savePlan(next: StoredPlan) {
+    writeActivePlan(next);
+  }
 
   function patch(partial: Partial<PlannerState>) {
-    setState((current) => ({ ...current, ...partial }));
+    savePlan({ step, state: { ...state, ...partial } });
     setErrors((current) => {
       const next = { ...current };
       for (const key of Object.keys(partial)) delete next[key];
@@ -142,29 +172,38 @@ export function TripPlanner({ config, partners }: Props) {
     });
   }
 
+  function setStep(next: Step) {
+    savePlan({ step: next, state });
+  }
+
   function toggleCategory(cat: TripCategory) {
     setCategoryError(null);
-    setState((current) => {
-      if (current.unsure) {
-        return {
-          ...current,
+    if (state.unsure) {
+      savePlan({
+        step,
+        state: {
+          ...state,
           unsure: false,
           categories: TRIP_CATEGORIES.filter((item) => item !== cat),
-        };
-      }
-      const has = current.categories.includes(cat);
-      return {
-        ...current,
+        },
+      });
+      return;
+    }
+    const has = state.categories.includes(cat);
+    savePlan({
+      step,
+      state: {
+        ...state,
         categories: has
-          ? current.categories.filter((item) => item !== cat)
-          : [...current.categories, cat],
-      };
+          ? state.categories.filter((item) => item !== cat)
+          : [...state.categories, cat],
+      },
     });
   }
 
   function toggleUnsure() {
     setCategoryError(null);
-    setState((current) => ({ ...current, unsure: !current.unsure }));
+    savePlan({ step, state: { ...state, unsure: !state.unsure } });
   }
 
   function goDetails() {
@@ -182,16 +221,24 @@ export function TripPlanner({ config, partners }: Props) {
     setStep(3);
   }
 
+  function toggleDone(key: string) {
+    const next = checked.includes(key)
+      ? checked.filter((item) => item !== key)
+      : [...checked, key];
+    writeChecks(fingerprint, next);
+  }
+
   function startOver() {
-    setState(initialPlannerState());
+    writeChecks(fingerprint, []);
+    writeActivePlan({ step: 1, state: initialPlannerState() });
     setCategoryError(null);
     setErrors({});
-    setStep(1);
   }
 
   const rows = reviewRows(state, flexibleOn);
   const steps = visiblePartners(partners, state, config.extras);
   const subhead = nextStepsSubhead(config.steps.next.helper, state, flexibleOn);
+  const doneCount = steps.filter((partner) => checked.includes(partner.key)).length;
 
   return (
     <section aria-labelledby={`${baseId}-heading`} className="mt-8 max-w-3xl">
@@ -691,13 +738,23 @@ export function TripPlanner({ config, partners }: Props) {
             <p className="mt-2 text-sm leading-relaxed text-muted md:text-base">
               {subhead}
             </p>
+            <p className="mt-3 text-sm leading-relaxed text-text">
+              {config.checklistHint}
+            </p>
             {steps.length > 0 ? (
-              <ol className="mt-6 space-y-3">
+              <p className="mt-1 text-sm font-semibold text-muted">
+                {doneCount} of {steps.length} done
+              </p>
+            ) : null}
+            {steps.length > 0 ? (
+              <ol className="mt-4 space-y-3">
                 {steps.map((partner, index) => {
                   const href = resolveAffiliateHref(
                     partner,
                     partnerUrlValues(partner, state, flexibleOn),
                   );
+                  const done = checked.includes(partner.key);
+                  const checkId = `${baseId}-done-${partner.key}`;
                   return (
                     <li
                       key={partner.key}
@@ -706,6 +763,13 @@ export function TripPlanner({ config, partners }: Props) {
                       }`}
                     >
                       <div className="flex min-w-0 gap-3">
+                        <input
+                          id={checkId}
+                          type="checkbox"
+                          className="mt-1 size-4 shrink-0 accent-[var(--accent)]"
+                          checked={done}
+                          onChange={() => toggleDone(partner.key)}
+                        />
                         <span
                           className={`flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
                             partner.isCore
@@ -716,25 +780,32 @@ export function TripPlanner({ config, partners }: Props) {
                         >
                           {index + 1}
                         </span>
-                        <div className="min-w-0">
-                          <p className="font-display font-bold text-heading">
+                        <label htmlFor={checkId} className="min-w-0 cursor-pointer">
+                          <span
+                            className={`font-display block font-bold ${
+                              done ? "text-muted line-through" : "text-heading"
+                            }`}
+                          >
                             {partner.label}
-                          </p>
+                          </span>
                           {partner.blurb ? (
-                            <p className="mt-0.5 text-sm leading-relaxed text-muted">
+                            <span className="mt-0.5 block text-sm leading-relaxed text-muted">
                               {partner.blurb}
-                            </p>
+                            </span>
                           ) : null}
-                        </div>
+                        </label>
                       </div>
                       <OutboundLink
                         href={href}
                         affiliate
+                        target="_blank"
+                        rel="noopener noreferrer sponsored"
                         className={`btn w-full shrink-0 sm:w-auto ${
                           partner.isCore ? "btn-primary" : "btn-secondary"
                         }`}
                       >
                         {partner.buttonLabel}
+                        <span className="sr-only"> (opens in a new tab)</span>
                       </OutboundLink>
                     </li>
                   );

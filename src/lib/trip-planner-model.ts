@@ -47,6 +47,8 @@ export type TripPlannerConfig = {
   guidesEyebrow: string;
   guidesHeading: string;
   disclosure: string;
+  /** Step 4 note that checked items stay in this browser. */
+  checklistHint: string;
   flexibleDates: boolean;
   extras: boolean;
   continueLabel: string;
@@ -128,6 +130,8 @@ export const DEFAULT_CONFIG: TripPlannerConfig = {
   guidesHeading: "Notes from trips I’ve already walked",
   disclosure:
     "Some links are affiliates. If you book through them I may earn a commission at no extra cost to you.",
+  checklistHint:
+    "This checklist stays on this page — mark what’s done when you come back.",
   flexibleDates: true,
   extras: true,
   continueLabel: "Continue",
@@ -384,6 +388,41 @@ export function travelerSummary(state: PlannerState): string {
   return parts.join(" · ");
 }
 
+/**
+ * Stable key for one plan on this browser. Category order is fixed so
+ * “not sure” and picking all three share the same checklist.
+ */
+export function planFingerprint(
+  state: PlannerState,
+  flexibleDatesEnabled: boolean,
+): string {
+  const cats = effectiveCategories(state);
+  const parts = [
+    state.destination.trim().toLowerCase(),
+    dateSummary(state, flexibleDatesEnabled),
+    cats.join("+"),
+    String(Math.max(0, Math.trunc(Number(state.adults)) || 0)),
+    String(Math.max(0, Math.trunc(Number(state.children)) || 0)),
+  ];
+  if (cats.includes("flights")) {
+    parts.push(state.origin.trim().toLowerCase(), state.tripType);
+  }
+  if (cats.includes("hotel")) {
+    parts.push(`rooms:${Math.max(0, Math.trunc(Number(state.rooms)) || 0)}`);
+  }
+  if (cats.includes("car")) {
+    parts.push(
+      state.carPickupSameAsDestination
+        ? "pickup:destination"
+        : `pickup:${state.carPickupLocation.trim().toLowerCase()}`,
+      state.carDatesSameAsTrip
+        ? "cardates:trip"
+        : `cardates:${state.carPickupDate}/${state.carDropoffDate}`,
+    );
+  }
+  return parts.join("|");
+}
+
 export function bookingSummary(state: PlannerState): string {
   return effectiveCategories(state)
     .map((cat) => CATEGORY_LABEL[cat])
@@ -622,6 +661,7 @@ export function normalizeConfig(raw: unknown): TripPlannerConfig {
     guidesEyebrow: str(record.guidesEyebrow, base.guidesEyebrow),
     guidesHeading: str(record.guidesHeading, base.guidesHeading),
     disclosure: str(record.disclosure, base.disclosure),
+    checklistHint: str(record.checklistHint, base.checklistHint),
     flexibleDates: bool(record.flexibleDates, base.flexibleDates),
     extras: bool(record.extras, base.extras),
     continueLabel: str(record.continueLabel, base.continueLabel),

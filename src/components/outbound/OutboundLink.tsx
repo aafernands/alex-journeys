@@ -24,6 +24,20 @@ export function OutboundLink({
 }: OutboundLinkProps) {
   const trimmed = href.trim();
 
+  if (trimmed.startsWith("/out")) {
+    return (
+      <a
+        href={trimmed}
+        className={className}
+        rel={rel ?? "noopener noreferrer"}
+        target={target ?? "_blank"}
+        {...rest}
+      >
+        {children}
+      </a>
+    );
+  }
+
   if (
     trimmed.startsWith("/") ||
     trimmed.startsWith("#") ||
