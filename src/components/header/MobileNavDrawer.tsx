@@ -1,8 +1,6 @@
 "use client";
 
 import { BrandLogo } from "@/components/brand/BrandLogo";
-import { MobileTopicSection } from "@/components/header/MobileTopicSection";
-import { NavIcon } from "@/components/icons/NavIcon";
 import {
   SocialCoffeeIcon,
   SocialInstagramIcon,
@@ -13,10 +11,7 @@ import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
 import { ThemeAppearanceControl } from "@/components/ThemeToggle";
 import { site } from "@/data/content";
-import { destinationsTree } from "@/data/destinations";
-import { guidesNav } from "@/data/guides";
 import Link from "next/link";
-import { useState } from "react";
 
 type Props = {
   open: boolean;
@@ -24,21 +19,24 @@ type Props = {
   googleConfigured?: boolean;
 };
 
-const exploreLinkClass =
-  "flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft hover:text-accent";
+const PRIMARY_LINKS = [
+  { href: "/start-here", label: "Start here" },
+  { href: "/destinations", label: "Places" },
+  { href: "/guides", label: "Guides" },
+  { href: "/tools", label: "Tools I use" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+] as const;
 
 /**
- * Secondary mobile drawer (opened from header hamburger).
- * Primary Places/Stories/Guides/Saved live in the scroll-reveal bottom bar — drawer holds the rest.
+ * Mobile hamburger drawer: oversized editorial list of hub links.
+ * Places / Stories / Guides / Saved also live in the scroll-reveal bottom bar.
  */
 export function MobileNavDrawer({
   open,
   onClose,
   googleConfigured = false,
 }: Props) {
-  const [mobileDestOpen, setMobileDestOpen] = useState(false);
-  const [mobileContinent, setMobileContinent] = useState<string | null>(null);
-
   if (!open) return null;
 
   return (
@@ -60,7 +58,6 @@ export function MobileNavDrawer({
         className="absolute inset-y-0 left-0 flex w-[calc(100%-0.75rem)] max-w-[28rem] flex-col bg-bg shadow-xl"
         aria-label="Mobile"
       >
-        {/* 1. Header: logo + close */}
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
           <BrandLogo className="h-10 w-auto" priority onClick={onClose} />
           <button
@@ -83,9 +80,8 @@ export function MobileNavDrawer({
           </button>
         </div>
 
-        {/* 2. Account strip — pinned under header */}
         {googleConfigured ? (
-          <div className="shrink-0 border-b border-border px-4 py-3">
+          <div className="shrink-0 border-b border-border px-5 py-2.5">
             <ReaderAuthButtons
               variant="drawer"
               googleConfigured={googleConfigured}
@@ -94,139 +90,22 @@ export function MobileNavDrawer({
           </div>
         ) : null}
 
-        {/* Scrollable body: Explore + Browse accordions + Appearance in document flow */}
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4">
-          {/* 3. Explore */}
-          <section aria-labelledby="drawer-explore-label">
-            <h2
-              id="drawer-explore-label"
-              className="mb-1.5 px-2 text-xs font-semibold uppercase tracking-wide text-muted"
-            >
-              Explore
-            </h2>
-            <ul className="flex flex-col gap-0.5">
-              <li>
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pt-4">
+          <ul className="flex flex-col" aria-label="Primary">
+            {PRIMARY_LINKS.map((item) => (
+              <li key={item.href}>
                 <Link
-                  href="/start-here"
-                  className={exploreLinkClass}
+                  href={item.href}
+                  className="font-display block py-3 text-3xl font-semibold leading-none tracking-tight text-heading transition hover:text-accent"
                   onClick={onClose}
                 >
-                  <NavIcon name="compass" size={18} className="text-accent" />
-                  Start here
+                  {item.label}
                 </Link>
               </li>
-              <li>
-                <Link href="/tools" className={exploreLinkClass} onClick={onClose}>
-                  <NavIcon name="wrench" size={18} className="text-accent" />
-                  Tools I use
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className={exploreLinkClass} onClick={onClose}>
-                  <NavIcon name="info" size={18} className="text-accent" />
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className={exploreLinkClass}
-                  onClick={onClose}
-                >
-                  <NavIcon name="mail" size={18} className="text-accent" />
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </section>
+            ))}
+          </ul>
 
-          {/* 4. Browse — Places / Guides expanders (push Appearance down when open) */}
-          <section
-            aria-labelledby="drawer-browse-label"
-            className="mt-5 border-t border-border pt-4"
-          >
-            <h2
-              id="drawer-browse-label"
-              className="mb-1.5 px-2 text-xs font-semibold uppercase tracking-wide text-muted"
-            >
-              Browse
-            </h2>
-            <ul className="flex flex-col gap-0.5">
-              <li>
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-between rounded-lg px-2 py-2.5 text-base font-semibold tracking-tight text-heading hover:bg-surface-soft"
-                  aria-expanded={mobileDestOpen}
-                  onClick={() => setMobileDestOpen((v) => !v)}
-                >
-                  <span className="inline-flex items-center gap-2.5">
-                    <NavIcon name="map-pin" size={18} className="text-accent" />
-                    Places
-                  </span>
-                  <ChevronDown open={mobileDestOpen} />
-                </button>
-                {mobileDestOpen ? (
-                  <ul className="mb-2 ml-3 border-l border-border pl-3">
-                    <li>
-                      <Link
-                        href="/destinations"
-                        className="block py-1.5 text-sm text-text hover:text-accent"
-                        onClick={onClose}
-                      >
-                        All places
-                      </Link>
-                    </li>
-                    {destinationsTree.map((continent) => {
-                      const continentOpen = mobileContinent === continent.id;
-                      return (
-                        <li key={continent.id}>
-                          <button
-                            type="button"
-                            className="flex w-full items-center justify-between py-1.5 text-sm font-semibold text-heading"
-                            aria-expanded={continentOpen}
-                            onClick={() =>
-                              setMobileContinent(
-                                continentOpen ? null : continent.id,
-                              )
-                            }
-                          >
-                            {continent.name}
-                            <ChevronDown open={continentOpen} />
-                          </button>
-                          {continentOpen ? (
-                            <ul className="mb-1 ml-2 border-l border-border pl-3">
-                              {continent.countries.map((country) => (
-                                <li key={country.slug}>
-                                  <Link
-                                    href={`/${country.slug}`}
-                                    className="block py-1.5 text-sm text-text hover:text-accent"
-                                    onClick={onClose}
-                                  >
-                                    {country.name}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          ) : null}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                ) : null}
-              </li>
-
-              <MobileTopicSection
-                label="Guides"
-                href="/guides"
-                items={guidesNav}
-                icon="book-marked"
-                onNavigate={onClose}
-              />
-            </ul>
-          </section>
-
-          {/* 5. Appearance + socials — in flow below nav, not sticky */}
-          <div className="mt-5 space-y-3 border-t border-border pt-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
+          <div className="mt-auto space-y-3 border-t border-border pt-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
             <ThemeAppearanceControl />
 
             <ul
@@ -278,22 +157,5 @@ export function MobileNavDrawer({
         </div>
       </nav>
     </div>
-  );
-}
-
-function ChevronDown({ open }: { open: boolean }) {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className={`transition ${open ? "rotate-180" : ""}`}
-      aria-hidden="true"
-    >
-      <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   );
 }

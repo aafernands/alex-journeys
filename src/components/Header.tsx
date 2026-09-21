@@ -361,7 +361,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             </Link>
           </div>
 
-          {/* Mobile: hamburger only (theme lives in drawer; bottom bar has Places/Stories/Guides/Saved) */}
+          {/* Mobile: hamburger opens oversized hub list; bottom bar has Places/Stories/Guides/Saved */}
           <div className="relative z-10 flex items-center md:hidden">
             <button
               type="button"
