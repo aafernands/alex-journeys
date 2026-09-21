@@ -617,7 +617,7 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
   margin: 1.75em 0;
 }
 
-/* Viator partner cards. The script paints a white card inside this div. */
+/* Viator partner cards. The script paints its own bordered white card inside this div. */
 .post-prose .viator-widget,
 .post-prose [data-vi-widget-ref] {
   box-sizing: border-box;
@@ -627,8 +627,6 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
   overflow: hidden;
   color-scheme: light;
   background: #ffffff;
-  border: 1px solid #e0d4c2;
-  border-radius: 0.75rem;
   padding: 0.75rem;
 }
 
