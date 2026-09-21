@@ -136,14 +136,14 @@ export function pinterestPinMarkup({
 
 function alreadyInsidePinnable(html: string, offset: number): boolean {
   const before = html.slice(0, offset);
-  const openRe = /<span\b[^>]*\bpinnable-image\b[^>]*>/gi;
+  const openRe = /<(?:div|span)\b[^>]*\bpinnable-image\b[^>]*>/gi;
   let lastOpen = -1;
   let match: RegExpExecArray | null;
   while ((match = openRe.exec(before))) {
     lastOpen = match.index + match[0].length;
   }
   if (lastOpen === -1) return false;
-  return !/<\/span>/i.test(before.slice(lastOpen));
+  return !/<\/(?:div|span)>/i.test(before.slice(lastOpen));
 }
 
 /**
@@ -173,7 +173,7 @@ export function wrapHtmlImagesWithPinterestPins(
     (full, aAttrs: string, beforeImg: string, img: string, afterImg: string) => {
       const pin = pinForImg(img);
       if (!pin) return full;
-      return `<span class="pinnable-image"><a${aAttrs}>${beforeImg}${img}${afterImg}</a>${pin}</span>`;
+      return `<div class="pinnable-image"><a${aAttrs}>${beforeImg}${img}${afterImg}</a>${pin}</div>`;
     },
   );
 
@@ -181,7 +181,7 @@ export function wrapHtmlImagesWithPinterestPins(
     if (alreadyInsidePinnable(out, offset)) return tag;
     const pin = pinForImg(tag);
     if (!pin) return tag;
-    return `<span class="pinnable-image">${tag}${pin}</span>`;
+    return `<div class="pinnable-image">${tag}${pin}</div>`;
   });
 
   return out;
