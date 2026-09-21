@@ -2,7 +2,7 @@
 
 Plan a trip (`/guides/plan-a-trip`) ends on an **itinerary hub**: one booking lane per selected partner (flights, stay, car, and extras), each with a partner search that opens through `/out` in a new tab. Readers add a title, link, optional confirmation number, day and time, notes, and a status of **To book**, **Booked**, or **Skip**. The hub groups those items into Day 1 … Day N from the trip dates (or flexible nights). Items without a day stay in **Unscheduled**.
 
-**Paste booking details** only reads the text the reader pasted. It may fill a link and a confirmation-looking code. It does not open or scrape partner sites.
+**Paste booking details** only reads the text the reader pasted. It may fill a link, a confirmation-looking code, a clock time, and a day when that text names one of the trip dates. It does not open or scrape partner sites.
 
 Reader auth is the existing Auth.js email/password + Google session. Trips do not add a second login.
 

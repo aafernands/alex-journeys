@@ -20,6 +20,7 @@ import {
   cleanTime,
   createTripItem,
   extractBookingPaste,
+  mentionedTripDay,
   isSafeHttpUrl,
   itemsForLane,
   itemTypeForPartner,
@@ -162,14 +163,17 @@ function BookingItemForm({
 
   function fillFromPaste() {
     const found = extractBookingPaste(paste);
-    if (!found.url && !found.confirmation) {
+    const day = mentionedTripDay(days, paste);
+    if (!found.url && !found.confirmation && !found.time && day == null) {
       setPasteNote(
-        "No link or confirmation code in that text. Fill the fields yourself.",
+        "No link, confirmation code, time, or trip day in that text. Fill the fields yourself.",
       );
       return;
     }
     if (found.url) setUrl(found.url);
     if (found.confirmation) setConfirmation(found.confirmation);
+    if (found.time) setTime(found.time);
+    if (day != null) setDayIndex(String(day));
     setError(null);
     setPasteNote(
       "Filled from the text you pasted. This only reads that text — it does not open booking sites.",
@@ -251,8 +255,8 @@ function BookingItemForm({
         />
       </label>
       <p className="text-sm leading-relaxed text-muted">
-        Looks for a link and a confirmation code in the text you paste. It does not
-        open or scrape booking sites.
+        Looks for a link, a confirmation code, a time, and a trip day in the text
+        you paste. It does not open or scrape booking sites.
       </p>
       <button type="button" className="btn btn-secondary" onClick={fillFromPaste}>
         Fill from paste

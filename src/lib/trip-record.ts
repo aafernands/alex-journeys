@@ -78,6 +78,10 @@ const DAY_MONTHS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ] as const;
+const FULL_MONTHS = [
+  "january", "february", "march", "april", "may", "june",
+  "july", "august", "september", "october", "november", "december",
+] as const;
 const MAX_TRIP_DAYS = 45;
 
 export type TripWrite = {
@@ -234,14 +238,54 @@ export function scheduledDayIndex(item: TripItem, dayCount: number): number | nu
   return item.dayIndex;
 }
 
+/** Clock time from pasted text, as `HH:MM`. Does not fetch a booking page. */
+export function extractPastedTime(text: string): string {
+  const match = text.match(/\b(\d{1,2}):(\d{2})\s*(am|pm)?\b/i);
+  if (!match) return "";
+  let hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const meridiem = match[3]?.toLowerCase();
+  if (minutes > 59 || hours > 23) return "";
+  if (meridiem) {
+    if (hours < 1 || hours > 12) return "";
+    if (meridiem === "pm" && hours < 12) hours += 12;
+    if (meridiem === "am" && hours === 12) hours = 0;
+  }
+  return cleanTime(
+    `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`,
+  );
+}
+
+/** Trip day named in pasted text, by ISO date or a month-and-day phrase. */
+export function mentionedTripDay(days: TripDay[], text: string): number | null {
+  const folded = text.toLowerCase();
+  for (const day of days) {
+    if (folded.includes(day.date)) return day.index;
+    const parsed = parseIsoDate(day.date);
+    if (!parsed) continue;
+    const shortName = DAY_MONTHS[parsed.m - 1].toLowerCase();
+    const fullName = FULL_MONTHS[parsed.m - 1];
+    const dayNumber = String(parsed.d);
+    const named = [
+      new RegExp(`\\b${fullName}\\.?\\s+${dayNumber}\\b`, "i"),
+      new RegExp(`\\b${shortName}\\.?\\s+${dayNumber}\\b`, "i"),
+      new RegExp(`\\b${dayNumber}\\s+${fullName}\\b`, "i"),
+      new RegExp(`\\b${dayNumber}\\s+${shortName}\\.?\\b`, "i"),
+    ];
+    if (named.some((pattern) => pattern.test(text))) return day.index;
+  }
+  return null;
+}
+
 /**
  * Best-effort read of a pasted confirmation blurb.
- * Pulls the first http(s) link and a confirmation-looking token.
+ * Pulls the first http(s) link, a confirmation-looking token, and a clock time.
  * Does not fetch or scrape a booking site.
  */
 export function extractBookingPaste(text: string): {
   url: string;
   confirmation: string;
+  time: string;
 } {
   const raw = text.trim();
   let url = "";
@@ -256,6 +300,7 @@ export function extractBookingPaste(text: string): {
   return {
     url,
     confirmation: confMatch ? cleanConfirmation(confMatch[1]) : "",
+    time: extractPastedTime(raw),
   };
 }
 

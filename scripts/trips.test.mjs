@@ -5,6 +5,7 @@ import {
   bookedChecklist,
   createTripItem,
   extractBookingPaste,
+  mentionedTripDay,
   isReasonableTripDraft,
   isSafeHttpUrl,
   normalizeTripItems,
@@ -140,13 +141,22 @@ describe("saved trips", () => {
     assert.equal(scheduledDayIndex({ ...parsed.data.items[0], dayIndex: 12 }, 8), null);
 
     const pasted = extractBookingPaste(
-      "You're confirmed. Confirmation code is XK4M92. https://www.expedia.com/trips/1.",
+      "You're confirmed. Confirmation code is XK4M92. Departs Apr 12 at 9:40 AM. https://www.expedia.com/trips/1.",
     );
     assert.equal(pasted.url, "https://www.expedia.com/trips/1");
     assert.equal(pasted.confirmation, "XK4M92");
+    assert.equal(pasted.time, "09:40");
+    const days = tripDays(lisbonState(), true);
+    assert.equal(mentionedTripDay(days, "Departs Apr 12 at 9:40 AM"), 1);
+    assert.equal(
+      mentionedTripDay(days, "Hotel check-in April 19, 2027"),
+      8,
+    );
+    assert.equal(mentionedTripDay(days, "See you in Lisbon"), null);
     assert.deepEqual(extractBookingPaste("See you in Lisbon"), {
       url: "",
       confirmation: "",
+      time: "",
     });
   });
 
