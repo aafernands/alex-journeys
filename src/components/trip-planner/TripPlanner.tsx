@@ -38,6 +38,7 @@ const EMPTY_PLAN: StoredPlan = {
   state: initialPlannerState(),
   items: [],
   tripId: null,
+  packingNotes: "",
 };
 
 type Props = {
@@ -184,12 +185,15 @@ export function TripPlanner({
     state: PlannerState;
     items?: StoredPlan["items"];
     tripId?: string | null;
+    packingNotes?: string;
   }) {
     writeActivePlan({
       step: next.step,
       state: next.state,
       items: next.items ?? plan.items,
       tripId: next.tripId !== undefined ? next.tripId : plan.tripId,
+      packingNotes:
+        next.packingNotes !== undefined ? next.packingNotes : plan.packingNotes,
     });
   }
 
@@ -259,6 +263,7 @@ export function TripPlanner({
       state: initialPlannerState(),
       items: [],
       tripId: null,
+      packingNotes: "",
     });
     setCategoryError(null);
     setErrors({});
@@ -849,7 +854,11 @@ export function TripPlanner({
               tripId={plan.tripId}
               saveMode={sync.mode}
               guestBackup={sync.guestBackup}
+              packingNotes={plan.packingNotes}
               onItemsChange={(items) => savePlan({ step, state, items })}
+              onPackingNotesChange={(packingNotes) =>
+                savePlan({ step, state, packingNotes })
+              }
               onEditTrip={() => setStep(2)}
               onStartOver={startOver}
               onSaveToAccount={sync.saveToAccount}

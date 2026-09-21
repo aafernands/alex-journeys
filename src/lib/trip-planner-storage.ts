@@ -3,6 +3,7 @@ import {
   type PlannerState,
 } from "@/lib/trip-planner-model";
 import {
+  cleanPackingNotes,
   normalizeTripItems,
   type StoredTripPlan,
   type TripItem,
@@ -95,6 +96,7 @@ export function parseStoredPlan(value: unknown): StoredPlan | null {
     state?: unknown;
     items?: unknown;
     tripId?: unknown;
+    packingNotes?: unknown;
   };
   if (
     record.step !== 1 &&
@@ -115,6 +117,7 @@ export function parseStoredPlan(value: unknown): StoredPlan | null {
     state: record.state,
     items: normalizeTripItems(record.items),
     tripId,
+    packingNotes: cleanPackingNotes(record.packingNotes),
   };
 }
 

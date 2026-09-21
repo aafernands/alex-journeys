@@ -29,6 +29,7 @@ users/{userId}/trips/{tripId}
     dayIndex?       // 1-based day. Missing or outside the trip = unscheduled
     time?           // optional HH:MM
   }]
+  packingNotes // freeform packing list, up to 4000 characters
   checklist   // item ids with status "booked"
   createdAt, updatedAt
 ```

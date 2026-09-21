@@ -108,6 +108,7 @@ function firestorePayload(write: TripWrite, createdAt: string, updatedAt: string
     carPickupDate: write.carPickupDate,
     carDropoffDate: write.carDropoffDate,
     unsure: write.unsure,
+    packingNotes: write.packingNotes,
     items,
     checklist: bookedChecklist(items),
     createdAt,

@@ -105,6 +105,8 @@ export type TripWrite = {
   carDropoffDate: string;
   unsure: boolean;
   items: TripItem[];
+  /** Freeform packing list for this trip. */
+  packingNotes: string;
 };
 
 export type TripRecord = TripWrite & {
@@ -120,7 +122,13 @@ export type StoredTripPlan = {
   state: PlannerState;
   items: TripItem[];
   tripId: string | null;
+  packingNotes: string;
 };
+
+export function cleanPackingNotes(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value.replace(/\r\n/g, "\n").slice(0, 4000);
+}
 
 const MAX_ITEMS = 40;
 
@@ -516,12 +524,13 @@ export function parseTripWrite(
       carDropoffDate,
       unsure: record.unsure === true,
       items,
+      packingNotes: cleanPackingNotes(record.packingNotes).trim(),
     },
   };
 }
 
 export function tripWriteFromPlan(
-  plan: { state: PlannerState; items: TripItem[] },
+  plan: { state: PlannerState; items: TripItem[]; packingNotes?: string },
   flexibleDatesEnabled: boolean,
 ): TripWrite {
   const { state, items } = plan;
@@ -546,6 +555,7 @@ export function tripWriteFromPlan(
     carDropoffDate: state.carDropoffDate,
     unsure: state.unsure,
     items,
+    packingNotes: cleanPackingNotes(plan.packingNotes).trim(),
   };
 }
 
@@ -580,6 +590,7 @@ export function storedPlanFromTrip(trip: TripRecord): StoredTripPlan {
     state: plannerStateFromTrip(trip),
     items: trip.items,
     tripId: trip.id,
+    packingNotes: trip.packingNotes,
   };
 }
 

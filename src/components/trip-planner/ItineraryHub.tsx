@@ -47,7 +47,9 @@ type Props = {
   tripId: string | null;
   saveMode: TripSaveMode;
   guestBackup: StoredPlan | null;
+  packingNotes: string;
   onItemsChange: (items: TripItem[]) => void;
+  onPackingNotesChange: (notes: string) => void;
   onEditTrip: () => void;
   onStartOver: () => void;
   onSaveToAccount: () => void;
@@ -520,7 +522,9 @@ export function ItineraryHub({
   tripId,
   saveMode,
   guestBackup,
+  packingNotes,
   onItemsChange,
+  onPackingNotesChange,
   onEditTrip,
   onStartOver,
   onSaveToAccount,
@@ -935,6 +939,26 @@ export function ItineraryHub({
             Add a note
           </button>
         )}
+      </section>
+
+      <section className="panel-soft mt-6 px-4 py-4" aria-labelledby={`${headingId}-packing`}>
+        <h3
+          id={`${headingId}-packing`}
+          className="font-display text-lg font-bold text-heading"
+        >
+          Packing notes
+        </h3>
+        <p className="mt-1 text-sm leading-relaxed text-muted">
+          A list for this trip. One line per item is enough.
+        </p>
+        <textarea
+          className={`${inputClass} min-h-28 py-3`}
+          rows={5}
+          maxLength={4000}
+          placeholder={"Layers for the evening\nAdapter\nWalking shoes"}
+          value={packingNotes}
+          onChange={(event) => onPackingNotesChange(event.target.value.slice(0, 4000))}
+        />
       </section>
 
       <aside className="panel-soft mt-6 px-4 py-3" aria-label="Affiliate disclosure">

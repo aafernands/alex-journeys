@@ -79,6 +79,23 @@ describe("saved trips", () => {
     assert.equal(parsed.data.items[0]?.laneKey, "booking");
     assert.deepEqual(bookedChecklist(parsed.data.items), [item.id]);
     assert.equal(parsed.data.title, "Lisbon · Apr 2027");
+    assert.equal(parsed.data.packingNotes, "");
+  });
+
+  it("keeps packing notes on the trip", () => {
+    const parsed = parseTripWrite({
+      ...tripWriteFromPlan(
+        {
+          state: lisbonState(),
+          items: [],
+          packingNotes: "  Adapter\nWalking shoes  ",
+        },
+        true,
+      ),
+    });
+    assert.equal(parsed.ok, true);
+    if (!parsed.ok) return;
+    assert.equal(parsed.data.packingNotes, "Adapter\nWalking shoes");
   });
 
   it("treats a destination on step 4 as a draft worth saving", () => {
