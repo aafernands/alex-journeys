@@ -7,6 +7,15 @@ import siteDesignJson from "@/data/site-design.json";
 import authorPhotoMeta from "@/data/author-photo.json";
 import { about, hero as contentHero, startHereCards, site } from "@/data/content";
 
+import {
+  DEFAULT_FROM_THE_ROAD_ITEMS,
+  normalizeFromTheRoad,
+  type FromTheRoadItem,
+} from "@/lib/from-the-road";
+
+export type { FromTheRoadItem };
+export { DEFAULT_FROM_THE_ROAD_ITEMS };
+
 export type HeroCta = {
   label: string;
   href: string;
@@ -64,7 +73,7 @@ export type HeroDesign = {
   showFromTheRoad: boolean;
   fromTheRoad: {
     label: string;
-    items: string[];
+    items: FromTheRoadItem[];
   };
   stats: HeroStat[];
 };
@@ -194,7 +203,7 @@ const DEFAULT_HERO: HeroDesign = {
   showFromTheRoad: true,
   fromTheRoad: {
     label: "From the road",
-    items: ["Places visited", "Trip notes & photos", "Tools I still use"],
+    items: DEFAULT_FROM_THE_ROAD_ITEMS.map((item) => ({ ...item })),
   },
   stats: [
     { label: "Light", value: "Sunrise" },
@@ -363,30 +372,6 @@ function emptySlide(): FeaturedSlide {
 
 export function createEmptyFeaturedSlide(): FeaturedSlide {
   return emptySlide();
-}
-
-function normalizeFromTheRoad(
-  raw: unknown,
-  fallback: HeroDesign["fromTheRoad"],
-): HeroDesign["fromTheRoad"] {
-  if (!raw || typeof raw !== "object") {
-    return {
-      label: fallback.label,
-      items: [...fallback.items],
-    };
-  }
-  const o = raw as Record<string, unknown>;
-  const items = Array.isArray(o.items)
-    ? o.items
-        .filter((x): x is string => typeof x === "string")
-        .map((x) => x.trim())
-        .filter(Boolean)
-        .slice(0, 6)
-    : [...fallback.items];
-  return {
-    label: asString(o.label, fallback.label).trim() || fallback.label,
-    items: items.length ? items : [...fallback.items],
-  };
 }
 
 /** Merge partial/unknown JSON into a full SiteDesign with safe defaults. */
@@ -658,6 +643,28 @@ export function validateSiteDesignInput(raw: unknown): SiteDesignValidation {
   const secondaryErr = validateHref(hero.ctaSecondary.href, "Secondary CTA");
   if (secondaryErr) return { ok: false, error: secondaryErr };
 
+  if (hero.fromTheRoad.label.length > SHORT_MAX) {
+    return { ok: false, error: "From the road heading is too long (max 120)." };
+  }
+  for (let i = 0; i < hero.fromTheRoad.items.length; i++) {
+    const item = hero.fromTheRoad.items[i];
+    const n = i + 1;
+    if (!item.label.trim()) {
+      return { ok: false, error: `From the road item ${n} label is required.` };
+    }
+    if (item.label.length > SHORT_MAX) {
+      return {
+        ok: false,
+        error: `From the road item ${n} label is too long (max 120).`,
+      };
+    }
+    const itemHrefErr = validateHref(
+      item.href,
+      `From the road item ${n}`,
+    );
+    if (itemHrefErr) return { ok: false, error: itemHrefErr };
+  }
+
   if (!hero.ctaPrimary.label.trim()) {
     return { ok: false, error: "Primary CTA label is required." };
   }
@@ -762,6 +769,13 @@ export function validateSiteDesignInput(raw: unknown): SiteDesignValidation {
           href: hero.ctaSecondary.href.trim(),
         },
         objectPosition: hero.objectPosition.trim() || "center",
+        fromTheRoad: {
+          label: hero.fromTheRoad.label.trim(),
+          items: hero.fromTheRoad.items.map((item) => ({
+            label: item.label.trim(),
+            href: item.href.trim(),
+          })),
+        },
       },
       featuredSlideshow: {
         ...featuredSlideshow,

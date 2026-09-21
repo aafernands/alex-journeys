@@ -78,7 +78,10 @@ export function Hero() {
           </div>
 
           {hero.showFromTheRoad ? (
-            <div className="animate-fade-up animate-delay-3 mt-10 hidden sm:block">
+            <nav
+              className="animate-fade-up animate-delay-3 mt-10 hidden sm:block"
+              aria-label={hero.fromTheRoad.label}
+            >
               <p className="inline-flex items-center gap-2 text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-hero-type">
                 <Trees
                   size={14}
@@ -90,7 +93,10 @@ export function Hero() {
               </p>
               <ul className="mt-3 flex flex-wrap items-center gap-x-1 gap-y-2 text-sm text-hero-type/85">
                 {hero.fromTheRoad.items.map((item, i) => (
-                  <li key={item} className="inline-flex items-center gap-2">
+                  <li
+                    key={`${item.href}-${item.label}-${i}`}
+                    className="inline-flex items-center gap-2"
+                  >
                     {i > 0 ? (
                       <span
                         className="mx-1.5 text-hero-type/45"
@@ -99,17 +105,22 @@ export function Hero() {
                         ·
                       </span>
                     ) : null}
-                    <Leaf
-                      size={12}
-                      strokeWidth={2}
-                      className="shrink-0 text-accent"
-                      aria-hidden="true"
-                    />
-                    {item}
+                    <Link
+                      href={item.href}
+                      className="inline-flex items-center gap-2 rounded-sm text-hero-type/85 underline-offset-[3px] transition hover:text-hero-type hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hero-type/70"
+                    >
+                      <Leaf
+                        size={12}
+                        strokeWidth={2}
+                        className="shrink-0 text-accent"
+                        aria-hidden="true"
+                      />
+                      {item.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
-            </div>
+            </nav>
           ) : null}
         </div>
       </div>

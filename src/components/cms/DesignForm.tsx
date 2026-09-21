@@ -8,6 +8,10 @@ import {
   MAX_MEDIA_UPLOAD_BYTES,
   MAX_MEDIA_UPLOAD_LABEL,
 } from "@/lib/cms/media-limits";
+import {
+  MAX_FROM_THE_ROAD_ITEMS,
+  type FromTheRoadItem,
+} from "@/lib/from-the-road";
 import type { SiteDesign } from "@/lib/site-design";
 
 type Props = {
@@ -466,29 +470,97 @@ export function DesignForm({ initial }: Props) {
                 className={fieldClass}
               />
             </div>
-            <div>
-              <label
-                htmlFor="design-ftr-items"
-                className="text-sm font-semibold text-heading"
-              >
-                Strip items (one per line)
-              </label>
-              <textarea
-                id="design-ftr-items"
-                value={hero.fromTheRoad.items.join("\n")}
-                onChange={(e) =>
+            <div className="space-y-4">
+              <p className="text-sm font-semibold text-heading">
+                Strip items
+              </p>
+              <p className="text-xs text-muted">
+                Each item is a real link on the desktop hero strip. Defaults:
+                Places → /destinations, Stories → /blog, Tools → /tools.
+              </p>
+              {hero.fromTheRoad.items.map((item, index) => (
+                <div
+                  key={`ftr-${index}`}
+                  className="grid gap-3 rounded-lg border border-border bg-surface-soft/50 p-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+                >
+                  <div>
+                    <label
+                      htmlFor={`design-ftr-label-${index}`}
+                      className="text-sm font-semibold text-heading"
+                    >
+                      Label
+                    </label>
+                    <input
+                      id={`design-ftr-label-${index}`}
+                      value={item.label}
+                      onChange={(e) => {
+                        const items = hero.fromTheRoad.items.map((row, i) =>
+                          i === index ? { ...row, label: e.target.value } : row,
+                        );
+                        patchHero("fromTheRoad", {
+                          ...hero.fromTheRoad,
+                          items,
+                        });
+                      }}
+                      className={fieldClass}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor={`design-ftr-href-${index}`}
+                      className="text-sm font-semibold text-heading"
+                    >
+                      Link
+                    </label>
+                    <input
+                      id={`design-ftr-href-${index}`}
+                      value={item.href}
+                      onChange={(e) => {
+                        const items = hero.fromTheRoad.items.map((row, i) =>
+                          i === index ? { ...row, href: e.target.value } : row,
+                        );
+                        patchHero("fromTheRoad", {
+                          ...hero.fromTheRoad,
+                          items,
+                        });
+                      }}
+                      placeholder="/destinations"
+                      className={fieldClass}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-secondary h-[2.625rem] text-sm"
+                    onClick={() =>
+                      patchHero("fromTheRoad", {
+                        ...hero.fromTheRoad,
+                        items: hero.fromTheRoad.items.filter((_, i) => i !== index),
+                      })
+                    }
+                    disabled={hero.fromTheRoad.items.length <= 1}
+                    aria-label={`Remove strip item ${item.label || index + 1}`}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                className="btn btn-secondary text-sm"
+                disabled={hero.fromTheRoad.items.length >= MAX_FROM_THE_ROAD_ITEMS}
+                onClick={() => {
+                  const next: FromTheRoadItem = { label: "", href: "/" };
                   patchHero("fromTheRoad", {
                     ...hero.fromTheRoad,
-                    items: e.target.value
-                      .split("\n")
-                      .map((s) => s.trim())
-                      .filter(Boolean)
-                      .slice(0, 6),
-                  })
-                }
-                rows={3}
-                className={areaClass}
-              />
+                    items: [...hero.fromTheRoad.items, next].slice(
+                      0,
+                      MAX_FROM_THE_ROAD_ITEMS,
+                    ),
+                  });
+                }}
+              >
+                Add item
+              </button>
             </div>
           </div>
         </section>

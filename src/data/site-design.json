@@ -22,9 +22,9 @@
     "fromTheRoad": {
       "label": "From the road",
       "items": [
-        "Places visited",
-        "Trip notes & photos",
-        "Tools I still use"
+        { "label": "Places visited", "href": "/destinations" },
+        { "label": "Trip notes & photos", "href": "/blog" },
+        { "label": "Tools I still use", "href": "/tools" }
       ]
     },
     "stats": [
