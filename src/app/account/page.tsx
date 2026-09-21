@@ -1,26 +1,13 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
-import {
-  BookOpen,
-  Compass,
-  ExternalLink,
-  Luggage,
-  MapPin,
-  User,
-} from "lucide-react";
 import { auth, isReaderAuthConfigured } from "@/auth";
 import { AccountAuthActions } from "@/components/AccountAuthActions";
 import {
-  MyTripsList,
-  type AccountTripRow,
-} from "@/components/account/MyTripsList";
-import { ChangePasswordForm } from "@/components/ChangePasswordForm";
-import { ProfileSettingsForm } from "@/components/ProfileSettingsForm";
-import {
-  SavedPostsList,
-  type SavedPostRow,
-} from "@/components/SavedPostsList";
+  AccountDashboard,
+  type AccountDashboardProps,
+} from "@/components/account/AccountDashboard";
+import { type AccountTripRow } from "@/components/account/MyTripsList";
+import { type SavedPostRow } from "@/components/SavedPostsList";
 import { isEmailConfigured } from "@/lib/email";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
 import { getPostBySlug } from "@/lib/posts";
@@ -35,6 +22,7 @@ import {
 import { dateSummary } from "@/lib/trip-planner-model";
 import { getTripPlannerConfig } from "@/lib/trip-planner";
 import {
+  planATripHref,
   plannerStateFromTrip,
   TRIPS_LIST_UNAVAILABLE,
 } from "@/lib/trip-record";
@@ -43,7 +31,7 @@ import { listTrips, TripsUnavailableError } from "@/lib/trips";
 export const metadata: Metadata = {
   title: "Account",
   description:
-    "Your Fernandes Journeys dashboard — profile, saved trips, and saved stories.",
+    "Your Fernandes Journeys journal — trips you’re planning and stories you’ve saved.",
   robots: { index: false, follow: false },
   alternates: { canonical: "/account" },
 };
@@ -66,59 +54,18 @@ function enrichSavedPosts(
   });
 }
 
-function ProfileAvatar({
-  src,
-  name,
-}: {
-  src: string | null | undefined;
-  name: string | null | undefined;
-}) {
-  if (!src) {
-    return (
-      <span
-        className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-surface-soft text-accent"
-        aria-hidden="true"
-      >
-        <User className="h-7 w-7" strokeWidth={1.75} />
-      </span>
-    );
-  }
-  const isData = src.startsWith("data:");
-  const isGoogle = src.includes("googleusercontent.com");
-  if (isData || !isGoogle) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return (
-      <img
-        src={src}
-        alt={name?.trim() ? `${name} avatar` : ""}
-        width={64}
-        height={64}
-        className="h-16 w-16 rounded-full border border-border object-cover"
-      />
-    );
-  }
-  return (
-    <Image
-      src={src}
-      alt={name?.trim() ? `${name} avatar` : ""}
-      width={64}
-      height={64}
-      className="h-16 w-16 rounded-full border border-border object-cover"
-    />
-  );
-}
-
 export default async function AccountPage() {
   const session = await auth();
-  const googleConfigured = isReaderAuthConfigured();
+  const readerAuthConfigured = isReaderAuthConfigured();
   const userId = session?.user?.id?.trim();
   const signedIn = Boolean(session?.user && userId);
   const user = session?.user;
 
   let posts: SavedPostRow[] = [];
-  let loadError: string | null = null;
+  let postsError: string | null = null;
   let firebaseOk = isFirebaseConfigured();
   let hasPassword = false;
+  let profileLoaded = false;
   let pendingNewEmail: string | null = null;
   let profileName = user?.name?.trim() || "";
   let profileImage = user?.image ?? null;
@@ -127,6 +74,7 @@ export default async function AccountPage() {
   if (signedIn && userId && firebaseOk) {
     try {
       const profile = await getUserById(userId);
+      profileLoaded = true;
       hasPassword = Boolean(profile?.passwordHash);
       if (profile) {
         profileName = profile.name?.trim() || profileName;
@@ -142,19 +90,19 @@ export default async function AccountPage() {
 
   if (signedIn && userId) {
     if (!firebaseOk) {
-      loadError =
-        "Saved posts are not configured yet. Ask the site owner to enable Firestore.";
+      postsError =
+        "Saved stories aren’t available right now. You can still browse and read.";
     } else {
       try {
         posts = enrichSavedPosts(await listSavedPosts(userId));
       } catch (err) {
         if (err instanceof SavedPostsUnavailableError) {
           firebaseOk = false;
-          loadError =
-            "Saved posts are temporarily unavailable. Try again later.";
+          postsError =
+            "Saved stories are temporarily unavailable. Try again later.";
         } else {
           console.error("[account] list saved failed:", err);
-          loadError = "Could not load your saved posts.";
+          postsError = "Could not load your saved stories. Try again in a moment.";
         }
       }
     }
@@ -180,281 +128,78 @@ export default async function AccountPage() {
           tripsError = TRIPS_LIST_UNAVAILABLE;
         } else {
           console.error("[account] list trips failed:", err);
-          tripsError = "Could not load your trips.";
+          tripsError = "Could not load your trips. Try again in a moment.";
         }
       }
     }
   }
 
-  const emailConfigured = isEmailConfigured();
+  const dashboardProps: AccountDashboardProps = {
+    name: profileName,
+    email: profileEmail,
+    image: profileImage,
+    pendingNewEmail,
+    hasPassword,
+    emailConfigured: isEmailConfigured(),
+    profileLoaded,
+    trips,
+    tripsError,
+    posts,
+    postsError,
+  };
 
   return (
     <main className="bg-bg">
       <header className="border-b border-border bg-white">
-        <div className="section-shell section-band">
-          <div className="mx-auto max-w-3xl">
-            <p className="eyebrow">Your dashboard</p>
+        <div className="section-shell py-8 md:py-10">
+          <div className={`mx-auto ${signedIn ? "max-w-5xl" : "max-w-xl"}`}>
+            <p className="eyebrow">Fernandes Journeys</p>
             <h1 className="font-display text-display mt-2 text-heading">
-              Account
+              Your journal
             </h1>
             <p className="mt-3 max-w-xl text-sm text-muted md:text-base">
-              Profile, saved trips, and saved stories. Sign in with email or Google
-              to keep them across devices.
+              {signedIn
+                ? "Trips you’re planning, stories you saved, and the details of your account."
+                : "Sign in to keep trip plans and saved stories with you on any device."}
             </p>
           </div>
         </div>
       </header>
 
-      <div className="section-shell section-band">
-        <div className="mx-auto flex max-w-3xl flex-col gap-8">
-          {!signedIn ? (
+      {signedIn ? (
+        <AccountDashboard {...dashboardProps} />
+      ) : (
+        <div className="section-shell section-band">
+          <div className="mx-auto max-w-xl">
             <div className="panel p-6 md:p-8">
-              <div className="flex items-start gap-3">
-                <User
-                  className="mt-0.5 h-5 w-5 shrink-0 text-accent"
-                  strokeWidth={2}
-                  aria-hidden="true"
+              <h2 className="font-display text-xl font-bold text-heading">
+                Sign in to continue
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-text">
+                Save stories you want to reread and itineraries you’re planning.
+                Use email and password, or Google.
+              </p>
+              <div className="mt-5">
+                <AccountAuthActions
+                  mode="sign-in"
+                  googleConfigured={readerAuthConfigured}
                 />
-                <div>
-                  <h2 className="font-display text-xl font-bold text-heading">
-                    Sign in to continue
-                  </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-text">
-                    Save stories and trip itineraries across devices. Use email
-                    and password or Google. Signing in does not grant CMS access.
-                  </p>
-                  <div className="mt-5">
-                    <AccountAuthActions
-                      mode="sign-in"
-                      googleConfigured={googleConfigured}
-                    />
-                  </div>
-                </div>
+              </div>
+              <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+                <Link
+                  href={planATripHref()}
+                  className="btn btn-secondary w-full sm:w-auto"
+                >
+                  Plan a trip
+                </Link>
+                <Link href="/blog" className="btn btn-secondary w-full sm:w-auto">
+                  Browse stories
+                </Link>
               </div>
             </div>
-          ) : (
-            <>
-              <section
-                className="panel p-6 md:p-8"
-                aria-labelledby="account-profile"
-              >
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-4">
-                    <ProfileAvatar src={profileImage} name={profileName} />
-                    <div className="min-w-0">
-                      <h2
-                        id="account-profile"
-                        className="font-display text-xl font-bold text-heading"
-                      >
-                        {profileName || "Reader"}
-                      </h2>
-                      {profileEmail ? (
-                        <p className="mt-0.5 truncate text-sm text-muted">
-                          {profileEmail}
-                          {pendingNewEmail
-                            ? ` · pending → ${pendingNewEmail}`
-                            : ""}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-                  <AccountAuthActions mode="sign-out" googleConfigured />
-                </div>
-              </section>
-
-              <section
-                className="panel p-6 md:p-8"
-                aria-labelledby="account-settings"
-              >
-                <h2
-                  id="account-settings"
-                  className="font-display text-xl font-bold text-heading"
-                >
-                  Profile settings
-                </h2>
-                <p className="mt-1 text-sm text-muted">
-                  Update your display name, photo, and account email.
-                </p>
-                <ProfileSettingsForm
-                  initialName={profileName}
-                  initialEmail={profileEmail}
-                  initialImage={profileImage}
-                  hasPassword={hasPassword}
-                  pendingNewEmail={pendingNewEmail}
-                  emailConfigured={emailConfigured}
-                />
-              </section>
-
-              <section id="trips" aria-labelledby="account-trips">
-                <div className="mb-4 flex items-center gap-2">
-                  <Luggage
-                    className="h-5 w-5 text-accent"
-                    strokeWidth={2}
-                    aria-hidden="true"
-                  />
-                  <h2
-                    id="account-trips"
-                    className="font-display text-xl font-bold text-heading"
-                  >
-                    My trips
-                  </h2>
-                </div>
-                <p className="mb-4 text-sm text-muted">
-                  Itineraries you save from Plan a trip. Open one to pick up the
-                  booking lanes.
-                </p>
-                {tripsError ? (
-                  <div className="panel p-6 md:p-8">
-                    <p className="text-sm text-text" role="status">
-                      {tripsError}
-                    </p>
-                  </div>
-                ) : (
-                  <MyTripsList trips={trips} />
-                )}
-              </section>
-
-              <section id="saved" aria-labelledby="account-saved">
-                <div className="mb-4">
-                  <h2
-                    id="account-saved"
-                    className="font-display text-xl font-bold text-heading"
-                  >
-                    Saved posts
-                  </h2>
-                  <p className="mt-1 text-sm text-muted">
-                    Bookmarks you save while reading. Remove any item anytime.
-                  </p>
-                </div>
-
-                {loadError ? (
-                  <div className="panel p-6 md:p-8">
-                    <p className="text-sm text-text" role="status">
-                      {loadError}
-                    </p>
-                    <Link href="/blog" className="btn btn-secondary mt-6">
-                      Browse stories
-                    </Link>
-                  </div>
-                ) : (
-                  <SavedPostsList posts={posts} />
-                )}
-              </section>
-
-              <section aria-labelledby="account-explore">
-                <h2
-                  id="account-explore"
-                  className="font-display mb-4 text-xl font-bold text-heading"
-                >
-                  Explore
-                </h2>
-                <ul className="grid gap-3 sm:grid-cols-3">
-                  <li>
-                    <Link
-                      href="/destinations"
-                      className="panel-interactive flex items-center gap-3 p-4"
-                    >
-                      <MapPin
-                        className="h-5 w-5 shrink-0 text-accent"
-                        strokeWidth={2}
-                        aria-hidden="true"
-                      />
-                      <span className="font-semibold text-heading">
-                        Destinations
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/blog"
-                      className="panel-interactive flex items-center gap-3 p-4"
-                    >
-                      <BookOpen
-                        className="h-5 w-5 shrink-0 text-accent"
-                        strokeWidth={2}
-                        aria-hidden="true"
-                      />
-                      <span className="font-semibold text-heading">
-                        Stories
-                      </span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/guides"
-                      className="panel-interactive flex items-center gap-3 p-4"
-                    >
-                      <Compass
-                        className="h-5 w-5 shrink-0 text-accent"
-                        strokeWidth={2}
-                        aria-hidden="true"
-                      />
-                      <span className="font-semibold text-heading">Guides</span>
-                    </Link>
-                  </li>
-                </ul>
-              </section>
-
-              {hasPassword ? (
-                <section
-                  className="panel p-6 md:p-8"
-                  aria-labelledby="account-password"
-                >
-                  <h2
-                    id="account-password"
-                    className="font-display text-xl font-bold text-heading"
-                  >
-                    Change password
-                  </h2>
-                  <p className="mt-1 text-sm text-muted">
-                    Update the password for your email sign-in.
-                  </p>
-                  <ChangePasswordForm />
-                </section>
-              ) : null}
-
-              <section
-                className="panel p-6 md:p-8"
-                aria-labelledby="account-utilities"
-              >
-                <h2
-                  id="account-utilities"
-                  className="font-display text-xl font-bold text-heading"
-                >
-                  Account
-                </h2>
-                <ul className="mt-4 space-y-3 text-sm text-text">
-                  <li>
-                    <AccountAuthActions mode="sign-out" googleConfigured />
-                  </li>
-                  <li>
-                    <a
-                      href="https://myaccount.google.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 font-semibold text-accent hover:underline"
-                    >
-                      Open Google Account
-                      <ExternalLink
-                        className="h-3.5 w-3.5"
-                        strokeWidth={2}
-                        aria-hidden="true"
-                      />
-                    </a>
-                  </li>
-                  <li className="pt-2 text-muted">
-                    Publishing tools for authors live at{" "}
-                    <code className="rounded bg-surface-soft px-1.5 py-0.5 text-xs text-heading">
-                      /cms
-                    </code>{" "}
-                    — not part of the reader account.
-                  </li>
-                </ul>
-              </section>
-            </>
-          )}
+          </div>
         </div>
-      </div>
+      )}
     </main>
   );
 }

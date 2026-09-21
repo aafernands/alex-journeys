@@ -214,7 +214,7 @@ export const TurnstileField = forwardRef<TurnstileFieldHandle, Props>(
             className={`text-xs text-muted ${className ?? ""}`}
             role="status"
           >
-            Turnstile not configured (set NEXT_PUBLIC_TURNSTILE_SITE_KEY).
+            The security check isn’t available right now.
           </p>
         );
       }

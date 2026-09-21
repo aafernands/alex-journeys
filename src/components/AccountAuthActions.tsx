@@ -8,6 +8,7 @@ type Props = {
   mode: "sign-in" | "sign-out";
   /** When false and mode is sign-in, show unavailable message. */
   googleConfigured?: boolean;
+  className?: string;
 };
 
 /**
@@ -16,13 +17,15 @@ type Props = {
 export function AccountAuthActions({
   mode,
   googleConfigured = true,
+  className,
 }: Props) {
   const [pending, setPending] = useState(false);
 
   if (mode === "sign-in" && !googleConfigured) {
     return (
       <p className="text-sm text-muted">
-        Sign-in is not configured on this deployment.
+        Sign-in isn’t available right now. You can still read stories and plan
+        a trip in this browser.
       </p>
     );
   }
@@ -31,7 +34,7 @@ export function AccountAuthActions({
     return (
       <Link
         href="/login?callbackUrl=%2Faccount"
-        className="btn btn-primary"
+        className={`btn btn-primary ${className ?? ""}`}
       >
         Sign in
       </Link>
@@ -41,7 +44,7 @@ export function AccountAuthActions({
   return (
     <button
       type="button"
-      className="inline-flex items-center justify-center rounded-lg border border-border bg-white px-4 py-2 text-sm font-semibold tracking-tight text-heading transition hover:bg-surface-soft disabled:opacity-60"
+      className={`inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-white px-4 py-2 text-sm font-semibold tracking-tight text-heading transition hover:bg-surface-soft disabled:opacity-60 ${className ?? ""}`}
       disabled={pending}
       onClick={async () => {
         setPending(true);
