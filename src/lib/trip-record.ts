@@ -132,6 +132,54 @@ export function cleanPackingNotes(value: unknown): string {
 
 const MAX_ITEMS = 40;
 
+function bytesToBase64Url(bytes: Uint8Array): string {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+}
+
+function base64UrlToBytes(token: string): Uint8Array {
+  const padded = token.replaceAll("-", "+").replaceAll("_", "/");
+  const pad = padded.length % 4 === 0 ? "" : "=".repeat(4 - (padded.length % 4));
+  const binary = atob(padded + pad);
+  return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+}
+
+/** Guest share link. The hash carries the draft; no account is required. */
+export function encodeSharedPlan(plan: {
+  state: PlannerState;
+  items: TripItem[];
+  packingNotes?: string;
+}): string {
+  const json = JSON.stringify(tripWriteFromPlan(plan, true));
+  return bytesToBase64Url(new TextEncoder().encode(json));
+}
+
+export function decodeSharedPlan(token: string): StoredTripPlan | null {
+  try {
+    const json = new TextDecoder().decode(base64UrlToBytes(token.trim()));
+    const parsed = parseTripWrite(JSON.parse(json) as unknown);
+    if (!parsed.ok) return null;
+    return {
+      step: 4,
+      state: plannerStateFromTrip(parsed.data),
+      items: parsed.data.items,
+      tripId: null,
+      packingNotes: parsed.data.packingNotes,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function sharePlanHref(plan: {
+  state: PlannerState;
+  items: TripItem[];
+  packingNotes?: string;
+}): string {
+  return `${planATripHref()}#itinerary=${encodeSharedPlan(plan)}`;
+}
+
 export function planATripHref(tripId?: string | null): string {
   const path = `/guides/${PLAN_A_TRIP_SLUG}`;
   if (!tripId) return path;

@@ -26,6 +26,7 @@ import {
   itemsForLane,
   itemTypeForPartner,
   planATripLoginHref,
+  sharePlanHref,
   scheduledDayIndex,
   tripDays,
   TRIP_ITEM_STATUSES,
@@ -587,6 +588,7 @@ export function ItineraryHub({
   onRestoreBackup,
   onRememberGuestDraft,
 }: Props) {
+  const [copied, setCopied] = useState(false);
   const [editor, setEditor] = useState<
     | { kind: "add-lane"; laneKey: string }
     | { kind: "add-note" }
@@ -686,10 +688,42 @@ export function ItineraryHub({
             {subhead}
           </p>
         </div>
-        <button type="button" className="btn btn-secondary" onClick={onEditTrip}>
-          Edit trip
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={async () => {
+              const url = `${window.location.origin}${sharePlanHref({
+                state,
+                items,
+                packingNotes,
+              })}`;
+              try {
+                await navigator.clipboard.writeText(url);
+              } catch {
+                const field = document.createElement("textarea");
+                field.value = url;
+                document.body.appendChild(field);
+                field.select();
+                document.execCommand("copy");
+                field.remove();
+              }
+              setCopied(true);
+              window.setTimeout(() => setCopied(false), 2500);
+            }}
+          >
+            Copy itinerary link
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={onEditTrip}>
+            Edit trip
+          </button>
+        </div>
       </div>
+      {copied ? (
+        <p className="mt-3 text-sm font-semibold text-heading" role="status">
+          Link copied. Anyone with it can open this itinerary.
+        </p>
+      ) : null}
 
       {saveMode === "local" ? (
         <aside className="panel-soft mt-5 px-4 py-4" aria-label="Save itinerary">

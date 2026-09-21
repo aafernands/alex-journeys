@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
 import { ItineraryHub } from "@/components/trip-planner/ItineraryHub";
 import { PlaceCombobox } from "@/components/trip-planner/PlaceCombobox";
@@ -21,7 +21,7 @@ import {
   type TripPlannerPartner,
   type TripType,
 } from "@/lib/trip-planner-model";
-import { planATripLoginHref } from "@/lib/trip-record";
+import { decodeSharedPlan, planATripLoginHref } from "@/lib/trip-record";
 import type { JournalNote, JournalPlace } from "@/lib/trip-journal";
 import {
   clearGuestBackup,
@@ -184,6 +184,23 @@ export function TripPlanner({
     flexibleOn,
     urlTripId,
   });
+  const sharedHashApplied = useRef(false);
+
+  useEffect(() => {
+    if (sharedHashApplied.current || isPendingPlan(storedPlan)) return;
+    const prefix = "#itinerary=";
+    const hash = window.location.hash;
+    if (!hash.startsWith(prefix)) return;
+    sharedHashApplied.current = true;
+    const shared = decodeSharedPlan(decodeURIComponent(hash.slice(prefix.length)));
+    if (!shared) return;
+    writeActivePlan(shared);
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${window.location.search}`,
+    );
+  }, [storedPlan]);
 
   function savePlan(next: {
     step: Step;

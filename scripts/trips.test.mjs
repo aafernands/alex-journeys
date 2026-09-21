@@ -5,6 +5,8 @@ import { initialPlannerState } from "../src/lib/trip-planner-model.ts";
 import {
   bookedChecklist,
   createTripItem,
+  decodeSharedPlan,
+  encodeSharedPlan,
   extractBookingPaste,
   mentionedTripDay,
   isReasonableTripDraft,
@@ -176,6 +178,30 @@ describe("saved trips", () => {
       confirmation: "",
       time: "",
     });
+  });
+
+  it("round-trips a guest itinerary through a share link", () => {
+    const item = createTripItem({
+      type: "flight",
+      title: "Outbound",
+      url: "https://www.expedia.com/flights",
+      dayIndex: 1,
+      time: "09:40",
+      sortOrder: 0,
+    });
+    const token = encodeSharedPlan({
+      state: lisbonState(),
+      items: [item],
+      packingNotes: "Adapter",
+    });
+    const restored = decodeSharedPlan(token);
+    assert.ok(restored);
+    assert.equal(restored?.state.destination, "Lisbon, Portugal");
+    assert.equal(restored?.items[0]?.title, "Outbound");
+    assert.equal(restored?.items[0]?.time, "09:40");
+    assert.equal(restored?.packingNotes, "Adapter");
+    assert.equal(restored?.tripId, null);
+    assert.equal(decodeSharedPlan("not-a-plan"), null);
   });
 
   it("matches journal notes for a real destination and stays quiet otherwise", () => {
