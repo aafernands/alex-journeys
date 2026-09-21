@@ -6,11 +6,20 @@ import { ChevronRight, LayoutDashboard, LogOut, Shield } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
+type Variant = "header" | "header-mobile" | "mobile" | "drawer" | "drawer-cta";
+
 type Props = {
-  /** Desktop header: photo + name. Mobile: photo only. Drawer: full account strip. */
-  variant?: "header" | "mobile" | "drawer";
+  /**
+   * Desktop header: photo + name. Sticky mobile header: photo only.
+   * Drawer: account row (name and avatar) that opens this menu.
+   */
+  variant?: Variant;
   onNavigate?: () => void;
 };
+
+function isDrawerVariant(variant: Variant): boolean {
+  return variant === "drawer" || variant === "drawer-cta";
+}
 
 function displayName(name?: string | null, email?: string | null): string {
   const trimmed = name?.trim();
@@ -68,10 +77,17 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
   const name = displayName(user.name, user.email);
   const isAdmin = user.isAdmin === true;
   const isMobile = variant === "mobile";
-  const isDrawer = variant === "drawer";
+  const isHeaderMobile = variant === "header-mobile";
+  const isDrawer = isDrawerVariant(variant);
+  const avatarBox = isDrawer
+    ? "h-10 w-10 text-sm"
+    : isHeaderMobile
+      ? "h-11 w-11 text-sm"
+      : "h-9 w-9 text-xs";
+  const avatarPx = isDrawer ? 40 : isHeaderMobile ? 44 : 36;
 
   const itemClass =
-    "flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm font-medium text-text transition hover:bg-surface-soft hover:text-heading";
+    "flex min-h-11 w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm font-medium text-text transition hover:bg-surface-soft hover:text-heading";
 
   function onItemNavigate() {
     close();
@@ -82,18 +98,30 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
     <Image
       src={user.image}
       alt=""
-      width={isDrawer ? 40 : 36}
-      height={isDrawer ? 40 : 36}
-      className={`${isDrawer ? "h-10 w-10" : "h-9 w-9"} shrink-0 rounded-full border border-border object-cover`}
+      width={avatarPx}
+      height={avatarPx}
+      className={`${avatarBox} shrink-0 rounded-full border border-border object-cover`}
     />
   ) : (
     <span
-      className={`inline-flex ${isDrawer ? "h-10 w-10 text-sm" : "h-9 w-9 text-xs"} shrink-0 items-center justify-center rounded-full border border-border bg-surface-soft font-semibold text-heading`}
+      className={`inline-flex ${avatarBox} shrink-0 items-center justify-center rounded-full border border-border bg-surface-soft font-semibold text-heading`}
       aria-hidden="true"
     >
       {initials(user.name, user.email)}
     </span>
   );
+
+  const triggerClass = isDrawer
+    ? "flex min-h-11 w-full items-center gap-3 rounded-xl border border-border bg-white px-3 py-2.5 text-left transition hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    : isHeaderMobile || isMobile
+      ? "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      : "inline-flex max-w-[11rem] items-center gap-2 rounded-full py-0.5 pl-0.5 pr-2.5 transition hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:max-w-[13rem]";
+
+  const menuClass = isDrawer
+    ? "absolute left-0 right-0 top-full z-50 mt-1.5 rounded-xl border border-border bg-white py-1.5 shadow-lg"
+    : isMobile
+      ? "absolute left-0 bottom-full z-50 mb-2 min-w-[14rem] rounded-xl border border-border bg-white py-1.5 shadow-lg"
+      : "absolute right-0 top-full z-50 mt-2 min-w-[14rem] rounded-xl border border-border bg-white py-1.5 shadow-lg";
 
   return (
     <div
@@ -103,13 +131,7 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
       <button
         ref={buttonRef}
         type="button"
-        className={
-          isDrawer
-            ? "flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            : isMobile
-              ? "inline-flex items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              : "inline-flex max-w-[11rem] items-center gap-2 rounded-full py-0.5 pl-0.5 pr-2.5 transition hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:max-w-[13rem]"
-        }
+        className={triggerClass}
         aria-expanded={open}
         aria-haspopup="menu"
         aria-controls={menuId}
@@ -119,10 +141,10 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
           <>
             {avatar}
             <span className="min-w-0 flex-1">
-              <span className="block text-[11px] font-semibold uppercase tracking-wide text-muted">
-                Signed in
+              <span className="block text-xs font-semibold uppercase tracking-wide text-accent">
+                Account
               </span>
-              <span className="block truncate font-sans text-sm font-semibold tracking-tight text-heading">
+              <span className="block truncate font-sans text-base font-semibold tracking-tight text-heading">
                 {name}
               </span>
               {user.email ? (
@@ -146,7 +168,7 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
               {open ? "Close account menu" : "Open account menu"}
             </span>
             {avatar}
-            {!isMobile ? (
+            {variant === "header" ? (
               <span className="min-w-0 truncate font-sans text-sm font-semibold tracking-tight text-heading">
                 {name}
               </span>
@@ -160,13 +182,7 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
           id={menuId}
           role="menu"
           aria-label="Account"
-          className={
-            isDrawer
-              ? "absolute left-0 right-0 top-full z-50 mt-1.5 rounded-xl border border-border bg-white py-1.5 shadow-lg"
-              : isMobile
-                ? "absolute left-0 bottom-full z-50 mb-2 min-w-[14rem] rounded-xl border border-border bg-white py-1.5 shadow-lg"
-                : "absolute right-0 top-full z-50 mt-2 min-w-[14rem] rounded-xl border border-border bg-white py-1.5 shadow-lg"
-          }
+          className={menuClass}
         >
           {!isDrawer ? (
             <div className="border-b border-border px-3.5 py-2.5">
