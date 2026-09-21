@@ -330,7 +330,7 @@ export function ReaderLoginForm({
             <button
               type="button"
               disabled={pending || oauthPending !== null}
-              className="btn btn-secondary btn-block disabled:opacity-60"
+              className="btn btn-secondary btn-block whitespace-nowrap px-3 text-sm disabled:opacity-60"
               onClick={() => startOauth("google")}
             >
               {oauthPending === "google" ? "Redirecting…" : "Continue with Google"}
@@ -340,7 +340,7 @@ export function ReaderLoginForm({
             <button
               type="button"
               disabled={pending || oauthPending !== null}
-              className="btn btn-secondary btn-block disabled:opacity-60"
+              className="btn btn-secondary btn-block whitespace-nowrap px-3 text-sm disabled:opacity-60"
               onClick={() => startOauth("twitter")}
             >
               {oauthPending === "twitter" ? "Redirecting…" : "Continue with X"}
