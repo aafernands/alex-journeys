@@ -12,6 +12,8 @@ import {
   isGoogleAuthConfigured,
   isTwitterAuthConfigured,
 } from "@/lib/auth-config";
+import { authCookies } from "@/lib/auth-cookies";
+import { noteAuthError } from "@/lib/auth-error-redirect";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
 import { safeAuthErrorDetails } from "@/lib/auth-error-log";
 import {
@@ -55,6 +57,7 @@ export {
  */
 
 const twitterCredentials = readTwitterOAuthCredentials();
+const sharedAuthCookies = authCookies();
 
 const providers = [
   ...(isGoogleAuthConfigured()
@@ -125,8 +128,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   // Allow build without AUTH_SECRET; production runtime must set it for auth.
   secret: process.env.AUTH_SECRET || "build-placeholder-not-for-production",
   trustHost: true,
+  // www and apex share state + PKCE. CSRF stays host-only (__Host-).
+  ...(sharedAuthCookies ? { cookies: sharedAuthCookies } : {}),
   logger: {
     error(error) {
+      noteAuthError(error);
       const details = safeAuthErrorDetails(error);
       console.error(`[auth][error] ${details.name}: ${details.message}`);
       if (details.oauthError || details.oauthDescription) {
