@@ -128,8 +128,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   // Allow build without AUTH_SECRET; production runtime must set it for auth.
   secret: process.env.AUTH_SECRET || "build-placeholder-not-for-production",
   trustHost: true,
-  // www and apex share state + PKCE. CSRF stays host-only (__Host-).
-  ...(sharedAuthCookies ? { cookies: sharedAuthCookies } : {}),
+  // www and apex share state + PKCE (Domain=.fernandesjourneys.com, Secure,
+  // SameSite=Lax, Path=/). CSRF stays host-only (__Host-). Force __Secure-
+  // cookie names so a callback seen as http still looks up the same state cookie.
+  ...(sharedAuthCookies
+    ? { cookies: sharedAuthCookies, useSecureCookies: true }
+    : {}),
   logger: {
     error(error) {
       noteAuthError(error);
@@ -140,6 +144,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           error: details.oauthError,
           error_description: details.oauthDescription,
         });
+      }
+      const cause = error instanceof Error ? error.cause : undefined;
+      const nested =
+        cause instanceof Error
+          ? cause
+          : cause &&
+              typeof cause === "object" &&
+              "err" in cause &&
+              cause.err instanceof Error
+            ? cause.err
+            : null;
+      if (nested?.message) {
+        console.error(`[auth][cause] ${nested.name}: ${nested.message}`);
       }
     },
   },

@@ -11,8 +11,14 @@ const OAUTH_CALLBACK =
 const ACCOUNT_NOT_LINKED =
   "That email is already used with a different sign-in method. Use the method you used originally.";
 
+const USERS_ME_BLOCKED =
+  "X could not load your profile because GET /2/users/me returned HTTP 403. Approve Continue with X again so the token includes tweet.read. This site does not post. It is not a wrong client secret.";
+
 const MESSAGES: Record<string, string> = {
   AccessDenied: "Sign-in was denied. Your account may be disabled.",
+  OAuthProfileParseError: USERS_ME_BLOCKED,
+  InvalidCheck:
+    "X sign-in lost the browser state cookie on the way back from x.com, so this attempt could not be verified. Stay on www.fernandesjourneys.com, use a normal window (not private browsing), and try Continue with X again.",
   OAuthCallback: OAUTH_CALLBACK,
   OAuthCallbackError: OAUTH_CALLBACK,
   Callback: OAUTH_CALLBACK,
@@ -31,8 +37,6 @@ const MESSAGES: Record<string, string> = {
   CredentialsSignin: "Invalid email or password.",
   SessionRequired: "Please sign in to continue.",
   MissingCSRF: "This sign-in request expired. Refresh the page and try again.",
-  InvalidCheck:
-    "Sign-in could not be confirmed in this browser. Refresh the page and start again on www.fernandesjourneys.com, without switching to the address that has no www.",
 };
 
 export function readerLoginErrorMessage(

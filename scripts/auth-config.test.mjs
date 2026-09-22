@@ -160,6 +160,21 @@ describe("readerLoginErrorMessage", () => {
     assert.match(readerLoginErrorMessage("InvalidCheck"), /\(InvalidCheck\)$/);
   });
 
+  it("names the X users/me block and a dropped state cookie", () => {
+    const profile = readerLoginErrorMessage("OAuthProfileParseError");
+    assert.match(profile, /GET \/2\/users\/me/);
+    assert.match(profile, /403/);
+    assert.match(profile, /tweet\.read/);
+    assert.match(profile, /not a wrong client secret/);
+    assert.match(profile, /\(OAuthProfileParseError\)$/);
+    const check = readerLoginErrorMessage("InvalidCheck");
+    assert.match(check, /state cookie/i);
+    assert.match(check, /x\.com/);
+    assert.match(check, /private/i);
+    assert.match(check, /www\.fernandesjourneys\.com/);
+    assert.match(check, /\(InvalidCheck\)$/);
+  });
+
   it("keeps unknown codes visible and ignores blanks", () => {
     assert.match(readerLoginErrorMessage("SomethingNew"), /\(SomethingNew\)$/);
     assert.equal(readerLoginErrorMessage(null), null);
