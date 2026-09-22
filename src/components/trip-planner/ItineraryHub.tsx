@@ -865,19 +865,19 @@ export function ItineraryHub({
 
       {partners.length > 0 ? (
         <section className="plan-section" aria-labelledby={`${headingId}-left`}>
-          <h3 id={`${headingId}-left`} className={plan.h3}>
+          <h3 id={`${headingId}-left`} className={plan.label}>
             What’s left to book
           </h3>
-          <ul className="plan-follow flex flex-wrap gap-2">
+          <ul className="plan-status">
             {partners.map((partner) => {
               const progress = laneProgress(itemsForLane(items, partner));
               return (
                 <li key={partner.key}>
-                  <span className={`${plan.badge} border border-border bg-white`}>
-                    <span className="text-heading">{laneName(partner)}</span>
-                    <span className="ml-2 font-medium text-muted">
-                      {LANE_PROGRESS_LABEL[progress]}
-                    </span>
+                  <span className={`${plan.caption} font-semibold text-heading`}>
+                    {laneName(partner)}
+                  </span>
+                  <span className={`${plan.caption} text-muted`}>
+                    {LANE_PROGRESS_LABEL[progress]}
                   </span>
                 </li>
               );
@@ -915,7 +915,7 @@ export function ItineraryHub({
                 partner.isCore ? "bg-surface-soft" : "bg-white"
               }`}
             >
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-start gap-3">
                   <span className="icon-tile icon-tile-sm shrink-0">
                     <NavIcon name={laneIcon(partner)} size={16} />
@@ -934,7 +934,7 @@ export function ItineraryHub({
                   affiliate
                   target="_blank"
                   rel="noopener noreferrer sponsored"
-                  className={`btn w-full shrink-0 sm:w-auto ${
+                  className={`btn self-start shrink-0 sm:self-center ${
                     partner.isCore ? "btn-primary" : "btn-secondary"
                   }`}
                 >
