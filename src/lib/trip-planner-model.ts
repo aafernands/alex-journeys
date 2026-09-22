@@ -4,7 +4,7 @@
  */
 
 import { experiencesPath } from "@/lib/experiences";
-import { flightsPath } from "@/lib/flights";
+import { flightsPath, prefilledAirport } from "@/lib/flights";
 import { staysPath } from "@/lib/stays";
 
 export const PLAN_A_TRIP_SLUG = "plan-a-trip";
@@ -630,8 +630,8 @@ export function flightLaneHref(
 ): string {
   const values = tripUrlValues(state, flexibleDatesEnabled);
   return flightsPath({
-    origin: values.origin,
-    destination: values.destination,
+    origin: prefilledAirport(values.origin),
+    destination: prefilledAirport(values.destination),
     startDate: values.startDate,
     endDate: state.tripType === "oneway" ? "" : values.endDate,
     tripType: state.tripType,

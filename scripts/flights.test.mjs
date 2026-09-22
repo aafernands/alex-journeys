@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import {
   airportFieldValue,
   airportSearchText,
+  prefilledAirport,
   buildFlightConfirmation,
   classifyFlightFailure,
   FLIGHT_CARD_REQUIRED,
@@ -693,5 +694,9 @@ describe("city airports", () => {
       airportFieldValue("Miami, United States", { code: "MIA", label: "Miami · MIA" }),
       "Miami · MIA",
     );
+    assert.equal(prefilledAirport("Lisbon, Portugal"), "Lisbon · LIS");
+    assert.equal(prefilledAirport("Newark (EWR)"), "Newark (EWR)");
+    assert.equal(prefilledAirport("JFK"), "JFK");
+    assert.equal(prefilledAirport("Miami, United States"), "Miami · MIA");
   });
 });

@@ -88,6 +88,9 @@ export function FlightsSearchForm({ query }: Props) {
           );
         })}
       </div>
+      <p className="text-sm text-muted">
+        A city uses its main airport. Type another three-letter code to override it.
+      </p>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
         <label className="plan-stack-tight lg:col-span-2">
           <span className={plan.label}>From</span>

@@ -9,6 +9,7 @@ import {
   flightDayOffset,
   airportFieldValue,
   flightsBookPath,
+  prefilledAirport,
   flightsQueryIssue,
   flightsQueryString,
   formatFlightClock,
@@ -94,6 +95,17 @@ export default async function FlightsPage({ searchParams }: PageProps) {
 
   const route =
     query.origin && query.destination ? `${query.origin} to ${query.destination}` : "";
+  const shownOrigin = result
+    ? airportFieldValue(query.origin, result.origin)
+    : prefilledAirport(query.origin);
+  const shownDestination = result
+    ? airportFieldValue(query.destination, result.destination)
+    : prefilledAirport(query.destination);
+  const shownQuery: FlightsQuery = {
+    ...query,
+    origin: shownOrigin,
+    destination: shownDestination,
+  };
 
   return (
     <SitePage
@@ -115,22 +127,7 @@ export default async function FlightsPage({ searchParams }: PageProps) {
     >
       <div className="plan-trip hub-follow plan-stack">
         <FlightTripBar query={query} />
-        <FlightsSearchForm
-          key={flightsQueryString({
-            ...query,
-            origin: result ? airportFieldValue(query.origin, result.origin) : query.origin,
-            destination: result
-              ? airportFieldValue(query.destination, result.destination)
-              : query.destination,
-          })}
-          query={{
-            ...query,
-            origin: result ? airportFieldValue(query.origin, result.origin) : query.origin,
-            destination: result
-              ? airportFieldValue(query.destination, result.destination)
-              : query.destination,
-          }}
-        />
+        <FlightsSearchForm key={flightsQueryString(shownQuery)} query={shownQuery} />
         {!configured ? (
           <Notice
             title="Flights not configured"
