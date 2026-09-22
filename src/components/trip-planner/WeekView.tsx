@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type DragEvent } from "react";
+import { useState, type DragEvent, type ReactNode } from "react";
+import { plan } from "@/components/trip-planner/density";
 import {
   compareScheduledItems,
   formatTripWeekRange,
@@ -20,9 +21,6 @@ type Props = {
   onEdit: (id: string) => void;
 };
 
-const daySelectClass =
-  "mt-1.5 min-h-8 w-full rounded-md border border-border bg-white px-1.5 py-1 text-xs text-heading focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25";
-
 function itemsForDay(items: TripItem[], dayIndex: number, dayCount: number): TripItem[] {
   return items
     .filter((item) => scheduledDayIndex(item, dayCount) === dayIndex)
@@ -33,6 +31,7 @@ function WeekChip({
   item,
   days,
   dragging,
+  idPrefix,
   onAssignDay,
   onEdit,
   onDragStart,
@@ -41,6 +40,7 @@ function WeekChip({
   item: TripItem;
   days: TripDay[];
   dragging: boolean;
+  idPrefix: string;
   onAssignDay: (id: string, dayIndex: number | null) => void;
   onEdit: (id: string) => void;
   onDragStart: (id: string) => void;
@@ -49,7 +49,7 @@ function WeekChip({
   const dayIndex = scheduledDayIndex(item, days.length);
   return (
     <article
-      className={`rounded-lg border px-2 py-1.5 ${
+      className={`${plan.chipCard} plan-stack-tight ${
         item.status === "booked"
           ? "border-accent/30 bg-accent/10"
           : item.status === "skipped"
@@ -57,8 +57,8 @@ function WeekChip({
             : "border-border bg-white"
       } ${dragging ? "opacity-50" : ""}`}
     >
-      <div className="flex items-start justify-between gap-1">
-        <p className="min-w-0 font-display text-xs font-bold leading-snug text-heading">
+      <div className="flex items-start justify-between gap-2">
+        <p className={`${plan.body} min-w-0 font-semibold text-heading`}>
           {item.time ? (
             <span className="mr-1 text-accent">{item.time}</span>
           ) : null}
@@ -69,7 +69,7 @@ function WeekChip({
           draggable
           aria-label={`Drag ${item.title} to a day`}
           title="Drag to a day"
-          className="shrink-0 cursor-grab rounded px-1 text-[0.65rem] font-semibold uppercase tracking-[0.06em] text-muted active:cursor-grabbing"
+          className={`${plan.chip} shrink-0 cursor-grab border-transparent text-muted active:cursor-grabbing`}
           onDragStart={(event) => {
             event.dataTransfer.setData("text/plain", item.id);
             event.dataTransfer.effectAllowed = "move";
@@ -82,12 +82,10 @@ function WeekChip({
           Move
         </button>
       </div>
-      <p className="mt-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.06em] text-muted">
-        {TRIP_STATUS_LABEL[item.status]}
-      </p>
+      <p className={plan.label}>{TRIP_STATUS_LABEL[item.status]}</p>
       <select
-        id={`week-day-${item.id}`}
-        className={daySelectClass}
+        id={`${idPrefix}-day-${item.id}`}
+        className={plan.input}
         aria-label={`Day for ${item.title}`}
         value={dayIndex == null ? "" : String(dayIndex)}
         onChange={(event) => {
@@ -104,7 +102,7 @@ function WeekChip({
       </select>
       <button
         type="button"
-        className="mt-1 text-xs font-semibold text-accent hover:underline"
+        className={`${plan.textBtn} self-start text-accent hover:underline`}
         onClick={() => onEdit(item.id)}
       >
         Edit
@@ -142,27 +140,78 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit }: Props)
     setOverKey(null);
   }
 
+  function renderItems(dayItems: TripItem[], day: TripDay, idPrefix: string): ReactNode {
+    if (dayItems.length === 0) {
+      return (
+        <p className={`${plan.caption} text-muted plan-desktop-only`}>
+          Nothing on this day yet.
+        </p>
+      );
+    }
+    return dayItems.map((item) => (
+      <WeekChip
+        key={item.id}
+        item={item}
+        days={days}
+        dragging={draggingId === item.id}
+        idPrefix={idPrefix}
+        onAssignDay={onAssignDay}
+        onEdit={onEdit}
+        onDragStart={setDraggingId}
+        onDragEnd={endDrag}
+      />
+    ));
+  }
+
   return (
-    <div className="mt-4 space-y-4">
-      <p className="text-sm leading-relaxed text-muted">
+    <div className="plan-stack plan-follow">
+      <p className={`${plan.prose} text-muted plan-desktop-only`}>
         Drag a booking onto a day, or choose a day on the booking. Time stays on the
         booking when you move it.
       </p>
-      <div className="overflow-x-auto pb-1">
+      <div className="plan-stack sm:hidden">
+        {days.map((day) => {
+          const dayItems = itemsForDay(items, day.index, days.length);
+          const key = `day-${day.index}`;
+          const active = overKey === key && draggingId != null;
+          return (
+            <div
+              key={day.date}
+              aria-label={`${day.label}, ${day.detail}`}
+              className={`plan-inset plan-stack-tight border transition-colors ${
+                active ? "border-accent bg-accent/10" : "border-border bg-white"
+              }`}
+              onDragOver={(event) => allowDrop(event, key)}
+              onDragLeave={(event) => {
+                const next = event.relatedTarget;
+                if (next instanceof Node && event.currentTarget.contains(next)) return;
+                if (overKey === key) setOverKey(null);
+              }}
+              onDrop={(event) => dropOn(event, day.index)}
+            >
+              <div>
+                <p className={plan.h4}>{day.label}</p>
+                {day.detail ? (
+                  <p className={`${plan.caption} text-muted`}>{day.detail}</p>
+                ) : null}
+              </div>
+              <div className="plan-stack-tight">{renderItems(dayItems, day, "week-stack")}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="hidden overflow-x-auto pb-1 sm:block">
         <div className="min-w-[52rem]" aria-label="Trip week">
           <div className="grid grid-cols-7 gap-2">
             {TRIP_WEEKDAYS.map((weekday) => (
-              <div
-                key={weekday}
-                className="px-1 text-center text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted"
-              >
+              <div key={weekday} className={`${plan.label} px-1 text-center`}>
                 {weekday}
               </div>
             ))}
           </div>
           {weeks.map((week) => (
-            <div key={week.startDate} className="mt-2">
-              <p className="mb-1.5 text-xs font-semibold text-muted">
+            <div key={week.startDate} className="plan-follow">
+              <p className={`${plan.caption} mb-2 font-semibold text-muted`}>
                 {formatTripWeekRange(week.startDate)}
               </p>
               <div className="grid grid-cols-7 gap-2">
@@ -172,7 +221,7 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit }: Props)
                       <div
                         key={`${week.startDate}-off-${column}`}
                         aria-hidden="true"
-                        className="min-h-36 rounded-lg border border-dashed border-border bg-surface/50"
+                        className="plan-control min-h-36 border border-dashed border-border bg-surface/50"
                       />
                     );
                   }
@@ -183,7 +232,7 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit }: Props)
                     <div
                       key={day.date}
                       aria-label={`${day.label}, ${day.detail}`}
-                      className={`flex min-h-36 flex-col rounded-lg border p-2 transition-colors ${
+                      className={`plan-inset flex min-h-36 flex-col gap-3 border transition-colors ${
                         active
                           ? "border-accent bg-accent/10"
                           : "border-border bg-white"
@@ -196,31 +245,13 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit }: Props)
                       }}
                       onDrop={(event) => dropOn(event, day.index)}
                     >
-                      <p className="text-xs font-semibold text-heading">{day.label}</p>
-                      {day.detail ? (
-                        <p className="text-[0.7rem] text-muted">{day.detail}</p>
-                      ) : null}
-                      <div className="mt-2 flex flex-1 flex-col gap-1.5">
-                        {dayItems.length === 0 ? (
-                          <p className="text-xs leading-relaxed text-muted">
-                            Nothing on this day yet. Add a booking above and assign it to{" "}
-                            {day.label}.
-                          </p>
-                        ) : (
-                          dayItems.map((item) => (
-                            <WeekChip
-                              key={item.id}
-                              item={item}
-                              days={days}
-                              dragging={draggingId === item.id}
-                              onAssignDay={onAssignDay}
-                              onEdit={onEdit}
-                              onDragStart={setDraggingId}
-                              onDragEnd={endDrag}
-                            />
-                          ))
-                        )}
+                      <div>
+                        <p className={`${plan.caption} font-semibold text-heading`}>{day.label}</p>
+                        {day.detail ? (
+                          <p className={`${plan.caption} text-muted`}>{day.detail}</p>
+                        ) : null}
                       </div>
+                      <div className="plan-stack-tight flex-1">{renderItems(dayItems, day, "week-grid")}</div>
                     </div>
                   );
                 })}
@@ -231,7 +262,7 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit }: Props)
       </div>
 
       <section
-        className={`panel-soft px-4 py-4 ${
+        className={`${plan.soft} ${
           overKey === "unscheduled" && draggingId ? "ring-2 ring-accent/40" : ""
         }`}
         aria-labelledby={`${headingId}-week-unscheduled-title`}
@@ -245,27 +276,28 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit }: Props)
       >
         <h4
           id={`${headingId}-week-unscheduled-title`}
-          className="font-display font-bold text-heading"
+          className={plan.h4}
         >
           Unscheduled
           {unscheduled.length > 0 ? (
-            <span className="ml-2 text-sm font-semibold text-accent">
+            <span className={`${plan.caption} ml-2 font-semibold text-accent`}>
               {unscheduled.length}
             </span>
           ) : null}
         </h4>
         {unscheduled.length === 0 ? (
-          <p className="mt-2 text-sm text-muted">
+          <p className={`${plan.body} plan-follow text-muted`}>
             Bookings without a day land here. Choose a day when you add one.
           </p>
         ) : (
-          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+          <ul className="plan-grid-2 plan-follow">
             {unscheduled.map((item) => (
               <li key={item.id}>
                 <WeekChip
                   item={item}
                   days={days}
                   dragging={draggingId === item.id}
+                  idPrefix="week-open"
                   onAssignDay={onAssignDay}
                   onEdit={onEdit}
                   onDragStart={setDraggingId}

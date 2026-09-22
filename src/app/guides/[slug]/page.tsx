@@ -6,6 +6,7 @@ import { destinationCity, getAllDestinations } from "@/data/destinations";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { SitePage } from "@/components/pages/SitePage";
 import { TripPlanner } from "@/components/trip-planner/TripPlanner";
+import { PlanFold } from "@/components/trip-planner/PlanFold";
 import {
   getGuideHub,
   getGuideHubSlugs,
@@ -22,6 +23,58 @@ import {
   getPostsByGuideHub,
   type PostMeta,
 } from "@/lib/posts";
+
+function GuideIndex({
+  pages,
+  posts,
+}: {
+  pages: { title: string; href: string; description?: string }[];
+  posts: PostMeta[];
+}) {
+  return (
+    <>
+      {pages.length > 0 ? (
+        <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+          {pages.map((page) => (
+            <li key={page.href}>
+              <Link
+                href={page.href}
+                className="panel-interactive group flex h-full gap-4 p-5"
+              >
+                <span className="icon-tile">
+                  <NavIcon name="book-open" size={20} />
+                </span>
+                <span>
+                  <span className="card-title block">{page.title}</span>
+                  {page.description ? (
+                    <span className="mt-1 block text-sm text-text">{page.description}</span>
+                  ) : null}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {posts.length > 0 ? (
+        <ul className="hub-follow grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+          {posts.map((post, i) => (
+            <li key={post.slug}>
+              <PostCard post={post} priority={i < 3} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-10 text-text">
+          More notes coming soon. Meanwhile, browse the{" "}
+          <Link href="/blog" className="text-link hover:text-accent">
+            full blog
+          </Link>
+          .
+        </p>
+      )}
+    </>
+  );
+}
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -119,6 +172,7 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
       title={plannerConfig?.title || hub.title}
       description={plannerConfig?.intro || hub.description}
       narrow={false}
+      compact={isPlanner}
       tone={isPlanner ? "default" : "white"}
       crumbs={[
         { href: "/", label: "Home" },
@@ -150,11 +204,22 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
       ) : null}
 
       {plannerConfig ? (
-        <div className="mt-14 border-t border-border pt-10">
+        <PlanFold
+          id={`${slug}-journal-index`}
+          title={plannerConfig.guidesHeading}
+          mobileOnly
+        >
+          <GuideIndex pages={pages} posts={posts} />
+        </PlanFold>
+      ) : null}
+
+      {plannerConfig ? (
+        <div className="mt-14 hidden border-t border-border pt-10 sm:block">
           <p className="eyebrow">{plannerConfig.guidesEyebrow}</p>
           <h2 className="font-display mt-2 text-3xl font-bold tracking-tight text-heading md:text-4xl">
             {plannerConfig.guidesHeading}
           </h2>
+          <GuideIndex pages={pages} posts={posts} />
         </div>
       ) : (
         <div className="hub-follow inline-flex items-center gap-2 rounded-full bg-surface-soft px-3 py-1.5 text-sm font-semibold text-heading">
@@ -164,50 +229,7 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
         </div>
       )}
 
-      {pages.length > 0 ? (
-        <ul className="mt-8 grid gap-3 sm:grid-cols-2">
-          {pages.map((page) => (
-            <li key={page.href}>
-              <Link
-                href={page.href}
-                className="panel-interactive group flex h-full gap-4 p-5"
-              >
-                <span className="icon-tile">
-                  <NavIcon name="book-open" size={20} />
-                </span>
-                <span>
-                  <span className="card-title block">
-                    {page.title}
-                  </span>
-                  {page.description ? (
-                    <span className="mt-1 block text-sm text-text">
-                      {page.description}
-                    </span>
-                  ) : null}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      {posts.length > 0 ? (
-        <ul className="hub-follow grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-          {posts.map((post, i) => (
-            <li key={post.slug}>
-              <PostCard post={post} priority={i < 3} />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-10 text-text">
-          More notes coming soon. Meanwhile, browse the{" "}
-          <Link href="/blog" className="text-link hover:text-accent">
-            full blog
-          </Link>
-          .
-        </p>
-      )}
+      {plannerConfig ? null : <GuideIndex pages={pages} posts={posts} />}
     </SitePage>
   );
 }

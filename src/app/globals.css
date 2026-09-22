@@ -1058,3 +1058,591 @@ html.dark .places-world-map.leaflet-container {
   border: 2px solid var(--on-solid);
   box-shadow: 0 1px 4px rgba(20, 17, 13, 0.4);
 }
+
+/* ——— Plan a Trip density ———
+   Size, spacing, and nested radius only. Colors and font families stay on FJ tokens.
+   Outer radius 28px − card padding 20px = 8px nested; inset padding 16px clamps the next radius to 4px. */
+.plan-trip {
+  --plan-fs-body: 1rem; /* 16 */
+  --plan-lh-body: 1.55;
+  --plan-fs-caption: 0.8125rem; /* 13 */
+  --plan-lh-caption: 1.35;
+  --plan-fs-h2: 1.5rem; /* 24 */
+  --plan-fs-h3: 1.1875rem; /* 19 */
+  --plan-fs-h4: 1rem; /* 16 */
+  --plan-fs-chip: 0.75rem; /* 12 */
+  --plan-fs-label: 0.75rem; /* 12 */
+  --plan-radius: 1.75rem; /* 28 */
+  --plan-pad: 1.25rem; /* 20 */
+  --plan-pad-inset: 1rem; /* 16 */
+  --plan-gap: 1rem; /* 16 — card interior */
+  --plan-gap-tight: 0.75rem; /* 12 */
+  --plan-gap-label: 0.5rem; /* 8 — label ↔ value */
+  --plan-section: 1.25rem; /* 20 — subsections */
+  --plan-block: 1.5rem; /* 24 — between primary blocks */
+  --plan-radius-next: max(0.25rem, calc(var(--plan-radius) - var(--plan-pad)));
+  --plan-radius-deep: max(0.25rem, calc(var(--plan-radius-next) - var(--plan-pad-inset)));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.plan-h2 {
+  font-size: var(--plan-fs-h2);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.plan-h3 {
+  font-size: var(--plan-fs-h3);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.plan-h4 {
+  font-size: var(--plan-fs-h4);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.plan-body {
+  font-size: var(--plan-fs-body);
+  line-height: var(--plan-lh-body);
+}
+
+.plan-prose {
+  max-width: 70ch;
+}
+
+.plan-caption {
+  font-size: var(--plan-fs-caption);
+  font-weight: 500;
+  line-height: var(--plan-lh-caption);
+}
+
+.plan-label {
+  font-size: var(--plan-fs-label);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.plan-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: var(--plan-fs-chip);
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.plan-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: 1.5rem;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: var(--plan-fs-chip);
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.plan-text-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.25rem;
+  font-size: var(--plan-fs-caption);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.plan-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid var(--border);
+  background: var(--white);
+  padding: 0.625rem 1.25rem;
+  font-size: var(--plan-fs-body);
+  line-height: 1.5;
+  color: var(--heading);
+}
+
+.plan-input::placeholder {
+  color: var(--muted);
+}
+
+textarea.plan-input {
+  min-height: 6.5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  resize: vertical;
+}
+
+select.plan-input {
+  padding-right: 2.25rem;
+}
+
+.plan-panel {
+  border-radius: var(--plan-radius);
+  padding: var(--plan-pad);
+}
+
+.plan-inset {
+  border-radius: var(--plan-radius-next);
+  padding: var(--plan-pad-inset);
+  --plan-radius-deep: max(0.25rem, calc(var(--plan-radius-next) - var(--plan-pad-inset)));
+}
+
+.plan-chip-card {
+  border-radius: var(--plan-radius-deep);
+  padding: 0.75rem;
+}
+
+.plan-trip .plan-control {
+  border-radius: var(--plan-radius-next);
+}
+
+.plan-trip .plan-inset .plan-control,
+.plan-trip .plan-inset .plan-chip-card {
+  border-radius: var(--plan-radius-deep);
+}
+
+.plan-trip .plan-inset .plan-inset {
+  border-radius: var(--plan-radius-deep);
+  --plan-radius-deep: 0.25rem;
+}
+
+.plan-trip .btn {
+  font-size: var(--plan-fs-body);
+  border-radius: var(--plan-radius-next);
+}
+
+.plan-trip .plan-inset .btn {
+  border-radius: var(--plan-radius-deep);
+}
+
+.plan-trip .plan-inset .icon-tile {
+  border-radius: var(--plan-radius-deep);
+}
+
+.plan-field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--plan-gap-label);
+}
+
+.plan-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--plan-gap);
+}
+
+.plan-stack-tight {
+  display: flex;
+  flex-direction: column;
+  gap: var(--plan-gap-tight);
+}
+
+/* Labeled cluster inside a form: label, choices, then the control. */
+.plan-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--plan-gap-label);
+}
+
+/* 20px between trip-detail groups. Short fields pair up even on a phone. */
+.plan-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--plan-section);
+  margin-top: var(--plan-section);
+}
+
+.plan-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--plan-gap-tight);
+}
+
+.plan-pair .plan-input {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.plan-input-short {
+  max-width: 8rem;
+}
+
+/* Quiet progress index — name over status, two columns, no pill chrome. */
+.plan-status {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--plan-gap-tight) var(--plan-gap);
+  margin-top: var(--plan-gap-tight);
+}
+
+.plan-status > li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.plan-section {
+  margin-top: var(--plan-section);
+}
+
+.plan-block {
+  margin-top: var(--plan-block);
+}
+
+.plan-follow {
+  margin-top: var(--plan-gap);
+}
+
+.plan-grid-2 {
+  display: grid;
+  gap: var(--plan-gap);
+}
+
+.plan-check {
+  display: flex;
+  align-items: center;
+  gap: var(--plan-gap-label);
+  min-height: 2.75rem;
+}
+
+.plan-check-input {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.plan-review-row {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  border-bottom: 1px solid var(--border);
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+}
+
+.plan-review-row > dd {
+  margin-left: auto;
+  max-width: 100%;
+  text-align: right;
+}
+
+.plan-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--plan-gap);
+}
+
+.plan-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--plan-gap-tight);
+}
+
+.plan-actions {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--plan-gap-tight);
+  margin-top: var(--plan-section);
+}
+
+.plan-actions-inline {
+  margin-top: 0;
+  justify-content: flex-start;
+}
+
+.plan-actions-end {
+  justify-content: flex-end;
+}
+
+.plan-actions.plan-follow {
+  margin-top: var(--plan-gap);
+}
+
+.plan-day {
+  padding-bottom: var(--plan-section);
+}
+
+.plan-day:last-child {
+  padding-bottom: 0;
+}
+
+@media (max-width: 639px) {
+  /* One primary step action spans the card. Pairs stay side by side. */
+  .plan-actions-end > .btn,
+  .plan-actions-end > a.btn {
+    width: 100%;
+  }
+}
+
+@media (min-width: 640px) {
+  .plan-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .plan-toolbar {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+}
+
+/* Instructional copy that stays on desktop and drops out of the phone flow. */
+@media (max-width: 639px) {
+  .plan-desktop-only {
+    display: none !important;
+  }
+
+  .plan-page .section-band {
+    padding-top: 1rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .plan-page .plan-block {
+    margin-top: 0.75rem;
+  }
+
+  .plan-trip {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  html:has(.plan-trip) {
+    scroll-padding-bottom: calc(
+      4.75rem + var(--mobile-nav-bar) + env(safe-area-inset-bottom, 0px)
+    );
+  }
+
+  .plan-day-card {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .plan-lane-body[data-open="false"] {
+    display: none;
+  }
+
+  .plan-save.panel-soft {
+    margin-top: 0.75rem;
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+}
+
+@media (min-width: 640px) {
+  .plan-mobile-only {
+    display: none !important;
+  }
+}
+
+.plan-fold {
+  --plan-fs-h4: 1rem;
+  --plan-fs-caption: 0.8125rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.plan-fold-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.75rem;
+  border: 0;
+  background: transparent;
+  padding: 0.625rem 0;
+  color: var(--heading);
+  text-align: left;
+}
+
+.plan-fold-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.plan-fold-title {
+  min-width: 0;
+  flex: 1;
+  font-size: var(--plan-fs-h4);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.plan-fold-meta {
+  flex-shrink: 0;
+  font-size: var(--plan-fs-caption);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.plan-fold-chevron {
+  width: 0.45rem;
+  height: 0.45rem;
+  flex-shrink: 0;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.plan-fold-toggle[aria-expanded="true"] .plan-fold-chevron {
+  transform: rotate(-135deg) translateY(-2px);
+}
+
+.plan-fold-panel {
+  padding-bottom: 0.75rem;
+}
+
+.plan-lanes {
+  border-top: 1px solid var(--border);
+}
+
+.plan-lane {
+  border-bottom: 1px solid var(--border);
+}
+
+.plan-lane-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--plan-gap-tight);
+  padding-bottom: 0.75rem;
+}
+
+.plan-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  margin-right: calc(var(--plan-pad) * -1);
+  margin-bottom: calc(var(--plan-pad) * -1);
+  margin-left: calc(var(--plan-pad) * -1);
+  border-top: 1px solid var(--border);
+  background: var(--white);
+  padding: 0.75rem var(--plan-pad) calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+body.mobile-bottom-nav-visible .plan-sticky {
+  bottom: calc(var(--mobile-nav-bar) + env(safe-area-inset-bottom, 0px));
+}
+
+.plan-sticky-page {
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  background: color-mix(in srgb, var(--bg) 92%, white);
+  backdrop-filter: blur(8px);
+}
+
+.plan-sticky .btn:focus-visible,
+.plan-sticky a.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 639px) {
+  .plan-sticky {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 140;
+    margin: 0;
+  }
+
+  body.mobile-bottom-nav-visible .plan-trip {
+    padding-bottom: calc(5.5rem + var(--mobile-nav-bar) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .plan-sticky-solo > .btn,
+  .plan-sticky-solo > a.btn {
+    flex: 1;
+  }
+
+  .plan-fold-panel .panel-soft {
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+}
+
+@media (min-width: 640px) {
+  .plan-fold,
+  .plan-lane {
+    border-bottom: 0;
+  }
+
+  .plan-fold {
+    margin-top: var(--plan-block);
+  }
+
+  .plan-fold-mobile {
+    display: none;
+  }
+
+  .plan-lanes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--plan-gap);
+    border-top: 0;
+  }
+
+  .plan-lane {
+    border: 1px solid var(--border);
+    border-radius: var(--plan-radius-next);
+    background: var(--white);
+    padding: var(--plan-pad-inset);
+  }
+
+  .plan-lane-core {
+    background: var(--surface-soft);
+  }
+
+  .plan-lane-body {
+    gap: var(--plan-gap);
+    padding-bottom: 0;
+  }
+
+  .plan-sticky {
+    position: static;
+    z-index: auto;
+    margin: var(--plan-section) 0 0;
+    border-top: 0;
+    background: transparent;
+    padding: 0;
+    backdrop-filter: none;
+  }
+
+  body.mobile-bottom-nav-visible .plan-sticky {
+    bottom: auto;
+  }
+}

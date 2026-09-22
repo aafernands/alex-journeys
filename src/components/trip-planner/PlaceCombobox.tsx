@@ -134,7 +134,7 @@ export function PlaceCombobox({
           id={listId}
           role="listbox"
           aria-label={listLabel}
-          className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-xl border border-border bg-white py-1 shadow-[0_12px_32px_rgba(60,40,20,0.12)]"
+          className="plan-control absolute z-30 mt-2 max-h-64 w-full overflow-auto border border-border bg-white py-1 shadow-[0_12px_32px_rgba(60,40,20,0.12)]"
         >
           {options.map((option, index) => {
             const selected = index === active;
@@ -145,7 +145,7 @@ export function PlaceCombobox({
                   role="option"
                   aria-selected={selected}
                   data-active={selected ? "true" : undefined}
-                  className={`flex cursor-pointer items-baseline justify-between gap-3 px-4 py-2.5 text-sm ${
+                  className={`plan-body flex min-h-11 cursor-pointer items-baseline justify-between gap-3 px-4 py-2.5 ${
                     selected ? "bg-accent/10 text-heading" : "text-text"
                   }`}
                   onMouseEnter={() => setActiveIndex(index)}
@@ -154,7 +154,7 @@ export function PlaceCombobox({
                 >
                   <span className="font-medium">{option.label}</span>
                   {option.journal || option.iata ? (
-                    <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.06em] text-muted">
+                    <span className="plan-label shrink-0 text-muted">
                       {option.journal ? "Journal" : option.iata}
                     </span>
                   ) : null}
