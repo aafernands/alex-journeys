@@ -7,10 +7,12 @@ import { ItineraryHub } from "@/components/trip-planner/ItineraryHub";
 import { PlaceCombobox } from "@/components/trip-planner/PlaceCombobox";
 import { useTripSync } from "@/components/trip-planner/useTripSync";
 import {
+  dateSummary,
   effectiveCategories,
   initialPlannerState,
   nextStepsSubhead,
   reviewRows,
+  travelerSummary,
   TRIP_CATEGORIES,
   validateCategories,
   validateDetails,
@@ -146,6 +148,60 @@ function Field({
 
 function describedBy(id: string, error?: string): string | undefined {
   return error ? `${id}-error` : undefined;
+}
+
+function StepMeter({ step, className }: { step: number; className?: string }) {
+  return (
+    <div className={className}>
+      <div
+        className="flex gap-2"
+        role="progressbar"
+        aria-valuemin={1}
+        aria-valuemax={3}
+        aria-valuenow={step}
+        aria-label={`Step ${step} of 3`}
+      >
+        {STEPS.filter((n) => n < 4).map((n) => (
+          <span
+            key={n}
+            className={`h-1 flex-1 rounded-full ${n <= step ? "bg-accent" : "bg-sand"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StepHeading({
+  id,
+  title,
+  step,
+  lead,
+  status,
+}: {
+  id: string;
+  title: string;
+  step: Step;
+  lead?: string;
+  status?: string;
+}) {
+  return (
+    <div className="plan-stack-tight">
+      <h2 id={id} className={tripDensity.h2}>
+        {lead ? <span className="plan-mobile-only">{lead}</span> : null}
+        <span className={lead ? "plan-desktop-only" : undefined}>{title}</span>
+      </h2>
+      {lead && status ? (
+        <p className={`${tripDensity.caption} text-muted plan-mobile-only`}>
+          {status} · Step {step} of 3
+        </p>
+      ) : null}
+      {lead ? (
+        <p className="plan-step-title font-display text-heading plan-mobile-only">{title}</p>
+      ) : null}
+      <StepMeter step={step} className="plan-mobile-only" />
+    </div>
+  );
 }
 
 function PlannerShell() {
@@ -304,6 +360,11 @@ export function TripPlanner({
   const rows = reviewRows(state, flexibleOn);
   const steps = visiblePartners(partners, state, config.extras);
   const subhead = nextStepsSubhead(config.steps.next.helper, state, flexibleOn);
+  const tripName = state.destination.trim();
+  const tripStatus = [
+    dateSummary(state, flexibleOn) || "Dates not set",
+    travelerSummary(state),
+  ].join(" · ");
 
   if (isPendingPlan(storedPlan)) {
     return <PlannerShell />;
@@ -415,37 +476,22 @@ export function TripPlanner({
   return (
     <section aria-labelledby={`${baseId}-heading`} className="plan-trip plan-block max-w-3xl">
       {step < 4 ? (
-        <>
+        <div className="plan-desktop-only">
           <p className={`${tripDensity.caption} font-semibold text-muted`}>
             Step {step} of 3
           </p>
-          <div
-            className="mt-2 flex gap-2"
-            role="progressbar"
-            aria-valuemin={1}
-            aria-valuemax={3}
-            aria-valuenow={step}
-            aria-label={`Step ${step} of 3`}
-          >
-            {STEPS.filter((n) => n < 4).map((n) => (
-              <span
-                key={n}
-                className={`h-1 flex-1 rounded-full ${n <= step ? "bg-accent" : "bg-sand"}`}
-              />
-            ))}
-          </div>
-        </>
+          <StepMeter step={step} className="mt-2" />
+        </div>
       ) : null}
 
       <div className={`${tripDensity.panel} plan-section`}>
         {step === 1 ? (
           <>
-            <h2
+            <StepHeading
               id={`${baseId}-heading`}
-              className={tripDensity.h2}
-            >
-              {config.steps.categories.heading}
-            </h2>
+              title={config.steps.categories.heading}
+              step={1}
+            />
             <p className={`${tripDensity.prose} plan-follow text-muted plan-desktop-only`}>
               {config.steps.categories.helper}
             </p>
@@ -488,12 +534,13 @@ export function TripPlanner({
               goReview();
             }}
           >
-            <h2
+            <StepHeading
               id={`${baseId}-heading`}
-              className={tripDensity.h2}
-            >
-              {config.steps.details.heading}
-            </h2>
+              title={config.steps.details.heading}
+              step={2}
+              lead={tripName || undefined}
+              status={tripName ? tripStatus : undefined}
+            />
             <p className={`${tripDensity.prose} plan-follow text-muted plan-desktop-only`}>
               {config.steps.details.helper}
             </p>
@@ -861,12 +908,13 @@ export function TripPlanner({
 
         {step === 3 ? (
           <>
-            <h2
+            <StepHeading
               id={`${baseId}-heading`}
-              className={tripDensity.h2}
-            >
-              {config.steps.review.heading}
-            </h2>
+              title={config.steps.review.heading}
+              step={3}
+              lead={tripName || undefined}
+              status={tripName ? tripStatus : undefined}
+            />
             <p className={`${tripDensity.prose} plan-follow text-muted plan-desktop-only`}>
               {config.steps.review.helper}
             </p>

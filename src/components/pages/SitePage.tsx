@@ -69,48 +69,50 @@ export function SitePage({
       ) : null}
       <div className="section-shell section-band">
         <div className={width}>
-          {crumbs && crumbs.length > 0 ? (
-            <nav aria-label="Breadcrumb" className="text-sm text-muted">
-              <ol className="flex flex-wrap items-center gap-2">
-                {crumbs.map((c, i) => (
-                  <li key={`${c.label}-${i}`} className="flex items-center gap-2">
-                    {i > 0 ? <span aria-hidden="true">›</span> : null}
-                    {c.href ? (
-                      <Link
-                        href={c.href}
-                        className="text-link transition hover:text-accent"
-                      >
-                        {c.label}
-                      </Link>
-                    ) : (
-                      <span className="text-text">{c.label}</span>
-                    )}
-                  </li>
-                ))}
-              </ol>
-            </nav>
-          ) : null}
+          <div className={compact ? "plan-page-chrome" : undefined}>
+            {crumbs && crumbs.length > 0 ? (
+              <nav aria-label="Breadcrumb" className="text-sm text-muted">
+                <ol className="flex flex-wrap items-center gap-2">
+                  {crumbs.map((c, i) => (
+                    <li key={`${c.label}-${i}`} className="flex items-center gap-2">
+                      {i > 0 ? <span aria-hidden="true">›</span> : null}
+                      {c.href ? (
+                        <Link
+                          href={c.href}
+                          className="text-link transition hover:text-accent"
+                        >
+                          {c.label}
+                        </Link>
+                      ) : (
+                        <span className="text-text">{c.label}</span>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            ) : null}
 
-          {label ? (
-            <p className={`${crumbs ? "mt-8" : ""} eyebrow ${compact ? "max-sm:hidden" : ""}`}>
-              {label}
-            </p>
-          ) : null}
-          <div
-            className={`flex flex-wrap items-start justify-between gap-3 ${
-              label || crumbs ? "mt-2" : ""
-            }`}
-          >
-            <h1 className="font-display text-display text-heading">{title}</h1>
-            {editHref ? (
-              <AdminSectionEdit href={editHref} label={editLabel} />
+            {label ? (
+              <p className={`${crumbs ? "mt-8" : ""} eyebrow ${compact ? "max-sm:hidden" : ""}`}>
+                {label}
+              </p>
+            ) : null}
+            <div
+              className={`flex flex-wrap items-start justify-between gap-3 ${
+                label || crumbs ? "mt-2" : ""
+              }`}
+            >
+              <h1 className="font-display text-display text-heading">{title}</h1>
+              {editHref ? (
+                <AdminSectionEdit href={editHref} label={editLabel} />
+              ) : null}
+            </div>
+            {description ? (
+              <p className={`mt-4 max-w-2xl text-lead text-text ${compact ? "max-sm:hidden" : ""}`}>
+                {description}
+              </p>
             ) : null}
           </div>
-          {description ? (
-            <p className={`mt-4 max-w-2xl text-lead text-text ${compact ? "max-sm:hidden" : ""}`}>
-              {description}
-            </p>
-          ) : null}
 
           {html ? (
             <div className="mt-10 md:mt-12">
