@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { FlightCardPayment } from "@/components/flights/FlightCardPayment";
-import { FlightConfirmation } from "@/components/flights/FlightConfirmation";
+import { FlightConfirmationScreen } from "@/components/flights/FlightConfirmationScreen";
 import { FlightFailureNotice } from "@/components/flights/FlightFailureNotice";
 import { plan } from "@/components/trip-planner/density";
 import {
@@ -32,12 +32,7 @@ import {
   type FlightPriceChange,
   type FlightsQuery,
 } from "@/lib/flights";
-import {
-  bookedFlightFromConfirmation,
-  commitBookedFlight,
-  flightTripContext,
-  type FlightCommitResult,
-} from "@/lib/flights-itinerary";
+import { rememberFlightConfirmation } from "@/lib/flights-itinerary";
 
 type Props = {
   offer: FlightOffer;
@@ -49,7 +44,6 @@ type Props = {
 };
 
 type Pending = "" | "prebook" | "book";
-type ItineraryState = "adding" | "added" | "missing";
 
 function priceMoved(changes: FlightPriceChange | null): boolean {
   if (!changes) return false;
@@ -111,11 +105,6 @@ export function FlightBooker({
   const [confirmation, setConfirmation] = useState<FlightConfirmationDetails | null>(null);
   const [failure, setFailure] = useState<FlightFailure | null>(null);
   const [pending, setPending] = useState<Pending>("");
-  const [itinerary, setItinerary] = useState<ItineraryState>("adding");
-  const [returnHref, setReturnHref] = useState(planHref);
-  const [savedAs, setSavedAs] = useState<Exclude<FlightCommitResult, { ok: false }>["saved"]>(
-    "local",
-  );
   const lock = useRef(false);
   const moved = priceMoved(changes);
   const busy = pending !== "";
@@ -253,15 +242,15 @@ export function FlightBooker({
         );
         return;
       }
-      setConfirmation(
-        buildFlightConfirmation({
-          booking: payload.booking,
-          offer: prebook.offer ?? offer,
-          party,
-          sandbox,
-          paidBy: "card",
-        }),
-      );
+      const booked = buildFlightConfirmation({
+        booking: payload.booking,
+        offer: prebook.offer ?? offer,
+        party,
+        sandbox,
+        paidBy: "card",
+      });
+      rememberFlightConfirmation(booked);
+      setConfirmation(booked);
     } catch {
       setFailure(
         classifyFlightFailure({
@@ -276,48 +265,14 @@ export function FlightBooker({
     }
   }
 
-  const applyCommit = useCallback((result: FlightCommitResult) => {
-    if (!result.ok) {
-      setItinerary("missing");
-      return;
-    }
-    setReturnHref(result.href);
-    setSavedAs(result.saved);
-    setItinerary("added");
-  }, []);
-
-  useEffect(() => {
-    if (!confirmation) return;
-    let cancelled = false;
-    void commitBookedFlight(
-      bookedFlightFromConfirmation(confirmation, listHref),
-      flightTripContext(query),
-    ).then((result) => {
-      if (!cancelled) applyCommit(result);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [applyCommit, confirmation, listHref, query]);
-
-  function addToItinerary() {
-    if (!confirmation || itinerary === "adding") return;
-    setItinerary("adding");
-    void commitBookedFlight(
-      bookedFlightFromConfirmation(confirmation, listHref),
-      flightTripContext(query),
-    ).then(applyCommit);
-  }
-
   if (confirmation) {
     return (
-      <FlightConfirmation
+      <FlightConfirmationScreen
         confirmation={confirmation}
+        query={query}
         listHref={listHref}
-        planHref={returnHref}
-        itinerary={itinerary}
-        saved={savedAs}
-        onAddToItinerary={addToItinerary}
+        planHref={planHref}
+        redirect
       />
     );
   }

@@ -9,9 +9,13 @@ import {
   FLIGHT_PUBLISHABLE_KEY_MISSING,
   flightBookBody,
   flightBookingPayment,
+  flightConfirmationFromParams,
+  flightConfirmationPath,
   flightEnvPublishableKey,
   flightPrebookPaymentIssue,
   flightStripeConfirmed,
+  isFlightConfirmationPath,
+  isFlightSearchPath,
   flightOfferId,
   flightUpstreamMessage,
   flightsBookPath,
@@ -584,6 +588,64 @@ describe("verify payload", () => {
     const path = flightsBookPath(VERIFY_OFFER, query);
     const params = new URLSearchParams(path.slice(path.indexOf("?") + 1));
     assert.equal(params.get("offer"), VERIFY_OFFER);
+  });
+});
+
+describe("flight confirmation link", () => {
+  it("opens the paid booking instead of the search results", () => {
+    const query = parseFlightsSearchParams({
+      origin: "EWR",
+      dest: "MIA",
+      start: "2027-04-12",
+      end: "2027-04-19",
+      type: "roundtrip",
+      adults: "1",
+      trip: "trip_abc",
+    });
+    const confirmation = buildFlightConfirmation({
+      booking: {
+        bookingId: "book_123",
+        status: "CONFIRMED",
+        bookingRef: "ABC123",
+        currency: "USD",
+        price: 655,
+        email: "ada@example.com",
+      },
+      offer: mapFlightSearch(RATES)[0],
+      party: parseFlightParty([lead], 1, 0, "2027-04-12"),
+      sandbox: true,
+      paidBy: "card",
+    });
+    const path = flightConfirmationPath(confirmation, query);
+    const url = new URL(path, "http://localhost");
+    assert.equal(url.pathname, "/flights/confirmation");
+    assert.equal(isFlightConfirmationPath(path), true);
+    assert.equal(isFlightSearchPath(path), false);
+    assert.equal(isFlightSearchPath(flightsPath(query)), true);
+    assert.equal(url.searchParams.get("booking"), "book_123");
+    assert.equal(url.searchParams.get("ref"), "ABC123");
+    assert.match(url.searchParams.get("route") ?? "", /EWR/);
+    assert.match(url.searchParams.get("total") ?? "", /655/);
+    assert.equal(url.searchParams.get("origin"), "EWR");
+    assert.equal(url.searchParams.get("dest"), "MIA");
+    assert.equal(path.includes("offer="), false);
+    assert.equal(path.length < 2000, true);
+
+    const params = Object.fromEntries(url.searchParams.entries());
+    const fromUrl = flightConfirmationFromParams(params);
+    assert.ok(fromUrl);
+    assert.equal(fromUrl.bookingId, "book_123");
+    assert.equal(fromUrl.confirmationCode, "ABC123");
+    assert.equal(fromUrl.routeLabel, confirmation.routeLabel);
+    assert.equal(fromUrl.dateLabel, confirmation.dateLabel);
+    assert.equal(fromUrl.totalLabel, confirmation.totalLabel);
+    assert.equal(fromUrl.payment.method, "guest_card");
+    assert.equal(fromUrl.sandbox, true);
+    assert.equal(flightConfirmationFromParams({ origin: "EWR", dest: "MIA" }), null);
+    assert.equal(
+      flightConfirmationPath(fromUrl, parseFlightsSearchParams(params)),
+      path,
+    );
   });
 });
 

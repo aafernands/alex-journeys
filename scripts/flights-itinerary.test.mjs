@@ -6,6 +6,8 @@ import {
   itineraryFlightHref,
   mergeBookedFlight,
   nextLocalFlightPlan,
+  parseStoredFlightConfirmations,
+  resolveFlightConfirmation,
 } from "../src/lib/flights-itinerary.ts";
 import { initialPlannerState } from "../src/lib/trip-planner-model.ts";
 import { tripWriteFromPlan } from "../src/lib/trip-record.ts";
@@ -14,7 +16,7 @@ const flight = {
   title: "TAP Air Portugal EWR ⇄ LIS",
   confirmation: "ABC123",
   notes: "EWR ⇄ LIS · Apr 12 – Apr 19 · Economy",
-  href: "/flights?origin=Newark+%28EWR%29&dest=Lisbon%2C+Portugal&start=2027-04-12&end=2027-04-19&type=roundtrip",
+  href: "/flights/confirmation?booking=book_123&ref=ABC123&route=EWR+%E2%86%92+LIS&dates=Apr+12+%E2%80%93+Apr+19&total=%24640&origin=Newark+%28EWR%29&dest=Lisbon%2C+Portugal&start=2027-04-12&end=2027-04-19&type=roundtrip",
   departDate: "2027-04-12",
   time: "18:30",
 };
@@ -75,7 +77,9 @@ describe("flights itinerary handoff", () => {
     assert.equal(item.confirmation, "ABC123");
     assert.equal(item.dayIndex, 1);
     assert.equal(item.time, "18:30");
-    assert.equal(item.url.startsWith("/flights?"), true);
+    assert.equal(item.url.startsWith("/flights/confirmation?"), true);
+    assert.equal(item.url.includes("booking=book_123"), true);
+    assert.equal(item.url.startsWith("/flights?"), false);
     const again = mergeBookedFlight(merged.plan, flight);
     assert.equal(again.added, false);
     assert.equal(again.plan.items.length, 1);
@@ -99,5 +103,63 @@ describe("flights itinerary handoff", () => {
       flight,
     );
     assert.equal(local.kind, "local");
+  });
+
+  it("replaces a search link with the confirmation for that booking", () => {
+    const search = {
+      ...flight,
+      href: "/flights?origin=Newark+%28EWR%29&dest=Lisbon%2C+Portugal&start=2027-04-12&end=2027-04-19&type=roundtrip",
+    };
+    const merged = mergeBookedFlight(lisbonPlan(), search);
+    assert.equal(merged.plan.items[0].url.startsWith("/flights?"), true);
+    const fixed = mergeBookedFlight(merged.plan, flight);
+    assert.equal(fixed.added, false);
+    assert.equal(fixed.plan.items.length, 1);
+    assert.equal(fixed.plan.items[0].url, flight.href);
+    assert.equal(fixed.plan.items[0].url.startsWith("/flights/confirmation?"), true);
+  });
+
+  it("keeps a stored confirmation ahead of a thinner URL copy", () => {
+    const stored = parseStoredFlightConfirmations(
+      JSON.stringify([
+        {
+          confirmation: {
+            title: "TAP Air Portugal EWR ⇄ LIS",
+            bookingId: "book_123",
+            confirmationCode: "ABC123",
+            status: "CONFIRMED",
+            routeLabel: "EWR ⇄ LIS",
+            dateLabel: "Apr 12 – Apr 19",
+            cabin: "Economy",
+            baggage: "Carry-on",
+            conditions: ["Non-refundable"],
+            totalLabel: "$640",
+            passengerName: "Ada Lovelace",
+            email: "ada@example.com",
+            payment: { method: "guest_card", label: "Paid with the card confirmed through Nuitee." },
+            sandbox: true,
+            departDate: "2027-04-12",
+            departTime: "18:30",
+          },
+        },
+      ]),
+    );
+    assert.equal(stored.length, 1);
+    assert.equal(stored[0].passengerName, "Ada Lovelace");
+    assert.equal(stored[0].email, "ada@example.com");
+    const fromUrl = {
+      ...stored[0],
+      passengerName: "",
+      email: "",
+      conditions: [],
+    };
+    const resolved = resolveFlightConfirmation(fromUrl, stored[0]);
+    assert.equal(resolved.passengerName, "Ada Lovelace");
+    assert.equal(resolveFlightConfirmation(fromUrl, null), fromUrl);
+    assert.equal(parseStoredFlightConfirmations("{").length, 0);
+    assert.equal(
+      parseStoredFlightConfirmations(JSON.stringify([{ confirmation: { bookingId: "bad id" } }])).length,
+      0,
+    );
   });
 });
