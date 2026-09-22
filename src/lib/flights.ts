@@ -1043,7 +1043,10 @@ export function flightUpstreamMessage(payload: unknown): string {
   return raw;
 }
 
-export function mapFlightPrebook(payload: unknown): FlightPrebook | null {
+export function mapFlightPrebook(
+  payload: unknown,
+  env: Record<string, string | undefined> = process.env,
+): FlightPrebook | null {
   const root = asRecord(payload);
   const data = root?.data;
   const first = Array.isArray(data) ? asRecord(data[0]) : asRecord(data);
@@ -1055,12 +1058,14 @@ export function mapFlightPrebook(payload: unknown): FlightPrebook | null {
     verified.offer?.price ??
     moneyFrom(asRecord(asRecord(first.pricing)?.display)) ??
     moneyFrom(asRecord(first.price));
-  return { prebookId, price, offer: verified.offer, payment: mapCardPayment(first) };
+  return { prebookId, price, offer: verified.offer, payment: mapCardPayment(first, env) };
 }
 
 const FLIGHT_TRANSACTION_ID = /^[A-Za-z0-9_-]{8,200}$/;
 const FLIGHT_CLIENT_SECRET = /^pi_[A-Za-z0-9_]{10,400}$/;
 const FLIGHT_PUBLISHABLE_KEY = /^pk_(?:test|live)_[A-Za-z0-9]{8,200}$/;
+/** Env fallback must be a Stripe publishable key, never a secret. */
+const FLIGHT_ENV_PUBLISHABLE_KEY = /^pk_(test|live)_/;
 
 /** Method names Nuitee rejects on flight book. Never send these as `payment.method`. */
 const UNSUPPORTED_FLIGHT_PAYMENT_METHODS = new Set([
@@ -1071,6 +1076,22 @@ const UNSUPPORTED_FLIGHT_PAYMENT_METHODS = new Set([
   "TRANSACTION_ID",
   "WALLET",
 ]);
+
+/**
+ * Publishable key used when Nuitee prebook omits `publishableKey`.
+ * `NUITEE_STRIPE_PUBLISHABLE_KEY` wins over `STRIPE_PUBLISHABLE_KEY`.
+ * Values that do not match `pk_test_` / `pk_live_` are ignored.
+ */
+export function flightEnvPublishableKey(
+  env: Record<string, string | undefined> = process.env,
+): string {
+  const candidates = [env.NUITEE_STRIPE_PUBLISHABLE_KEY, env.STRIPE_PUBLISHABLE_KEY];
+  for (const candidate of candidates) {
+    const key = typeof candidate === "string" ? candidate.trim() : "";
+    if (FLIGHT_ENV_PUBLISHABLE_KEY.test(key) && FLIGHT_PUBLISHABLE_KEY.test(key)) return key;
+  }
+  return "";
+}
 
 export function flightBookingPayment(transactionId: string): FlightBookingPayment | null {
   const transaction = transactionId.trim();
@@ -1094,7 +1115,10 @@ export function flightBookBody(
   return { prebookId, payment };
 }
 
-function stripeFields(record: Record<string, unknown>): {
+function stripeFields(
+  record: Record<string, unknown>,
+  env: Record<string, string | undefined>,
+): {
   transactionId: string;
   clientSecret: string;
   publishableKey: string;
@@ -1115,20 +1139,35 @@ function stripeFields(record: Record<string, unknown>): {
         stripe?.clientSecret,
       500,
     ),
-    publishableKey: text(
-      record.publishableKey ??
-        record.publishable_key ??
-        nested?.publishableKey ??
-        nested?.publishable_key ??
-        stripe?.publishableKey ??
-        record.stripePublishableKey,
-      300,
+    publishableKey: publishableKeyForPrebook(
+      text(
+        record.publishableKey ??
+          record.publishable_key ??
+          nested?.publishableKey ??
+          nested?.publishable_key ??
+          stripe?.publishableKey ??
+          record.stripePublishableKey,
+        300,
+      ),
+      env,
     ),
   };
 }
 
-function mapCardPayment(record: Record<string, unknown>): FlightCardPayment | null {
-  const fields = stripeFields(record);
+/** Upstream key when Nuitee sent one. Otherwise the env fallback. */
+function publishableKeyForPrebook(
+  upstream: string,
+  env: Record<string, string | undefined>,
+): string {
+  if (upstream) return upstream;
+  return flightEnvPublishableKey(env);
+}
+
+function mapCardPayment(
+  record: Record<string, unknown>,
+  env: Record<string, string | undefined>,
+): FlightCardPayment | null {
+  const fields = stripeFields(record, env);
   const payment = flightBookingPayment(fields.transactionId);
   if (!payment) return null;
   if (!FLIGHT_CLIENT_SECRET.test(fields.clientSecret)) return null;
@@ -1144,13 +1183,16 @@ function mapCardPayment(record: Record<string, unknown>): FlightCardPayment | nu
  * Why a prebook cannot open Stripe Elements.
  * Null when `secretKey`, `transactionId`, and `publishableKey` are all usable.
  */
-export function flightPrebookPaymentIssue(payload: unknown): string | null {
-  if (mapFlightPrebook(payload)?.payment) return null;
+export function flightPrebookPaymentIssue(
+  payload: unknown,
+  env: Record<string, string | undefined> = process.env,
+): string | null {
+  if (mapFlightPrebook(payload, env)?.payment) return null;
   const root = asRecord(payload);
   const data = root?.data;
   const first = Array.isArray(data) ? asRecord(data[0]) : asRecord(data);
   if (!first) return FLIGHT_CARD_REQUIRED;
-  const fields = stripeFields(first);
+  const fields = stripeFields(first, env);
   const hasIntent =
     Boolean(flightBookingPayment(fields.transactionId)) &&
     FLIGHT_CLIENT_SECRET.test(fields.clientSecret);
