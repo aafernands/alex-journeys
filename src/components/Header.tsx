@@ -226,10 +226,10 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
 
           {/* Desktop: primary nav */}
           <nav
-            className="hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-3 lg:gap-5 xl:gap-6 md:flex"
+            className="hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-3 xl:gap-6 md:flex"
             aria-label="Primary"
           >
-            <div className="relative" ref={destWrapRef}>
+            <div className="relative shrink-0" ref={destWrapRef}>
               <button
                 ref={destButtonRef}
                 type="button"
@@ -316,14 +316,14 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
 
             <Link
               href="/guides/plan-a-trip"
-              className={`whitespace-nowrap font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
+              className={`shrink-0 whitespace-nowrap font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
             >
               Plan a trip
             </Link>
 
             <Link
               href="/blog"
-              className={`font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
+              className={`shrink-0 whitespace-nowrap font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
             >
               Stories
             </Link>
@@ -338,7 +338,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
 
             <Link
               href="/start-here"
-              className={`font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
+              className={`shrink-0 whitespace-nowrap font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
             >
               Start here
             </Link>
@@ -350,7 +350,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
               ref={desktopSearchRef}
               variant="header"
               id="header-search"
-              className="w-44 max-w-xs shrink-0 lg:w-52"
+              className="w-36 max-w-xs shrink-0 lg:w-44 xl:w-52"
             />
 
             <ReaderAuthButtons

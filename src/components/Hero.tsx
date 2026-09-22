@@ -64,14 +64,14 @@ export function Hero() {
           <div className="animate-fade-up animate-delay-3 mt-8 flex w-full max-w-sm flex-col items-start gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
             <Link
               href={hero.ctaPrimary.href}
-              className="btn btn-block border border-transparent bg-hero-type text-near-black hover:bg-hero-type/90 sm:w-auto sm:min-w-[11rem]"
+              className="btn btn-block border border-transparent bg-hero-type text-near-black hover:bg-hero-type/90 sm:!w-auto sm:min-w-[11rem]"
             >
               {hero.ctaPrimary.label}
               <span aria-hidden="true">→</span>
             </Link>
             <Link
               href={hero.ctaSecondary.href}
-              className="btn btn-block border border-hero-type/75 bg-transparent text-hero-type hover:border-hero-type hover:bg-hero-type/10 sm:w-auto sm:min-w-[11rem]"
+              className="btn btn-block border border-hero-type/75 bg-transparent text-hero-type hover:border-hero-type hover:bg-hero-type/10 sm:!w-auto sm:min-w-[11rem]"
             >
               {hero.ctaSecondary.label}
             </Link>
