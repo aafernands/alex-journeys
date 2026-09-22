@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { plan } from "@/components/trip-planner/density";
 import type { StayConfirmationDetails } from "@/lib/stays";
@@ -7,7 +9,7 @@ type Props = {
   listHref: string;
   planHref: string;
   itinerary: "" | "added" | "missing";
-  onAddToItinerary: () => void;
+  onAddToItinerary?: () => void;
 };
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -25,7 +27,7 @@ export function StayConfirmation({
   listHref,
   planHref,
   itinerary,
-  onAddToItinerary,
+  onAddToItinerary = () => undefined,
 }: Props) {
   const showBookingId = confirmation.bookingId !== confirmation.confirmationCode;
   return (

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import type { StayFailure } from "@/lib/stays";
 
@@ -5,18 +7,18 @@ type Props = {
   failure: StayFailure;
   listHref: string;
   pending: boolean;
-  onRefreshRooms: () => void;
-  onPickAnother: () => void;
-  onRetry: () => void;
+  onRefreshRooms?: () => void;
+  onPickAnother?: () => void;
+  onRetry?: () => void;
 };
 
 export function StayFailureNotice({
   failure,
   listHref,
   pending,
-  onRefreshRooms,
-  onPickAnother,
-  onRetry,
+  onRefreshRooms = () => undefined,
+  onPickAnother = () => undefined,
+  onRetry = () => undefined,
 }: Props) {
   const primary =
     failure.recovery === "refresh-rooms" ? (
