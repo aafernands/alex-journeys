@@ -839,10 +839,10 @@ export function ItineraryHub({
             : ""}
         </p>
         <p className={`${plan.prose} text-muted plan-desktop-only`}>{subhead}</p>
-        <div className="plan-inline-actions">
+        <div className="plan-inline-actions plan-hub-actions">
           <button
             type="button"
-            className={`${plan.textBtn} text-accent`}
+            className={`${plan.textBtn} text-muted sm:text-accent`}
             onClick={async () => {
               const url = `${window.location.origin}${sharePlanHref({
                 state,
@@ -865,7 +865,7 @@ export function ItineraryHub({
           >
             Copy link
           </button>
-          <button type="button" className={`${plan.textBtn} text-heading`} onClick={onEditTrip}>
+          <button type="button" className={`${plan.textBtn} text-muted sm:text-heading`} onClick={onEditTrip}>
             Edit
           </button>
           <button type="button" className={`${plan.textBtn} text-muted`} onClick={onStartOver}>
@@ -1034,7 +1034,9 @@ export function ItineraryHub({
                     <NavIcon name={laneIcon(partner)} size={16} />
                   </span>
                   <span className="plan-fold-title">{partner.label}</span>
-                  <span className="plan-fold-meta">{laneMeta(laneItems, isNext)}</span>
+                  <span className={isNext ? "plan-next-badge" : "plan-fold-meta"}>
+                    {laneMeta(laneItems, isNext)}
+                  </span>
                   <span className="plan-fold-chevron" aria-hidden="true" />
                 </button>
               </h3>
@@ -1072,27 +1074,31 @@ export function ItineraryHub({
                 </div>
               </div>
 
-              {partner.blurb ? (
+              {laneItems.length === 0 ? (
+                <p className={`${plan.caption} text-muted sm:hidden`}>Nothing saved yet.</p>
+              ) : partner.blurb ? (
                 <PlanHint label="About this search" mobileOnly>
                   {partner.blurb}
                 </PlanHint>
               ) : null}
 
-              {partner.key === "booking" ? (
-                <CompareOnBooking
-                  state={state}
-                  flexibleOn={flexibleOn}
-                  className={`${plan.textBtn} text-link hover:text-accent sm:hidden`}
-                />
+              {laneOpen ? (
+                <div className="plan-mobile-only">
+                  <LaneCta
+                    partner={partner}
+                    state={state}
+                    flexibleOn={flexibleOn}
+                    className={`btn btn-block plan-lane-hero ${
+                      partner.isCore ? "btn-primary" : "btn-secondary"
+                    }`}
+                  />
+                </div>
               ) : null}
 
               {laneItems.length === 0 ? (
-                <>
-                  <p className={`${plan.caption} text-muted sm:hidden`}>Nothing saved yet</p>
-                  <p className={`${plan.body} text-muted plan-desktop-only`}>
-                    Nothing saved here yet. Search, then add the booking you want to keep.
-                  </p>
-                </>
+                <p className={`${plan.body} text-muted plan-desktop-only`}>
+                  Nothing saved here yet. Search, then add the booking you want to keep.
+                </p>
               ) : (
                 <ul className="plan-stack-tight">
                   {laneItems.map((item) => {
@@ -1130,6 +1136,29 @@ export function ItineraryHub({
                 </ul>
               )}
 
+              {partner.key === "booking" || !adding ? (
+                <div className="plan-lane-secondaries">
+                  {partner.key === "booking" ? (
+                    <CompareOnBooking
+                      state={state}
+                      flexibleOn={flexibleOn}
+                      className={`${plan.textBtn} plan-lane-quiet plan-mobile-only text-muted hover:text-heading`}
+                    />
+                  ) : null}
+                  {adding ? null : (
+                    <button
+                      type="button"
+                      className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
+                      onClick={() => {
+                        setLanePin(partner.key);
+                        setEditor({ kind: "add-lane", laneKey: partner.key });
+                      }}
+                    >
+                      Add to itinerary
+                    </button>
+                  )}
+                </div>
+              ) : null}
               {adding ? (
                 <BookingItemForm
                   type={itemTypeForPartner(partner)}
@@ -1139,18 +1168,7 @@ export function ItineraryHub({
                   onCancel={() => setEditor(null)}
                   onSave={addItem}
                 />
-              ) : (
-                <button
-                  type="button"
-                  className={`${plan.textBtn} self-start text-accent hover:underline`}
-                  onClick={() => {
-                    setLanePin(partner.key);
-                    setEditor({ kind: "add-lane", laneKey: partner.key });
-                  }}
-                >
-                  Add to itinerary
-                </button>
-              )}
+              ) : null}
               </div>
             </article>
           );
@@ -1422,7 +1440,7 @@ export function ItineraryHub({
       </PlanFold>
       </div>
 
-      {stickyPartner && editor == null ? (
+      {stickyPartner && editor == null && openLane == null ? (
         <div className="plan-hub-sticky plan-sticky plan-sticky-page plan-sticky-solo plan-mobile-only">
           <LaneCta
             partner={stickyPartner}

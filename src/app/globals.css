@@ -1724,13 +1724,71 @@ body:has(main.plan-flow) a[href="#newsletter"] {
   }
 
   .plan-lane-next {
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
-    border-bottom-color: transparent;
-    border-radius: var(--plan-radius-next);
-    background: var(--surface-soft);
-    padding-right: 0.75rem;
-    padding-left: 0.75rem;
+    margin-top: 0.35rem;
+    margin-bottom: 0.35rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--border));
+    border-radius: 0.75rem;
+    background: var(--white);
+    box-shadow: 0 8px 22px rgba(20, 17, 13, 0.1);
+    padding: 0.2rem 0.85rem 0.85rem;
+  }
+
+  .plan-lane:not(.plan-lane-next) .plan-fold-title {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .plan-lane:not(.plan-lane-next) .plan-fold-toggle .icon-tile {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-color: transparent;
+    background: transparent;
+    color: var(--muted);
+  }
+
+  .plan-next-badge {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    min-height: 1.35rem;
+    padding: 0.12rem 0.5rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--on-solid);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .plan-lane-hero {
+    margin-top: 0.15rem;
+  }
+
+  .plan-lane-secondaries {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.15rem 1rem;
+  }
+
+  .plan-lane-quiet {
+    min-height: 2.25rem;
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+    font-weight: 500;
+  }
+
+  .plan-hub-lead .plan-hub-actions {
+    gap: 0.1rem 1rem;
+  }
+
+  .plan-hub-lead .plan-hub-actions .plan-text-btn {
+    min-height: 2rem;
+    padding: 0.2rem 0;
+    font-weight: 500;
   }
 
   .plan-page .plan-block {
@@ -1769,6 +1827,10 @@ body:has(main.plan-flow) a[href="#newsletter"] {
 @media (min-width: 640px) {
   .plan-mobile-only {
     display: none !important;
+  }
+
+  .plan-lane-secondaries {
+    display: contents;
   }
 }
 
