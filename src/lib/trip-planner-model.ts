@@ -628,6 +628,7 @@ export function resolveAffiliateHref(
 export function hotelLaneHref(
   state: PlannerState,
   flexibleDatesEnabled: boolean,
+  tripId?: string | null,
 ): string {
   const values = tripUrlValues(state, flexibleDatesEnabled);
   return staysPath({
@@ -637,6 +638,7 @@ export function hotelLaneHref(
     adults: state.adults,
     children: state.children,
     rooms: state.rooms,
+    tripId,
   });
 }
 

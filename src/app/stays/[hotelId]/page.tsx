@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StayBooker } from "@/components/stays/StayBooker";
 import { StayCompareLinks } from "@/components/stays/StayCompareLinks";
+import { StayTripBar } from "@/components/stays/StayTripBar";
 import { SitePage } from "@/components/pages/SitePage";
 import { LiteApiError, liteApiKeyInfo } from "@/lib/liteapi";
 import { stayCompareUrls } from "@/lib/stays-compare";
@@ -43,7 +44,7 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
   const { hotelId } = await params;
   if (!isStayHotelId(hotelId)) notFound();
   const query = parseStaysSearchParams(await searchParams);
-  const planHref = planATripHref();
+  const planHref = planATripHref(query.tripId || null);
   const listHref = staysPath(query);
   const compare = stayCompareUrls(query);
   const configured = Boolean(liteApiKeyInfo());
@@ -65,7 +66,9 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
           { label: "Hotel" },
         ]}
       >
-        <div className="panel hub-follow max-w-2xl p-6 sm:p-8">
+        <div className="plan-trip hub-follow plan-stack">
+          <StayTripBar query={query} />
+          <div className="panel max-w-2xl p-6 sm:p-8">
           <h2 className="font-display text-2xl font-bold text-heading">
             {configured ? "Add trip dates" : "Stays not configured"}
           </h2>
@@ -79,11 +82,12 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
               Back to stays
             </Link>
             <Link href={planHref} className="btn btn-secondary inline-flex">
-              Plan a trip
+              {query.destination || query.tripId ? "Back to itinerary" : "Plan a trip"}
             </Link>
           </div>
           <div className="mt-4">
             <StayCompareLinks bookingHref={compare.booking} expediaHref={compare.expedia} />
+          </div>
           </div>
         </div>
       </SitePage>
@@ -124,6 +128,7 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
       ]}
     >
       <div className="plan-trip hub-follow plan-stack">
+        <StayTripBar query={query} />
         <StayCompareLinks bookingHref={compare.booking} expediaHref={compare.expedia} />
         {loaded?.sandbox ? (
           <p className="text-sm text-muted">

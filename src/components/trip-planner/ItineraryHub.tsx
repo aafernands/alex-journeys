@@ -23,7 +23,7 @@ import {
   createTripItem,
   extractBookingPaste,
   mentionedTripDay,
-  isSafeHttpUrl,
+  isTripItemUrl,
   itemsForLane,
   itemTypeForPartner,
   compareScheduledItems,
@@ -40,6 +40,7 @@ import {
   type TripItemType,
 } from "@/lib/trip-record";
 import type { StoredPlan } from "@/lib/trip-planner-storage";
+import { STAY_LANE_HASH } from "@/lib/stays-itinerary";
 import { plan } from "@/components/trip-planner/density";
 import { ForwardBookings } from "@/components/trip-planner/ForwardBookings";
 import { PlanFold, PlanHint } from "@/components/trip-planner/PlanFold";
@@ -54,6 +55,7 @@ type Props = {
   flexibleOn: boolean;
   subhead: string;
   tripId: string | null;
+  focusStay?: boolean;
   tripTitle?: string;
   saveMode: TripSaveMode;
   guestBackup: StoredPlan | null;
@@ -164,6 +166,39 @@ const LANE_PROGRESS_LABEL = {
   skipped: "skipped",
 } as const;
 
+function newestBookedStayId(items: TripItem[]): string | undefined {
+  return items
+    .filter((item) => item.type === "hotel" && item.status === "booked")
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0]?.id;
+}
+
+function ItemUrl({ url, compact = false }: { url: string; compact?: boolean }) {
+  if (!url) return null;
+  const onSite = url.startsWith("/") && !url.startsWith("//");
+  return (
+    <OutboundLink
+      href={url}
+      target={onSite ? undefined : "_blank"}
+      rel={onSite ? undefined : "noopener noreferrer"}
+      className={`${plan.textBtn} truncate text-link hover:text-accent`}
+    >
+      {onSite ? "View stay" : compact ? url.replace(/^https?:\/\//, "") : "Open link"}
+      {onSite ? null : <span className="sr-only"> (opens in a new tab)</span>}
+    </OutboundLink>
+  );
+}
+
+function laneFoldMeta(
+  partner: TripPlannerPartner,
+  items: TripItem[],
+  isNext: boolean,
+): string {
+  if (partner.key === "booking" && isNext && laneProgress(items) === "open") {
+    return "Search stays";
+  }
+  return laneMeta(items, isNext);
+}
+
 function laneMeta(items: TripItem[], isNext: boolean): string {
   const progress = laneProgress(items);
   const count = items.length;
@@ -250,8 +285,8 @@ function BookingItemForm({
       onSubmit={(event) => {
         event.preventDefault();
         const trimmedUrl = url.trim();
-        if (trimmedUrl && !isSafeHttpUrl(trimmedUrl)) {
-          setError("Paste a full http:// or https:// link.");
+        if (trimmedUrl && !isTripItemUrl(trimmedUrl)) {
+          setError("Use a full http:// or https:// link, or a link on this site.");
           return;
         }
         if (
@@ -437,31 +472,27 @@ function ItemCard({
   onStatus,
   onEdit,
   onRemove,
+  highlighted = false,
 }: {
   item: TripItem;
   days: TripDay[];
   onStatus: (status: TripItemStatus) => void;
   onEdit: () => void;
   onRemove: () => void;
+  highlighted?: boolean;
 }) {
   const when = itemWhen(item, days);
   return (
-    <div className={`${plan.inset} plan-stack-tight`}>
+    <div
+      className={`${plan.inset} plan-stack-tight ${
+        highlighted ? "ring-2 ring-accent" : ""
+      }`}
+    >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0 plan-stack-tight">
           <p className={plan.h4}>{item.title}</p>
           {when ? <p className={`${plan.caption} text-muted`}>{when}</p> : null}
-          {item.url ? (
-            <OutboundLink
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${plan.textBtn} truncate text-link hover:text-accent`}
-            >
-              {item.url.replace(/^https?:\/\//, "")}
-              <span className="sr-only"> (opens in a new tab)</span>
-            </OutboundLink>
-          ) : null}
+          <ItemUrl url={item.url} compact />
           {item.notes ? (
             <p className={`${plan.body} text-text`}>{item.notes}</p>
           ) : null}
@@ -542,17 +573,7 @@ function TimelineEntry({
           {item.notes ? (
             <p className={`${plan.body} text-text`}>{item.notes}</p>
           ) : null}
-          {item.url ? (
-            <OutboundLink
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${plan.textBtn} text-link hover:text-accent`}
-            >
-              Open link
-              <span className="sr-only"> (opens in a new tab)</span>
-            </OutboundLink>
-          ) : null}
+          <ItemUrl url={item.url} />
         </div>
         <div className="plan-inline-actions shrink-0">
           <button
@@ -631,17 +652,19 @@ function LaneCta({
   partner,
   state,
   flexibleOn,
+  tripId,
   className,
 }: {
   partner: TripPlannerPartner;
   state: PlannerState;
   flexibleOn: boolean;
+  tripId: string | null;
   className: string;
 }) {
   const inApp = partner.key === "viator" || partner.key === "booking";
   const href =
     partner.key === "booking"
-      ? hotelLaneHref(state, flexibleOn)
+      ? hotelLaneHref(state, flexibleOn, tripId)
       : partnerLaneHref(partner, state, flexibleOn);
   return (
     <OutboundLink
@@ -691,6 +714,7 @@ export function ItineraryHub({
   flexibleOn,
   subhead,
   tripId,
+  focusStay = false,
   tripTitle,
   saveMode,
   guestBackup,
@@ -712,7 +736,9 @@ export function ItineraryHub({
   const nextLaneKey =
     partners.find((partner) => laneProgress(itemsForLane(items, partner)) === "open")
       ?.key ?? null;
-  const [lanePin, setLanePin] = useState<string | null | "auto">("auto");
+  const [lanePin, setLanePin] = useState<string | null | "auto">(
+    focusStay ? "booking" : "auto",
+  );
   const openLane = lanePin === "auto" ? nextLaneKey : lanePin;
   const [layout, setLayout] = useState<"timeline" | "week">("timeline");
   const [editor, setEditor] = useState<
@@ -1018,7 +1044,8 @@ export function ItineraryHub({
           return (
             <article
               key={partner.key}
-              className={`plan-lane ${partner.isCore ? "plan-lane-core" : ""} ${
+              id={partner.key === "booking" ? STAY_LANE_HASH : undefined}
+              className={`plan-lane scroll-mt-24 ${partner.isCore ? "plan-lane-core" : ""} ${
                 isNext && laneOpen ? "plan-lane-next" : ""
               }`}
             >
@@ -1034,10 +1061,23 @@ export function ItineraryHub({
                     <NavIcon name={laneIcon(partner)} size={16} />
                   </span>
                   <span className="plan-fold-title">{partner.label}</span>
-                  <span className="plan-fold-meta">{laneMeta(laneItems, isNext)}</span>
+                  <span className="plan-fold-meta">
+                    {laneFoldMeta(partner, laneItems, isNext)}
+                  </span>
                   <span className="plan-fold-chevron" aria-hidden="true" />
                 </button>
               </h3>
+              {partner.key === "booking" ? (
+                <div className="pb-3 sm:hidden">
+                  <LaneCta
+                    partner={partner}
+                    state={state}
+                    flexibleOn={flexibleOn}
+                    tripId={tripId}
+                    className="btn btn-primary w-full"
+                  />
+                </div>
+              ) : null}
               <div
                 id={panelId}
                 data-open={laneOpen ? "true" : "false"}
@@ -1062,6 +1102,7 @@ export function ItineraryHub({
                     partner={partner}
                     state={state}
                     flexibleOn={flexibleOn}
+                    tripId={tripId}
                     className={`btn self-start sm:self-end ${
                       partner.isCore ? "btn-primary" : "btn-secondary"
                     }`}
@@ -1087,12 +1128,24 @@ export function ItineraryHub({
               ) : null}
 
               {laneItems.length === 0 ? (
-                <>
-                  <p className={`${plan.caption} text-muted sm:hidden`}>Nothing saved yet</p>
-                  <p className={`${plan.body} text-muted plan-desktop-only`}>
-                    Nothing saved here yet. Search, then add the booking you want to keep.
-                  </p>
-                </>
+                partner.key === "booking" ? (
+                  <>
+                    <p className={`${plan.caption} text-muted sm:hidden`}>
+                      Search stays for this trip
+                    </p>
+                    <p className={`${plan.body} text-muted plan-desktop-only`}>
+                      Nothing saved here yet. Search stays and the hotel you book comes back
+                      to this itinerary.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className={`${plan.caption} text-muted sm:hidden`}>Nothing saved yet</p>
+                    <p className={`${plan.body} text-muted plan-desktop-only`}>
+                      Nothing saved here yet. Search, then add the booking you want to keep.
+                    </p>
+                  </>
+                )
               ) : (
                 <ul className="plan-stack-tight">
                   {laneItems.map((item) => {
@@ -1100,6 +1153,10 @@ export function ItineraryHub({
                       editor?.kind === "edit" &&
                       editor.place === "lane" &&
                       editor.id === item.id;
+                    const highlighted =
+                      focusStay &&
+                      partner.key === "booking" &&
+                      item.id === newestBookedStayId(laneItems);
                     return (
                       <li key={item.id}>
                         {editing ? (
@@ -1117,6 +1174,7 @@ export function ItineraryHub({
                           <ItemCard
                             item={item}
                             days={days}
+                            highlighted={highlighted}
                             onStatus={(status) => updateItem(item.id, { status })}
                             onEdit={() =>
                               setEditor({ kind: "edit", id: item.id, place: "lane" })
@@ -1428,6 +1486,7 @@ export function ItineraryHub({
             partner={stickyPartner}
             state={state}
             flexibleOn={flexibleOn}
+            tripId={tripId}
             className={`btn ${stickyPartner.isCore ? "btn-primary" : "btn-secondary"}`}
           />
         </div>

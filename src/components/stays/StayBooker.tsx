@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { StayConfirmation } from "@/components/stays/StayConfirmation";
 import { StayFailureNotice } from "@/components/stays/StayFailureNotice";
@@ -21,7 +21,12 @@ import {
   type StayRoomOffer,
   type StaysQuery,
 } from "@/lib/stays";
-import { addBookedStayToActivePlan } from "@/lib/stays-itinerary";
+import {
+  bookedStayFromConfirmation,
+  commitBookedStay,
+  stayTripContext,
+  type StayCommitResult,
+} from "@/lib/stays-itinerary";
 
 type Props = {
   hotelId: string;
@@ -36,7 +41,7 @@ type Props = {
 
 const inputClass = plan.input;
 type Pending = "" | "prebook" | "book" | "rates";
-type ItineraryState = "" | "added" | "missing";
+type ItineraryState = "adding" | "added" | "missing";
 
 export function StayBooker({
   hotelId,
@@ -61,7 +66,11 @@ export function StayBooker({
   const [confirmation, setConfirmation] = useState<StayConfirmationDetails | null>(null);
   const [failure, setFailure] = useState<StayFailure | null>(null);
   const [pending, setPending] = useState<Pending>("");
-  const [itinerary, setItinerary] = useState<ItineraryState>("");
+  const [itinerary, setItinerary] = useState<ItineraryState>("adding");
+  const [returnHref, setReturnHref] = useState(planHref);
+  const [savedAs, setSavedAs] = useState<Exclude<StayCommitResult, { ok: false }>["saved"]>(
+    "local",
+  );
   const clientReference = useRef("");
   const lock = useRef(false);
   const retryStage = useRef<"prebook" | "book" | "rates">("prebook");
@@ -243,15 +252,37 @@ export function StayBooker({
     else void confirmRoom();
   }
 
-  function addToItinerary() {
+  const applyCommit = useCallback((result: StayCommitResult) => {
+    if (!result.ok) {
+      setItinerary("missing");
+      return;
+    }
+    setReturnHref(result.href);
+    setSavedAs(result.saved);
+    setItinerary("added");
+  }, []);
+
+  useEffect(() => {
     if (!confirmation) return;
-    const result = addBookedStayToActivePlan({
-      hotelName: confirmation.hotelName,
-      confirmation: confirmation.confirmationCode,
-      href: stayHref,
-      notes: [confirmation.dateLabel, confirmation.roomName].filter(Boolean).join(" · "),
+    let cancelled = false;
+    void commitBookedStay(
+      bookedStayFromConfirmation(confirmation, stayHref),
+      stayTripContext(query),
+    ).then((result) => {
+      if (!cancelled) applyCommit(result);
     });
-    setItinerary(result.ok ? "added" : "missing");
+    return () => {
+      cancelled = true;
+    };
+  }, [applyCommit, confirmation, query, stayHref]);
+
+  function addToItinerary() {
+    if (!confirmation || itinerary === "adding") return;
+    setItinerary("adding");
+    void commitBookedStay(
+      bookedStayFromConfirmation(confirmation, stayHref),
+      stayTripContext(query),
+    ).then(applyCommit);
   }
 
   if (confirmation) {
@@ -259,8 +290,9 @@ export function StayBooker({
       <StayConfirmation
         confirmation={confirmation}
         listHref={listHref}
-        planHref={planHref}
+        planHref={returnHref}
         itinerary={itinerary}
+        saved={savedAs}
         onAddToItinerary={addToItinerary}
       />
     );

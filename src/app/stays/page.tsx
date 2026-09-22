@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { randomUUID } from "node:crypto";
 import { StayCompareLinks } from "@/components/stays/StayCompareLinks";
+import { StayTripBar } from "@/components/stays/StayTripBar";
 import { StaysSearchForm } from "@/components/stays/StaysSearchForm";
 import { SitePage } from "@/components/pages/SitePage";
 import { LiteApiError, liteApiKeyInfo } from "@/lib/liteapi";
@@ -44,17 +45,19 @@ function Notice({
   title,
   body,
   planHref,
+  actionLabel,
 }: {
   title: string;
   body: string;
   planHref: string;
+  actionLabel: string;
 }) {
   return (
     <div className="panel hub-follow max-w-2xl p-6 sm:p-8">
       <h2 className="font-display text-2xl font-bold tracking-tight text-heading">{title}</h2>
       <p className="mt-3 text-text">{body}</p>
       <Link href={planHref} className="btn btn-primary mt-6 inline-flex">
-        Plan a trip
+        {actionLabel}
       </Link>
     </div>
   );
@@ -65,7 +68,7 @@ export default async function StaysPage({ searchParams }: PageProps) {
   const query: StaysQuery = parsed.sessionId
     ? parsed
     : { ...parsed, sessionId: randomUUID() };
-  const planHref = planATripHref();
+  const planHref = planATripHref(query.tripId || null);
   const compare = stayCompareUrls(query);
   const disclosure = getTripPlannerConfig().disclosure;
   const configured = Boolean(liteApiKeyInfo());
@@ -105,11 +108,13 @@ export default async function StaysPage({ searchParams }: PageProps) {
       ]}
     >
       <div className="plan-trip hub-follow plan-stack">
+        <StayTripBar query={query} />
         {!place ? (
           <Notice
             title="Add a destination in Plan a Trip"
             body="Stays follow the place on your trip. Set a destination and this page opens hotels for it."
             planHref={planHref}
+            actionLabel={query.tripId ? "Back to itinerary" : "Plan a trip"}
           />
         ) : (
           <>
@@ -120,6 +125,7 @@ export default async function StaysPage({ searchParams }: PageProps) {
                 title="Stays not configured"
                 body="Hotel search isn’t connected on this server yet. You can still compare the same dates on Booking or Expedia."
                 planHref={planHref}
+                actionLabel="Back to itinerary"
               />
             ) : null}
             {configured && issue ? (

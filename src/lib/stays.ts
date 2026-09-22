@@ -11,6 +11,8 @@ const OFFER_ID_RE = /^[A-Za-z0-9+/=_-]{8,12000}$/;
 const PREBOOK_ID_RE = /^[A-Za-z0-9_-]{4,128}$/;
 const CLIENT_REF_RE = /^fj-[0-9a-f-]{8,80}$/i;
 
+const TRIP_ID_RE = /^[A-Za-z0-9_-]{1,128}$/;
+
 export type StaysQuery = {
   destination: string;
   startDate: string;
@@ -19,6 +21,8 @@ export type StaysQuery = {
   children: number;
   rooms: number;
   sessionId: string;
+  /** Saved itinerary id, when Plan a Trip opened this search. */
+  tripId: string;
 };
 
 export type StayMoney = {
@@ -194,6 +198,12 @@ function cleanChildren(raw: string): number {
   return count;
 }
 
+/** Plan a Trip ids are the same shape the trips API accepts. */
+export function cleanStayTripId(raw: string | null | undefined): string {
+  const id = raw?.trim() ?? "";
+  return TRIP_ID_RE.test(id) ? id : "";
+}
+
 function firstParam(
   searchParams: Record<string, string | string[] | undefined>,
   key: string,
@@ -233,6 +243,7 @@ export function parseStaysSearchParams(
     children: cleanChildren(firstParam(searchParams, "children")),
     rooms: cleanPositive(firstParam(searchParams, "rooms"), 1, 8),
     sessionId: SESSION_RE.test(sessionRaw) ? sessionRaw.toLowerCase() : "",
+    tripId: cleanStayTripId(firstParam(searchParams, "trip")),
   };
 }
 
@@ -244,6 +255,7 @@ export function staysPath(input: {
   children?: number | string | null;
   rooms?: number | string | null;
   sessionId?: string | null;
+  tripId?: string | null;
 }): string {
   const query = parseStaysSearchParams({
     dest: input.destination ?? "",
@@ -260,6 +272,7 @@ export function staysPath(input: {
     rooms:
       input.rooms == null || input.rooms === "" ? undefined : String(input.rooms),
     session: input.sessionId ?? "",
+    trip: input.tripId ?? "",
   });
   if (!query.destination) return "/stays";
   return `/stays?${staysQueryString(query)}`;
@@ -281,6 +294,7 @@ export function staysQueryString(query: StaysQuery): string {
   if (query.children > 0) params.set("children", String(query.children));
   if (query.rooms > 1) params.set("rooms", String(query.rooms));
   if (query.sessionId) params.set("session", query.sessionId);
+  if (query.tripId) params.set("trip", query.tripId);
   return params.toString();
 }
 

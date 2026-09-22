@@ -92,7 +92,34 @@ describe("stays query", () => {
     assert.equal(parsed.destination, "Paris");
     assert.equal(parsed.rooms, 1);
     assert.equal(parsed.children, 1);
+    assert.equal(parsed.tripId, "");
     assert.equal(staysQueryIssue(parsed, new Date("2026-01-01T00:00:00Z")), null);
+
+    const withTrip = staysPath({
+      destination: "Paris",
+      startDate: "2027-06-02",
+      endDate: "2027-06-09",
+      adults: 2,
+      tripId: "trip_abc",
+    });
+    assert.equal(
+      withTrip,
+      "/stays?dest=Paris&start=2027-06-02&end=2027-06-09&adults=2&trip=trip_abc",
+    );
+    assert.equal(
+      parseStaysSearchParams({
+        dest: "Paris",
+        start: "2027-06-02",
+        end: "2027-06-09",
+        adults: "2",
+        trip: "trip_abc",
+      }).tripId,
+      "trip_abc",
+    );
+    assert.equal(
+      parseStaysSearchParams({ dest: "Paris", trip: "not a trip" }).tripId,
+      "",
+    );
   });
 
   it("rejects a stay that already passed and rooms without adults", () => {
