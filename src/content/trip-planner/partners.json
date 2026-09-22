@@ -2,9 +2,9 @@
   "partners": [
     {
       "key": "expedia",
-      "label": "Compare flights",
+      "label": "Flights",
       "buttonLabel": "Search flights",
-      "blurb": "Start with the routes I’d actually price-check first.",
+      "blurb": "Search and book the route here.",
       "affiliateUrlTemplate": "https://expedia.com/affiliates/nyc/plan_trip",
       "affiliateUrl": "https://expedia.com/affiliates/nyc/plan_trip",
       "showWhen": "flights",

@@ -62,6 +62,8 @@ type Props = {
   urlTripId?: string | null;
   /** Open the hotel lane after a stay was booked on /stays. */
   focusStay?: boolean;
+  /** Open the flight lane after a flight was booked on /flights. */
+  focusFlight?: boolean;
 };
 
 const STEPS = [1, 2, 3, 4] as const;
@@ -224,6 +226,7 @@ export function TripPlanner({
   journalPlaceIndex = [],
   urlTripId = null,
   focusStay = false,
+  focusFlight = false,
 }: Props) {
   const baseId = useId();
   const storedPlan = useSyncExternalStore<StoredPlan | null | PendingPlan>(
@@ -900,6 +903,7 @@ export function TripPlanner({
               subhead={subhead}
               tripId={plan.tripId}
               focusStay={focusStay}
+              focusFlight={focusFlight}
               tripTitle={plan.titleCustom ? plan.title : undefined}
               saveMode={sync.mode}
               saveDetail={sync.saveDetail}

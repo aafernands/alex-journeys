@@ -20,6 +20,7 @@ import {
   validateCategories,
   validateDetails,
 } from "@/lib/trip-planner-model";
+import { applyPendingBookedFlights } from "@/lib/flights-itinerary";
 import { applyPendingBookedStays } from "@/lib/stays-itinerary";
 import {
   accountSaveIntent,
@@ -138,6 +139,7 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
     if (current?.tripId === urlTripId && current.step === 4) {
       loadedUrlTrip.current = urlTripId;
       applyPendingBookedStays(urlTripId);
+      applyPendingBookedFlights(urlTripId);
       setRemote("ready");
       return;
     }
@@ -185,6 +187,7 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
         loadedUrlTrip.current = urlTripId;
         writeActivePlan(storedPlanFromTrip(data.trip));
         applyPendingBookedStays(urlTripId);
+      applyPendingBookedFlights(urlTripId);
         clearGuestSaveFlags();
         setRemote("ready");
       } catch {

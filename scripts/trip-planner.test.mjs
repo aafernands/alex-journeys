@@ -6,6 +6,7 @@ import {
   dateSummary,
   effectiveCategories,
   fillAffiliateUrl,
+  flightLaneHref,
   hotelLaneHref,
   planFingerprint,
   flexibleRange,
@@ -154,7 +155,15 @@ describe("plan a trip planner", () => {
     );
     assert.equal(
       partnerLaneHref(expedia, lisbonTrip(), true),
-      "https://expedia.com/affiliates/nyc/plan_trip",
+      "/flights?origin=Newark+%28EWR%29&dest=Lisbon%2C+Portugal&start=2027-04-12&end=2027-04-19&adults=2&type=roundtrip",
+    );
+    assert.equal(
+      flightLaneHref(lisbonTrip(), true, "trip_abc"),
+      "/flights?origin=Newark+%28EWR%29&dest=Lisbon%2C+Portugal&start=2027-04-12&end=2027-04-19&adults=2&type=roundtrip&trip=trip_abc",
+    );
+    assert.equal(
+      flightLaneHref({ ...lisbonTrip(), tripType: "oneway", children: 1 }, true),
+      "/flights?origin=Newark+%28EWR%29&dest=Lisbon%2C+Portugal&start=2027-04-12&adults=2&children=1&type=oneway",
     );
 
     const rentcars = DEFAULT_PARTNERS.find((partner) => partner.key === "rentcars");
