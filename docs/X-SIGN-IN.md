@@ -66,7 +66,7 @@ Do not put a path on `AUTH_URL`. `AUTH_TRUST_HOST=true` does not replace a wrong
 - Firestore doc id is the X user id (`account.providerAccountId`). Provider stored as `twitter`.
 - Disabled users are rejected the same way as Google.
 - X OAuth 2 usually does **not** return an email. Those accounts are separate from Google and email/password accounts. Forgot-password cannot look them up unless an email was added later on `/account`.
-- Profile photo comes from X (`pbs.twimg.com`) until the reader sets their own.
+- Profile photo comes from X until the reader sets their own. Auth.js stores `profile_image_url` unchanged: uploaded photos are `https://pbs.twimg.com/profile_images/…`, and the default avatar is `https://abs.twimg.com/sticky/default_profile_images/…`. Both are allowlisted in `next.config.ts` `images.remotePatterns` so the header `next/image` avatar can load. A missing photo falls back to initials.
 
 ## Quick check after deploy
 
