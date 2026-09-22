@@ -83,6 +83,12 @@ Google Analytics 4 (gtag) loads only when `NEXT_PUBLIC_GA_MEASUREMENT_ID` (or al
 
 Set `LITEAPI_API_KEY` on Vercel Preview and Production (sandbox keys start with `sand_`; `NUITEE_API_KEY` is accepted as an alias). Until that variable is set, `/stays` shows a “Stays not configured” state. Sandbox bookings use Nuitee’s simulated account card (`ACC_CREDIT_CARD`) and are not guest charges. A production key can search, and refuses checkout until a live card flow exists.
 
+## Flights (Nuitee)
+
+`/flights` searches and books on this site. Checkout confirms the card in Stripe Elements, then books with `TRANSACTION_ID` only.
+
+Nuitee prebook (`usePaymentSdk: true`) sometimes returns `secretKey` and `transactionId` with `publishableKey: null`. Set `NUITEE_STRIPE_PUBLISHABLE_KEY` on Vercel Preview and Production to the Stripe publishable key from Nuitee Connect → API Keys (sandbox `pk_test_…` with the `sand_` API key, or `pk_live_…` in production). `STRIPE_PUBLISHABLE_KEY` is accepted only when the Nuitee variable is unset. The value must start with `pk_test_` or `pk_live_`. The client secret and transaction id still have to come from prebook.
+
 ## In-site CMS
 
 Passcode-gated editor at **`/cms`** (not linked in the public header). Publishes posts to GitHub so Vercel redeploys.

@@ -9,6 +9,7 @@ import {
   FLIGHT_PUBLISHABLE_KEY_MISSING,
   flightBookBody,
   flightBookingPayment,
+  flightEnvPublishableKey,
   flightPrebookPaymentIssue,
   flightStripeConfirmed,
   flightOfferId,
@@ -225,12 +226,14 @@ describe("flights mapping", () => {
     assert.equal(prebook.payment.publishableKey, "pk_test_1234567890abcdef");
     assert.equal(prebook.payment.transactionId, "pi_3Nabc");
     assert.equal(JSON.stringify(prebook.offer).includes("secretKey"), false);
-    assert.equal(
-      mapFlightPrebook({
-        data: [{ prebookId: "019d0674-834d-7db7-9c8b-93fe8e46e7b8", secretKey: "pi_3Nabc_secret_shouldnotleak" }],
-      }).payment,
-      null,
-    );
+    withStripePublishableEnv({}, () => {
+      assert.equal(
+        mapFlightPrebook({
+          data: [{ prebookId: "019d0674-834d-7db7-9c8b-93fe8e46e7b8", secretKey: "pi_3Nabc_secret_shouldnotleak" }],
+        }).payment,
+        null,
+      );
+    });
 
     const booking = mapFlightBooking({
       data: [
@@ -332,10 +335,12 @@ describe("flight payment payload", () => {
       transactionId: "tr_cts_WaTMwICRB0h_dOfyvLvvN",
       secretKey: "pi_3TChNEA4FXPoRk9Y1hbH6uVq_secret_CRhCAan4jSlXcwLs8N3r1qN6D",
     };
-    assert.equal(
-      flightPrebookPaymentIssue({ data: [held] }),
-      FLIGHT_PUBLISHABLE_KEY_MISSING,
-    );
+    withStripePublishableEnv({}, () => {
+      assert.equal(
+        flightPrebookPaymentIssue({ data: [held] }),
+        FLIGHT_PUBLISHABLE_KEY_MISSING,
+      );
+    });
     assert.equal(flightPrebookPaymentIssue({ data: [{ prebookId: held.prebookId }] }), FLIGHT_CARD_REQUIRED);
     assert.equal(
       flightPrebookPaymentIssue({
@@ -360,18 +365,20 @@ describe("flight payment payload", () => {
       prebook.payment.clientSecret,
       "pi_3TChNEA4FXPoRk9Y1hbH6uVq_secret_CRhCAan4jSlXcwLs8N3r1qN6D",
     );
-    assert.equal(
-      mapFlightPrebook({
-        data: [
-          {
-            prebookId: "019d0674-834d-7db7-9c8b-93fe8e46e7b8",
-            transactionId: "tr_cts_WaTMwICRB0h_dOfyvLvvN",
-            secretKey: "pi_3TChNEA4FXPoRk9Y1hbH6uVq_secret_CRhCAan4jSlXcwLs8N3r1qN6D",
-          },
-        ],
-      }).payment,
-      null,
-    );
+    withStripePublishableEnv({}, () => {
+      assert.equal(
+        mapFlightPrebook({
+          data: [
+            {
+              prebookId: "019d0674-834d-7db7-9c8b-93fe8e46e7b8",
+              transactionId: "tr_cts_WaTMwICRB0h_dOfyvLvvN",
+              secretKey: "pi_3TChNEA4FXPoRk9Y1hbH6uVq_secret_CRhCAan4jSlXcwLs8N3r1qN6D",
+            },
+          ],
+        }).payment,
+        null,
+      );
+    });
     assert.equal(
       mapFlightPrebook({
         data: [
@@ -387,7 +394,127 @@ describe("flight payment payload", () => {
       "pk_live_51Hh1234567890abcdef",
     );
   });
+
+  it("uses the env publishable key when prebook omits it", () => {
+    const held = {
+      prebookId: "019d0674-834d-7db7-9c8b-93fe8e46e7b8",
+      transactionId: "tr_cts_WaTMwICRB0h_dOfyvLvvN",
+      secretKey: "pi_3TChNEA4FXPoRk9Y1hbH6uVq_secret_CRhCAan4jSlXcwLs8N3r1qN6D",
+      publishableKey: null,
+    };
+    const nuiteeKey = "pk_test_51Hh1234567890abcdef";
+    const stripeKey = "pk_live_51Hh1234567890abcdef";
+
+    withStripePublishableEnv({ NUITEE_STRIPE_PUBLISHABLE_KEY: nuiteeKey }, () => {
+      const prebook = mapFlightPrebook({ data: [held] });
+      assert.equal(prebook.payment.publishableKey, nuiteeKey);
+      assert.equal(prebook.payment.clientSecret, held.secretKey);
+      assert.equal(prebook.payment.transactionId, held.transactionId);
+      assert.equal(flightPrebookPaymentIssue({ data: [held] }), null);
+      assert.equal(flightEnvPublishableKey().startsWith("pk_test_"), true);
+    });
+
+    withStripePublishableEnv(
+      { NUITEE_STRIPE_PUBLISHABLE_KEY: "  pk_test_51Hh1234567890abcdef  " },
+      () => {
+        assert.equal(mapFlightPrebook({ data: [held] }).payment.publishableKey, nuiteeKey);
+      },
+    );
+
+    withStripePublishableEnv({ STRIPE_PUBLISHABLE_KEY: stripeKey }, () => {
+      assert.equal(mapFlightPrebook({ data: [held] }).payment.publishableKey, stripeKey);
+    });
+
+    withStripePublishableEnv(
+      { NUITEE_STRIPE_PUBLISHABLE_KEY: "sk_test_51Hh1234567890abcdef", STRIPE_PUBLISHABLE_KEY: stripeKey },
+      () => {
+        assert.equal(mapFlightPrebook({ data: [held] }).payment.publishableKey, stripeKey);
+      },
+    );
+
+    withStripePublishableEnv(
+      {
+        NUITEE_STRIPE_PUBLISHABLE_KEY: nuiteeKey,
+        STRIPE_PUBLISHABLE_KEY: stripeKey,
+      },
+      () => {
+        assert.equal(mapFlightPrebook({ data: [held] }).payment.publishableKey, nuiteeKey);
+      },
+    );
+
+    withStripePublishableEnv(
+      {
+        NUITEE_STRIPE_PUBLISHABLE_KEY: nuiteeKey,
+        STRIPE_PUBLISHABLE_KEY: stripeKey,
+      },
+      () => {
+        assert.equal(
+          mapFlightPrebook({
+            data: [{ ...held, publishableKey: stripeKey }],
+          }).payment.publishableKey,
+          stripeKey,
+        );
+      },
+    );
+
+    for (const bad of ["", "pk_test_", "pk_test_short", "sk_test_51Hh1234567890abcdef", "not-a-key"]) {
+      withStripePublishableEnv({ NUITEE_STRIPE_PUBLISHABLE_KEY: bad, STRIPE_PUBLISHABLE_KEY: bad }, () => {
+        assert.equal(flightEnvPublishableKey(), "");
+        assert.equal(mapFlightPrebook({ data: [held] }).payment, null);
+        assert.equal(flightPrebookPaymentIssue({ data: [held] }), FLIGHT_PUBLISHABLE_KEY_MISSING);
+      });
+    }
+
+    withStripePublishableEnv({ NUITEE_STRIPE_PUBLISHABLE_KEY: nuiteeKey }, () => {
+      assert.equal(
+        mapFlightPrebook({
+          data: [{ prebookId: held.prebookId, publishableKey: null }],
+        }).payment,
+        null,
+      );
+      assert.equal(
+        mapFlightPrebook({
+          data: [{ prebookId: held.prebookId, transactionId: held.transactionId, publishableKey: null }],
+        }).payment,
+        null,
+      );
+      assert.equal(
+        flightPrebookPaymentIssue({
+          data: [{ prebookId: held.prebookId, transactionId: held.transactionId, publishableKey: null }],
+        }),
+        FLIGHT_CARD_REQUIRED,
+      );
+    });
+
+    const booked = flightBookBody(held.prebookId, held.transactionId);
+    assert.deepEqual(booked, {
+      prebookId: held.prebookId,
+      payment: { method: "TRANSACTION_ID", transactionId: held.transactionId },
+    });
+    assert.equal(JSON.stringify(booked).includes("CREDIT"), false);
+    assert.equal(JSON.stringify(booked).includes("publishableKey"), false);
+  });
 });
+
+function withStripePublishableEnv(values, run) {
+  const names = ["NUITEE_STRIPE_PUBLISHABLE_KEY", "STRIPE_PUBLISHABLE_KEY"];
+  const previous = new Map(names.map((name) => [name, process.env[name]]));
+  for (const name of names) {
+    if (Object.prototype.hasOwnProperty.call(values, name) && values[name] != null) {
+      process.env[name] = values[name];
+    } else {
+      delete process.env[name];
+    }
+  }
+  try {
+    return run();
+  } finally {
+    for (const [name, value] of previous) {
+      if (value == null) delete process.env[name];
+      else process.env[name] = value;
+    }
+  }
+}
 
 const VERIFY_OFFER =
   "h6NwaWTZJDAxOWQwNjIwLWQzMDItNzBiYS04OGUxLTdlMTdkMzYyZDQ0MKJ0cMtAkdkUeuFHrqJtdcs+AAAAAAAAKNjdXKjVVNEo3VpZM0CeaJkZKoyMDI2LTA3LTAxonJkqjIwMjYtMDgtMDI=";

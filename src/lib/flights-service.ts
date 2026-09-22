@@ -208,7 +208,7 @@ export async function prebookFlight(offerId: string, party: FlightParty): Promis
     timeoutMs: 22_000,
     ...flightCall,
   });
-  const prebook = mapFlightPrebook(payload);
+  const prebook = mapFlightPrebook(payload, process.env);
   if (!prebook) {
     const upstream = flightUpstreamMessage(payload);
     throw new LiteApiError(
@@ -219,7 +219,7 @@ export async function prebookFlight(offerId: string, party: FlightParty): Promis
   }
   if (!prebook.payment) {
     throw new LiteApiError(
-      flightPrebookPaymentIssue(payload) ?? FLIGHT_CARD_REQUIRED,
+      flightPrebookPaymentIssue(payload, process.env) ?? FLIGHT_CARD_REQUIRED,
       409,
       "bad_request",
     );
