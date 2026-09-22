@@ -21,3 +21,60 @@ export const twitterAuthorization = {
   url: TWITTER_AUTHORIZE_URL,
   params: { scope: TWITTER_OAUTH_SCOPE },
 };
+
+/** X OAuth 2 token endpoint. Matches the Auth.js Twitter provider default. */
+export const TWITTER_TOKEN_URL = "https://api.x.com/2/oauth2/token";
+
+/**
+ * X user lookup. `user.fields=profile_image_url` is the Auth.js default.
+ * The response is `{ data: { id, name, username, profile_image_url } }` and
+ * usually has no `email`.
+ */
+export const TWITTER_USERINFO_URL =
+  "https://api.x.com/2/users/me?user.fields=profile_image_url";
+
+export function readTwitterOAuthCredentials(
+  env: NodeJS.ProcessEnv = process.env,
+): { clientId: string; clientSecret: string } {
+  return {
+    clientId: env.AUTH_TWITTER_ID?.trim() ?? "",
+    clientSecret: env.AUTH_TWITTER_SECRET?.trim() ?? "",
+  };
+}
+
+function requestHref(input: Parameters<typeof fetch>[0]): string {
+  if (typeof input === "string") return input;
+  if (input instanceof URL) return input.href;
+  return input.url;
+}
+
+/**
+ * X rejects a token POST that authenticates with HTTP Basic and omits
+ * `client_id` from the form body (`invalid_request` / `Missing required
+ * parameter [client_id].`). Auth.js's default client auth is that shape.
+ * The thrown error is not an Auth.js client error, so the callback becomes
+ * `/login?error=Configuration` after Authorize succeeds.
+ *
+ * Putting `client_secret` in the body and dropping the Basic header is also
+ * rejected (`Missing valid authorization header`). Add `client_id` only.
+ */
+export function ensureTwitterTokenClientId(
+  input: Parameters<typeof fetch>[0],
+  init: Parameters<typeof fetch>[1] | undefined,
+  clientId: string,
+): void {
+  const body = init?.body;
+  if (!clientId || !(body instanceof URLSearchParams)) return;
+  if (!requestHref(input).startsWith(TWITTER_TOKEN_URL)) return;
+  if (!body.get("client_id")) body.set("client_id", clientId);
+}
+
+export function twitterTokenFetch(
+  clientId: string,
+  inner: typeof fetch = fetch,
+): typeof fetch {
+  return async (input, init) => {
+    ensureTwitterTokenClientId(input, init, clientId);
+    return inner(input, init);
+  };
+}

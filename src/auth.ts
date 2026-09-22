@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { customFetch } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
@@ -13,7 +13,14 @@ import {
   isTwitterAuthConfigured,
 } from "@/lib/auth-config";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
-import { twitterAuthorization } from "@/lib/twitter-oauth";
+import { safeAuthErrorDetails } from "@/lib/auth-error-log";
+import {
+  readTwitterOAuthCredentials,
+  TWITTER_TOKEN_URL,
+  TWITTER_USERINFO_URL,
+  twitterAuthorization,
+  twitterTokenFetch,
+} from "@/lib/twitter-oauth";
 import {
   authorizeCredentials,
   getUserById,
@@ -47,6 +54,8 @@ export {
  * `src/lib/auth-config.ts` and are re-exported above.
  */
 
+const twitterCredentials = readTwitterOAuthCredentials();
+
 const providers = [
   ...(isGoogleAuthConfigured()
     ? [
@@ -59,11 +68,16 @@ const providers = [
   ...(isTwitterAuthConfigured()
     ? [
         Twitter({
-          clientId: process.env.AUTH_TWITTER_ID!,
-          clientSecret: process.env.AUTH_TWITTER_SECRET!,
+          clientId: twitterCredentials.clientId,
+          clientSecret: twitterCredentials.clientSecret,
           // url + params (not a raw authorize URL, and not params alone).
           // Scope is users.read + offline.access — no tweet.read.
           authorization: twitterAuthorization,
+          token: TWITTER_TOKEN_URL,
+          userinfo: TWITTER_USERINFO_URL,
+          // Auth.js Basic auth omits body client_id. X then 400s and Auth.js
+          // reports that as error=Configuration. See twitterTokenFetch.
+          [customFetch]: twitterTokenFetch(twitterCredentials.clientId),
         }),
       ]
     : []),
@@ -110,6 +124,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   // Allow build without AUTH_SECRET; production runtime must set it for auth.
   secret: process.env.AUTH_SECRET || "build-placeholder-not-for-production",
   trustHost: true,
+  logger: {
+    error(error) {
+      const details = safeAuthErrorDetails(error);
+      console.error(`[auth][error] ${details.name}: ${details.message}`);
+      if (details.oauthError || details.oauthDescription) {
+        console.error("[auth][error] oauth:", {
+          error: details.oauthError,
+          error_description: details.oauthDescription,
+        });
+      }
+    },
+  },
   providers,
   pages: {
     // Public reader login (email/password, Google, X). CMS keeps `/cms` UI.
