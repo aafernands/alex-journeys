@@ -1,12 +1,20 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { Auth, skipCSRFCheck } from "@auth/core";
+import { Auth, customFetch, skipCSRFCheck } from "@auth/core";
 import Twitter from "@auth/core/providers/twitter";
+import parseProviders from "../node_modules/@auth/core/lib/utils/providers.js";
+import { safeAuthErrorDetails } from "../src/lib/auth-error-log.ts";
 import {
   TWITTER_AUTHORIZE_URL,
   TWITTER_OAUTH_SCOPE,
+  TWITTER_TOKEN_URL,
+  TWITTER_USERINFO_URL,
+  ensureTwitterTokenClientId,
+  readTwitterOAuthCredentials,
   twitterAuthorization,
+  twitterTokenFetch,
 } from "../src/lib/twitter-oauth.ts";
+import { optionalOauthEmail, upsertOauthUser } from "../src/lib/users.ts";
 
 describe("twitterAuthorization", () => {
   it("asks X for profile and refresh only", () => {
@@ -64,5 +72,396 @@ describe("twitterAuthorization", () => {
     );
     assert.ok(cookieNames.some((name) => name.includes("pkce.code_verifier")));
     assert.ok(cookieNames.some((name) => name.endsWith("authjs.state")));
+  });
+});
+
+describe("X OAuth 2 endpoints", () => {
+  it("keeps the Auth.js token and userinfo URLs when only authorization is overridden", () => {
+    const { provider } = parseProviders({
+      providerId: "twitter",
+      url: new URL("https://www.fernandesjourneys.com/api/auth"),
+      config: {
+        providers: [
+          Twitter({
+            clientId: "client-id-123",
+            clientSecret: "client-secret-456",
+            authorization: twitterAuthorization,
+          }),
+        ],
+      },
+    });
+    assert.equal(provider.token.url.href, TWITTER_TOKEN_URL);
+    assert.equal(
+      provider.userinfo.url.origin + provider.userinfo.url.pathname,
+      "https://api.x.com/2/users/me",
+    );
+    assert.equal(
+      provider.userinfo.url.searchParams.get("user.fields"),
+      "profile_image_url",
+    );
+    assert.equal(provider.userinfo.url.href, TWITTER_USERINFO_URL);
+  });
+
+  it("parses an X profile that has no email", async () => {
+    const { provider } = parseProviders({
+      providerId: "twitter",
+      url: new URL("https://www.fernandesjourneys.com/api/auth"),
+      config: {
+        providers: [
+          Twitter({
+            clientId: "client-id-123",
+            clientSecret: "client-secret-456",
+          }),
+        ],
+      },
+    });
+    const user = await provider.profile(
+      {
+        data: {
+          id: "998877",
+          name: "Alex",
+          username: "dijacci",
+          profile_image_url: "https://pbs.twimg.com/profile_images/x.jpg",
+        },
+      },
+      {},
+    );
+    assert.equal(user.id, "998877");
+    assert.equal(user.name, "Alex");
+    assert.equal(user.email, null);
+    assert.equal(optionalOauthEmail(user.email), null);
+    assert.deepEqual(
+      await upsertOauthUser({
+        id: user.id,
+        email: optionalOauthEmail(user.email),
+        name: user.name,
+        image: user.image,
+        provider: "twitter",
+      }),
+      { ok: true },
+    );
+  });
+});
+
+const ORIGIN = "https://www.fernandesjourneys.com";
+const CLIENT_ID = "client-id-123";
+const CLIENT_SECRET = "client-secret-456";
+
+function cookieHeader(response) {
+  return response.headers
+    .getSetCookie()
+    .map((cookie) => cookie.split(";")[0])
+    .join("; ");
+}
+
+function oauthError(status, error, error_description) {
+  return new Response(JSON.stringify({ error, error_description }), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+/**
+ * X token rules this callback was failing on:
+ * - Basic auth and no body client_id → 400 Missing required parameter [client_id]
+ * - client_secret in the body (client_secret_post) → 401 Missing valid authorization header
+ * - Basic auth plus body client_id, no body secret → tokens
+ * Userinfo is the v2 envelope and has no email.
+ */
+function xApi() {
+  const requests = [];
+  const fetchImpl = async (input, init = {}) => {
+    const href = typeof input === "string" ? input : input.url;
+    const body = init.body instanceof URLSearchParams ? init.body : null;
+    const authorization = init.headers?.authorization ?? "";
+    requests.push({
+      href,
+      clientId: body?.get("client_id") ?? null,
+      hasClientSecret: Boolean(body?.get("client_secret")),
+      hasBasic: authorization.startsWith("Basic "),
+    });
+    if (href.startsWith(TWITTER_TOKEN_URL)) {
+      if (!body?.get("client_id")) {
+        return oauthError(
+          400,
+          "invalid_request",
+          "Missing required parameter [client_id].",
+        );
+      }
+      if (!authorization.startsWith("Basic ") || body.get("client_secret")) {
+        return oauthError(
+          401,
+          "unauthorized_client",
+          "Missing valid authorization header",
+        );
+      }
+      return new Response(
+        JSON.stringify({
+          token_type: "bearer",
+          access_token: "access-token",
+          expires_in: 7200,
+          scope: "users.read offline.access",
+          refresh_token: "refresh-token",
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }
+    if (href.startsWith("https://api.x.com/2/users/me")) {
+      return new Response(
+        JSON.stringify({
+          data: {
+            id: "998877",
+            name: "Alex",
+            username: "dijacci",
+            profile_image_url: "https://pbs.twimg.com/profile_images/x.jpg",
+          },
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }
+    throw new Error(`unexpected X request ${href}`);
+  };
+  return { fetchImpl, requests };
+}
+
+function authConfig(provider) {
+  return {
+    providers: [provider],
+    secret: "test-secret-test-secret-test-secret-test",
+    trustHost: true,
+    skipCSRFCheck,
+    basePath: "/api/auth",
+    pages: { signIn: "/login", error: "/login" },
+    session: { strategy: "jwt" },
+    callbacks: {
+      async signIn({ user, account }) {
+        if (account?.provider !== "twitter") return true;
+        const id = account.providerAccountId || user?.id || "";
+        if (!id) return false;
+        try {
+          const result = await upsertOauthUser({
+            id,
+            email: optionalOauthEmail(user?.email),
+            name: user?.name,
+            image: user?.image,
+            provider: "twitter",
+          });
+          return result.ok;
+        } catch {
+          return true;
+        }
+      },
+      async jwt({ token, user, account }) {
+        if (user?.id) token.sub = user.id;
+        else if (account?.providerAccountId) token.sub = account.providerAccountId;
+        const email =
+          optionalOauthEmail(token.email) ?? optionalOauthEmail(user?.email);
+        if (email) token.email = email;
+        else delete token.email;
+        token.authProvider = account?.provider ?? token.authProvider;
+        token.name = user?.name ?? token.name;
+        return token;
+      },
+    },
+  };
+}
+
+async function callbackLocation(provider) {
+  const config = authConfig(provider);
+  const signIn = await Auth(
+    new Request(`${ORIGIN}/api/auth/signin/twitter`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-Auth-Return-Redirect": "1",
+      },
+      body: new URLSearchParams({ callbackUrl: `${ORIGIN}/account` }),
+    }),
+    config,
+  );
+  assert.equal(signIn.status, 200);
+  const payload = await signIn.json();
+  const state = new URL(payload.url).searchParams.get("state");
+  assert.ok(state);
+  const callback = await Auth(
+    new Request(
+      `${ORIGIN}/api/auth/callback/twitter?${new URLSearchParams({
+        code: "auth-code-from-x",
+        state,
+      })}`,
+      { headers: { cookie: cookieHeader(signIn) } },
+    ),
+    config,
+  );
+  return { location: callback.headers.get("location"), callback, config };
+}
+
+describe("Twitter callback Configuration", () => {
+  it("trims the OAuth client id and secret", () => {
+    assert.deepEqual(
+      readTwitterOAuthCredentials({
+        AUTH_TWITTER_ID: "  client-id-123 \n",
+        AUTH_TWITTER_SECRET: " client-secret-456\n",
+      }),
+      { clientId: CLIENT_ID, clientSecret: CLIENT_SECRET },
+    );
+  });
+
+  it("maps X's missing body client_id to error=Configuration", async () => {
+    const x = xApi();
+    const { location, requests } = await (async () => {
+      const result = await callbackLocation(
+        Twitter({
+          clientId: CLIENT_ID,
+          clientSecret: CLIENT_SECRET,
+          authorization: twitterAuthorization,
+          [customFetch]: x.fetchImpl,
+        }),
+      );
+      return { ...result, requests: x.requests };
+    })();
+    assert.match(location, /\/login\?error=Configuration$/);
+    assert.equal(requests[0].href, TWITTER_TOKEN_URL);
+    assert.equal(requests[0].clientId, null);
+    assert.equal(requests[0].hasBasic, true);
+    assert.equal(requests[0].hasClientSecret, false);
+  });
+
+  it("maps a body client_secret without Basic to error=Configuration", async () => {
+    const x = xApi();
+    const { location, requests } = await (async () => {
+      const result = await callbackLocation(
+        Twitter({
+          clientId: CLIENT_ID,
+          clientSecret: CLIENT_SECRET,
+          authorization: twitterAuthorization,
+          client: { token_endpoint_auth_method: "client_secret_post" },
+          [customFetch]: x.fetchImpl,
+        }),
+      );
+      return { ...result, requests: x.requests };
+    })();
+    assert.match(location, /\/login\?error=Configuration$/);
+    assert.equal(requests[0].clientId, CLIENT_ID);
+    assert.equal(requests[0].hasClientSecret, true);
+    assert.equal(requests[0].hasBasic, false);
+  });
+
+  it("creates a session for @dijacci when the profile has no email", async () => {
+    const x = xApi();
+    const credentials = readTwitterOAuthCredentials({
+      AUTH_TWITTER_ID: `  ${CLIENT_ID} \n`,
+      AUTH_TWITTER_SECRET: ` ${CLIENT_SECRET}\n`,
+    });
+    const { location, callback, config, requests } = await (async () => {
+      const result = await callbackLocation(
+        Twitter({
+          ...credentials,
+          authorization: twitterAuthorization,
+          token: TWITTER_TOKEN_URL,
+          userinfo: TWITTER_USERINFO_URL,
+          [customFetch]: twitterTokenFetch(credentials.clientId, x.fetchImpl),
+        }),
+      );
+      return { ...result, requests: x.requests };
+    })();
+    assert.equal(location, `${ORIGIN}/account`);
+    assert.equal(requests[0].href, TWITTER_TOKEN_URL);
+    assert.equal(requests[0].clientId, CLIENT_ID);
+    assert.equal(requests[0].hasBasic, true);
+    assert.equal(requests[0].hasClientSecret, false);
+    assert.equal(requests[1].href, TWITTER_USERINFO_URL);
+    assert.ok(
+      callback.headers
+        .getSetCookie()
+        .some((cookie) => cookie.includes("session-token=") && !cookie.includes("session-token=;")),
+    );
+
+    const sessionRes = await Auth(
+      new Request(`${ORIGIN}/api/auth/session`, {
+        headers: { cookie: cookieHeader(callback) },
+      }),
+      config,
+    );
+    assert.equal(sessionRes.status, 200);
+    const session = await sessionRes.json();
+    assert.equal(session.user.name, "Alex");
+    assert.equal(session.user.email ?? null, null);
+  });
+
+  it("does not turn a profile parse failure into error=Configuration", async () => {
+    const fetchImpl = async (input) => {
+      const href = typeof input === "string" ? input : input.url;
+      if (href.startsWith(TWITTER_TOKEN_URL)) {
+        return new Response(
+          JSON.stringify({
+            token_type: "bearer",
+            access_token: "access-token",
+            expires_in: 7200,
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        );
+      }
+      return new Response(JSON.stringify({ id: "998877", name: "Alex" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    };
+    const { location } = await callbackLocation(
+      Twitter({
+        clientId: CLIENT_ID,
+        clientSecret: CLIENT_SECRET,
+        authorization: twitterAuthorization,
+        [customFetch]: async (input, init) => {
+          ensureTwitterTokenClientId(input, init, CLIENT_ID);
+          return fetchImpl(input, init);
+        },
+      }),
+    );
+    assert.equal(location.includes("error=Configuration"), false);
+    assert.equal(location.endsWith("/signin"), true);
+  });
+});
+
+describe("safeAuthErrorDetails", () => {
+  it("prints the X error code and not the token response", () => {
+    const error = new Error("server responded with an error in the response body");
+    error.name = "ResponseBodyError";
+    error.error = "invalid_request";
+    error.error_description = "Missing required parameter [client_id].";
+    error.cause = {
+      error: "invalid_request",
+      error_description: "Missing required parameter [client_id].",
+      access_token: "should-not-leak",
+    };
+    error.response = { headers: { authorization: "Basic secret" } };
+    const details = safeAuthErrorDetails(error);
+    assert.deepEqual(details, {
+      name: "ResponseBodyError",
+      message: "server responded with an error in the response body",
+      oauthError: "invalid_request",
+      oauthDescription: "Missing required parameter [client_id].",
+    });
+    assert.equal(JSON.stringify(details).includes("should-not-leak"), false);
+    assert.equal(JSON.stringify(details).includes("Basic"), false);
+  });
+
+  it("unwraps Auth.js CallbackRouteError without the response body", () => {
+    const details = safeAuthErrorDetails({
+      name: "CallbackRouteError",
+      message: "Read more at https://errors.authjs.dev#callbackrouteerror",
+      cause: {
+        err: new Error("server responded with an error in the response body"),
+        error: "invalid_request",
+        error_description: "Missing required parameter [client_id].",
+        provider: "twitter",
+      },
+    });
+    assert.equal(details.oauthError, "invalid_request");
+    assert.equal(
+      details.oauthDescription,
+      "Missing required parameter [client_id].",
+    );
+    assert.equal(JSON.stringify(details).includes("provider"), false);
   });
 });
