@@ -1,13 +1,17 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  airportFieldValue,
   airportSearchText,
   buildFlightConfirmation,
   classifyFlightFailure,
+  flightOfferId,
+  flightUpstreamMessage,
   flightsBookPath,
   flightsPath,
   flightsQueryIssue,
   iataHint,
+  isFlightOfferId,
   mapAirportMatch,
   mapFlightBooking,
   mapFlightPrebook,
@@ -15,6 +19,7 @@ import {
   mapVerifiedFlight,
   parseFlightParty,
   parseFlightsSearchParams,
+  primaryAirportFor,
 } from "../src/lib/flights.ts";
 
 const OFFER = "h6NwaWTZJDAxOWQwNjFlLWRlMjYtNzI1NC1hZDNmLTA0ZDkwZmMxMDNhZaJ0cA";
@@ -264,6 +269,117 @@ describe("flights passengers", () => {
     assert.equal(
       classifyFlightFailure({ stage: "verify", message: "Offer expired" }).recovery,
       "back-to-search",
+    );
+  });
+});
+
+const VERIFY_OFFER =
+  "h6NwaWTZJDAxOWQwNjIwLWQzMDItNzBiYS04OGUxLTdlMTdkMzYyZDQ0MKJ0cMtAkdkUeuFHrqJtdcs+AAAAAAAAKNjdXKjVVNEo3VpZM0CeaJkZKoyMDI2LTA3LTAxonJkqjIwMjYtMDgtMDI=";
+
+const VERIFY = {
+  data: [
+    {
+      journey: {
+        journeyKey: "26b2fa3085dc22b2",
+        pricing: { display: { total: 1423.42, currency: "USD" } },
+        baggage: { hasCarryOnBag: true, included: [{ description: "Cabin bag" }] },
+        fare: { family: "Economy", seatsRemaining: 9 },
+        terms: { refundable: false, changeable: false, summary: [{ message: "Non-refundable fare" }] },
+        segments: [
+          {
+            originCode: "EWR",
+            destinationCode: "MIA",
+            departureTime: "2026-10-12T08:00:00",
+            arrivalTime: "2026-10-12T11:10:00",
+            direction: "OUTBOUND",
+            duration: { minutes: 190 },
+            flight: { marketingNumber: "1234" },
+            carrier: { marketingCode: "AA", marketingName: "American Airlines" },
+          },
+          {
+            originCode: "MIA",
+            destinationCode: "EWR",
+            departureTime: "2026-10-19T18:40:00",
+            arrivalTime: "2026-10-19T21:45:00",
+            direction: "INBOUND",
+            duration: { minutes: 185 },
+            flight: { marketingNumber: "1235" },
+            carrier: { marketingCode: "AA", marketingName: "American Airlines" },
+          },
+        ],
+        segmentFares: [{ cabin: "Economy" }],
+      },
+    },
+  ],
+};
+
+describe("verify payload", () => {
+  it("keeps the search offer id when Nuitee omits it from the journey", () => {
+    assert.equal(isFlightOfferId(VERIFY_OFFER), true);
+    assert.equal(flightOfferId(VERIFY_OFFER.replace(/\+/g, " ")), VERIFY_OFFER);
+    const verified = mapVerifiedFlight(VERIFY, VERIFY_OFFER);
+    assert.equal(verified.offer.offerId, VERIFY_OFFER);
+    assert.equal(verified.offer.airline, "American Airlines");
+    assert.equal(verified.offer.originCode, "EWR");
+    assert.equal(verified.offer.destinationCode, "MIA");
+    assert.equal(verified.offer.price.amount, 1423.42);
+    assert.equal(verified.offer.returnDepartureTime, "2026-10-19T18:40:00");
+    assert.equal(mapVerifiedFlight(VERIFY).offer, null);
+    assert.equal(
+      flightUpstreamMessage({
+        error: { description: "The offer has expired or is invalid", message: "not found" },
+      }),
+      "The offer has expired or is invalid",
+    );
+    const query = parseFlightsSearchParams({
+      origin: "EWR",
+      dest: "MIA",
+      start: "2026-10-12",
+      end: "2026-10-19",
+      type: "roundtrip",
+    });
+    const path = flightsBookPath(VERIFY_OFFER, query);
+    const params = new URLSearchParams(path.slice(path.indexOf("?") + 1));
+    assert.equal(params.get("offer"), VERIFY_OFFER);
+  });
+});
+
+describe("city airports", () => {
+  it("reads nested Nuitee airport results and prefers the main airport", () => {
+    assert.equal(iataHint("Miami · MIA"), "MIA");
+    assert.deepEqual(primaryAirportFor("Miami, United States"), {
+      code: "MIA",
+      label: "Miami · MIA",
+    });
+    assert.deepEqual(primaryAirportFor("New York"), {
+      code: "JFK",
+      label: "New York · JFK",
+    });
+    assert.deepEqual(primaryAirportFor("Newark"), {
+      code: "EWR",
+      label: "Newark · EWR",
+    });
+    assert.deepEqual(
+      mapAirportMatch(
+        {
+          data: [
+            {
+              airports: [
+                { iata: "OPF", city: "Miami", name: "Opa-locka Executive Airport" },
+                { iata: "MIA", city: "Miami", name: "Miami International Airport" },
+              ],
+              count: 2,
+            },
+          ],
+        },
+        "",
+        "Miami",
+      ),
+      { code: "MIA", label: "Miami · MIA" },
+    );
+    assert.equal(
+      airportFieldValue("Miami, United States", { code: "MIA", label: "Miami · MIA" }),
+      "Miami · MIA",
     );
   });
 });

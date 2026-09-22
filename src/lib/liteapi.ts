@@ -109,6 +109,15 @@ export async function liteApiCall(options: CallOptions): Promise<unknown> {
     }
   }
 
+  if (options.product === "flights") {
+    const safe = text
+      .replace(/"(secretKey|transactionId|clientSecret|publishableKey)"\s*:\s*"[^"]*"/g, '"$1":"[redacted]"')
+      .slice(0, 700);
+    console.info(
+      `[liteapi:flights] ${options.method ?? "GET"} ${options.path} ${response.status} ${safe}`,
+    );
+  }
+
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) {
       throw new LiteApiError(copy.rejected, 502, "upstream");

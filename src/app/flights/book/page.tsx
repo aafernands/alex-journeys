@@ -4,9 +4,9 @@ import { FlightBooker } from "@/components/flights/FlightBooker";
 import { FlightTripBar } from "@/components/flights/FlightTripBar";
 import { SitePage } from "@/components/pages/SitePage";
 import {
+  flightOfferId,
   flightsPath,
   flightsQueryIssue,
-  isFlightOfferId,
   parseFlightsSearchParams,
 } from "@/lib/flights";
 import { verifyFlight } from "@/lib/flights-service";
@@ -37,21 +37,17 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function FlightBookPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const query = parseFlightsSearchParams(params);
-  const offerId = first(params.offer).trim();
+  const offerId = flightOfferId(first(params.offer));
   const planHref = planATripHref(query.tripId || null);
   const listHref = flightsPath(query);
   const configured = Boolean(liteApiKeyInfo());
   const issue = flightsQueryIssue(query);
 
-  if (!configured || !isFlightOfferId(offerId) || issue) {
-    const title = !configured
-      ? "Flights not configured"
-      : !isFlightOfferId(offerId)
-        ? "Pick a flight"
-        : "Check the trip dates";
+  if (!configured || !offerId || issue) {
+    const title = !configured ? "Flights not configured" : !offerId ? "Pick a flight" : "Check the trip dates";
     const body = !configured
       ? "Flight search isn’t connected on this server yet."
-      : !isFlightOfferId(offerId)
+      : !offerId
         ? "Choose a fare from the results to see the itinerary and book it here."
         : issue || "Add the route and dates before booking.";
     return (

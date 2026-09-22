@@ -13,6 +13,8 @@ import {
 } from "@/lib/liteapi";
 import {
   airportSearchText,
+  flightOfferId,
+  flightUpstreamMessage,
   flightsQueryIssue,
   iataHint,
   isFlightOfferId,
@@ -22,6 +24,7 @@ import {
   mapFlightPrebook,
   mapFlightSearch,
   mapVerifiedFlight,
+  primaryAirportFor,
   type FlightAirport,
   type FlightBooking,
   type FlightOffer,
@@ -48,16 +51,24 @@ const flightCall = {
   product: "flights" as const,
 };
 
+function airportMiss(place: string): LiteApiError {
+  const name = place.trim() || "that place";
+  return new LiteApiError(
+    `Couldn’t match ${name} to an airport. Try a city or a three-letter code.`,
+    400,
+    "bad_request",
+  );
+}
+
+function localAirport(place: string, hint: string): FlightAirport | null {
+  if (hint) return { code: hint, label: place.trim().slice(0, 80) || hint };
+  return primaryAirportFor(place);
+}
+
 async function resolveAirport(place: string): Promise<FlightAirport> {
   const hint = iataHint(place);
   const query = airportSearchText(place) || hint;
-  if (query.length < 2) {
-    throw new LiteApiError(
-      `Couldn’t match ${place.trim()} to an airport. Try a city or a three-letter code.`,
-      400,
-      "bad_request",
-    );
-  }
+  if (query.length < 2) throw airportMiss(place);
   try {
     const payload = await liteApiCall({
       base: LITEAPI_SEARCH_BASE,
@@ -66,19 +77,23 @@ async function resolveAirport(place: string): Promise<FlightAirport> {
       timeoutMs: 8_000,
       ...flightCall,
     });
-    const match = mapAirportMatch(payload, hint);
+    const match = mapAirportMatch(payload, hint, query);
     if (match) return match;
   } catch (error) {
     if (error instanceof LiteApiError && error.code === "not_configured") throw error;
-    if (hint) return { code: hint, label: hint };
+    if (
+      error instanceof LiteApiError &&
+      /not enabled|flights access|do not have access|forbidden/i.test(error.message)
+    ) {
+      throw error;
+    }
+    const local = localAirport(place, hint);
+    if (local) return local;
     if (error instanceof LiteApiError) throw error;
   }
-  if (hint) return { code: hint, label: place.trim().slice(0, 80) || hint };
-  throw new LiteApiError(
-    `Couldn’t match ${place.trim()} to an airport. Try a city or a three-letter code.`,
-    400,
-    "bad_request",
-  );
+  const local = localAirport(place, hint);
+  if (local) return local;
+  throw airportMiss(place);
 }
 
 function ratesBody(query: FlightsQuery, origin: string, destination: string) {
@@ -144,7 +159,8 @@ export async function searchFlights(query: FlightsQuery): Promise<FlightSearchRe
 }
 
 export async function verifyFlight(offerId: string): Promise<FlightVerifyResult> {
-  if (!isFlightOfferId(offerId)) {
+  const id = flightOfferId(offerId);
+  if (!id) {
     throw new LiteApiError("That flight link is not valid.", 400, "bad_request");
   }
   const info = liteApiKeyInfo();
@@ -153,15 +169,16 @@ export async function verifyFlight(offerId: string): Promise<FlightVerifyResult>
     base: LITEAPI_SEARCH_BASE,
     path: "/flights/verify",
     method: "POST",
-    body: { offerId },
+    body: { offerId: id },
     timeoutMs: 20_000,
     ...flightCall,
   });
-  const verified = mapVerifiedFlight(payload);
+  const verified = mapVerifiedFlight(payload, id);
   if (!verified.offer) {
+    const upstream = flightUpstreamMessage(payload);
     throw new LiteApiError(
-      "That fare expired. Search again and pick another flight.",
-      404,
+      upstream || "That fare expired. Search again and pick another flight.",
+      upstream ? 502 : 404,
       "upstream",
     );
   }

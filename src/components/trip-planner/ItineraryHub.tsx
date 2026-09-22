@@ -967,20 +967,6 @@ export function ItineraryHub({
       ) : null}
       </div>
 
-      <div className="plan-hub-inbox">
-      <PlanFold id={`${headingId}-inbox`} title="Inbox" meta="Email">
-        <ForwardBookings
-          headingId={headingId}
-          tripId={tripId}
-          days={days}
-          partners={partners}
-          nextSort={nextSort}
-          onAddItem={addItem}
-          onRemember={onRememberGuestDraft}
-        />
-      </PlanFold>
-      </div>
-
       {partners.length > 0 ? (
         <section className="plan-hub-index plan-section plan-desktop-only" aria-labelledby={`${headingId}-left`}>
           <h3 id={`${headingId}-left`} className={plan.label}>
@@ -1192,6 +1178,20 @@ export function ItineraryHub({
             </article>
           );
         })}
+      </div>
+
+      <div className="plan-hub-inbox">
+      <PlanFold id={`${headingId}-inbox`} title="Inbox" meta="Email">
+        <ForwardBookings
+          headingId={headingId}
+          tripId={tripId}
+          days={days}
+          partners={partners}
+          nextSort={nextSort}
+          onAddItem={addItem}
+          onRemember={onRememberGuestDraft}
+        />
+      </PlanFold>
       </div>
 
       <div className="plan-hub-days">

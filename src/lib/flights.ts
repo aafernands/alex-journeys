@@ -252,13 +252,36 @@ export function cleanFlightCabin(raw: string | null | undefined): FlightCabin {
   return "ECONOMY";
 }
 
-/** Three-letter code when the place is already an airport, including “Newark (EWR)”. */
+/**
+ * Three-letter code when the place is already an airport.
+ * Reads “EWR”, “Newark (EWR)”, and a resolved label such as “Miami · MIA”.
+ */
 export function iataHint(place: string): string {
   const paren = /\(([A-Za-z]{3})\)/.exec(place);
   if (paren?.[1]) return paren[1].toUpperCase();
   const trimmed = place.trim();
   if (/^[A-Za-z]{3}$/.test(trimmed)) return trimmed.toUpperCase();
+  const tail = /(?:^|[\s·|,/–—-])([A-Za-z]{3})$/.exec(trimmed);
+  if (tail?.[1]) return tail[1].toUpperCase();
   return "";
+}
+
+/** Keep a msgpack offer id verbatim. Query parsers turn `+` into a space. */
+export function flightOfferId(value: unknown): string {
+  if (typeof value !== "string") return "";
+  const restored = value.trim().replace(/ /g, "+");
+  return OFFER_ID_RE.test(restored) ? restored : "";
+}
+
+/** Label shown in the search fields after a city resolves to an airport. */
+export function airportFieldValue(
+  typed: string,
+  airport: { code: string; label: string },
+): string {
+  const label = airport.label.trim() || airport.code;
+  if (!airport.code) return typed;
+  if (iataHint(typed) === airport.code && typed.trim().toUpperCase() !== airport.code) return typed;
+  return label;
 }
 
 /** Text sent to the airport lookup. City names drop a trailing country. */
@@ -640,8 +663,8 @@ function stopsFor(segments: FlightSegmentView[], direction: "OUTBOUND" | "INBOUN
 }
 
 function mapOffer(journey: Record<string, unknown>, offer: Record<string, unknown>): FlightOffer | null {
-  const offerId = text(offer.offerId, 8000);
-  if (!isFlightOfferId(offerId)) return null;
+  const offerId = flightOfferId(offer.offerId);
+  if (!offerId) return null;
   const segments = asArray(journey.segments)
     .map(mapSegment)
     .filter((segment): segment is FlightSegmentView => Boolean(segment));
@@ -762,23 +785,66 @@ export function mapFlightSearch(payload: unknown): FlightOffer[] {
     .slice(0, 24);
 }
 
-export function mapVerifiedFlight(payload: unknown): {
+function verifiedJourney(payload: unknown): {
+  journey: Record<string, unknown> | null;
+  changes: Record<string, unknown> | null;
+} {
+  const root = asRecord(payload);
+  if (!root) return { journey: null, changes: null };
+  const data = root.data;
+  const first = Array.isArray(data) ? asRecord(data[0]) : asRecord(data);
+  const nested = asRecord(first?.journey) ?? asRecord(root.journey);
+  const journey =
+    nested ??
+    (first && (Array.isArray(first.segments) || first.pricing || first.journeyKey) ? first : null);
+  return { journey, changes: asRecord(first?.changes) ?? asRecord(root.changes) };
+}
+
+/**
+ * Nuitee’s verify body is a journey, not a search offer.
+ * Pricing, fare, baggage, and segments sit on `data[].journey`, and the
+ * offer id is omitted — callers must pass the id they sent.
+ */
+export function mapVerifiedFlight(
+  payload: unknown,
+  requestedOfferId = "",
+): {
   offer: FlightOffer | null;
   changes: FlightPriceChange | null;
 } {
-  const root = asRecord(payload);
-  const data = root?.data;
-  const first = Array.isArray(data) ? asRecord(data[0]) : asRecord(data);
-  const journey = asRecord(first?.journey) ?? asRecord(root?.journey);
-  const offers = journey ? asArray(journey.offers) : [];
-  const offerRecord = asRecord(offers[0]) ?? asRecord(first?.offer);
-  const offer =
-    journey && offerRecord
-      ? mapOffer(journey, offerRecord)
-      : journey
-        ? cheapestOffer(journey)
-        : null;
-  const changesRecord = asRecord(first?.changes);
+  const { journey, changes: changesRecord } = verifiedJourney(payload);
+  const requested = flightOfferId(requestedOfferId);
+  let offer: FlightOffer | null = null;
+  if (journey) {
+    const listed = asArray(journey.offers)
+      .map((item) => {
+        const record = asRecord(item);
+        if (!record) return null;
+        const id = flightOfferId(record.offerId) || requested;
+        return id ? mapOffer(journey, { ...record, offerId: id }) : null;
+      })
+      .filter((item): item is FlightOffer => Boolean(item));
+    if (listed.length > 0) {
+      listed.sort(
+        (a, b) =>
+          (a.price?.amount ?? Number.POSITIVE_INFINITY) -
+          (b.price?.amount ?? Number.POSITIVE_INFINITY),
+      );
+      offer = listed[0];
+    } else {
+      const id = flightOfferId(journey.offerId) || requested;
+      if (id) {
+        offer = mapOffer(journey, {
+          offerId: id,
+          pricing: journey.pricing,
+          fare: journey.fare,
+          baggage: journey.baggage,
+          terms: journey.terms,
+          segmentFares: journey.segmentFares,
+        });
+      }
+    }
+  }
   if (!changesRecord) return { offer, changes: null };
   const pricing = asRecord(changesRecord.pricing);
   const oldDisplay = asRecord(asRecord(pricing?.old)?.display) ?? asRecord(pricing?.old);
@@ -819,32 +885,135 @@ function airportRows(payload: unknown): Record<string, unknown>[] {
     asRecord(root?.data)?.results,
   ];
   const rows: Record<string, unknown>[] = [];
+  const push = (value: unknown) => {
+    const record = asRecord(value);
+    if (!record) return;
+    const nested = record.airports;
+    if (Array.isArray(nested)) {
+      for (const airport of nested) push(airport);
+      return;
+    }
+    rows.push(record);
+  };
   for (const bucket of buckets) {
-    if (!Array.isArray(bucket)) continue;
-    for (const item of bucket) {
-      const record = asRecord(item);
-      if (record) rows.push(record);
+    if (Array.isArray(bucket)) {
+      for (const item of bucket) push(item);
+    } else {
+      push(bucket);
     }
   }
   return rows;
 }
 
-export function mapAirportMatch(payload: unknown, hint: string): FlightAirport | null {
+/** Commercial airports preferred when a city has several fields. */
+const MAJOR_AIRPORTS = new Set([
+  "ATL", "LAX", "ORD", "DFW", "DEN", "JFK", "SFO", "SEA", "MIA", "MCO",
+  "EWR", "BOS", "LAS", "CLT", "PHX", "IAH", "MSP", "DTW", "PHL", "LGA",
+  "BWI", "IAD", "DCA", "SAN", "TPA", "FLL", "SLC", "HNL", "PDX", "AUS",
+  "BNA", "RDU", "MDW", "DAL", "HOU", "SJC", "OAK", "LIS", "OPO", "CDG",
+  "ORY", "LHR", "LGW", "AMS", "FRA", "MAD", "BCN", "FCO", "MXP", "DUB",
+  "YYZ", "YUL", "YVR", "CUN", "SJU", "GRU", "GIG", "EZE", "NRT", "HND",
+  "ICN", "DXB", "SIN", "HKG", "SYD", "MEL",
+]);
+
+const CITY_AIRPORTS: Record<string, string> = {
+  miami: "MIA",
+  "new york": "JFK",
+  nyc: "JFK",
+  "new york city": "JFK",
+  newark: "EWR",
+  "new jersey": "EWR",
+  "jersey city": "EWR",
+  lisbon: "LIS",
+  london: "LHR",
+  paris: "CDG",
+  orlando: "MCO",
+  "los angeles": "LAX",
+  chicago: "ORD",
+  boston: "BOS",
+  seattle: "SEA",
+  "san francisco": "SFO",
+  washington: "DCA",
+  "washington dc": "DCA",
+  atlanta: "ATL",
+  dallas: "DFW",
+  houston: "IAH",
+  denver: "DEN",
+  "fort lauderdale": "FLL",
+  cancun: "CUN",
+};
+
+function cityKey(place: string): string {
+  return airportSearchText(place)
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Used when the airports endpoint returns nothing for a known city. */
+export function primaryAirportFor(place: string): FlightAirport | null {
+  const hint = iataHint(place);
+  if (hint && place.trim().toUpperCase() === hint) {
+    return { code: hint, label: hint };
+  }
+  const key = cityKey(place);
+  const code = CITY_AIRPORTS[key];
+  if (!code) return null;
+  const city = airportSearchText(place) || place.trim();
+  return { code, label: `${city} · ${code}`.slice(0, 120) };
+}
+
+export function mapAirportMatch(
+  payload: unknown,
+  hint: string,
+  city = "",
+): FlightAirport | null {
   const wanted = hint.trim().toUpperCase();
+  const wantedCity = cityKey(city);
   const rows = airportRows(payload)
     .map((record) => {
       const code = iataCode(record);
       if (!code) return null;
-      const city = text(record.city ?? record.cityName, 80);
+      const cityName = text(record.city ?? record.cityName, 80);
       const name = text(record.name ?? record.airportName, 120);
-      const label = [city, code].filter(Boolean).join(" · ") || name || code;
-      return { code, label: label.slice(0, 120), city, name };
+      const label = [cityName, code].filter(Boolean).join(" · ") || name || code;
+      return { code, label: label.slice(0, 120), city: cityName, name };
     })
     .filter((row): row is { code: string; label: string; city: string; name: string } => Boolean(row));
   if (rows.length === 0) return null;
-  const exact = wanted ? rows.find((row) => row.code === wanted) : null;
-  const picked = exact ?? rows[0];
+  const scored = rows.map((row, index) => {
+    const cityName = row.city.toLowerCase();
+    let score = rows.length - index;
+    if (wanted && row.code === wanted) score += 1000;
+    if (wantedCity && cityName === wantedCity) score += 200;
+    else if (wantedCity && (cityName.startsWith(wantedCity) || wantedCity.startsWith(cityName))) {
+      score += 80;
+    }
+    if (MAJOR_AIRPORTS.has(row.code) || CITY_AIRPORTS[wantedCity] === row.code) score += 60;
+    if (/heliport|seaplane|airpark/i.test(row.name)) score -= 80;
+    return { row, score };
+  });
+  scored.sort((a, b) => b.score - a.score);
+  const picked = scored[0]?.row;
+  if (!picked) return null;
   return { code: picked.code, label: picked.label };
+}
+
+/** Nuitee error text safe to show. Empty when the payload has no message. */
+export function flightUpstreamMessage(payload: unknown): string {
+  const root = asRecord(payload);
+  const nested = asRecord(root?.error);
+  const raw =
+    text(nested?.description, 240) ||
+    text(nested?.message, 240) ||
+    text(root?.message, 240) ||
+    text(root?.error, 240);
+  if (!raw) return "";
+  if (/api[- ]?key|unauthorized|invalid key/i.test(raw)) {
+    return "Nuitee rejected the flights key on the server.";
+  }
+  return raw;
 }
 
 export function mapFlightPrebook(payload: unknown): FlightPrebook | null {

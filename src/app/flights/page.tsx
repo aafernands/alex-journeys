@@ -7,6 +7,7 @@ import {
   FLIGHT_CABIN_LABEL,
   flightDateLabel,
   flightDayOffset,
+  airportFieldValue,
   flightsBookPath,
   flightsQueryIssue,
   flightsQueryString,
@@ -114,7 +115,22 @@ export default async function FlightsPage({ searchParams }: PageProps) {
     >
       <div className="plan-trip hub-follow plan-stack">
         <FlightTripBar query={query} />
-        <FlightsSearchForm key={flightsQueryString(query)} query={query} />
+        <FlightsSearchForm
+          key={flightsQueryString({
+            ...query,
+            origin: result ? airportFieldValue(query.origin, result.origin) : query.origin,
+            destination: result
+              ? airportFieldValue(query.destination, result.destination)
+              : query.destination,
+          })}
+          query={{
+            ...query,
+            origin: result ? airportFieldValue(query.origin, result.origin) : query.origin,
+            destination: result
+              ? airportFieldValue(query.destination, result.destination)
+              : query.destination,
+          }}
+        />
         {!configured ? (
           <Notice
             title="Flights not configured"
