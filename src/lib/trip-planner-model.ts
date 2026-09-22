@@ -630,8 +630,8 @@ export function flightLaneHref(
 ): string {
   const values = tripUrlValues(state, flexibleDatesEnabled);
   return flightsPath({
-    origin: prefilledAirport(values.origin),
-    destination: prefilledAirport(values.destination),
+    origin: prefilledAirport(values.origin ?? ""),
+    destination: prefilledAirport(values.destination ?? ""),
     startDate: values.startDate,
     endDate: state.tripType === "oneway" ? "" : values.endDate,
     tripType: state.tripType,
