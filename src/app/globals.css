@@ -1440,7 +1440,7 @@ select.plan-input {
 .plan-date-day[data-range="between"],
 .plan-date-day[data-range="start"],
 .plan-date-day[data-range="end"] {
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  background: color-mix(in srgb, var(--accent) 36%, var(--white));
 }
 
 .plan-date-day[data-range="start"] {
