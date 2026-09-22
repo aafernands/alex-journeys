@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { DateRangeField } from "@/components/trip-planner/DateRangeField";
 import { plan } from "@/components/trip-planner/density";
 import { staysPath, type StaysQuery } from "@/lib/stays";
 
@@ -12,6 +13,10 @@ type Props = {
 export function StaysSearchForm({ query }: Props) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const [startDate, setStartDate] = useState(query.startDate);
+  const [endDate, setEndDate] = useState(query.endDate);
+  const [startError, setStartError] = useState("");
+  const [endError, setEndError] = useState("");
 
   return (
     <form
@@ -20,12 +25,21 @@ export function StaysSearchForm({ query }: Props) {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const value = (key: string) => String(data.get(key) ?? "");
+        const startIssue = startDate ? "" : "Add a check-in date.";
+        const endIssue = !endDate
+          ? "Add a check-out date."
+          : endDate <= startDate
+            ? "Check-out has to be after check-in."
+            : "";
+        setStartError(startIssue);
+        setEndError(endIssue);
+        if (startIssue || endIssue) return;
         setPending(true);
         router.push(
           staysPath({
             destination: value("dest"),
-            startDate: value("start"),
-            endDate: value("end"),
+            startDate,
+            endDate,
             adults: value("adults"),
             children: value("children"),
             rooms: value("rooms"),
@@ -46,26 +60,25 @@ export function StaysSearchForm({ query }: Props) {
             autoComplete="off"
           />
         </label>
-        <label className="plan-stack-tight">
-          <span className={plan.label}>Check-in</span>
-          <input
-            name="start"
-            type="date"
-            required
-            defaultValue={query.startDate}
-            className={plan.input}
+        <div className="sm:col-span-2 lg:col-span-2">
+          <DateRangeField
+            id="stays-dates"
+            startDate={startDate}
+            endDate={endDate}
+            startLabel="Check-in"
+            endLabel="Check-out"
+            dialogLabel="Stay dates"
+            allowSameDay={false}
+            startError={startError}
+            endError={endError}
+            onChange={(next) => {
+              setStartDate(next.startDate);
+              setEndDate(next.endDate);
+              setStartError("");
+              setEndError("");
+            }}
           />
-        </label>
-        <label className="plan-stack-tight">
-          <span className={plan.label}>Check-out</span>
-          <input
-            name="end"
-            type="date"
-            required
-            defaultValue={query.endDate}
-            className={plan.input}
-          />
-        </label>
+        </div>
         <label className="plan-stack-tight">
           <span className={plan.label}>Adults</span>
           <input
