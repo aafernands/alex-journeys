@@ -67,22 +67,22 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
         <div className="plan-trip hub-follow plan-stack">
           <StayTripBar query={query} />
           <div className="panel max-w-2xl p-6 sm:p-8">
-          <h2 className="font-display text-2xl font-bold text-heading">
-            {configured ? "Add trip dates" : "Stays not configured"}
-          </h2>
-          <p className="mt-3 text-text">
-            {configured
-              ? issue
-              : "Hotel search isn’t connected on this server yet."}
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href={planHref} className="btn btn-primary inline-flex">
-              {onTrip ? "Back to itinerary" : "Plan a trip"}
-            </Link>
-            <Link href={listHref} className="btn btn-secondary inline-flex">
-              Search more stays
-            </Link>
-          </div>
+            <h2 className="font-display text-2xl font-bold text-heading">
+              {configured ? "Add trip dates" : "Stays not configured"}
+            </h2>
+            <p className="mt-3 text-text">
+              {configured
+                ? issue
+                : "Hotel search isn’t connected on this server yet."}
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link href={planHref} className="btn btn-primary inline-flex">
+                {onTrip ? "Back to itinerary" : "Plan a trip"}
+              </Link>
+              <Link href={listHref} className="btn btn-secondary inline-flex">
+                Search more stays
+              </Link>
+            </div>
           </div>
         </div>
       </SitePage>

@@ -421,6 +421,14 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
   background: var(--surface-soft);
 }
 
+/* Two-up OAuth actions live in the max-w-md login card, so the label + icon
+   need a slightly tighter measure than a full-width secondary button. */
+.btn-oauth {
+  gap: 0.375rem;
+  padding-inline: 0.5rem;
+  font-size: 0.8125rem;
+}
+
 .btn-block {
   width: 100%;
 }

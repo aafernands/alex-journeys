@@ -1086,7 +1086,9 @@ export function ItineraryHub({
 
               {laneItems.length === 0 ? (
                 <p className={`${plan.body} text-muted plan-desktop-only`}>
-                  Nothing saved here yet. Search, then add the booking you want to keep.
+                  {partner.key === "booking"
+                    ? "Nothing saved here yet. Search stays and the hotel you book comes back to this itinerary."
+                    : "Nothing saved here yet. Search, then add the booking you want to keep."}
                 </p>
               ) : (
                 <ul className="plan-stack-tight">
