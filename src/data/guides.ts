@@ -271,8 +271,10 @@ export const guidesNav = guideHubs.map((h) => ({
 }));
 
 /**
- * Old /resources/* and /experiences/* → best matching guide hub.
+ * Old /resources/* and /experiences/* paths → best matching guide hub.
  * Used by next.config redirects.
+ * `/experiences` itself is the Plan a Trip Viator page, so it is not redirected.
+ * Legacy child paths (/experiences/day-trips and the rest) still go to the guide hub.
  */
 export const legacyPathRedirects: { source: string; destination: string }[] = [
   { source: "/resources", destination: "/guides" },
@@ -296,7 +298,6 @@ export const legacyPathRedirects: { source: string; destination: string }[] = [
   { source: "/resources/travel-guides", destination: "/guides/plan-a-trip" },
   { source: "/resources/travel-tips", destination: "/guides/travel-smarter" },
   { source: "/resources/useful-apps", destination: "/guides/travel-smarter" },
-  { source: "/experiences", destination: "/guides/experiences" },
   {
     source: "/experiences/adventure-travel",
     destination: "/guides/experiences",

@@ -49,3 +49,55 @@ export function viatorWidgetDiv(
 export function htmlHasViatorWidgets(html: string): boolean {
   return /data-vi-widget-ref\s*=\s*["']W-/i.test(html);
 }
+
+export type ViatorDynamicWidgetInput = {
+  partnerId: string;
+  /** Dynamic widget ref from Viator Widgets Hub. Omitted when it is not a W-… id. */
+  widgetRef?: string;
+  searchTerm: string;
+  campaign?: string;
+  language?: string;
+  currency?: string;
+  travelDateFrom?: string;
+  travelDateTo?: string;
+  adults?: number | null;
+  children?: number | null;
+};
+
+/**
+ * One Dynamic widget for any destination. Book Now stays inside Viator’s
+ * iframe and is attributed by the partner id (and campaign, when set).
+ * Do not rewrite those iframe navigations through /out.
+ */
+export function viatorDynamicWidgetMarkup(input: ViatorDynamicWidgetInput): string {
+  const searchTerm = input.searchTerm.trim();
+  if (!searchTerm || !isViatorPartnerId(input.partnerId)) return "";
+
+  const attrs = [
+    `class="viator-widget"`,
+    attr("data-vi-partner-id", input.partnerId),
+    isViatorWidgetRef(input.widgetRef ?? "")
+      ? attr("data-vi-widget-ref", input.widgetRef)
+      : null,
+    attr("data-vi-search-term", searchTerm),
+    attr("data-vi-campaign", input.campaign),
+    attr("data-vi-language", input.language),
+    attr("data-vi-currency", input.currency),
+    attr("data-vi-travel-date-from", input.travelDateFrom),
+    attr("data-vi-travel-date-to", input.travelDateTo),
+    input.adults && input.adults > 0
+      ? attr("data-vi-travellers-adults", String(input.adults))
+      : null,
+    input.children && input.children > 0
+      ? attr("data-vi-travellers-children", String(input.children))
+      : null,
+  ].filter((part): part is string => Boolean(part));
+
+  return `<div ${attrs.join(" ")}></div>`;
+}
+
+function attr(name: string, value: string | undefined | null): string | null {
+  const trimmed = value?.trim() ?? "";
+  if (!trimmed) return null;
+  return `${name}="${escapeHtmlAttr(trimmed)}"`;
+}

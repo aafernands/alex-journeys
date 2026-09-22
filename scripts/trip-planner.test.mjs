@@ -11,6 +11,7 @@ import {
   formatDateRange,
   formatFlexible,
   initialPlannerState,
+  partnerLaneHref,
   resolveAffiliateHref,
   reviewRows,
   travelerSummary,
@@ -149,6 +150,40 @@ describe("plan a trip planner", () => {
         adults: "2",
       }),
       "https://expedia.com/affiliates/nyc/plan_trip",
+    );
+    assert.equal(
+      partnerLaneHref(expedia, lisbonTrip(), true),
+      "https://expedia.com/affiliates/nyc/plan_trip",
+    );
+
+    const rentcars = DEFAULT_PARTNERS.find((partner) => partner.key === "rentcars");
+    assert.ok(rentcars);
+    const carTrip = {
+      ...lisbonTrip(),
+      categories: ["car"],
+    };
+    assert.equal(
+      partnerLaneHref(rentcars, carTrip, true),
+      rentcars.affiliateUrl,
+    );
+
+    const viator = DEFAULT_PARTNERS.find((partner) => partner.key === "viator");
+    assert.ok(viator);
+    assert.equal(
+      partnerLaneHref(viator, lisbonTrip(), true),
+      "/experiences?dest=Lisbon%2C+Portugal&start=2027-04-12&end=2027-04-19&adults=2",
+    );
+    assert.equal(
+      partnerLaneHref(
+        viator,
+        { ...lisbonTrip(), children: 1 },
+        true,
+      ),
+      "/experiences?dest=Lisbon%2C+Portugal&start=2027-04-12&end=2027-04-19&adults=2&children=1",
+    );
+    assert.equal(
+      partnerLaneHref(viator, initialPlannerState(), true),
+      "/experiences",
     );
   });
 

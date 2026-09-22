@@ -643,6 +643,31 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
   background: #ffffff;
 }
 
+/* /experiences Dynamic widget. Book Now stays in the iframe. */
+.experiences-widget {
+  max-width: 100%;
+}
+
+.experiences-widget-ready {
+  min-height: 16rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--white);
+  padding: 0.75rem;
+}
+
+.experiences-widget-ready:has(iframe) .experiences-widget-loading {
+  display: none;
+}
+
+.experiences-widget iframe {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  border: 0;
+  background: #ffffff;
+}
+
 .post-prose .cms-html-embed {
   max-width: 100%;
   margin: 1.75em 0;

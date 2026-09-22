@@ -3,6 +3,8 @@
  * Safe to import from client components (no filesystem).
  */
 
+import { experiencesPath } from "@/lib/experiences";
+
 export const PLAN_A_TRIP_SLUG = "plan-a-trip";
 
 export const TRIP_CATEGORIES = ["flights", "hotel", "car"] as const;
@@ -616,6 +618,32 @@ export function resolveAffiliateHref(
   const candidate = (filled ?? partner.affiliateUrl).trim();
   if (/^https?:\/\//i.test(candidate)) return candidate;
   return partner.affiliateUrl.trim();
+}
+
+/**
+ * Lane CTA. The Viator lane stays on this site and opens /experiences with
+ * the active destination. Expedia, Booking, Rentcars, and the other partners
+ * keep their affiliate URLs so OutboundLink can still wrap them in /out.
+ */
+export function partnerLaneHref(
+  partner: TripPlannerPartner,
+  state: PlannerState,
+  flexibleDatesEnabled: boolean,
+): string {
+  if (partner.key === "viator") {
+    const values = tripUrlValues(state, flexibleDatesEnabled);
+    return experiencesPath({
+      destination: values.destination,
+      startDate: values.startDate,
+      endDate: values.endDate,
+      adults: state.adults,
+      children: state.children,
+    });
+  }
+  return resolveAffiliateHref(
+    partner,
+    partnerUrlValues(partner, state, flexibleDatesEnabled),
+  );
 }
 
 export function visiblePartners(
