@@ -5,6 +5,8 @@ import {
   airportSearchText,
   buildFlightConfirmation,
   classifyFlightFailure,
+  FLIGHT_CARD_REQUIRED,
+  flightBookBody,
   flightBookingPayment,
   flightOfferId,
   flightUpstreamMessage,
@@ -287,12 +289,9 @@ describe("flights passengers", () => {
       }).title,
       "Booking didn’t finish",
     );
-    assert.match(
-      classifyFlightFailure({
-        stage: "book",
-        message: "invalid format: payment method unsupported",
-      }).message,
-      /Stripe form/,
+    assert.equal(
+      classifyFlightFailure({ stage: "book", message: FLIGHT_CARD_REQUIRED }).title,
+      "Complete card payment first",
     );
   });
 });
@@ -310,6 +309,17 @@ describe("flight payment payload", () => {
     assert.equal(flightBookingPayment("CREDIT"), null);
     assert.equal(flightBookingPayment("ACC_CREDIT_CARD"), null);
     assert.equal(flightBookingPayment("WALLET"), null);
+    const prebookId = "019d0674-834d-7db7-9c8b-93fe8e46e7b8";
+    assert.equal(flightBookBody(prebookId, ""), null);
+    assert.equal(flightBookBody(prebookId, "ACC_CREDIT_CARD"), null);
+    assert.deepEqual(flightBookBody(prebookId, "tr_cts_WaTMwICRB0h_dOfyvLvvN"), {
+      prebookId,
+      payment: {
+        method: "TRANSACTION_ID",
+        transactionId: "tr_cts_WaTMwICRB0h_dOfyvLvvN",
+      },
+    });
+    assert.equal(FLIGHT_CARD_REQUIRED, "Complete card payment first");
 
     const prebook = mapFlightPrebook({
       data: [

@@ -97,14 +97,17 @@ export type FlightCardPayment = {
 };
 
 /**
- * Body for `POST /flights/bookings`. Flights accept Stripe’s transaction id.
- * Hotel account credit (`ACC_CREDIT_CARD`) and an unconfigured credit line (`CREDIT`)
- * are rejected by Nuitee as an unsupported payment method.
+ * Body for `POST /flights/bookings` after Stripe confirms.
+ * Flights accept `TRANSACTION_ID`. An enabled credit line can use `CREDIT`.
+ * Hotel `ACC_CREDIT_CARD` is not a flight method.
  */
 export type FlightBookingPayment = {
   method: "TRANSACTION_ID";
   transactionId: string;
 };
+
+/** Shown when prebook has no Stripe secrets, so we do not call bookings. */
+export const FLIGHT_CARD_REQUIRED = "Complete card payment first";
 
 export type FlightPrebook = {
   prebookId: string;
@@ -1070,6 +1073,21 @@ export function flightBookingPayment(transactionId: string): FlightBookingPaymen
   return { method: "TRANSACTION_ID", transactionId: transaction };
 }
 
+/**
+ * Bookings body after Stripe confirms. Null when the transaction id is missing,
+ * so the caller can stop with `FLIGHT_CARD_REQUIRED` instead of sending CREDIT
+ * or ACC_CREDIT_CARD.
+ */
+export function flightBookBody(
+  prebookId: string,
+  transactionId: string,
+): { prebookId: string; payment: FlightBookingPayment } | null {
+  if (!isFlightPrebookId(prebookId)) return null;
+  const payment = flightBookingPayment(transactionId);
+  if (!payment) return null;
+  return { prebookId, payment };
+}
+
 function paymentTypesAllowCard(record: Record<string, unknown>): boolean {
   const raw = record.paymentTypes ?? asRecord(record.payment)?.paymentTypes;
   if (!Array.isArray(raw) || raw.length === 0) return true;
@@ -1233,10 +1251,10 @@ export function classifyFlightFailure(input: {
   if (/too many|rate limit|wait a moment/i.test(message)) {
     return { title: "Give it a moment", message, recovery: "retry" };
   }
-  if (/did not return a card payment|card payment isn/i.test(message)) {
+  if (message === FLIGHT_CARD_REQUIRED || /did not return a card payment|card payment isn/i.test(message)) {
     return {
-      title: "Card payment isn’t available",
-      message,
+      title: FLIGHT_CARD_REQUIRED,
+      message: "Nuitee did not return a confirmed card payment, so this fare was not booked.",
       recovery: "back-to-search",
     };
   }

@@ -10,6 +10,7 @@ import {
   blankPassenger,
   buildFlightConfirmation,
   classifyFlightFailure,
+  FLIGHT_CARD_REQUIRED,
   flightBookingPayment,
   flightDateLabel,
   flightDayOffset,
@@ -219,7 +220,7 @@ export function FlightBooker({
       setFailure(
         classifyFlightFailure({
           stage: "book",
-          message: "Confirm the card payment before booking this flight.",
+          message: FLIGHT_CARD_REQUIRED,
         }),
       );
       return;
@@ -445,7 +446,7 @@ export function FlightBooker({
             {total ? `${total} for this itinerary.` : "Nuitee held this itinerary."}{" "}
             {prebook.payment
               ? "Pay with the card form from Nuitee. The ticket is booked after Stripe confirms."
-              : "Nuitee held the fare but did not return a card payment. Search again and pick the flight once more."}
+              : FLIGHT_CARD_REQUIRED}
           </p>
           {prebook.payment ? (
             <FlightCardPayment

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { loadStripe, type Stripe, type StripeCardElement } from "@stripe/stripe-js";
-import type { FlightCardPayment as CardPayment } from "@/lib/flights";
+import { FLIGHT_CARD_REQUIRED, type FlightCardPayment as CardPayment } from "@/lib/flights";
 
 type Props = {
   payment: CardPayment;
@@ -71,9 +71,8 @@ export function FlightCardPayment({ payment, busy, sandbox, onAttempt, onPaid, o
         onError(result.error.message || "The card was declined.");
         return;
       }
-      const status = result.paymentIntent?.status;
-      if (status !== "succeeded" && status !== "requires_capture") {
-        onError("The card payment is not confirmed yet.");
+      if (result.paymentIntent?.status !== "succeeded") {
+        onError(FLIGHT_CARD_REQUIRED);
         return;
       }
       onPaid(payment.transactionId);
