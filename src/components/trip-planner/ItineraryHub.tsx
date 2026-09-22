@@ -8,8 +8,7 @@ import { NavIcon } from "@/components/icons/NavIcon";
 import type { TripSaveMode } from "@/components/trip-planner/useTripSync";
 import {
   dateSummary,
-  partnerUrlValues,
-  resolveAffiliateHref,
+  partnerLaneHref,
   travelerSummary,
   type PlannerState,
   type TripPlannerConfig,
@@ -626,6 +625,33 @@ function JournalNotes({
   );
 }
 
+function LaneCta({
+  partner,
+  state,
+  flexibleOn,
+  className,
+}: {
+  partner: TripPlannerPartner;
+  state: PlannerState;
+  flexibleOn: boolean;
+  className: string;
+}) {
+  const href = partnerLaneHref(partner, state, flexibleOn);
+  const external = partner.key !== "viator";
+  return (
+    <OutboundLink
+      href={href}
+      affiliate={external}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer sponsored" : undefined}
+      className={className}
+    >
+      {partner.buttonLabel}
+      {external ? <span className="sr-only"> (opens in a new tab)</span> : null}
+    </OutboundLink>
+  );
+}
+
 export function ItineraryHub({
   headingId,
   config,
@@ -954,10 +980,6 @@ export function ItineraryHub({
 
       <div className="plan-hub-lanes plan-lanes plan-section">
         {partners.map((partner) => {
-          const href = resolveAffiliateHref(
-            partner,
-            partnerUrlValues(partner, state, flexibleOn),
-          );
           const laneItems = itemsForLane(items, partner);
           const adding = editor?.kind === "add-lane" && editor.laneKey === partner.key;
           const laneOpen = openLane === partner.key;
@@ -1005,18 +1027,14 @@ export function ItineraryHub({
                     ) : null}
                   </div>
                 </div>
-                <OutboundLink
-                  href={href}
-                  affiliate
-                  target="_blank"
-                  rel="noopener noreferrer sponsored"
+                <LaneCta
+                  partner={partner}
+                  state={state}
+                  flexibleOn={flexibleOn}
                   className={`btn self-start shrink-0 sm:self-center ${
                     partner.isCore ? "btn-primary" : "btn-secondary"
                   }`}
-                >
-                  {partner.buttonLabel}
-                  <span className="sr-only"> (opens in a new tab)</span>
-                </OutboundLink>
+                />
               </div>
 
               {partner.blurb ? (
@@ -1363,19 +1381,12 @@ export function ItineraryHub({
 
       {stickyPartner && editor == null ? (
         <div className="plan-hub-sticky plan-sticky plan-sticky-page plan-sticky-solo plan-mobile-only">
-          <OutboundLink
-            href={resolveAffiliateHref(
-              stickyPartner,
-              partnerUrlValues(stickyPartner, state, flexibleOn),
-            )}
-            affiliate
-            target="_blank"
-            rel="noopener noreferrer sponsored"
+          <LaneCta
+            partner={stickyPartner}
+            state={state}
+            flexibleOn={flexibleOn}
             className={`btn ${stickyPartner.isCore ? "btn-primary" : "btn-secondary"}`}
-          >
-            {stickyPartner.buttonLabel}
-            <span className="sr-only"> (opens in a new tab)</span>
-          </OutboundLink>
+          />
         </div>
       ) : null}
     </div>
