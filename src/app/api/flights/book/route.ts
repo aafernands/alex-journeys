@@ -20,8 +20,9 @@ function fail(error: unknown) {
 }
 
 /**
- * POST /api/flights/book
- * Sandbox keys complete the reservation on Nuitee credit. No card data is collected.
+ * POST /api/flights/book { prebookId, transactionId? }
+ * Card checkouts send the Nuitee transaction id after Stripe confirms.
+ * Sandbox credit is only used when prebook did not return a PaymentIntent.
  */
 export async function POST(request: Request) {
   const limit = rateLimit(staysCallerKey(request, "flights-book"), 8, 60_000);
@@ -37,12 +38,11 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
-  const prebookId =
-    body && typeof body === "object" && "prebookId" in body && typeof body.prebookId === "string"
-      ? body.prebookId.trim()
-      : "";
+  const record = body && typeof body === "object" ? (body as Record<string, unknown>) : {};
+  const prebookId = typeof record.prebookId === "string" ? record.prebookId.trim() : "";
+  const transactionId = typeof record.transactionId === "string" ? record.transactionId.trim() : "";
   try {
-    const booking = await bookFlight(prebookId);
+    const booking = await bookFlight(prebookId, transactionId);
     return NextResponse.json({ booking });
   } catch (error) {
     return fail(error);

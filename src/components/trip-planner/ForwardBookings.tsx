@@ -259,12 +259,12 @@ export function ForwardBookings({
           <NavIcon name="mail" size={16} />
         </span>
         <div className="min-w-0 flex-1 plan-stack-tight">
-          <h3 id={titleId} className={`${plan.h3} max-sm:hidden`}>
-            Forward bookings here
+          <h3 id={titleId} className={plan.h4}>
+            Forward a confirmation
           </h3>
-          <p className={`${plan.prose} text-text plan-desktop-only`}>
-            Forward airline, hotel, or car confirmation emails. We’ll suggest items — you
-            approve before they land on the itinerary.
+          <p className={`${plan.prose} text-muted`}>
+            Insurance, an eSIM, an experience, or anything booked outside Fernandes Journeys.
+            Forward the email and approve it before it lands on this itinerary.
           </p>
 
           {status === "loading" || (status === "authenticated" && loading && !primary) ? (
@@ -281,7 +281,7 @@ export function ForwardBookings({
               <div className="plan-actions plan-actions-inline">
                 <Link
                   href={planATripLoginHref(tripId, "signin")}
-                  className="btn btn-ink"
+                  className="btn btn-secondary"
                   onClick={onRemember}
                 >
                   Sign in

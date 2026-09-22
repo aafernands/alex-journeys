@@ -207,15 +207,24 @@ describe("flights mapping", () => {
       data: [
         {
           prebookId: "019d0674-834d-7db7-9c8b-93fe8e46e7b8",
-          secretKey: "pi_secret_should_not_leak",
-          transactionId: "txn_should_not_leak",
+          secretKey: "pi_3Nabc_secret_shouldnotleak",
+          transactionId: "pi_3Nabc",
+          publishableKey: "pk_test_1234567890abcdef",
           journey: RATES.data[0].journeys[0],
         },
       ],
     });
     assert.equal(prebook.prebookId, "019d0674-834d-7db7-9c8b-93fe8e46e7b8");
-    assert.equal(JSON.stringify(prebook).includes("secret"), false);
-    assert.equal(JSON.stringify(prebook).includes("txn_"), false);
+    assert.equal(prebook.payment.clientSecret, "pi_3Nabc_secret_shouldnotleak");
+    assert.equal(prebook.payment.publishableKey, "pk_test_1234567890abcdef");
+    assert.equal(prebook.payment.transactionId, "pi_3Nabc");
+    assert.equal(JSON.stringify(prebook.offer).includes("secretKey"), false);
+    assert.equal(
+      mapFlightPrebook({
+        data: [{ prebookId: "019d0674-834d-7db7-9c8b-93fe8e46e7b8", secretKey: "pi_3Nabc_secret_shouldnotleak" }],
+      }).payment,
+      null,
+    );
 
     const booking = mapFlightBooking({
       data: [

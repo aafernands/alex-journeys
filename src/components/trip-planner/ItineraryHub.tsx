@@ -686,6 +686,53 @@ function LaneCta({
   );
 }
 
+function OutsideBookings({
+  headingId,
+  tripId,
+  days,
+  partners,
+  nextSort,
+  onAddItem,
+  onRemember,
+}: {
+  headingId: string;
+  tripId: string | null;
+  days: TripDay[];
+  partners: TripPlannerPartner[];
+  nextSort: number;
+  onAddItem: (item: TripItem) => void;
+  onRemember: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const panelId = `${headingId}-outside`;
+  return (
+    <section className="plan-hub-inbox plan-section">
+      <button
+        type="button"
+        className={`${plan.textBtn} text-muted`}
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((value) => !value)}
+      >
+        Booked outside FJ?
+      </button>
+      {open ? (
+        <div id={panelId} className="plan-follow">
+          <ForwardBookings
+            headingId={headingId}
+            tripId={tripId}
+            days={days}
+            partners={partners}
+            nextSort={nextSort}
+            onAddItem={onAddItem}
+            onRemember={onRemember}
+          />
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 export function ItineraryHub({
   headingId,
   config,
@@ -1180,19 +1227,15 @@ export function ItineraryHub({
         })}
       </div>
 
-      <div className="plan-hub-inbox">
-      <PlanFold id={`${headingId}-inbox`} title="Inbox" meta="Email">
-        <ForwardBookings
-          headingId={headingId}
-          tripId={tripId}
-          days={days}
-          partners={partners}
-          nextSort={nextSort}
-          onAddItem={addItem}
-          onRemember={onRememberGuestDraft}
-        />
-      </PlanFold>
-      </div>
+      <OutsideBookings
+        headingId={headingId}
+        tripId={tripId}
+        days={days}
+        partners={partners}
+        nextSort={nextSort}
+        onAddItem={addItem}
+        onRemember={onRememberGuestDraft}
+      />
 
       <div className="plan-hub-days">
       <PlanFold

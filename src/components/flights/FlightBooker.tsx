@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { FlightCardPayment } from "@/components/flights/FlightCardPayment";
 import { FlightConfirmation } from "@/components/flights/FlightConfirmation";
 import { FlightFailureNotice } from "@/components/flights/FlightFailureNotice";
 import { plan } from "@/components/trip-planner/density";
@@ -140,7 +141,7 @@ export function FlightBooker({
 
   async function holdFare(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault();
-    if (lock.current || !sandbox) return;
+    if (lock.current) return;
     const errors = passengers.map((passenger, index) =>
       flightPassengerFieldErrors(
         passenger,
@@ -209,7 +210,7 @@ export function FlightBooker({
     }
   }
 
-  async function bookHeld() {
+  async function bookHeld(transactionId = "") {
     if (lock.current || !prebook || !party) return;
     lock.current = true;
     setFailure(null);
@@ -218,7 +219,10 @@ export function FlightBooker({
       const response = await fetch("/api/flights/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prebookId: prebook.prebookId }),
+        body: JSON.stringify({
+          prebookId: prebook.prebookId,
+          transactionId: transactionId || undefined,
+        }),
       });
       if (!response.ok) {
         const { message, code } = await readError(response);
@@ -242,6 +246,7 @@ export function FlightBooker({
           offer: prebook.offer ?? offer,
           party,
           sandbox,
+          paidBy: transactionId ? "card" : "credit",
         }),
       );
     } catch {
@@ -414,8 +419,8 @@ export function FlightBooker({
           listHref={listHref}
           pending={busy}
           onRetry={() => {
-            if (prebook) void bookHeld();
-            else void holdFare();
+            if (prebook && !prebook.payment) void bookHeld();
+            else if (!prebook) void holdFare();
           }}
         />
       ) : null}
@@ -424,17 +429,33 @@ export function FlightBooker({
         <section className="panel plan-inset plan-stack p-5">
           <h2 className="font-display text-xl font-bold text-heading">Fare held</h2>
           <p className="text-sm leading-relaxed text-text">
-            {total ? `${total} for this itinerary.` : "Nuitee held this itinerary."} Booking finishes
-            here with the sandbox credit. No card is collected.
+            {total ? `${total} for this itinerary.` : "Nuitee held this itinerary."}{" "}
+            {prebook.payment
+              ? "Pay with the card form from Nuitee to finish the ticket."
+              : sandbox
+                ? "This sandbox fare can finish on Nuitee credit. No card is collected."
+                : "Nuitee held the fare but did not return a card form. Search again and pick the flight once more."}
           </p>
-          <div className="plan-actions plan-sticky plan-sticky-page plan-sticky-solo">
-            <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void bookHeld()}>
-              {pending === "book" ? "Booking…" : "Book flight"}
-            </button>
-            <Link href={listHref} className="btn btn-secondary">
-              Back to flights
-            </Link>
-          </div>
+          {prebook.payment ? (
+            <FlightCardPayment
+              key={prebook.payment.publishableKey}
+              payment={prebook.payment}
+              busy={busy}
+              onPaid={(transactionId) => void bookHeld(transactionId)}
+              onError={(message) =>
+                setFailure(classifyFlightFailure({ stage: "book", message }))
+              }
+            />
+          ) : sandbox ? (
+            <div className="plan-actions plan-sticky plan-sticky-page plan-sticky-solo">
+              <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void bookHeld()}>
+                {pending === "book" ? "Booking…" : "Book flight"}
+              </button>
+            </div>
+          ) : null}
+          <Link href={listHref} className="btn btn-secondary inline-flex">
+            Back to flights
+          </Link>
         </section>
       ) : (
         <form className="panel plan-inset plan-stack p-5" onSubmit={(event) => void holdFare(event)}>
@@ -597,7 +618,7 @@ export function FlightBooker({
             );
           })}
           <div className="plan-actions plan-sticky plan-sticky-page plan-sticky-solo">
-            <button type="submit" className="btn btn-primary" disabled={busy || !sandbox}>
+            <button type="submit" className="btn btn-primary" disabled={busy}>
               {pending === "prebook" ? "Holding fare…" : "Continue"}
             </button>
             <Link href={listHref} className="btn btn-secondary">
@@ -606,8 +627,8 @@ export function FlightBooker({
           </div>
           <p className="text-sm text-muted">
             {sandbox
-              ? "A sandbox booking uses Nuitee credit. No guest card is charged."
-              : "A sandbox key is required to finish a test booking."}
+              ? "Continue holds the fare. Card payment uses the Stripe details Nuitee returns."
+              : "Continue holds the fare, then the card form from Nuitee finishes the booking."}
           </p>
         </form>
       )}

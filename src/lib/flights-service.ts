@@ -191,21 +191,15 @@ export async function prebookFlight(offerId: string, party: FlightParty): Promis
   }
   const info = liteApiKeyInfo();
   if (!info) throw new LiteApiError("Flights aren’t configured.", 503, "not_configured");
-  if (!info.sandbox) {
-    throw new LiteApiError(
-      "Live card checkout isn’t turned on. A sandbox key can complete a test booking.",
-      409,
-      "live_checkout",
-    );
-  }
+  const phone = `+${party.contact.phoneCountryCode}${party.contact.phoneNumber}`;
   const payload = await liteApiCall({
     base: LITEAPI_SEARCH_BASE,
     path: "/flights/prebooks",
     method: "POST",
     body: {
       offerId,
-      usePaymentSdk: false,
-      contact: party.contact,
+      usePaymentSdk: true,
+      contact: { ...party.contact, phone },
       passengers: party.passengers,
     },
     timeoutMs: 22_000,
@@ -213,8 +207,9 @@ export async function prebookFlight(offerId: string, party: FlightParty): Promis
   });
   const prebook = mapFlightPrebook(payload);
   if (!prebook) {
+    const upstream = flightUpstreamMessage(payload);
     throw new LiteApiError(
-      "Nuitee did not hold that fare. Search again and pick another flight.",
+      upstream || "Nuitee did not hold that fare. Search again and pick another flight.",
       502,
       "upstream",
     );
@@ -222,17 +217,19 @@ export async function prebookFlight(offerId: string, party: FlightParty): Promis
   return prebook;
 }
 
-export async function bookFlight(prebookId: string): Promise<FlightBooking> {
+export async function bookFlight(prebookId: string, transactionId = ""): Promise<FlightBooking> {
   if (!isFlightPrebookId(prebookId)) {
     throw new LiteApiError("That checkout session expired. Pick the flight again.", 400, "bad_request");
   }
   const info = liteApiKeyInfo();
   if (!info) throw new LiteApiError("Flights aren’t configured.", 503, "not_configured");
-  if (!info.sandbox) {
+  const transaction = transactionId.trim();
+  const cardPayment = /^[A-Za-z0-9_-]{6,200}$/.test(transaction);
+  if (!cardPayment && !info.sandbox) {
     throw new LiteApiError(
-      "Live card checkout isn’t turned on. A sandbox key can complete a test booking.",
+      "Confirm the card payment before booking this flight.",
       409,
-      "live_checkout",
+      "bad_request",
     );
   }
   const payload = await liteApiCall({
@@ -241,7 +238,9 @@ export async function bookFlight(prebookId: string): Promise<FlightBooking> {
     method: "POST",
     body: {
       prebookId,
-      payment: { method: "CREDIT" },
+      payment: cardPayment
+        ? { method: "TRANSACTION_ID", transactionId: transaction }
+        : { method: "CREDIT" },
     },
     timeoutMs: 25_000,
     ...flightCall,

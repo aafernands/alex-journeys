@@ -89,10 +89,18 @@ export type FlightAirport = {
   label: string;
 };
 
+/** Stripe credentials from a Nuitee prebook. The client secret is meant for the browser. */
+export type FlightCardPayment = {
+  transactionId: string;
+  clientSecret: string;
+  publishableKey: string;
+};
+
 export type FlightPrebook = {
   prebookId: string;
   price: FlightMoney | null;
   offer: FlightOffer | null;
+  payment: FlightCardPayment | null;
 };
 
 export type FlightBooking = {
@@ -1028,7 +1036,18 @@ export function mapFlightPrebook(payload: unknown): FlightPrebook | null {
     verified.offer?.price ??
     moneyFrom(asRecord(asRecord(first.pricing)?.display)) ??
     moneyFrom(asRecord(first.price));
-  return { prebookId, price, offer: verified.offer };
+  return { prebookId, price, offer: verified.offer, payment: mapCardPayment(first) };
+}
+
+function mapCardPayment(record: Record<string, unknown>): FlightCardPayment | null {
+  const nested = asRecord(record.payment);
+  const transactionId = text(record.transactionId ?? nested?.transactionId, 200);
+  const clientSecret = text(record.secretKey ?? record.clientSecret ?? nested?.secretKey, 400);
+  const publishableKey = text(record.publishableKey ?? nested?.publishableKey, 200);
+  if (!/^[A-Za-z0-9_-]{6,200}$/.test(transactionId)) return null;
+  if (!/^pi_[A-Za-z0-9_]{10,360}$/.test(clientSecret)) return null;
+  if (!/^pk_(?:test|live)_[A-Za-z0-9]{8,160}$/.test(publishableKey)) return null;
+  return { transactionId, clientSecret, publishableKey };
 }
 
 export function mapFlightBooking(payload: unknown): FlightBooking | null {
@@ -1079,6 +1098,7 @@ export function buildFlightConfirmation(input: {
   offer: FlightOffer | null;
   party: FlightParty;
   sandbox: boolean;
+  paidBy?: "card" | "credit";
 }): FlightConfirmationDetails {
   const offer = input.offer;
   const title = offer
@@ -1102,15 +1122,21 @@ export function buildFlightConfirmation(input: {
     totalLabel: total,
     passengerName: `${input.party.passengers[0]?.firstName ?? ""} ${input.party.passengers[0]?.lastName ?? ""}`.trim(),
     email: input.party.contact.email,
-    payment: input.sandbox
-      ? {
-          method: "sandbox_account",
-          label: "Nuitee’s sandbox credit. No guest card was charged.",
-        }
-      : {
-          method: "guest_card",
-          label: "Live card checkout isn’t turned on.",
-        },
+    payment:
+      input.paidBy === "card"
+        ? {
+            method: "guest_card",
+            label: "Paid with the card confirmed through Nuitee.",
+          }
+        : input.sandbox
+          ? {
+              method: "sandbox_account",
+              label: "Nuitee’s sandbox credit. No guest card was charged.",
+            }
+          : {
+              method: "guest_card",
+              label: "Paid with the card confirmed through Nuitee.",
+            },
     sandbox: input.sandbox,
     departDate: offer?.departureTime.slice(0, 10) ?? "",
     departTime: clock24(offer?.departureTime ?? ""),
