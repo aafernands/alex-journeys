@@ -96,6 +96,25 @@ export type FlightCardPayment = {
   publishableKey: string;
 };
 
+/**
+ * Body for `POST /flights/bookings` after Stripe confirms.
+ * The only method this checkout sends is `TRANSACTION_ID`.
+ */
+export type FlightBookingPayment = {
+  method: "TRANSACTION_ID";
+  transactionId: string;
+};
+
+/** Shown when prebook has no Stripe secrets, so we do not call bookings. */
+export const FLIGHT_CARD_REQUIRED = "Complete card payment first";
+
+/**
+ * Shown when prebook returned a client secret but no Stripe publishable key.
+ * Elements cannot mount without `pk_test_` / `pk_live_` from Nuitee.
+ */
+export const FLIGHT_PUBLISHABLE_KEY_MISSING =
+  "Nuitee prebook did not include a Stripe publishable key, so the card form cannot load. In Nuitee Connect, enable Stripe for this API key’s environment. Prebook must return publishableKey as pk_test_ with a sand_ key, or pk_live_ in production. Those keys come from Nuitee, not your own Stripe account. If the field stays empty, use Request Assistance and ask for the publishable key for this environment.";
+
 export type FlightPrebook = {
   prebookId: string;
   price: FlightMoney | null;
@@ -1039,15 +1058,111 @@ export function mapFlightPrebook(payload: unknown): FlightPrebook | null {
   return { prebookId, price, offer: verified.offer, payment: mapCardPayment(first) };
 }
 
-function mapCardPayment(record: Record<string, unknown>): FlightCardPayment | null {
+const FLIGHT_TRANSACTION_ID = /^[A-Za-z0-9_-]{8,200}$/;
+const FLIGHT_CLIENT_SECRET = /^pi_[A-Za-z0-9_]{10,400}$/;
+const FLIGHT_PUBLISHABLE_KEY = /^pk_(?:test|live)_[A-Za-z0-9]{8,200}$/;
+
+/** Method names Nuitee rejects on flight book. Never send these as `payment.method`. */
+const UNSUPPORTED_FLIGHT_PAYMENT_METHODS = new Set([
+  "ACC_CREDIT_CARD",
+  "CREDIT",
+  "THIRD_PARTY",
+  "TRANSACTION",
+  "TRANSACTION_ID",
+  "WALLET",
+]);
+
+export function flightBookingPayment(transactionId: string): FlightBookingPayment | null {
+  const transaction = transactionId.trim();
+  if (!FLIGHT_TRANSACTION_ID.test(transaction)) return null;
+  if (UNSUPPORTED_FLIGHT_PAYMENT_METHODS.has(transaction.toUpperCase())) return null;
+  return { method: "TRANSACTION_ID", transactionId: transaction };
+}
+
+/**
+ * Bookings body after Stripe confirms. Null when the transaction id is missing,
+ * so the caller can stop with `FLIGHT_CARD_REQUIRED` instead of sending CREDIT
+ * or ACC_CREDIT_CARD.
+ */
+export function flightBookBody(
+  prebookId: string,
+  transactionId: string,
+): { prebookId: string; payment: FlightBookingPayment } | null {
+  if (!isFlightPrebookId(prebookId)) return null;
+  const payment = flightBookingPayment(transactionId);
+  if (!payment) return null;
+  return { prebookId, payment };
+}
+
+function stripeFields(record: Record<string, unknown>): {
+  transactionId: string;
+  clientSecret: string;
+  publishableKey: string;
+} {
   const nested = asRecord(record.payment);
-  const transactionId = text(record.transactionId ?? nested?.transactionId, 200);
-  const clientSecret = text(record.secretKey ?? record.clientSecret ?? nested?.secretKey, 400);
-  const publishableKey = text(record.publishableKey ?? nested?.publishableKey, 200);
-  if (!/^[A-Za-z0-9_-]{6,200}$/.test(transactionId)) return null;
-  if (!/^pi_[A-Za-z0-9_]{10,360}$/.test(clientSecret)) return null;
-  if (!/^pk_(?:test|live)_[A-Za-z0-9]{8,160}$/.test(publishableKey)) return null;
-  return { transactionId, clientSecret, publishableKey };
+  const stripe = asRecord(nested?.stripe) ?? asRecord(record.stripe);
+  return {
+    transactionId: text(
+      record.transactionId ?? nested?.transactionId ?? stripe?.transactionId,
+      200,
+    ),
+    clientSecret: text(
+      record.secretKey ??
+        record.clientSecret ??
+        nested?.secretKey ??
+        nested?.clientSecret ??
+        stripe?.secretKey ??
+        stripe?.clientSecret,
+      500,
+    ),
+    publishableKey: text(
+      record.publishableKey ??
+        record.publishable_key ??
+        nested?.publishableKey ??
+        nested?.publishable_key ??
+        stripe?.publishableKey ??
+        record.stripePublishableKey,
+      300,
+    ),
+  };
+}
+
+function mapCardPayment(record: Record<string, unknown>): FlightCardPayment | null {
+  const fields = stripeFields(record);
+  const payment = flightBookingPayment(fields.transactionId);
+  if (!payment) return null;
+  if (!FLIGHT_CLIENT_SECRET.test(fields.clientSecret)) return null;
+  if (!FLIGHT_PUBLISHABLE_KEY.test(fields.publishableKey)) return null;
+  return {
+    transactionId: payment.transactionId,
+    clientSecret: fields.clientSecret,
+    publishableKey: fields.publishableKey,
+  };
+}
+
+/**
+ * Why a prebook cannot open Stripe Elements.
+ * Null when `secretKey`, `transactionId`, and `publishableKey` are all usable.
+ */
+export function flightPrebookPaymentIssue(payload: unknown): string | null {
+  if (mapFlightPrebook(payload)?.payment) return null;
+  const root = asRecord(payload);
+  const data = root?.data;
+  const first = Array.isArray(data) ? asRecord(data[0]) : asRecord(data);
+  if (!first) return FLIGHT_CARD_REQUIRED;
+  const fields = stripeFields(first);
+  const hasIntent =
+    Boolean(flightBookingPayment(fields.transactionId)) &&
+    FLIGHT_CLIENT_SECRET.test(fields.clientSecret);
+  if (hasIntent && !FLIGHT_PUBLISHABLE_KEY.test(fields.publishableKey)) {
+    return FLIGHT_PUBLISHABLE_KEY_MISSING;
+  }
+  return FLIGHT_CARD_REQUIRED;
+}
+
+/** Nuitee captures an authorized PaymentIntent when the booking is created. */
+export function flightStripeConfirmed(status: string | null | undefined): boolean {
+  return status === "succeeded" || status === "requires_capture";
 }
 
 export function mapFlightBooking(payload: unknown): FlightBooking | null {
@@ -1171,6 +1286,35 @@ export function classifyFlightFailure(input: {
   }
   if (/too many|rate limit|wait a moment/i.test(message)) {
     return { title: "Give it a moment", message, recovery: "retry" };
+  }
+  if (/publishable key/i.test(message)) {
+    return {
+      title: "Stripe publishable key missing",
+      message,
+      recovery: "back-to-search",
+    };
+  }
+  if (message === FLIGHT_CARD_REQUIRED || /did not return a card payment|card payment isn/i.test(message)) {
+    return {
+      title: FLIGHT_CARD_REQUIRED,
+      message: "Nuitee did not return a confirmed card payment, so this fare was not booked.",
+      recovery: "back-to-search",
+    };
+  }
+  if (/payment method unsupported|not supported payment method/i.test(message)) {
+    return {
+      title: "Booking didn’t finish",
+      message:
+        "Nuitee rejected that payment method. Confirm the card in the Stripe form, then book with the transaction id.",
+      recovery: "retry",
+    };
+  }
+  if (/card rejected|card was declined|card has been declined/i.test(message)) {
+    return {
+      title: "The card was declined",
+      message,
+      recovery: "retry",
+    };
   }
   if (/price change|price has changed|fare change/i.test(message)) {
     return {

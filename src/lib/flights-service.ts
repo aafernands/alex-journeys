@@ -19,6 +19,9 @@ import {
   iataHint,
   isFlightOfferId,
   isFlightPrebookId,
+  FLIGHT_CARD_REQUIRED,
+  flightBookBody,
+  flightPrebookPaymentIssue,
   mapAirportMatch,
   mapFlightBooking,
   mapFlightPrebook,
@@ -214,6 +217,13 @@ export async function prebookFlight(offerId: string, party: FlightParty): Promis
       "upstream",
     );
   }
+  if (!prebook.payment) {
+    throw new LiteApiError(
+      flightPrebookPaymentIssue(payload) ?? FLIGHT_CARD_REQUIRED,
+      409,
+      "bad_request",
+    );
+  }
   return prebook;
 }
 
@@ -223,25 +233,15 @@ export async function bookFlight(prebookId: string, transactionId = ""): Promise
   }
   const info = liteApiKeyInfo();
   if (!info) throw new LiteApiError("Flights aren’t configured.", 503, "not_configured");
-  const transaction = transactionId.trim();
-  const cardPayment = /^[A-Za-z0-9_-]{6,200}$/.test(transaction);
-  if (!cardPayment && !info.sandbox) {
-    throw new LiteApiError(
-      "Confirm the card payment before booking this flight.",
-      409,
-      "bad_request",
-    );
+  const body = flightBookBody(prebookId, transactionId);
+  if (!body) {
+    throw new LiteApiError(FLIGHT_CARD_REQUIRED, 409, "bad_request");
   }
   const payload = await liteApiCall({
     base: LITEAPI_SEARCH_BASE,
     path: "/flights/bookings",
     method: "POST",
-    body: {
-      prebookId,
-      payment: cardPayment
-        ? { method: "TRANSACTION_ID", transactionId: transaction }
-        : { method: "CREDIT" },
-    },
+    body,
     timeoutMs: 25_000,
     ...flightCall,
   });

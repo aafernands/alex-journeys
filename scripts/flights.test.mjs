@@ -5,6 +5,12 @@ import {
   airportSearchText,
   buildFlightConfirmation,
   classifyFlightFailure,
+  FLIGHT_CARD_REQUIRED,
+  FLIGHT_PUBLISHABLE_KEY_MISSING,
+  flightBookBody,
+  flightBookingPayment,
+  flightPrebookPaymentIssue,
+  flightStripeConfirmed,
   flightOfferId,
   flightUpstreamMessage,
   flightsBookPath,
@@ -278,6 +284,107 @@ describe("flights passengers", () => {
     assert.equal(
       classifyFlightFailure({ stage: "verify", message: "Offer expired" }).recovery,
       "back-to-search",
+    );
+    assert.equal(
+      classifyFlightFailure({
+        stage: "book",
+        message: "invalid format: payment method unsupported",
+      }).title,
+      "Booking didn’t finish",
+    );
+    assert.equal(
+      classifyFlightFailure({ stage: "book", message: FLIGHT_CARD_REQUIRED }).title,
+      "Complete card payment first",
+    );
+  });
+});
+
+describe("flight payment payload", () => {
+  it("books with the Stripe transaction id and never a hotel or credit method", () => {
+    const payment = flightBookingPayment("tr_cts_WaTMwICRB0h_dOfyvLvvN");
+    assert.deepEqual(payment, {
+      method: "TRANSACTION_ID",
+      transactionId: "tr_cts_WaTMwICRB0h_dOfyvLvvN",
+    });
+    assert.equal(JSON.stringify(payment).includes("ACC_CREDIT_CARD"), false);
+    assert.equal(JSON.stringify(payment).includes("CREDIT"), false);
+    assert.equal(flightBookingPayment(""), null);
+    assert.equal(flightBookingPayment("CREDIT"), null);
+    assert.equal(flightBookingPayment("ACC_CREDIT_CARD"), null);
+    assert.equal(flightBookingPayment("WALLET"), null);
+    const prebookId = "019d0674-834d-7db7-9c8b-93fe8e46e7b8";
+    assert.equal(flightBookBody(prebookId, ""), null);
+    assert.equal(flightBookBody(prebookId, "ACC_CREDIT_CARD"), null);
+    assert.deepEqual(flightBookBody(prebookId, "tr_cts_WaTMwICRB0h_dOfyvLvvN"), {
+      prebookId,
+      payment: {
+        method: "TRANSACTION_ID",
+        transactionId: "tr_cts_WaTMwICRB0h_dOfyvLvvN",
+      },
+    });
+    assert.equal(FLIGHT_CARD_REQUIRED, "Complete card payment first");
+    assert.equal(flightStripeConfirmed("succeeded"), true);
+    assert.equal(flightStripeConfirmed("requires_capture"), true);
+    assert.equal(flightStripeConfirmed("requires_payment_method"), false);
+
+    const held = {
+      prebookId: "019d0674-834d-7db7-9c8b-93fe8e46e7b8",
+      transactionId: "tr_cts_WaTMwICRB0h_dOfyvLvvN",
+      secretKey: "pi_3TChNEA4FXPoRk9Y1hbH6uVq_secret_CRhCAan4jSlXcwLs8N3r1qN6D",
+    };
+    assert.equal(
+      flightPrebookPaymentIssue({ data: [held] }),
+      FLIGHT_PUBLISHABLE_KEY_MISSING,
+    );
+    assert.equal(flightPrebookPaymentIssue({ data: [{ prebookId: held.prebookId }] }), FLIGHT_CARD_REQUIRED);
+    assert.equal(
+      flightPrebookPaymentIssue({
+        data: [{ ...held, publishableKey: "pk_test_51Hh1234567890abcdef" }],
+      }),
+      null,
+    );
+
+    const prebook = mapFlightPrebook({
+      data: [
+        {
+          prebookId: "019d0674-834d-7db7-9c8b-93fe8e46e7b8",
+          transactionId: "tr_cts_WaTMwICRB0h_dOfyvLvvN",
+          secretKey: "pi_3TChNEA4FXPoRk9Y1hbH6uVq_secret_CRhCAan4jSlXcwLs8N3r1qN6D",
+          publishableKey: "pk_test_51Hh1234567890abcdef",
+          paymentTypes: ["TRANSACTION_ID"],
+        },
+      ],
+    });
+    assert.equal(prebook.payment.transactionId, "tr_cts_WaTMwICRB0h_dOfyvLvvN");
+    assert.equal(
+      prebook.payment.clientSecret,
+      "pi_3TChNEA4FXPoRk9Y1hbH6uVq_secret_CRhCAan4jSlXcwLs8N3r1qN6D",
+    );
+    assert.equal(
+      mapFlightPrebook({
+        data: [
+          {
+            prebookId: "019d0674-834d-7db7-9c8b-93fe8e46e7b8",
+            transactionId: "tr_cts_WaTMwICRB0h_dOfyvLvvN",
+            secretKey: "pi_3TChNEA4FXPoRk9Y1hbH6uVq_secret_CRhCAan4jSlXcwLs8N3r1qN6D",
+          },
+        ],
+      }).payment,
+      null,
+    );
+    assert.equal(
+      mapFlightPrebook({
+        data: [
+          {
+            prebookId: "019d0674-834d-7db7-9c8b-93fe8e46e7b8",
+            transactionId: "tr_cts_WaTMwICRB0h_dOfyvLvvN",
+            secretKey: "pi_3TChNEA4FXPoRk9Y1hbH6uVq_secret_CRhCAan4jSlXcwLs8N3r1qN6D",
+            publishableKey: "pk_live_51Hh1234567890abcdef",
+            paymentTypes: ["CREDIT", "ACC_CREDIT_CARD"],
+          },
+        ],
+      }).payment.publishableKey,
+      "pk_live_51Hh1234567890abcdef",
     );
   });
 });
