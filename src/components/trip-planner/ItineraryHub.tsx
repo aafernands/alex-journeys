@@ -9,6 +9,7 @@ import type { TripSaveMode } from "@/components/trip-planner/useTripSync";
 import {
   dateSummary,
   hotelLaneHref,
+  isFlightLanePartner,
   partnerLaneHref,
   travelerSummary,
   type PlannerState,
@@ -39,6 +40,7 @@ import {
   type TripItemType,
 } from "@/lib/trip-record";
 import type { StoredPlan } from "@/lib/trip-planner-storage";
+import { FLIGHT_LANE_HASH } from "@/lib/flights-itinerary";
 import { STAY_LANE_HASH } from "@/lib/stays-itinerary";
 import { plan } from "@/components/trip-planner/density";
 import { ForwardBookings } from "@/components/trip-planner/ForwardBookings";
@@ -55,6 +57,7 @@ type Props = {
   subhead: string;
   tripId: string | null;
   focusStay?: boolean;
+  focusFlight?: boolean;
   tripTitle?: string;
   saveMode: TripSaveMode;
   guestBackup: StoredPlan | null;
@@ -171,6 +174,12 @@ function newestBookedStayId(items: TripItem[]): string | undefined {
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0]?.id;
 }
 
+function newestBookedFlightId(items: TripItem[]): string | undefined {
+  return items
+    .filter((item) => item.type === "flight" && item.status === "booked")
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0]?.id;
+}
+
 function ItemUrl({ url, compact = false }: { url: string; compact?: boolean }) {
   if (!url) return null;
   const onSite = url.startsWith("/") && !url.startsWith("//");
@@ -181,7 +190,15 @@ function ItemUrl({ url, compact = false }: { url: string; compact?: boolean }) {
       rel={onSite ? undefined : "noopener noreferrer"}
       className={`${plan.textBtn} truncate text-link hover:text-accent`}
     >
-      {onSite ? "View stay" : compact ? url.replace(/^https?:\/\//, "") : "Open link"}
+      {onSite
+        ? url.startsWith("/flights")
+          ? "View flight"
+          : url.startsWith("/stays")
+            ? "View stay"
+            : "View"
+        : compact
+          ? url.replace(/^https?:\/\//, "")
+          : "Open link"}
       {onSite ? null : <span className="sr-only"> (opens in a new tab)</span>}
     </OutboundLink>
   );
@@ -649,11 +666,12 @@ function LaneCta({
   tripId: string | null;
   className: string;
 }) {
-  const inApp = partner.key === "viator" || partner.key === "booking";
+  const inApp =
+    partner.key === "viator" || partner.key === "booking" || isFlightLanePartner(partner);
   const href =
     partner.key === "booking"
       ? hotelLaneHref(state, flexibleOn, tripId)
-      : partnerLaneHref(partner, state, flexibleOn);
+      : partnerLaneHref(partner, state, flexibleOn, tripId);
   return (
     <OutboundLink
       href={href}
@@ -668,6 +686,53 @@ function LaneCta({
   );
 }
 
+function OutsideBookings({
+  headingId,
+  tripId,
+  days,
+  partners,
+  nextSort,
+  onAddItem,
+  onRemember,
+}: {
+  headingId: string;
+  tripId: string | null;
+  days: TripDay[];
+  partners: TripPlannerPartner[];
+  nextSort: number;
+  onAddItem: (item: TripItem) => void;
+  onRemember: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const panelId = `${headingId}-outside`;
+  return (
+    <section className="plan-hub-inbox plan-section">
+      <button
+        type="button"
+        className={`${plan.textBtn} text-muted`}
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((value) => !value)}
+      >
+        Booked outside FJ?
+      </button>
+      {open ? (
+        <div id={panelId} className="plan-follow">
+          <ForwardBookings
+            headingId={headingId}
+            tripId={tripId}
+            days={days}
+            partners={partners}
+            nextSort={nextSort}
+            onAddItem={onAddItem}
+            onRemember={onRemember}
+          />
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 export function ItineraryHub({
   headingId,
   config,
@@ -678,6 +743,7 @@ export function ItineraryHub({
   subhead,
   tripId,
   focusStay = false,
+  focusFlight = false,
   tripTitle,
   saveMode,
   guestBackup,
@@ -699,8 +765,10 @@ export function ItineraryHub({
   const nextLaneKey =
     partners.find((partner) => laneProgress(itemsForLane(items, partner)) === "open")
       ?.key ?? null;
+  const flightLaneKey =
+    partners.find((partner) => isFlightLanePartner(partner))?.key ?? "expedia";
   const [lanePin, setLanePin] = useState<string | null | "auto">(
-    focusStay ? "booking" : "auto",
+    focusFlight ? flightLaneKey : focusStay ? "booking" : "auto",
   );
   const openLane = lanePin === "auto" ? nextLaneKey : lanePin;
   const [layout, setLayout] = useState<"timeline" | "week">("timeline");
@@ -946,20 +1014,6 @@ export function ItineraryHub({
       ) : null}
       </div>
 
-      <div className="plan-hub-inbox">
-      <PlanFold id={`${headingId}-inbox`} title="Inbox" meta="Email">
-        <ForwardBookings
-          headingId={headingId}
-          tripId={tripId}
-          days={days}
-          partners={partners}
-          nextSort={nextSort}
-          onAddItem={addItem}
-          onRemember={onRememberGuestDraft}
-        />
-      </PlanFold>
-      </div>
-
       {partners.length > 0 ? (
         <section className="plan-hub-index plan-section plan-desktop-only" aria-labelledby={`${headingId}-left`}>
           <h3 id={`${headingId}-left`} className={plan.label}>
@@ -1007,7 +1061,13 @@ export function ItineraryHub({
           return (
             <article
               key={partner.key}
-              id={partner.key === "booking" ? STAY_LANE_HASH : undefined}
+              id={
+                partner.key === "booking"
+                  ? STAY_LANE_HASH
+                  : partner.key === flightLaneKey
+                    ? FLIGHT_LANE_HASH
+                    : undefined
+              }
               className={`plan-lane scroll-mt-24 ${partner.isCore ? "plan-lane-core" : ""} ${
                 isNext && laneOpen ? "plan-lane-next" : ""
               }`}
@@ -1088,7 +1148,9 @@ export function ItineraryHub({
                 <p className={`${plan.body} text-muted plan-desktop-only`}>
                   {partner.key === "booking"
                     ? "Nothing saved here yet. Search stays and the hotel you book comes back to this itinerary."
-                    : "Nothing saved here yet. Search, then add the booking you want to keep."}
+                    : isFlightLanePartner(partner)
+                      ? "Nothing saved here yet. Search flights and the one you book comes back to this itinerary."
+                      : "Nothing saved here yet. Search, then add the booking you want to keep."}
                 </p>
               ) : (
                 <ul className="plan-stack-tight">
@@ -1098,9 +1160,12 @@ export function ItineraryHub({
                       editor.place === "lane" &&
                       editor.id === item.id;
                     const highlighted =
-                      focusStay &&
-                      partner.key === "booking" &&
-                      item.id === newestBookedStayId(laneItems);
+                      (focusStay &&
+                        partner.key === "booking" &&
+                        item.id === newestBookedStayId(laneItems)) ||
+                      (focusFlight &&
+                        partner.key === flightLaneKey &&
+                        item.id === newestBookedFlightId(laneItems));
                     return (
                       <li key={item.id}>
                         {editing ? (
@@ -1161,6 +1226,16 @@ export function ItineraryHub({
           );
         })}
       </div>
+
+      <OutsideBookings
+        headingId={headingId}
+        tripId={tripId}
+        days={days}
+        partners={partners}
+        nextSort={nextSort}
+        onAddItem={addItem}
+        onRemember={onRememberGuestDraft}
+      />
 
       <div className="plan-hub-days">
       <PlanFold

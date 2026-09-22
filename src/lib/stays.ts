@@ -791,7 +791,11 @@ export function mapBooking(payload: unknown): StayBooking | null {
   };
 }
 
-export function upstreamStayMessage(payload: unknown, fallback: string): string {
+export function upstreamStayMessage(
+  payload: unknown,
+  fallback: string,
+  product: "stays" | "flights" = "stays",
+): string {
   const root = asRecord(payload);
   const nested = asRecord(root?.error);
   const raw =
@@ -801,7 +805,9 @@ export function upstreamStayMessage(payload: unknown, fallback: string): string 
     text(root?.error, 240);
   if (!raw) return fallback;
   if (/api[- ]?key|unauthorized|invalid key/i.test(raw)) {
-    return "Nuitee rejected the stays key on the server.";
+    return product === "flights"
+      ? "Nuitee rejected the flights key on the server."
+      : "Nuitee rejected the stays key on the server.";
   }
   return raw;
 }

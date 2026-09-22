@@ -4,6 +4,7 @@
  */
 
 import { experiencesPath } from "@/lib/experiences";
+import { flightsPath } from "@/lib/flights";
 import { staysPath } from "@/lib/stays";
 
 export const PLAN_A_TRIP_SLUG = "plan-a-trip";
@@ -190,9 +191,9 @@ const VIATOR_TEMPLATE =
 export const DEFAULT_PARTNERS: TripPlannerPartner[] = [
   {
     key: "expedia",
-    label: "Compare flights",
+    label: "Flights",
     buttonLabel: "Search flights",
-    blurb: "Start with the routes I’d actually price-check first.",
+    blurb: "Search and book the route here.",
     affiliateUrlTemplate: EXPEDIA,
     affiliateUrl: EXPEDIA,
     showWhen: "flights",
@@ -621,6 +622,31 @@ export function resolveAffiliateHref(
   return partner.affiliateUrl.trim();
 }
 
+/** Flight lane opens in-app search with the active trip. */
+export function flightLaneHref(
+  state: PlannerState,
+  flexibleDatesEnabled: boolean,
+  tripId?: string | null,
+): string {
+  const values = tripUrlValues(state, flexibleDatesEnabled);
+  return flightsPath({
+    origin: values.origin,
+    destination: values.destination,
+    startDate: values.startDate,
+    endDate: state.tripType === "oneway" ? "" : values.endDate,
+    tripType: state.tripType,
+    adults: state.adults,
+    children: state.children,
+    tripId,
+  });
+}
+
+export function isFlightLanePartner(
+  partner: Pick<TripPlannerPartner, "showWhen">,
+): boolean {
+  return partner.showWhen === "flights";
+}
+
 /** Hotel lane opens in-app stays with the active trip. */
 export function hotelLaneHref(
   state: PlannerState,
@@ -641,14 +667,18 @@ export function hotelLaneHref(
 
 /**
  * Lane CTA for partners that leave the site. Viator opens /experiences.
- * The hotel lane uses `hotelLaneHref` instead, so stays stay on this site.
- * Flights, cars, and the other partners keep their affiliate URLs.
+ * The hotel lane uses `hotelLaneHref` and the flight lane uses `flightLaneHref`.
+ * Cars and the other partners keep their affiliate URLs.
  */
 export function partnerLaneHref(
   partner: TripPlannerPartner,
   state: PlannerState,
   flexibleDatesEnabled: boolean,
+  tripId?: string | null,
 ): string {
+  if (isFlightLanePartner(partner)) {
+    return flightLaneHref(state, flexibleDatesEnabled, tripId);
+  }
   if (partner.key === "viator") {
     const values = tripUrlValues(state, flexibleDatesEnabled);
     return experiencesPath({
