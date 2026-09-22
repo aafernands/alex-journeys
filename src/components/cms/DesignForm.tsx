@@ -682,7 +682,7 @@ export function DesignForm({ initial }: Props) {
                   htmlFor="design-cta3-label"
                   className="text-sm font-semibold text-heading"
                 >
-                  Plan a trip link label
+                  Tertiary link label
                 </label>
                 <input
                   id="design-cta3-label"
@@ -696,8 +696,8 @@ export function DesignForm({ initial }: Props) {
                   className={fieldClass}
                 />
                 <p className="mt-1.5 text-xs leading-relaxed text-muted">
-                  Quieter text link beside Explore places and Read stories.
-                  Leave the label blank to hide it.
+                  Quieter underline link beside the two hero buttons. Leave the
+                  label blank to hide it.
                 </p>
               </div>
               <div>
@@ -705,7 +705,7 @@ export function DesignForm({ initial }: Props) {
                   htmlFor="design-cta3-href"
                   className="text-sm font-semibold text-heading"
                 >
-                  Plan a trip link
+                  Tertiary link
                 </label>
                 <input
                   id="design-cta3-href"
