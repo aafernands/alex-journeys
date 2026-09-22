@@ -1548,6 +1548,31 @@ select.plan-input {
   min-width: 0;
 }
 
+.plan-status-jump {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.125rem;
+  border: 0;
+  background: transparent;
+  padding: 0.15rem 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.plan-status-jump:hover span:first-child,
+.plan-status-jump[aria-current="true"] span:first-child {
+  color: var(--accent-deep);
+}
+
+.plan-status-jump:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .plan-section {
   margin-top: var(--plan-section);
 }
@@ -1913,6 +1938,181 @@ body:has(main.plan-flow) a[href="#newsletter"] {
   flex-direction: column;
   gap: var(--plan-gap-tight);
   padding-bottom: 0.75rem;
+}
+
+.plan-hub,
+.plan-hub-lanes,
+.plan-lane-tabs-bar,
+.plan-lane-tabs {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.plan-lane-tabs-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.15rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.plan-lane-tabs {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  gap: 0.15rem;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: 0.25rem;
+  scrollbar-width: thin;
+}
+
+.plan-lane-tab {
+  display: inline-flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.15rem;
+  min-height: 2.75rem;
+  max-width: 100%;
+  border: 0;
+  box-shadow: inset 0 -2px 0 transparent;
+  background: transparent;
+  padding: 0.4rem 0.8rem 0.5rem;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.plan-lane-tab-label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.plan-lane-tab-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.plan-lane-tab-meta {
+  font-size: var(--plan-fs-caption);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.plan-lane-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--muted-light);
+}
+
+.plan-lane-dot-open {
+  background: var(--accent);
+}
+
+.plan-lane-dot-booked {
+  background: var(--steel);
+}
+
+.plan-lane-dot-skipped {
+  background: var(--border-strong);
+}
+
+.plan-lane-tab[aria-selected="true"] {
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.plan-lane-tab[aria-selected="true"] .plan-lane-tab-label {
+  color: var(--heading);
+  font-weight: 700;
+}
+
+.plan-lane-tab-next .plan-lane-tab-meta,
+.plan-lane-tab[aria-selected="true"] .plan-lane-tab-meta {
+  color: var(--accent-deep);
+}
+
+.plan-lane-tab:hover .plan-lane-tab-label {
+  color: var(--heading);
+}
+
+.plan-lane-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.plan-lane-tab-aside {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  border-left: 0;
+  background: var(--bg);
+}
+
+.plan-lane-panel[hidden] {
+  display: none !important;
+}
+
+.plan-lane-head {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--plan-gap-tight);
+}
+
+.plan-lane-cta {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .plan-lane-tabs-bar {
+    gap: 0;
+  }
+
+  .plan-lane-tab-aside {
+    width: auto;
+    align-self: flex-start;
+    background: transparent;
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+  }
+
+  .plan-lane-panel.plan-lane:not([hidden]) {
+    margin-top: 0;
+    border-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  .plan-lane-outside:not([hidden]) {
+    margin-top: var(--plan-gap);
+  }
+
+  .plan-lane-head {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .plan-lane-cta {
+    width: auto;
+    flex-shrink: 0;
+  }
 }
 
 .plan-sticky {

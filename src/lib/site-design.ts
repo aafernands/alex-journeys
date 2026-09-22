@@ -209,11 +209,11 @@ const DEFAULT_HERO: HeroDesign = {
   },
   ctaSecondary: {
     label: contentHero.ctaSecondary,
-    href: "/blog",
+    href: "/guides/plan-a-trip",
   },
   ctaTertiary: {
-    label: "Plan a trip",
-    href: "/guides/plan-a-trip",
+    label: "Read stories",
+    href: "/blog",
   },
   objectPosition: "center",
   overlay: true,

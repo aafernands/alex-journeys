@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { journalNotesForDestination, type JournalNote, type JournalPlace } from "@/lib/trip-journal";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
@@ -169,6 +169,34 @@ const LANE_PROGRESS_LABEL = {
   skipped: "skipped",
 } as const;
 
+function lanePanelId(
+  headingId: string,
+  partner: TripPlannerPartner,
+  flightLaneKey: string,
+  stayLaneKey: string,
+): string {
+  if (partner.key === flightLaneKey && isFlightLanePartner(partner)) return FLIGHT_LANE_HASH;
+  if (
+    partner.key === stayLaneKey &&
+    (partner.key === "booking" || partner.showWhen === "hotel")
+  ) {
+    return STAY_LANE_HASH;
+  }
+  return `${headingId}-lane-${partner.key}`;
+}
+
+function laneTabCue(items: TripItem[], isNext: boolean): string {
+  const progress = laneProgress(items);
+  const count = items.length;
+  if (isNext && progress === "open") return count > 0 ? `${count} · next` : "Next";
+  if (count > 0) {
+    const word =
+      progress === "booked" ? "booked" : progress === "skipped" ? "skipped" : "open";
+    return `${count} ${word}`;
+  }
+  return progress === "booked" ? "Booked" : progress === "skipped" ? "Skipped" : "Open";
+}
+
 function newestBookedStayId(items: TripItem[]): string | undefined {
   return items
     .filter((item) => item.type === "hotel" && item.status === "booked")
@@ -199,16 +227,6 @@ function ItemUrl({ url, compact = false }: { url: string; compact?: boolean }) {
       {onSite ? null : <span className="sr-only"> (opens in a new tab)</span>}
     </OutboundLink>
   );
-}
-
-function laneMeta(items: TripItem[], isNext: boolean): string {
-  const progress = laneProgress(items);
-  const count = items.length;
-  if (isNext && progress === "open") {
-    return count > 0 ? `${count} · next` : "Next";
-  }
-  if (count > 0) return `${count} · ${LANE_PROGRESS_LABEL[progress]}`;
-  return LANE_PROGRESS_LABEL[progress];
 }
 
 function itemWhen(item: TripItem, days: TripDay[]): string {
@@ -769,10 +787,19 @@ export function ItineraryHub({
       ?.key ?? null;
   const flightLaneKey =
     partners.find((partner) => isFlightLanePartner(partner))?.key ?? "expedia";
-  const [lanePin, setLanePin] = useState<string | null | "auto">(
-    focusFlight ? flightLaneKey : focusStay ? "booking" : "auto",
+  const stayLaneKey =
+    partners.find((partner) => partner.key === "booking")?.key ??
+    partners.find((partner) => partner.showWhen === "hotel")?.key ??
+    "booking";
+  const [lanePin, setLanePin] = useState<string>(
+    focusFlight ? flightLaneKey : focusStay ? stayLaneKey : "auto",
   );
-  const openLane = lanePin === "auto" ? nextLaneKey : lanePin;
+  const pinnedLane =
+    lanePin !== "auto" && partners.some((partner) => partner.key === lanePin)
+      ? lanePin
+      : null;
+  const selectedLaneKey = pinnedLane ?? nextLaneKey ?? partners[0]?.key ?? null;
+  const appliedHash = useRef<string | null>(null);
   const [layout, setLayout] = useState<"timeline" | "week">("timeline");
   const [editor, setEditor] = useState<
     | { kind: "add-lane"; laneKey: string }
@@ -793,10 +820,6 @@ export function ItineraryHub({
   const stillOpen = partners.filter(
     (partner) => laneProgress(itemsForLane(items, partner)) === "open",
   ).length;
-  const stickyPartner =
-    partners.find((partner) => partner.key === openLane) ??
-    partners.find((partner) => laneProgress(itemsForLane(items, partner)) === "open") ??
-    null;
 
   function renderTimeline(list: TripItem[]) {
     return (
@@ -863,6 +886,74 @@ export function ItineraryHub({
         return next;
       }),
     );
+  }
+
+  useEffect(() => {
+    function laneKeyForHash(hash: string): string | null {
+      if (hash === FLIGHT_LANE_HASH) {
+        return partners.find((partner) => isFlightLanePartner(partner))?.key ?? null;
+      }
+      if (hash === STAY_LANE_HASH) {
+        return (
+          partners.find((partner) => partner.key === "booking")?.key ??
+          partners.find((partner) => partner.showWhen === "hotel")?.key ??
+          null
+        );
+      }
+      return null;
+    }
+    function applyHash(force: boolean) {
+      const hash = window.location.hash.replace(/^#/, "");
+      const key = laneKeyForHash(hash);
+      if (!key) return;
+      if (!force && appliedHash.current === hash) return;
+      appliedHash.current = hash;
+      setLanePin(key);
+      window.requestAnimationFrame(() => {
+        document.querySelector(".plan-hub-lanes")?.scrollIntoView({ block: "start" });
+      });
+    }
+    applyHash(false);
+    const onHashChange = () => applyHash(true);
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, [partners]);
+
+  useEffect(() => {
+    if (!selectedLaneKey) return;
+    const tab = document.getElementById(`${headingId}-tab-${selectedLaneKey}`);
+    const scroller = tab?.parentElement;
+    if (!(tab instanceof HTMLElement) || !(scroller instanceof HTMLElement)) return;
+    const tabStart = tab.offsetLeft;
+    const tabEnd = tabStart + tab.offsetWidth;
+    const viewEnd = scroller.scrollLeft + scroller.clientWidth;
+    if (tabStart < scroller.scrollLeft) scroller.scrollLeft = tabStart;
+    else if (tabEnd > viewEnd) scroller.scrollLeft = tabEnd - scroller.clientWidth;
+  }, [headingId, selectedLaneKey]);
+
+  function onLaneTabKeyDown(event: { key: string; preventDefault: () => void }, current: string) {
+    const order = partners.map((partner) => partner.key);
+    const index = order.indexOf(current);
+    if (index < 0) return;
+    let nextIndex = index;
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (index + 1) % order.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (index - 1 + order.length) % order.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = order.length - 1;
+    } else {
+      return;
+    }
+    event.preventDefault();
+    const next = order[nextIndex];
+    if (!next) return;
+    setLanePin(next);
+    window.requestAnimationFrame(() => {
+      document.getElementById(`${headingId}-tab-${next}`)?.focus();
+    });
   }
 
   const saveCopy =
@@ -1024,14 +1115,22 @@ export function ItineraryHub({
           <ul className="plan-status">
             {partners.map((partner) => {
               const progress = laneProgress(itemsForLane(items, partner));
+              const current = selectedLaneKey === partner.key;
               return (
                 <li key={partner.key}>
-                  <span className={`${plan.caption} font-semibold text-heading`}>
-                    {laneName(partner)}
-                  </span>
-                  <span className={`${plan.caption} text-muted`}>
-                    {LANE_PROGRESS_LABEL[progress]}
-                  </span>
+                  <button
+                    type="button"
+                    className="plan-status-jump"
+                    aria-current={current ? "true" : undefined}
+                    onClick={() => setLanePin(partner.key)}
+                  >
+                    <span className={`${plan.caption} font-semibold text-heading`}>
+                      {laneName(partner)}
+                    </span>
+                    <span className={`${plan.caption} text-muted`}>
+                      {LANE_PROGRESS_LABEL[progress]}
+                    </span>
+                  </button>
                 </li>
               );
             })}
@@ -1053,181 +1152,159 @@ export function ItineraryHub({
         </aside>
       ) : null}
 
-      <div className="plan-hub-lanes plan-lanes plan-section">
+      <section className="plan-hub-lanes plan-section scroll-mt-24" aria-label="Book this trip">
+        <div className="plan-lane-tabs-bar" role="tablist" aria-label="Booking lanes" aria-orientation="horizontal">
+          <div className="plan-lane-tabs" role="presentation">
+            {partners.map((partner) => {
+              const laneItems = itemsForLane(items, partner);
+              const selected = selectedLaneKey === partner.key;
+              const isNext = partner.key === nextLaneKey;
+              const progress = laneProgress(laneItems);
+              const panelId = lanePanelId(headingId, partner, flightLaneKey, stayLaneKey);
+              return (
+                <button
+                  key={partner.key}
+                  type="button"
+                  role="tab"
+                  id={`${headingId}-tab-${partner.key}`}
+                  className={`plan-lane-tab${isNext && progress === "open" ? " plan-lane-tab-next" : ""}`}
+                  aria-selected={selected}
+                  aria-controls={panelId}
+                  tabIndex={selected ? 0 : -1}
+                  onClick={() => setLanePin(partner.key)}
+                  onKeyDown={(event) => onLaneTabKeyDown(event, partner.key)}
+                >
+                  <span className="plan-lane-tab-label">{laneName(partner)}</span>
+                  <span className="plan-lane-tab-cue">
+                    <span className={`plan-lane-dot plan-lane-dot-${progress}`} aria-hidden="true" />
+                    <span className="plan-lane-tab-meta">{laneTabCue(laneItems, isNext)}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {partners.map((partner) => {
           const laneItems = itemsForLane(items, partner);
           const adding = editor?.kind === "add-lane" && editor.laneKey === partner.key;
-          const laneOpen = openLane === partner.key;
-          const isNext = partner.key === nextLaneKey;
-          const panelId = `${headingId}-lane-${partner.key}`;
+          const selected = selectedLaneKey === partner.key;
+          const panelId = lanePanelId(headingId, partner, flightLaneKey, stayLaneKey);
           return (
-            <article
+            <div
               key={partner.key}
-              id={
-                partner.key === "booking"
-                  ? STAY_LANE_HASH
-                  : partner.key === flightLaneKey
-                    ? FLIGHT_LANE_HASH
-                    : undefined
-              }
-              className={`plan-lane scroll-mt-24 ${partner.isCore ? "plan-lane-core" : ""} ${
-                isNext && laneOpen ? "plan-lane-next" : ""
-              }`}
+              role="tabpanel"
+              id={panelId}
+              aria-labelledby={`${headingId}-tab-${partner.key}`}
+              hidden={!selected}
+              className={`plan-lane plan-lane-panel scroll-mt-24 ${partner.isCore ? "plan-lane-core" : ""}`}
             >
-              <h3 className="sm:hidden">
-                <button
-                  type="button"
-                  className="plan-fold-toggle"
-                  aria-expanded={laneOpen}
-                  aria-controls={panelId}
-                  onClick={() => setLanePin(laneOpen ? null : partner.key)}
-                >
-                  <span className="icon-tile icon-tile-sm shrink-0">
-                    <NavIcon name={laneIcon(partner)} size={16} />
-                  </span>
-                  <span className="plan-fold-title">{partner.label}</span>
-                  <span className={isNext ? "plan-next-badge" : "plan-fold-meta"}>
-                    {laneMeta(laneItems, isNext)}
-                  </span>
-                  <span className="plan-fold-chevron" aria-hidden="true" />
-                </button>
-              </h3>
-              <div
-                id={panelId}
-                data-open={laneOpen ? "true" : "false"}
-                className="plan-lane-body"
-              >
-              <div className="hidden gap-3 sm:flex sm:items-center sm:justify-between">
-                <div className="flex min-w-0 items-start gap-3">
-                  <span className="icon-tile icon-tile-sm shrink-0">
-                    <NavIcon name={laneIcon(partner)} size={16} />
-                  </span>
-                  <div className="min-w-0 plan-stack-tight">
-                    <h3 className={plan.h3}>{partner.label}</h3>
-                    {partner.blurb ? (
-                      <p className={`${plan.body} text-muted`}>
-                        {partner.blurb}
-                      </p>
-                    ) : null}
+              <div className="plan-lane-body">
+                <div className="plan-lane-head">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span className="icon-tile icon-tile-sm shrink-0 plan-desktop-only">
+                      <NavIcon name={laneIcon(partner)} size={16} />
+                    </span>
+                    <div className="min-w-0 plan-stack-tight">
+                      <h3 className={plan.h3}>{partner.label}</h3>
+                      {partner.blurb ? (
+                        <p className={`${plan.body} text-muted`}>{partner.blurb}</p>
+                      ) : null}
+                    </div>
                   </div>
-                </div>
-                <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
                   <LaneCta
                     partner={partner}
                     state={state}
                     flexibleOn={flexibleOn}
                     tripId={tripId}
-                    className={`btn self-start sm:self-end ${
+                    className={`btn plan-lane-cta ${
                       partner.isCore ? "btn-primary" : "btn-secondary"
                     }`}
                   />
                 </div>
-              </div>
 
-              {laneItems.length === 0 ? (
-                <p className={`${plan.caption} text-muted sm:hidden`}>Nothing saved yet.</p>
-              ) : partner.blurb ? (
-                <PlanHint label="About this search" mobileOnly>
-                  {partner.blurb}
-                </PlanHint>
-              ) : null}
+                {laneItems.length === 0 ? (
+                  <p className={`${plan.body} text-muted`}>
+                    {partner.key === "booking"
+                      ? "Nothing saved here yet. Search stays and the hotel you book comes back to this itinerary."
+                      : isFlightLanePartner(partner)
+                        ? "Nothing saved here yet. Search flights and the one you book comes back to this itinerary."
+                        : "Nothing saved here yet. Search, then add the booking you want to keep."}
+                  </p>
+                ) : (
+                  <ul className="plan-stack-tight">
+                    {laneItems.map((item) => {
+                      const editing =
+                        editor?.kind === "edit" &&
+                        editor.place === "lane" &&
+                        editor.id === item.id;
+                      const highlighted =
+                        (focusStay &&
+                          partner.key === "booking" &&
+                          item.id === newestBookedStayId(laneItems)) ||
+                        (focusFlight &&
+                          partner.key === flightLaneKey &&
+                          item.id === newestBookedFlightId(laneItems));
+                      return (
+                        <li key={item.id}>
+                          {editing ? (
+                            <BookingItemForm
+                              framed
+                              type={item.type}
+                              laneKey={item.laneKey}
+                              sortOrder={item.sortOrder}
+                              existing={item}
+                              days={days}
+                              onCancel={() => setEditor(null)}
+                              onSave={replaceItem}
+                            />
+                          ) : (
+                            <ItemCard
+                              item={item}
+                              days={days}
+                              highlighted={highlighted}
+                              onStatus={(status) => updateItem(item.id, { status })}
+                              onEdit={() =>
+                                setEditor({ kind: "edit", id: item.id, place: "lane" })
+                              }
+                              onRemove={() => removeItem(item.id)}
+                            />
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
 
-              {laneOpen && !laneItems.some((item) => item.status === "booked") ? (
-                <div className="plan-mobile-only">
-                  <LaneCta
-                    partner={partner}
-                    state={state}
-                    flexibleOn={flexibleOn}
-                    tripId={tripId}
-                    className={`btn btn-block plan-lane-hero ${
-                      partner.isCore ? "btn-primary" : "btn-secondary"
-                    }`}
+                {adding ? null : (
+                  <div className="plan-lane-secondaries">
+                    <button
+                      type="button"
+                      className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
+                      onClick={() => {
+                        setLanePin(partner.key);
+                        setEditor({ kind: "add-lane", laneKey: partner.key });
+                      }}
+                    >
+                      Add to itinerary
+                    </button>
+                  </div>
+                )}
+                {adding ? (
+                  <BookingItemForm
+                    type={itemTypeForPartner(partner)}
+                    laneKey={partner.key}
+                    sortOrder={nextSort}
+                    days={days}
+                    onCancel={() => setEditor(null)}
+                    onSave={addItem}
                   />
-                </div>
-              ) : null}
-
-              {laneItems.length === 0 ? (
-                <p className={`${plan.body} text-muted plan-desktop-only`}>
-                  {partner.key === "booking"
-                    ? "Nothing saved here yet. Search stays and the hotel you book comes back to this itinerary."
-                    : isFlightLanePartner(partner)
-                      ? "Nothing saved here yet. Search flights and the one you book comes back to this itinerary."
-                      : "Nothing saved here yet. Search, then add the booking you want to keep."}
-                </p>
-              ) : (
-                <ul className="plan-stack-tight">
-                  {laneItems.map((item) => {
-                    const editing =
-                      editor?.kind === "edit" &&
-                      editor.place === "lane" &&
-                      editor.id === item.id;
-                    const highlighted =
-                      (focusStay &&
-                        partner.key === "booking" &&
-                        item.id === newestBookedStayId(laneItems)) ||
-                      (focusFlight &&
-                        partner.key === flightLaneKey &&
-                        item.id === newestBookedFlightId(laneItems));
-                    return (
-                      <li key={item.id}>
-                        {editing ? (
-                          <BookingItemForm
-                            framed
-                            type={item.type}
-                            laneKey={item.laneKey}
-                            sortOrder={item.sortOrder}
-                            existing={item}
-                            days={days}
-                            onCancel={() => setEditor(null)}
-                            onSave={replaceItem}
-                          />
-                        ) : (
-                          <ItemCard
-                            item={item}
-                            days={days}
-                            highlighted={highlighted}
-                            onStatus={(status) => updateItem(item.id, { status })}
-                            onEdit={() =>
-                              setEditor({ kind: "edit", id: item.id, place: "lane" })
-                            }
-                            onRemove={() => removeItem(item.id)}
-                          />
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-
-              {adding ? null : (
-                <div className="plan-lane-secondaries">
-                  <button
-                    type="button"
-                    className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
-                    onClick={() => {
-                      setLanePin(partner.key);
-                      setEditor({ kind: "add-lane", laneKey: partner.key });
-                    }}
-                  >
-                    Add to itinerary
-                  </button>
-                </div>
-              )}
-              {adding ? (
-                <BookingItemForm
-                  type={itemTypeForPartner(partner)}
-                  laneKey={partner.key}
-                  sortOrder={nextSort}
-                  days={days}
-                  onCancel={() => setEditor(null)}
-                  onSave={addItem}
-                />
-              ) : null}
+                ) : null}
               </div>
-            </article>
+            </div>
           );
         })}
-      </div>
+      </section>
 
       <div className="plan-hub-days">
       <PlanFold
@@ -1504,17 +1581,6 @@ export function ItineraryHub({
       />
       </div>
 
-      {stickyPartner && editor == null && openLane == null ? (
-        <div className="plan-hub-sticky plan-sticky plan-sticky-page plan-sticky-solo plan-mobile-only">
-          <LaneCta
-            partner={stickyPartner}
-            state={state}
-            flexibleOn={flexibleOn}
-            tripId={tripId}
-            className={`btn ${stickyPartner.isCore ? "btn-primary" : "btn-secondary"}`}
-          />
-        </div>
-      ) : null}
     </div>
   );
 }

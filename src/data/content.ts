@@ -37,7 +37,7 @@ export const hero = {
   subtitle:
     "A personal travel blog sharing places I’ve been and notes from the road — places, stories, guides, and photos from journeys already behind me.",
   ctaPrimary: "Explore places",
-  ctaSecondary: "Read stories",
+  ctaSecondary: "Plan a trip",
   /** Maroon Bells sunrise — matches the WordPress hero mood */
   image:
     "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
