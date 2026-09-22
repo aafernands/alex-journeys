@@ -66,6 +66,10 @@ export type StayRoomOffer = {
   refundable: StayRefundable;
   price: StayMoney | null;
   remarks: string;
+  /** Readable cancellation windows from the rate, when Nuitee sends them. */
+  cancellation: string[];
+  /** Hotel remarks and other rate conditions. */
+  conditions: string[];
 };
 
 export type StayPrebook = {
@@ -80,6 +84,9 @@ export type StayPrebook = {
   boardName: string;
   refundable: StayRefundable;
   remarks: string;
+  cancellation: string[];
+  conditions: string[];
+  terms: string;
   checkin: string;
   checkout: string;
 };
@@ -93,6 +100,48 @@ export type StayBooking = {
   checkout: string;
   currency: string;
   price: number | null;
+  guestEmail: string;
+  roomName: string;
+  boardName: string;
+};
+
+/**
+ * How this reservation was paid.
+ * `sandbox_account` is Nuitee’s simulated card. `guest_card` is reserved for a
+ * later Payment SDK and is not collected in this flow.
+ */
+export type StayPaymentRecord = {
+  method: "sandbox_account" | "guest_card";
+  label: string;
+};
+
+export type StayConfirmationDetails = {
+  hotelName: string;
+  bookingId: string;
+  confirmationCode: string;
+  status: string;
+  checkin: string;
+  checkout: string;
+  dateLabel: string;
+  roomName: string;
+  rateLabel: string;
+  cancellation: string[];
+  conditions: string[];
+  remarks: string;
+  terms: string;
+  totalLabel: string;
+  guestName: string;
+  guestEmail: string;
+  payment: StayPaymentRecord;
+  sandbox: boolean;
+};
+
+export type StayRecovery = "refresh-rooms" | "retry-book" | "back-to-search" | "retry";
+
+export type StayFailure = {
+  title: string;
+  message: string;
+  recovery: StayRecovery;
 };
 
 export type StayGuest = {
@@ -320,6 +369,36 @@ export function formatStayMoney(money: StayMoney | null | undefined): string {
   }
 }
 
+const STAY_MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
+
+export function formatStayDay(value: string): string {
+  const clean = cleanStayDate(value);
+  if (!clean) return "";
+  const month = Number(clean.slice(5, 7));
+  const day = Number(clean.slice(8, 10));
+  return `${STAY_MONTHS[month - 1]} ${day}, ${clean.slice(0, 4)}`;
+}
+
+export function formatStayRange(checkin: string, checkout: string): string {
+  const start = formatStayDay(checkin);
+  const end = formatStayDay(checkout);
+  if (start && end) return `${start} – ${end}`;
+  return start || end;
+}
+
 export function formatStayRating(rating: number | null): string {
   if (rating == null || !Number.isFinite(rating)) return "";
   const rounded = Math.round(rating * 10) / 10;
@@ -410,6 +489,69 @@ function refundableOf(rate: Record<string, unknown> | null): StayRefundable {
   if (tag === "RFN") return "refundable";
   if (tag === "NRFN") return "non-refundable";
   return "unknown";
+}
+
+function formatPolicyWhen(value: string): string {
+  const date = cleanStayDate(value.slice(0, 10));
+  if (date) return formatStayDay(date);
+  return text(value, 40);
+}
+
+function cancellationSummary(
+  record: Record<string, unknown>,
+  currencyFallback: string,
+): string {
+  const when = formatPolicyWhen(text(record.cancelTime ?? record.cancelDate, 40));
+  const amount = numberOrNull(record.amount);
+  const currency = text(record.currency, 3).toUpperCase() || currencyFallback;
+  const kind = text(record.type, 20).toLowerCase();
+  if (amount === 0) {
+    return when ? `Free cancellation until ${when}.` : "Free cancellation.";
+  }
+  if (amount == null) {
+    return when ? `Cancellation terms change on ${when}.` : "";
+  }
+  const fee =
+    kind === "percentage"
+      ? `${amount}%`
+      : formatStayMoney({
+          amount,
+          currency: /^[A-Z]{3}$/.test(currency) ? currency : "USD",
+        }) || `${amount}`;
+  return when
+    ? `A ${fee} fee applies if you cancel after ${when}.`
+    : `Cancellation fee ${fee}.`;
+}
+
+function cancellationLines(
+  rate: Record<string, unknown> | null,
+  currencyFallback: string,
+): string[] {
+  const policies = asRecord(rate?.cancellationPolicies);
+  if (!policies) return [];
+  const lines: string[] = [];
+  for (const item of asArray(policies.cancelPolicyInfos ?? policies.cancelPolicyInfo)) {
+    const record = asRecord(item);
+    if (!record) continue;
+    const summary = cancellationSummary(record, currencyFallback);
+    if (!summary || lines.includes(summary)) continue;
+    lines.push(summary);
+    if (lines.length >= 4) break;
+  }
+  return lines;
+}
+
+function conditionLines(rate: Record<string, unknown> | null): string[] {
+  const policies = asRecord(rate?.cancellationPolicies);
+  const lines: string[] = [];
+  for (const item of asArray(policies?.hotelRemarks)) {
+    const raw = typeof item === "string" ? item : text(asRecord(item)?.remark, 240);
+    const line = plainStayText(raw).slice(0, 240);
+    if (!line || lines.includes(line)) continue;
+    lines.push(line);
+    if (lines.length >= 3) break;
+  }
+  return lines;
 }
 
 function neighborhoodOf(hotel: Record<string, unknown>): string {
@@ -555,14 +697,17 @@ export function mapRoomOffers(payload: unknown): StayRoomOffer[] {
       if (!room || !isStayOfferId(offerId) || seen.has(offerId)) continue;
       const rate = asRecord(asArray(room.rates)[0]);
       const name = text(rate?.name ?? room.name, 160) || "Room";
+      const price = offerPrice(room);
       seen.add(offerId);
       offers.push({
         offerId,
         name,
         boardName: text(rate?.boardName, 80),
         refundable: refundableOf(rate),
-        price: offerPrice(room),
+        price,
         remarks: plainStayText(text(rate?.remarks, 800)).slice(0, 320),
+        cancellation: cancellationLines(rate, price?.currency || "USD"),
+        conditions: conditionLines(rate),
       });
     }
   }
@@ -583,10 +728,11 @@ export function mapPrebook(payload: unknown): StayPrebook | null {
   const room = asRecord(asArray(data.roomTypes)[0]);
   const rate = asRecord(asArray(room?.rates)[0]);
   const diff = numberOrNull(data.priceDifferencePercent) ?? 0;
+  const currency = text(data.currency, 3).toUpperCase() || "USD";
   return {
     prebookId,
     hotelId: text(data.hotelId, 64),
-    currency: text(data.currency, 3).toUpperCase() || "USD",
+    currency,
     price: numberOrNull(data.price),
     priceDifferencePercent: diff,
     cancellationChanged: data.cancellationChanged === true,
@@ -595,6 +741,9 @@ export function mapPrebook(payload: unknown): StayPrebook | null {
     boardName: text(rate?.boardName, 80),
     refundable: refundableOf(rate),
     remarks: plainStayText(text(rate?.remarks, 800)).slice(0, 320),
+    cancellation: cancellationLines(rate, currency),
+    conditions: conditionLines(rate),
+    terms: plainStayText(text(data.termsAndConditions ?? data.terms, 2000)).slice(0, 600),
     checkin: cleanStayDate(text(data.checkin, 10)),
     checkout: cleanStayDate(text(data.checkout, 10)),
   };
@@ -607,6 +756,9 @@ export function mapBooking(payload: unknown): StayBooking | null {
   if (!bookingId) return null;
   const hotel = asRecord(data.hotel);
   const price = numberOrNull(data.price) ?? numberOrNull(asRecord(data.bookedPrice)?.amount);
+  const booked = asRecord(asArray(data.bookedRooms)[0]);
+  const roomType = asRecord(booked?.roomType);
+  const holder = asRecord(data.holder) ?? asRecord(data.guestInfo);
   return {
     bookingId,
     status: text(data.status, 40) || "CONFIRMED",
@@ -619,6 +771,9 @@ export function mapBooking(payload: unknown): StayBooking | null {
     checkout: cleanStayDate(text(data.checkout, 10)),
     currency: text(data.currency, 3).toUpperCase() || "USD",
     price,
+    guestEmail: text(holder?.email ?? holder?.guestEmail, 120),
+    roomName: text(roomType?.name ?? booked?.roomName, 160),
+    boardName: text(booked?.boardName ?? booked?.board, 80),
   };
 }
 
@@ -661,4 +816,132 @@ export function refundableLabel(value: StayRefundable): string {
   if (value === "refundable") return "Refundable";
   if (value === "non-refundable") return "Non-refundable";
   return "Cancellation varies";
+}
+
+export function stayGuestFieldErrors(
+  value: unknown,
+): Partial<Record<keyof StayGuest, string>> {
+  const record = asRecord(value) ?? {};
+  const errors: Partial<Record<keyof StayGuest, string>> = {};
+  if (!personName(record.firstName)) errors.firstName = "Enter a first name.";
+  if (!personName(record.lastName)) errors.lastName = "Enter a last name.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text(record.email, 120))) {
+    errors.email = "Enter an email address.";
+  }
+  const digits = text(record.phone, 24).replace(/\D/g, "");
+  if (digits.length < 7 || digits.length > 15) {
+    errors.phone = "Enter a phone number with 7 to 15 digits.";
+  }
+  return errors;
+}
+
+export function classifyStayFailure(input: {
+  stage: "prebook" | "book" | "rates";
+  message: string;
+  code?: string;
+}): StayFailure {
+  const message = input.message.trim() || "Nuitee could not complete that step.";
+  const code = input.code ?? "";
+  if (code === "live_checkout") {
+    return {
+      title: "Live card payment isn’t turned on",
+      message,
+      recovery: "back-to-search",
+    };
+  }
+  if (code === "not_configured") {
+    return {
+      title: "Stays aren’t configured",
+      message,
+      recovery: "back-to-search",
+    };
+  }
+  if (/too many|rate limit|wait a moment/i.test(message) || code === "rate_limited") {
+    return {
+      title: "Give it a moment",
+      message,
+      recovery: "retry",
+    };
+  }
+  if (/sold out|no longer available|not available|unavailable|no availability/i.test(message)) {
+    return {
+      title: "That room was just taken",
+      message: "Nuitee no longer has this rate. Pick another room, or search again.",
+      recovery: "refresh-rooms",
+    };
+  }
+  if (/expir|invalid offer|offer not found|no offer|prebook/i.test(message)) {
+    return {
+      title: "That rate expired",
+      message: "Rates move quickly. Refresh the rooms and choose again.",
+      recovery: "refresh-rooms",
+    };
+  }
+  if (input.stage === "prebook") {
+    return {
+      title: "That room couldn’t be held",
+      message,
+      recovery: "refresh-rooms",
+    };
+  }
+  if (input.stage === "rates") {
+    return {
+      title: "Rooms couldn’t be refreshed",
+      message,
+      recovery: "back-to-search",
+    };
+  }
+  return {
+    title: "The booking didn’t go through",
+    message: /dashboard|already submitted|confirmation/i.test(message)
+      ? message
+      : `${message} You can try again, or pick another room.`,
+    recovery: "retry-book",
+  };
+}
+
+export function buildStayConfirmation(input: {
+  booking: StayBooking;
+  hotelName: string;
+  guest: StayGuest;
+  prebook: StayPrebook | null;
+  query: Pick<StaysQuery, "startDate" | "endDate">;
+  sandbox: boolean;
+}): StayConfirmationDetails {
+  const checkin = input.booking.checkin || input.prebook?.checkin || input.query.startDate;
+  const checkout = input.booking.checkout || input.prebook?.checkout || input.query.endDate;
+  const price = input.booking.price ?? input.prebook?.price ?? null;
+  const currency = input.booking.currency || input.prebook?.currency || "USD";
+  const roomName = input.prebook?.roomName || input.booking.roomName || "Room";
+  const boardName = input.prebook?.boardName || input.booking.boardName;
+  const refundable = input.prebook?.refundable ?? "unknown";
+  const guestName = [input.guest.firstName, input.guest.lastName].filter(Boolean).join(" ");
+  return {
+    hotelName: input.booking.hotelName || input.hotelName,
+    bookingId: input.booking.bookingId,
+    confirmationCode: input.booking.hotelConfirmationCode || input.booking.bookingId,
+    status: input.booking.status || "CONFIRMED",
+    checkin,
+    checkout,
+    dateLabel: formatStayRange(checkin, checkout),
+    roomName,
+    rateLabel: [boardName, refundableLabel(refundable)].filter(Boolean).join(" · "),
+    cancellation: input.prebook?.cancellation ?? [],
+    conditions: input.prebook?.conditions ?? [],
+    remarks: input.prebook?.remarks ?? "",
+    terms: input.prebook?.terms ?? "",
+    totalLabel: price == null ? "" : formatStayMoney({ amount: price, currency }),
+    guestName,
+    guestEmail: input.guest.email || input.booking.guestEmail,
+    payment: input.sandbox
+      ? {
+          method: "sandbox_account",
+          label: "Nuitee’s simulated sandbox card. No guest card was charged.",
+        }
+      : {
+          method: "guest_card",
+          label: "Nuitee records the payment. Guest card checkout is not shown here yet.",
+        },
+    sandbox: input.sandbox,
+  };
 }

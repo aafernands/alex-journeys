@@ -3,6 +3,9 @@ import { describe, it } from "node:test";
 import { readLiteApiKey } from "../src/lib/stays-config.ts";
 import {
   formatStayMoney,
+  buildStayConfirmation,
+  classifyStayFailure,
+  formatStayRange,
   mapBooking,
   mapHotelContent,
   mapPrebook,
@@ -11,6 +14,7 @@ import {
   parseStayGuest,
   parseStaysSearchParams,
   plainStayText,
+  stayGuestFieldErrors,
   stayOccupancies,
   staysPath,
   staysQueryIssue,
@@ -220,6 +224,9 @@ describe("stays mapping", () => {
       checkout: "2027-06-09",
       currency: "USD",
       price: 213.66,
+      guestEmail: "",
+      roomName: "",
+      boardName: "",
     });
   });
 
@@ -238,6 +245,194 @@ describe("stays mapping", () => {
       "+12125550100",
     );
     assert.equal(parseStayGuest({ firstName: "A", lastName: "", email: "nope", phone: "1" }), null);
+  });
+
+  it("reads cancellation windows and hotel remarks from a rate", () => {
+    const [room] = mapRoomOffers({
+      data: [
+        {
+          hotelId: "lp1897",
+          roomTypes: [
+            {
+              offerId: "CANCELPOLICY123456",
+              offerRetailRate: [{ amount: 200, currency: "USD" }],
+              rates: [
+                {
+                  name: "Deluxe",
+                  boardName: "Breakfast",
+                  cancellationPolicies: {
+                    refundableTag: "RFN",
+                    hotelRemarks: ["City tax due at the property"],
+                    cancelPolicyInfos: [
+                      {
+                        cancelTime: "2027-05-20 00:00:00",
+                        amount: 0,
+                        currency: "USD",
+                        type: "amount",
+                      },
+                      {
+                        cancelTime: "2027-06-01 00:00:00",
+                        amount: 50,
+                        currency: "USD",
+                        type: "percentage",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    assert.equal(room.cancellation[0], "Free cancellation until May 20, 2027.");
+    assert.equal(room.cancellation[1], "A 50% fee applies if you cancel after Jun 1, 2027.");
+    assert.deepEqual(room.conditions, ["City tax due at the property"]);
+  });
+});
+
+describe("stay confirmation and recovery", () => {
+  const guest = {
+    firstName: "Ada",
+    lastName: "Lovelace",
+    email: "ada@example.com",
+    phone: "+12125550100",
+  };
+  const prebook = mapPrebook({
+    data: {
+      prebookId: "zzWkJcdgk",
+      hotelId: "lp1897",
+      currency: "USD",
+      price: 240,
+      termsAndConditions: "<p>Government ID required.</p>",
+      checkin: "2027-06-02",
+      checkout: "2027-06-06",
+      secretKey: "pi_secret",
+      roomTypes: [
+        {
+          rates: [
+            {
+              name: "Queen Room",
+              boardName: "Breakfast",
+              cancellationPolicies: {
+                refundableTag: "NRFN",
+                cancelPolicyInfos: [
+                  { cancelTime: "2027-06-02", amount: 240, currency: "USD", type: "amount" },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    },
+  });
+
+  it("builds a confirmation the Payment SDK can extend later", () => {
+    assert.equal(formatStayRange("2027-06-02", "2027-06-06"), "Jun 2, 2027 – Jun 6, 2027");
+    const booking = mapBooking({
+      data: {
+        bookingId: "book_123",
+        status: "CONFIRMED",
+        hotelConfirmationCode: "ABC123",
+        hotel: { name: "Hotel du Test" },
+        price: 240,
+        currency: "USD",
+        checkin: "2027-06-02",
+        checkout: "2027-06-06",
+        holder: { email: "ada@example.com" },
+        bookedRooms: [{ roomType: { name: "Queen Room" }, boardName: "Breakfast" }],
+      },
+    });
+    const confirmation = buildStayConfirmation({
+      booking,
+      hotelName: "Fallback Hotel",
+      guest,
+      prebook,
+      query: { startDate: "2027-06-02", endDate: "2027-06-06" },
+      sandbox: true,
+    });
+    assert.equal(confirmation.hotelName, "Hotel du Test");
+    assert.equal(confirmation.confirmationCode, "ABC123");
+    assert.equal(confirmation.bookingId, "book_123");
+    assert.equal(confirmation.dateLabel, "Jun 2, 2027 – Jun 6, 2027");
+    assert.equal(confirmation.roomName, "Queen Room");
+    assert.equal(confirmation.rateLabel, "Breakfast · Non-refundable");
+    assert.equal(confirmation.totalLabel, "$240");
+    assert.equal(confirmation.guestEmail, "ada@example.com");
+    assert.equal(confirmation.guestName, "Ada Lovelace");
+    assert.equal(confirmation.terms, "Government ID required.");
+    assert.match(confirmation.cancellation[0], /\$240/);
+    assert.equal(confirmation.payment.method, "sandbox_account");
+    assert.equal(JSON.stringify(confirmation).includes("pi_secret"), false);
+    assert.equal(
+      buildStayConfirmation({
+        booking,
+        hotelName: "Hotel du Test",
+        guest,
+        prebook,
+        query: { startDate: "2027-06-02", endDate: "2027-06-06" },
+        sandbox: false,
+      }).payment.method,
+      "guest_card",
+    );
+  });
+
+  it("points sold-out and expired rates back to the room list", () => {
+    assert.equal(
+      classifyStayFailure({
+        stage: "prebook",
+        message: "This room is sold out",
+      }).recovery,
+      "refresh-rooms",
+    );
+    assert.equal(
+      classifyStayFailure({
+        stage: "book",
+        message: "Offer expired",
+      }).title,
+      "That rate expired",
+    );
+    const held = classifyStayFailure({
+      stage: "prebook",
+      message: "Nuitee did not confirm that room. Pick another rate.",
+    });
+    assert.equal(held.recovery, "refresh-rooms");
+    assert.equal(held.title, "That room couldn’t be held");
+    const missed = classifyStayFailure({
+      stage: "book",
+      message: "Nuitee did not return a confirmation. Check the sandbox dashboard before trying again.",
+    });
+    assert.equal(missed.recovery, "retry-book");
+    assert.match(missed.message, /dashboard/);
+    assert.equal(
+      classifyStayFailure({
+        stage: "book",
+        message: "Live card checkout isn’t turned on.",
+        code: "live_checkout",
+      }).recovery,
+      "back-to-search",
+    );
+    assert.equal(
+      classifyStayFailure({
+        stage: "book",
+        message: "Too many booking attempts. Wait a moment and try again.",
+      }).recovery,
+      "retry",
+    );
+  });
+
+  it("rejects an incomplete guest before a booking request", () => {
+    const errors = stayGuestFieldErrors({
+      firstName: "",
+      lastName: "Lovelace",
+      email: "not-an-email",
+      phone: "12",
+    });
+    assert.equal(errors.firstName, "Enter a first name.");
+    assert.equal(errors.email, "Enter an email address.");
+    assert.equal(errors.phone, "Enter a phone number with 7 to 15 digits.");
+    assert.equal(Object.keys(stayGuestFieldErrors(guest)).length, 0);
+    assert.ok(parseStayGuest(guest));
   });
 });
 
