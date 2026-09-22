@@ -41,7 +41,7 @@ import {
 import type { StoredPlan } from "@/lib/trip-planner-storage";
 import { plan } from "@/components/trip-planner/density";
 import { ForwardBookings } from "@/components/trip-planner/ForwardBookings";
-import { PlanFold } from "@/components/trip-planner/PlanFold";
+import { PlanFold, PlanHint } from "@/components/trip-planner/PlanFold";
 import { WeekView } from "@/components/trip-planner/WeekView";
 
 type Props = {
@@ -162,6 +162,16 @@ const LANE_PROGRESS_LABEL = {
   booked: "booked",
   skipped: "skipped",
 } as const;
+
+function laneMeta(items: TripItem[], isNext: boolean): string {
+  const progress = laneProgress(items);
+  const count = items.length;
+  if (isNext && progress === "open") {
+    return count > 0 ? `${count} · next` : "Next";
+  }
+  if (count > 0) return `${count} · ${LANE_PROGRESS_LABEL[progress]}`;
+  return LANE_PROGRESS_LABEL[progress];
+}
 
 function itemWhen(item: TripItem, days: TripDay[]): string {
   const dayCount = days.length;
@@ -305,10 +315,14 @@ function BookingItemForm({
           }}
         />
       </label>
-      <p className={`${plan.prose} text-muted`}>
+      <p className={`${plan.prose} text-muted plan-desktop-only`}>
         Looks for a link, a confirmation code, a time, and a trip day in the text
         you paste. It does not open or scrape booking sites.
       </p>
+      <PlanHint label="What paste reads" mobileOnly>
+        Looks for a link, a confirmation code, a time, and a trip day in the text
+        you paste. It does not open or scrape booking sites.
+      </PlanHint>
       <button type="button" className="btn btn-secondary" onClick={fillFromPaste}>
         Fill from paste
       </button>
@@ -579,10 +593,13 @@ function JournalNotes({
         Notes from trips I’ve already walked
       </h3>
       {matches.length === 0 ? (
-        <p className={`${plan.prose} plan-follow text-muted`}>
-          No journal notes for {place} yet. When a story from that trip is on the
-          site, it will show up here.
-        </p>
+        <>
+          <p className={`${plan.caption} text-muted sm:hidden`}>No notes for {place} yet.</p>
+          <p className={`${plan.prose} plan-follow text-muted plan-desktop-only`}>
+            No journal notes for {place} yet. When a story from that trip is on the
+            site, it will show up here.
+          </p>
+        </>
       ) : (
         <ul className="plan-grid-2 plan-follow">
           {matches.map((note) => (
@@ -636,7 +653,11 @@ export function ItineraryHub({
   onRememberGuestDraft,
 }: Props) {
   const [copied, setCopied] = useState(false);
-  const [openLane, setOpenLane] = useState<string | null>(null);
+  const nextLaneKey =
+    partners.find((partner) => laneProgress(itemsForLane(items, partner)) === "open")
+      ?.key ?? null;
+  const [lanePin, setLanePin] = useState<string | null | "auto">("auto");
+  const openLane = lanePin === "auto" ? nextLaneKey : lanePin;
   const [layout, setLayout] = useState<"timeline" | "week">("timeline");
   const [editor, setEditor] = useState<
     | { kind: "add-lane"; laneKey: string }
@@ -744,9 +765,9 @@ export function ItineraryHub({
               : null;
 
   return (
-    <>
-      <div className="plan-stack-tight">
-        <p className={`${plan.caption} font-semibold text-muted`}>Itinerary</p>
+    <div className="plan-hub">
+      <div className="plan-hub-lead plan-stack-tight">
+        <p className={`${plan.caption} font-semibold text-muted plan-desktop-only`}>Itinerary</p>
         <h2 id={headingId} className={plan.h2}>
           {tripTitle?.trim() || state.destination.trim() || config.steps.next.heading}
         </h2>
@@ -755,7 +776,11 @@ export function ItineraryHub({
         ) : null}
         <p className={`${plan.caption} text-muted`}>
           {[dates, travelers].filter(Boolean).join(" · ")}
-          {partners.length > 0 ? ` · ${stillOpen} still to book` : ""}
+          {partners.length > 0
+            ? stillOpen > 0
+              ? ` · ${stillOpen} still to book`
+              : " · All booked"
+            : ""}
         </p>
         <p className={`${plan.prose} text-muted plan-desktop-only`}>{subhead}</p>
         <div className="plan-inline-actions">
@@ -792,9 +817,13 @@ export function ItineraryHub({
           </button>
         </div>
       </div>
+      <div className="plan-hub-save">
       {copied ? (
         <p className={`${plan.caption} plan-follow font-semibold text-heading`} role="status">
-          Link copied. Anyone with it can open this itinerary.
+          <span className="plan-mobile-only">Link copied.</span>
+          <span className="plan-desktop-only">
+            Link copied. Anyone with it can open this itinerary.
+          </span>
         </p>
       ) : null}
 
@@ -870,7 +899,9 @@ export function ItineraryHub({
           </button>
         </div>
       ) : null}
+      </div>
 
+      <div className="plan-hub-inbox">
       <PlanFold id={`${headingId}-inbox`} title="Inbox" meta="Email">
         <ForwardBookings
           headingId={headingId}
@@ -882,9 +913,10 @@ export function ItineraryHub({
           onRemember={onRememberGuestDraft}
         />
       </PlanFold>
+      </div>
 
       {partners.length > 0 ? (
-        <section className="plan-section plan-desktop-only" aria-labelledby={`${headingId}-left`}>
+        <section className="plan-hub-index plan-section plan-desktop-only" aria-labelledby={`${headingId}-left`}>
           <h3 id={`${headingId}-left`} className={plan.label}>
             What’s left to book
           </h3>
@@ -907,7 +939,7 @@ export function ItineraryHub({
       ) : null}
 
       {guestBackup ? (
-        <aside className={`${plan.soft} plan-section plan-stack-tight`} aria-label="Browser draft">
+        <aside className={`plan-hub-draft ${plan.soft} plan-section plan-stack-tight`} aria-label="Browser draft">
           <p className={`${plan.prose} text-text`}>
             You also have an unsaved itinerary for {guestBackup.state.destination.trim()} in
             this browser.
@@ -920,7 +952,7 @@ export function ItineraryHub({
         </aside>
       ) : null}
 
-      <div className="plan-lanes plan-section">
+      <div className="plan-hub-lanes plan-lanes plan-section">
         {partners.map((partner) => {
           const href = resolveAffiliateHref(
             partner,
@@ -929,11 +961,14 @@ export function ItineraryHub({
           const laneItems = itemsForLane(items, partner);
           const adding = editor?.kind === "add-lane" && editor.laneKey === partner.key;
           const laneOpen = openLane === partner.key;
+          const isNext = partner.key === nextLaneKey;
           const panelId = `${headingId}-lane-${partner.key}`;
           return (
             <article
               key={partner.key}
-              className={`plan-lane ${partner.isCore ? "plan-lane-core" : ""}`}
+              className={`plan-lane ${partner.isCore ? "plan-lane-core" : ""} ${
+                isNext && laneOpen ? "plan-lane-next" : ""
+              }`}
             >
               <h3 className="sm:hidden">
                 <button
@@ -941,17 +976,13 @@ export function ItineraryHub({
                   className="plan-fold-toggle"
                   aria-expanded={laneOpen}
                   aria-controls={panelId}
-                  onClick={() =>
-                    setOpenLane((current) => (current === partner.key ? null : partner.key))
-                  }
+                  onClick={() => setLanePin(laneOpen ? null : partner.key)}
                 >
                   <span className="icon-tile icon-tile-sm shrink-0">
                     <NavIcon name={laneIcon(partner)} size={16} />
                   </span>
                   <span className="plan-fold-title">{partner.label}</span>
-                  <span className="plan-fold-meta">
-                    {LANE_PROGRESS_LABEL[laneProgress(laneItems)]}
-                  </span>
+                  <span className="plan-fold-meta">{laneMeta(laneItems, isNext)}</span>
                   <span className="plan-fold-chevron" aria-hidden="true" />
                 </button>
               </h3>
@@ -989,7 +1020,9 @@ export function ItineraryHub({
               </div>
 
               {partner.blurb ? (
-                <p className={`${plan.caption} text-muted sm:hidden`}>{partner.blurb}</p>
+                <PlanHint label="About this search" mobileOnly>
+                  {partner.blurb}
+                </PlanHint>
               ) : null}
 
               {laneItems.length === 0 ? (
@@ -1050,7 +1083,7 @@ export function ItineraryHub({
                   type="button"
                   className={`${plan.textBtn} self-start text-accent hover:underline`}
                   onClick={() => {
-                    setOpenLane(partner.key);
+                    setLanePin(partner.key);
                     setEditor({ kind: "add-lane", laneKey: partner.key });
                   }}
                 >
@@ -1063,10 +1096,12 @@ export function ItineraryHub({
         })}
       </div>
 
+      <div className="plan-hub-days">
       <PlanFold
         id={`${headingId}-days`}
         title="Days"
         meta={days.length > 0 ? `${sorted.length} saved` : "No dates"}
+        defaultOpen={nextLaneKey == null}
       >
       <section aria-labelledby={`${headingId}-list`}>
         <div className="plan-toolbar">
@@ -1215,7 +1250,7 @@ export function ItineraryHub({
               Unscheduled
             </h4>
             {unscheduled.length === 0 ? (
-              <p className={`${plan.body} plan-follow text-muted`}>
+              <p className={`${plan.body} plan-follow text-muted plan-desktop-only`}>
                 Bookings without a day land here. Choose a day when you add one.
               </p>
             ) : (
@@ -1276,7 +1311,9 @@ export function ItineraryHub({
         )}
       </section>
       </PlanFold>
+      </div>
 
+      <div className="plan-hub-more">
       <PlanFold
         id={`${headingId}-journal-fold`}
         title="Journal"
@@ -1322,9 +1359,10 @@ export function ItineraryHub({
           .
         </p>
       </PlanFold>
+      </div>
 
       {stickyPartner && editor == null ? (
-        <div className="plan-sticky plan-sticky-page plan-sticky-solo plan-mobile-only">
+        <div className="plan-hub-sticky plan-sticky plan-sticky-page plan-sticky-solo plan-mobile-only">
           <OutboundLink
             href={resolveAffiliateHref(
               stickyPartner,
@@ -1340,6 +1378,6 @@ export function ItineraryHub({
           </OutboundLink>
         </div>
       ) : null}
-    </>
+    </div>
   );
 }

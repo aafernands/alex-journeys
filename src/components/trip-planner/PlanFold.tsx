@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 
 type Props = {
   id: string;
@@ -52,5 +52,35 @@ export function PlanFold({
         {children}
       </div>
     </section>
+  );
+}
+
+/** Short disclosure for help that should stay off the phone’s first screen. */
+export function PlanHint({
+  label,
+  children,
+  mobileOnly = false,
+}: {
+  label: string;
+  children: ReactNode;
+  mobileOnly?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+  return (
+    <div className={mobileOnly ? "plan-mobile-only" : undefined}>
+      <button
+        type="button"
+        className="plan-text-btn text-muted"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((value) => !value)}
+      >
+        {label}
+      </button>
+      <div id={panelId} hidden={!open} className="plan-body text-muted">
+        {children}
+      </div>
+    </div>
   );
 }

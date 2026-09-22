@@ -306,10 +306,13 @@ export function ForwardBookings({
           {status === "authenticated" && primary ? (
             <>
               <p className={`${plan.prose} text-muted`}>
-                {tripId
-                  ? "This address is only for this trip."
-                  : "This address is tied to your account. Save the itinerary when you want an address just for this trip."}
+                {tripId ? "This address is only for this trip." : "Tied to your account."}
               </p>
+              {tripId ? null : (
+                <p className={`${plan.caption} text-muted plan-desktop-only`}>
+                  Save the itinerary when you want an address just for this trip.
+                </p>
+              )}
               <p
                 className={`${plan.input} plan-control break-all`}
                 aria-label="Forwarding address"
@@ -380,9 +383,12 @@ export function ForwardBookings({
                 Suggested imports
               </h4>
               {primary.suggestions.length === 0 ? (
-                <p className={`${plan.prose} text-muted`}>
-                  Nothing waiting. Forward a confirmation, then add or dismiss what we find.
-                </p>
+                <>
+                  <p className={`${plan.caption} text-muted sm:hidden`}>Nothing waiting.</p>
+                  <p className={`${plan.prose} text-muted plan-desktop-only`}>
+                    Nothing waiting. Forward a confirmation, then add or dismiss what we find.
+                  </p>
+                </>
               ) : (
                 <ul className="plan-stack-tight" aria-label="Suggested imports">
                   {primary.suggestions.map((suggestion) => (
