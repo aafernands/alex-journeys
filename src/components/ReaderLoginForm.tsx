@@ -378,7 +378,7 @@ export function ReaderLoginForm({
             <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center">
-            <span className="bg-white px-3 text-xs font-medium text-muted">
+            <span className="bg-white px-3 text-xs font-medium text-text">
               or continue with
             </span>
           </div>
