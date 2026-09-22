@@ -703,7 +703,7 @@ function OutsideBookings({
   const [open, setOpen] = useState(false);
   const panelId = `${headingId}-outside`;
   return (
-    <section className="plan-hub-inbox plan-section">
+    <section className="plan-follow">
       <button
         type="button"
         className={`${plan.textBtn} text-muted`}
@@ -713,6 +713,11 @@ function OutsideBookings({
       >
         Booked outside FJ?
       </button>
+      {open ? null : (
+        <p className={`${plan.caption} text-muted`}>
+          Insurance, an eSIM, an experience, or a booking that started somewhere else.
+        </p>
+      )}
       {open ? (
         <div id={panelId} className="plan-follow">
           <ForwardBookings
@@ -1224,16 +1229,6 @@ export function ItineraryHub({
         })}
       </div>
 
-      <OutsideBookings
-        headingId={headingId}
-        tripId={tripId}
-        days={days}
-        partners={partners}
-        nextSort={nextSort}
-        onAddItem={addItem}
-        onRemember={onRememberGuestDraft}
-      />
-
       <div className="plan-hub-days">
       <PlanFold
         id={`${headingId}-days`}
@@ -1497,6 +1492,16 @@ export function ItineraryHub({
           .
         </p>
       </PlanFold>
+
+      <OutsideBookings
+        headingId={headingId}
+        tripId={tripId}
+        days={days}
+        partners={partners}
+        nextSort={nextSort}
+        onAddItem={addItem}
+        onRemember={onRememberGuestDraft}
+      />
       </div>
 
       {stickyPartner && editor == null && openLane == null ? (
