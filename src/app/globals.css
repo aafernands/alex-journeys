@@ -1961,6 +1961,7 @@ body:has(main.plan-flow) a[href="#newsletter"] {
   display: flex;
   flex: 1 1 auto;
   gap: 0.15rem;
+  border-bottom: 1px solid var(--border);
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
@@ -2079,21 +2080,15 @@ body:has(main.plan-flow) a[href="#newsletter"] {
 
 @media (min-width: 640px) {
   .plan-lane-tabs-bar {
-    flex-direction: row;
-    align-items: stretch;
-    gap: 0.35rem;
+    gap: 0;
   }
 
   .plan-lane-tab-aside {
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 0.15rem;
     width: auto;
-    margin-left: 0.15rem;
-    border-left: 1px solid var(--border);
-    background: var(--white);
-    padding-left: 0.9rem;
+    align-self: flex-start;
+    background: transparent;
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
   }
 
   .plan-lane-panel.plan-lane:not([hidden]) {
