@@ -50,7 +50,7 @@ export function TopicFlyout({
 
   return (
     <div
-      className="relative"
+      className="relative shrink-0"
       ref={wrapRef}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}

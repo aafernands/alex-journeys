@@ -52,10 +52,18 @@ export const PAGE_DEFAULTS: Record<string, SitePage> = {
     title: "Start here.",
     label: "Welcome",
     description:
-      "This is a personal travel blog — places I’ve been and notes from the road. Pick a path below and dig in.",
+      "A personal travel journal of places I’ve been and notes from the road. When you want to go, sketch the itinerary and book flights and stays in the same place.",
     contentHtml: "<p></p>",
     sections: {
       steps: [
+        {
+          title: "Plan a trip",
+          href: "/guides/plan-a-trip",
+          icon: "plane",
+          description:
+            "Sketch the days, then book flights and stays from the same itinerary. One place for the plan — not a deals site.",
+          cta: "Start planning",
+        },
         {
           title: "Places",
           href: "/destinations",
@@ -81,12 +89,12 @@ export const PAGE_DEFAULTS: Record<string, SitePage> = {
           cta: "Open guides",
         },
         {
-          title: "Tools",
+          title: "Gear & apps",
           href: "/tools",
-          icon: "suitcase",
+          icon: "backpack",
           description:
-            "Honest affiliate tools I use for stays, flights, insurance, and connectivity — not a booking desk.",
-          cta: "See tools",
+            "Affiliate recommendations I actually use — gear, apps, and staying connected. To book flights or a stay, use Plan a trip or Stays.",
+          cta: "See the list",
         },
       ],
       aboutTeaser:

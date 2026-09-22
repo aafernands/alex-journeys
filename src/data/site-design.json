@@ -20,6 +20,10 @@
       "label": "Read stories",
       "href": "/blog"
     },
+    "ctaTertiary": {
+      "label": "Plan a trip",
+      "href": "/guides/plan-a-trip"
+    },
     "objectPosition": "center",
     "overlay": true,
     "showFromTheRoad": true,

@@ -18,7 +18,7 @@ const STATIC_PAGES: Omit<SearchItem, "haystack" | "id">[] = [
     slug: "start-here",
     href: "/start-here",
     excerpt:
-      "New to Fernandes Journeys? Start with Places, Stories, Guides, and Tools from this personal travel journal.",
+      "New to Fernandes Journeys? Plan a trip and book flights and stays, or start with Places, Stories, and Guides. Gear and apps are affiliate picks, not the booking desk.",
   },
   {
     type: "page",

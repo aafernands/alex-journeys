@@ -66,6 +66,11 @@ export type HeroDesign = {
   subtitle: string;
   ctaPrimary: HeroCta;
   ctaSecondary: HeroCta;
+  /**
+   * Quieter third link beside the journal CTAs.
+   * Empty label hides it.
+   */
+  ctaTertiary: HeroCta;
   /** CSS object-position value, e.g. "center", "top", "50% 30%" */
   objectPosition: string;
   /** Soft dark overlay on hero image */
@@ -206,6 +211,10 @@ const DEFAULT_HERO: HeroDesign = {
     label: contentHero.ctaSecondary,
     href: "/blog",
   },
+  ctaTertiary: {
+    label: "Plan a trip",
+    href: "/guides/plan-a-trip",
+  },
   objectPosition: "center",
   overlay: true,
   showFromTheRoad: true,
@@ -306,6 +315,17 @@ function normalizeCta(raw: unknown, fallback: HeroCta): HeroCta {
     label: asString(o.label, fallback.label).trim() || fallback.label,
     href: asString(o.href, fallback.href).trim() || fallback.href,
   };
+}
+
+/** Missing tertiary CTA uses the fallback. A blank label hides the link. */
+function normalizeOptionalCta(raw: unknown, fallback: HeroCta): HeroCta {
+  if (raw === undefined || raw === null) return { ...fallback };
+  if (typeof raw !== "object") return { ...fallback };
+  const o = raw as Record<string, unknown>;
+  const label = asString(o.label, "").trim();
+  if (!label) return { label: "", href: "" };
+  const href = asString(o.href, fallback.href).trim() || fallback.href;
+  return { label, href };
 }
 
 function normalizeStats(raw: unknown, fallback: HeroStat[]): HeroStat[] {
@@ -441,6 +461,10 @@ export function normalizeSiteDesign(raw: unknown): SiteDesign {
     subtitle: asString(heroRaw.subtitle, base.hero.subtitle),
     ctaPrimary: normalizeCta(heroRaw.ctaPrimary, base.hero.ctaPrimary),
     ctaSecondary: normalizeCta(heroRaw.ctaSecondary, base.hero.ctaSecondary),
+    ctaTertiary: normalizeOptionalCta(
+      heroRaw.ctaTertiary,
+      base.hero.ctaTertiary,
+    ),
     objectPosition:
       asString(heroRaw.objectPosition, base.hero.objectPosition).trim() ||
       "center",
@@ -681,6 +705,13 @@ export function validateSiteDesignInput(raw: unknown): SiteDesignValidation {
   if (primaryErr) return { ok: false, error: primaryErr };
   const secondaryErr = validateHref(hero.ctaSecondary.href, "Secondary CTA");
   if (secondaryErr) return { ok: false, error: secondaryErr };
+  if (hero.ctaTertiary.label.trim()) {
+    if (hero.ctaTertiary.label.length > SHORT_MAX) {
+      return { ok: false, error: "Tertiary CTA label is too long (max 120)." };
+    }
+    const tertiaryErr = validateHref(hero.ctaTertiary.href, "Tertiary CTA");
+    if (tertiaryErr) return { ok: false, error: tertiaryErr };
+  }
 
   if (hero.fromTheRoad.label.length > SHORT_MAX) {
     return { ok: false, error: "From the road heading is too long (max 120)." };
@@ -830,6 +861,10 @@ export function validateSiteDesignInput(raw: unknown): SiteDesignValidation {
         ctaSecondary: {
           label: hero.ctaSecondary.label.trim(),
           href: hero.ctaSecondary.href.trim(),
+        },
+        ctaTertiary: {
+          label: hero.ctaTertiary.label.trim(),
+          href: hero.ctaTertiary.href.trim(),
         },
         objectPosition: hero.objectPosition.trim() || "center",
         fromTheRoad: {
