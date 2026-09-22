@@ -1570,6 +1570,19 @@ body.mobile-bottom-nav-visible .plan-sticky {
 }
 
 @media (max-width: 639px) {
+  .plan-sticky {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 140;
+    margin: 0;
+  }
+
+  body.mobile-bottom-nav-visible .plan-trip {
+    padding-bottom: calc(5.5rem + var(--mobile-nav-bar) + env(safe-area-inset-bottom, 0px));
+  }
+
   .plan-sticky-solo > .btn,
   .plan-sticky-solo > a.btn {
     flex: 1;

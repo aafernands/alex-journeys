@@ -1063,24 +1063,6 @@ export function ItineraryHub({
         })}
       </div>
 
-      {stickyPartner && editor == null ? (
-        <div className="plan-sticky plan-sticky-page plan-sticky-solo plan-mobile-only">
-          <OutboundLink
-            href={resolveAffiliateHref(
-              stickyPartner,
-              partnerUrlValues(stickyPartner, state, flexibleOn),
-            )}
-            affiliate
-            target="_blank"
-            rel="noopener noreferrer sponsored"
-            className={`btn ${stickyPartner.isCore ? "btn-primary" : "btn-secondary"}`}
-          >
-            {stickyPartner.buttonLabel}
-            <span className="sr-only"> (opens in a new tab)</span>
-          </OutboundLink>
-        </div>
-      ) : null}
-
       <PlanFold
         id={`${headingId}-days`}
         title="Days"
@@ -1340,6 +1322,24 @@ export function ItineraryHub({
           .
         </p>
       </PlanFold>
+
+      {stickyPartner && editor == null ? (
+        <div className="plan-sticky plan-sticky-page plan-sticky-solo plan-mobile-only">
+          <OutboundLink
+            href={resolveAffiliateHref(
+              stickyPartner,
+              partnerUrlValues(stickyPartner, state, flexibleOn),
+            )}
+            affiliate
+            target="_blank"
+            rel="noopener noreferrer sponsored"
+            className={`btn ${stickyPartner.isCore ? "btn-primary" : "btn-secondary"}`}
+          >
+            {stickyPartner.buttonLabel}
+            <span className="sr-only"> (opens in a new tab)</span>
+          </OutboundLink>
+        </div>
+      ) : null}
     </>
   );
 }
