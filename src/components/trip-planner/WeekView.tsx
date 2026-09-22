@@ -58,7 +58,7 @@ function WeekChip({
       } ${dragging ? "opacity-50" : ""}`}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className={`${plan.caption} min-w-0 font-semibold text-heading`}>
+        <p className={`${plan.body} min-w-0 font-semibold text-heading`}>
           {item.time ? (
             <span className="mr-1 text-accent">{item.time}</span>
           ) : null}
