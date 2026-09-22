@@ -125,7 +125,7 @@ Optional: `POST /api/auth/change-email/cancel` clears pending tokens for the sig
 | Variable | Notes |
 | --- | --- |
 | `AUTH_SECRET` | Required for all Auth.js |
-| `AUTH_URL` | Optional canonical site URL for reset links (e.g. `https://www.fernandesjourneys.com`). Falls back to `NEXTAUTH_URL`, then the production domain. |
+| `AUTH_URL` | Production: `https://www.fernandesjourneys.com` (no path). Used for reset links and for the OAuth callback host. A wrong host (apex vs www) drops the X session after Authorize. Details: [X-SIGN-IN.md](./X-SIGN-IN.md). |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google button on `/login` |
 | `AUTH_TWITTER_ID` / `AUTH_TWITTER_SECRET` | **Continue with X** on `/login` when both are set. OAuth 2.0 Client ID + Client Secret (not the OAuth 1.0 API key). Does not unlock CMS. Full checklist: [X-SIGN-IN.md](./X-SIGN-IN.md). |
 | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Required for email/password + user profiles + reset tokens |

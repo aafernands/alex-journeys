@@ -64,6 +64,16 @@ export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
+/**
+ * Email from an OAuth profile, or null when the provider omitted it.
+ * X OAuth 2 usually has no email. Never throws on null, blank, or a non-string.
+ */
+export function optionalOauthEmail(email: unknown): string | null {
+  if (typeof email !== "string") return null;
+  const normalized = normalizeEmail(email);
+  return normalized || null;
+}
+
 /** Stable Firestore doc id for email/password accounts. */
 export function credentialsUserId(email: string): string {
   const normalized = normalizeEmail(email);
@@ -332,7 +342,7 @@ export async function upsertOauthUser(
     const id = input.id.trim();
     if (!id || id.includes("/")) return { ok: true };
 
-    const email = input.email ? normalizeEmail(input.email) : "";
+    const email = optionalOauthEmail(input.email) ?? "";
     const ref = usersCollection().doc(id);
     const prior = await ref.get();
     const priorData = prior.exists ? prior.data() ?? {} : {};

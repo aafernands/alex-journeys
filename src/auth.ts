@@ -13,9 +13,11 @@ import {
   isTwitterAuthConfigured,
 } from "@/lib/auth-config";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
+import { twitterAuthorization } from "@/lib/twitter-oauth";
 import {
   authorizeCredentials,
   getUserById,
+  optionalOauthEmail,
   upsertOauthUser,
 } from "@/lib/users";
 
@@ -59,10 +61,9 @@ const providers = [
         Twitter({
           clientId: process.env.AUTH_TWITTER_ID!,
           clientSecret: process.env.AUTH_TWITTER_SECRET!,
-          // Profile only. The provider default also asks for tweet.read,
-          // which this site does not use.
-          authorization:
-            "https://x.com/i/oauth2/authorize?scope=users.read%20offline.access",
+          // url + params (not a raw authorize URL, and not params alone).
+          // Scope is users.read + offline.access — no tweet.read.
+          authorization: twitterAuthorization,
         }),
       ]
     : []),
@@ -164,9 +165,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           try {
             const profile = await getUserById(sub);
             if (profile) {
-              if (profile.email) {
-                token.email = profile.email;
-              }
+              const syncedEmail = optionalOauthEmail(profile.email);
+              if (syncedEmail) token.email = syncedEmail;
               if (profile.name !== undefined) {
                 token.name = profile.name;
               }
@@ -181,9 +181,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       }
 
+      // X often has no email. Missing or non-string values must not throw.
       const email =
-        (typeof token.email === "string" ? token.email : undefined) ??
-        user?.email ??
+        optionalOauthEmail(token.email) ??
+        optionalOauthEmail(user?.email) ??
         undefined;
       token.isAdmin = grantsCmsAdmin({
         email,
@@ -197,9 +198,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (typeof token.sub === "string" && token.sub) {
           session.user.id = token.sub;
         }
-        if (typeof token.email === "string") {
-          session.user.email = token.email;
-        }
+        // X often omits email. Only write a real address onto the session.
+        const sessionEmail = optionalOauthEmail(token.email);
+        if (sessionEmail) session.user.email = sessionEmail;
         if (typeof token.name === "string" || token.name === null) {
           session.user.name = token.name as string | null;
         }
@@ -226,14 +227,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           account.providerAccountId ||
           (typeof user.id === "string" ? user.id : "");
         if (!id) return false;
-        const result = await upsertOauthUser({
-          id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          provider: account.provider,
-        });
-        return result.ok;
+        try {
+          const result = await upsertOauthUser({
+            id,
+            // null is valid: X OAuth 2 usually omits email.
+            email: optionalOauthEmail(user?.email),
+            name: user.name,
+            image: user.image,
+            provider: account.provider,
+          });
+          return result.ok;
+        } catch (err) {
+          // A thrown signIn callback becomes error=Configuration and
+          // sends the reader back to /login with no session.
+          console.error("[auth] oauth signIn failed:", err);
+          return true;
+        }
       }
 
       // GitHub (CMS tooling): allowlisted admins only + upsert profile.
