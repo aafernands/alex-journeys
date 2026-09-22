@@ -19,6 +19,7 @@ import {
   iataHint,
   isFlightOfferId,
   isFlightPrebookId,
+  flightBookingPayment,
   mapAirportMatch,
   mapFlightBooking,
   mapFlightPrebook,
@@ -214,6 +215,13 @@ export async function prebookFlight(offerId: string, party: FlightParty): Promis
       "upstream",
     );
   }
+  if (!prebook.payment) {
+    throw new LiteApiError(
+      "Nuitee held the fare but did not return a card payment. Search again and pick the flight once more.",
+      502,
+      "upstream",
+    );
+  }
   return prebook;
 }
 
@@ -223,9 +231,8 @@ export async function bookFlight(prebookId: string, transactionId = ""): Promise
   }
   const info = liteApiKeyInfo();
   if (!info) throw new LiteApiError("Flights aren’t configured.", 503, "not_configured");
-  const transaction = transactionId.trim();
-  const cardPayment = /^[A-Za-z0-9_-]{6,200}$/.test(transaction);
-  if (!cardPayment && !info.sandbox) {
+  const payment = flightBookingPayment(transactionId);
+  if (!payment) {
     throw new LiteApiError(
       "Confirm the card payment before booking this flight.",
       409,
@@ -236,12 +243,7 @@ export async function bookFlight(prebookId: string, transactionId = ""): Promise
     base: LITEAPI_SEARCH_BASE,
     path: "/flights/bookings",
     method: "POST",
-    body: {
-      prebookId,
-      payment: cardPayment
-        ? { method: "TRANSACTION_ID", transactionId: transaction }
-        : { method: "CREDIT" },
-    },
+    body: { prebookId, payment },
     timeoutMs: 25_000,
     ...flightCall,
   });

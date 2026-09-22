@@ -96,6 +96,16 @@ export type FlightCardPayment = {
   publishableKey: string;
 };
 
+/**
+ * Body for `POST /flights/bookings`. Flights accept Stripe’s transaction id.
+ * Hotel account credit (`ACC_CREDIT_CARD`) and an unconfigured credit line (`CREDIT`)
+ * are rejected by Nuitee as an unsupported payment method.
+ */
+export type FlightBookingPayment = {
+  method: "TRANSACTION_ID";
+  transactionId: string;
+};
+
 export type FlightPrebook = {
   prebookId: string;
   price: FlightMoney | null;
@@ -1039,15 +1049,66 @@ export function mapFlightPrebook(payload: unknown): FlightPrebook | null {
   return { prebookId, price, offer: verified.offer, payment: mapCardPayment(first) };
 }
 
+const FLIGHT_TRANSACTION_ID = /^[A-Za-z0-9_-]{8,200}$/;
+const FLIGHT_CLIENT_SECRET = /^pi_[A-Za-z0-9_]{10,400}$/;
+const FLIGHT_PUBLISHABLE_KEY = /^pk_(?:test|live)_[A-Za-z0-9]{8,200}$/;
+
+/** Method names Nuitee rejects on flight book. Never send these as `payment.method`. */
+const UNSUPPORTED_FLIGHT_PAYMENT_METHODS = new Set([
+  "ACC_CREDIT_CARD",
+  "CREDIT",
+  "THIRD_PARTY",
+  "TRANSACTION",
+  "TRANSACTION_ID",
+  "WALLET",
+]);
+
+export function flightBookingPayment(transactionId: string): FlightBookingPayment | null {
+  const transaction = transactionId.trim();
+  if (!FLIGHT_TRANSACTION_ID.test(transaction)) return null;
+  if (UNSUPPORTED_FLIGHT_PAYMENT_METHODS.has(transaction.toUpperCase())) return null;
+  return { method: "TRANSACTION_ID", transactionId: transaction };
+}
+
+function paymentTypesAllowCard(record: Record<string, unknown>): boolean {
+  const raw = record.paymentTypes ?? asRecord(record.payment)?.paymentTypes;
+  if (!Array.isArray(raw) || raw.length === 0) return true;
+  return raw.some((entry) => text(entry, 40).toUpperCase() === "TRANSACTION_ID");
+}
+
 function mapCardPayment(record: Record<string, unknown>): FlightCardPayment | null {
+  if (!paymentTypesAllowCard(record)) return null;
   const nested = asRecord(record.payment);
-  const transactionId = text(record.transactionId ?? nested?.transactionId, 200);
-  const clientSecret = text(record.secretKey ?? record.clientSecret ?? nested?.secretKey, 400);
-  const publishableKey = text(record.publishableKey ?? nested?.publishableKey, 200);
-  if (!/^[A-Za-z0-9_-]{6,200}$/.test(transactionId)) return null;
-  if (!/^pi_[A-Za-z0-9_]{10,360}$/.test(clientSecret)) return null;
-  if (!/^pk_(?:test|live)_[A-Za-z0-9]{8,160}$/.test(publishableKey)) return null;
-  return { transactionId, clientSecret, publishableKey };
+  const stripe = asRecord(nested?.stripe) ?? asRecord(record.stripe);
+  const transactionId = text(
+    record.transactionId ?? nested?.transactionId ?? stripe?.transactionId,
+    200,
+  );
+  const clientSecret = text(
+    record.secretKey ??
+      record.clientSecret ??
+      nested?.secretKey ??
+      nested?.clientSecret ??
+      stripe?.secretKey ??
+      stripe?.clientSecret,
+    400,
+  );
+  const publishableKey = text(
+    record.publishableKey ??
+      nested?.publishableKey ??
+      stripe?.publishableKey ??
+      record.stripePublishableKey,
+    220,
+  );
+  const payment = flightBookingPayment(transactionId);
+  if (!payment) return null;
+  if (!FLIGHT_CLIENT_SECRET.test(clientSecret)) return null;
+  if (!FLIGHT_PUBLISHABLE_KEY.test(publishableKey)) return null;
+  return {
+    transactionId: payment.transactionId,
+    clientSecret,
+    publishableKey,
+  };
 }
 
 export function mapFlightBooking(payload: unknown): FlightBooking | null {
@@ -1171,6 +1232,28 @@ export function classifyFlightFailure(input: {
   }
   if (/too many|rate limit|wait a moment/i.test(message)) {
     return { title: "Give it a moment", message, recovery: "retry" };
+  }
+  if (/did not return a card payment|card payment isn/i.test(message)) {
+    return {
+      title: "Card payment isn’t available",
+      message,
+      recovery: "back-to-search",
+    };
+  }
+  if (/payment method unsupported|not supported payment method/i.test(message)) {
+    return {
+      title: "Booking didn’t finish",
+      message:
+        "Nuitee rejected that payment method. Confirm the card in the Stripe form, then book with the transaction id.",
+      recovery: "retry",
+    };
+  }
+  if (/card rejected|card was declined|card has been declined/i.test(message)) {
+    return {
+      title: "The card was declined",
+      message,
+      recovery: "retry",
+    };
   }
   if (/price change|price has changed|fare change/i.test(message)) {
     return {

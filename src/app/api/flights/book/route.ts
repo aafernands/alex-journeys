@@ -20,9 +20,8 @@ function fail(error: unknown) {
 }
 
 /**
- * POST /api/flights/book { prebookId, transactionId? }
- * Card checkouts send the Nuitee transaction id after Stripe confirms.
- * Sandbox credit is only used when prebook did not return a PaymentIntent.
+ * POST /api/flights/book { prebookId, transactionId }
+ * Books only after Stripe confirms, with payment.method TRANSACTION_ID.
  */
 export async function POST(request: Request) {
   const limit = rateLimit(staysCallerKey(request, "flights-book"), 8, 60_000);
