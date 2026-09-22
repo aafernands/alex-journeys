@@ -148,6 +148,8 @@ describe("readerLoginErrorMessage", () => {
   it("names OAuth callback, configuration, denial, and verification", () => {
     const callback = readerLoginErrorMessage("OAuthCallbackError");
     assert.match(callback, /callback URL and client secret/);
+    assert.match(callback, /does not post/);
+    assert.match(callback, /approve the requested access/);
     assert.match(callback, /\(OAuthCallbackError\)$/);
     assert.match(readerLoginErrorMessage("OAuthCallback"), /\(OAuthCallback\)$/);
     assert.match(readerLoginErrorMessage("Configuration"), /AUTH_URL/);

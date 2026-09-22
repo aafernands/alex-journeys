@@ -6,7 +6,7 @@
  * Unknown codes still name themselves so a new Auth.js code is visible.
  */
 const OAUTH_CALLBACK =
-  "The provider could not finish sign-in after you authorized. Check that the callback URL and client secret match the app, then try again.";
+  "The provider could not finish sign-in after you authorized. Try again and approve the requested access. This site does not post. If it still fails, check that the callback URL and client secret match the app.";
 
 const ACCOUNT_NOT_LINKED =
   "That email is already used with a different sign-in method. Use the method you used originally.";
