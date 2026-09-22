@@ -3,8 +3,15 @@ import { createHmac } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import {
+  INBOUND_NAME_FALLBACK,
+  createInboundToken,
+  firstAvailableLocalPart,
   formatInboundAddress,
+  inboundLocalPartAttempts,
+  isFriendlyInboundLocalPart,
+  isInboundLocalPart,
   isInboundToken,
+  slugifyInboundName,
   tokensFromRecipients,
 } from "../src/lib/inbound-address.ts";
 import {
@@ -29,11 +36,24 @@ function unitedText() {
   return sample;
 }
 
+function makeRandom(seed = 1) {
+  let state = seed >>> 0;
+  return (exclusiveMax) => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    return exclusiveMax <= 1 ? 0 : state % exclusiveMax;
+  };
+}
+
 describe("forward address", () => {
-  it("reads a trip token and a plus-address on the inbound host only", () => {
+  it("reads a legacy hex token and a plus-address on the inbound host only", () => {
     assert.equal(isInboundToken(TOKEN), true);
     assert.equal(isInboundToken(TOKEN.toUpperCase()), false);
+    assert.equal(isFriendlyInboundLocalPart(TOKEN), false);
+    assert.equal(isInboundLocalPart(TOKEN), true);
     assert.equal(formatInboundAddress(TOKEN, DOMAIN), `${TOKEN}@${DOMAIN}`);
+    const legacy = createInboundToken();
+    assert.equal(isInboundToken(legacy), true);
+    assert.equal(legacy.length, 32);
     assert.deepEqual(
       tokensFromRecipients(
         [
@@ -44,6 +64,87 @@ describe("forward address", () => {
         DOMAIN,
       ),
       [TOKEN],
+    );
+  });
+
+  it("slugifies a first name and falls back when there is nothing to keep", () => {
+    assert.equal(slugifyInboundName("Alex Fernandes"), "alex");
+    assert.equal(slugifyInboundName("  Mary-Jane   O'Brien "), "mary-jane");
+    assert.equal(slugifyInboundName("José María"), "jose");
+    assert.equal(slugifyInboundName("Søren"), "soren");
+    assert.equal(slugifyInboundName("Ægir"), "aegir");
+    assert.equal(slugifyInboundName("Åsa"), "asa");
+    assert.equal(slugifyInboundName("O'Brien"), "obrien");
+    assert.equal(slugifyInboundName("Straße"), "strasse");
+    assert.equal(slugifyInboundName("Alex2"), "alex2");
+    assert.equal(slugifyInboundName("A".repeat(80)), "a".repeat(40));
+    assert.equal(slugifyInboundName(""), INBOUND_NAME_FALLBACK);
+    assert.equal(slugifyInboundName("   "), INBOUND_NAME_FALLBACK);
+    assert.equal(slugifyInboundName(null), INBOUND_NAME_FALLBACK);
+    assert.equal(slugifyInboundName("李明"), INBOUND_NAME_FALLBACK);
+  });
+
+  it("assigns firstname-NN, then a longer suffix only after 00–99 are taken", () => {
+    const rng = makeRandom(4);
+    const attempts = inboundLocalPartAttempts("Alex Fernandes", rng);
+    const twoDigit = attempts.filter((local) => /^alex-\d{2}$/.test(local));
+    const threeDigit = attempts.filter((local) => /^alex-\d{3}$/.test(local));
+    const fourDigit = attempts.filter((local) => /^alex-\d{4}$/.test(local));
+    assert.equal(new Set(twoDigit).size, 100);
+    assert.equal(threeDigit.length >= 1 && threeDigit.length <= 24, true);
+    assert.equal(fourDigit.length >= 1 && fourDigit.length <= 16, true);
+    assert.equal(attempts.length, twoDigit.length + threeDigit.length + fourDigit.length);
+    assert.equal(
+      attempts.findIndex((local) => /^alex-\d{3,4}$/.test(local)),
+      100,
+    );
+    assert.notDeepEqual(
+      twoDigit.map((local) => local.slice("alex-".length)),
+      Array.from({ length: 100 }, (_, index) => String(index).padStart(2, "0")),
+    );
+    for (const local of attempts) {
+      assert.equal(isFriendlyInboundLocalPart(local), true);
+      assert.equal(isInboundToken(local), false);
+    }
+
+    const open = firstAvailableLocalPart(attempts, new Set());
+    assert.match(open, /^alex-\d{2}$/);
+    assert.equal(formatInboundAddress(open, DOMAIN), `${open}@${DOMAIN}`);
+
+    const skipped = firstAvailableLocalPart(attempts, new Set([attempts[0]]));
+    assert.match(skipped, /^alex-\d{2}$/);
+    assert.notEqual(skipped, attempts[0]);
+
+    const takenTwo = new Set(twoDigit);
+    const overflow = firstAvailableLocalPart(attempts, takenTwo);
+    assert.match(overflow, /^alex-\d{3}$/);
+    assert.equal(takenTwo.has(overflow), false);
+
+    const takenThroughThree = new Set(attempts.filter((local) => /^alex-\d{2,3}$/.test(local)));
+    const wider = firstAvailableLocalPart(attempts, takenThroughThree);
+    assert.match(wider, /^alex-\d{4}$/);
+    assert.equal(firstAvailableLocalPart(attempts, new Set(attempts)), null);
+    assert.match(inboundLocalPartAttempts(null, rng)[0], /^trip-\d{2}$/);
+  });
+
+  it("resolves friendly addresses and legacy hex tokens on the same inbound host", () => {
+    assert.equal(isInboundLocalPart("alex-24"), true);
+    assert.equal(isInboundLocalPart("alex-024"), true);
+    assert.equal(isInboundLocalPart("alex-7"), false);
+    assert.equal(isFriendlyInboundLocalPart("not-a-token"), false);
+    assert.deepEqual(
+      tokensFromRecipients(
+        [
+          `Alex <Alex-24@${DOMAIN}>`,
+          `trip+${TOKEN}@${DOMAIN}`,
+          `alex-7@${DOMAIN}`,
+          `alex-10000@${DOMAIN}`,
+          `notes+alex-24@${DOMAIN}`,
+          `other@example.com`,
+        ],
+        DOMAIN,
+      ),
+      ["alex-24", TOKEN],
     );
   });
 });

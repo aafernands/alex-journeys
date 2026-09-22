@@ -5,13 +5,17 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { InboundUnavailableError } from "@/lib/inbound-store";
 
-export async function requireReaderId(): Promise<{ userId: string } | NextResponse> {
+export async function requireReaderId(): Promise<
+  { userId: string; displayName: string | null } | NextResponse
+> {
   const session = await auth();
   const userId = session?.user?.id?.trim();
   if (!session?.user || !userId) {
     return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
-  return { userId };
+  const name = session.user.name;
+  const displayName = typeof name === "string" && name.trim() ? name.trim() : null;
+  return { userId, displayName };
 }
 
 export function inboundFailure(err: unknown, fallback: string): NextResponse {

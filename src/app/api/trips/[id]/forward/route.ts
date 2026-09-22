@@ -18,7 +18,11 @@ export async function GET(_request: Request, context: RouteContext) {
   }
   const { id } = await context.params;
   try {
-    const mailbox = await readOrCreateMailbox(gate.userId, { kind: "trip", tripId: id });
+    const mailbox = await readOrCreateMailbox(
+      gate.userId,
+      { kind: "trip", tripId: id },
+      { displayName: gate.displayName },
+    );
     if (!mailbox) return NextResponse.json({ error: "Trip not found." }, { status: 404 });
     return NextResponse.json({ mailbox });
   } catch (err) {
@@ -44,7 +48,9 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   const { id } = await context.params;
   try {
-    const mailbox = await updateMailbox(gate.userId, { kind: "trip", tripId: id }, patch);
+    const mailbox = await updateMailbox(gate.userId, { kind: "trip", tripId: id }, patch, {
+      displayName: gate.displayName,
+    });
     if (!mailbox) return NextResponse.json({ error: "Trip not found." }, { status: 404 });
     return NextResponse.json({ ok: true, mailbox });
   } catch (err) {
