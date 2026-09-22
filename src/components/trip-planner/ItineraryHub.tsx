@@ -41,6 +41,7 @@ import {
 import type { StoredPlan } from "@/lib/trip-planner-storage";
 import { plan } from "@/components/trip-planner/density";
 import { ForwardBookings } from "@/components/trip-planner/ForwardBookings";
+import { PlanFold } from "@/components/trip-planner/PlanFold";
 import { WeekView } from "@/components/trip-planner/WeekView";
 
 type Props = {
@@ -403,12 +404,12 @@ function BookingItemForm({
           {error}
         </p>
       ) : null}
-      <div className="plan-actions plan-actions-inline">
-        <button type="submit" className="btn btn-primary">
-          {existing ? "Save changes" : "Add to itinerary"}
-        </button>
+      <div className="plan-actions plan-actions-inline plan-sticky plan-sticky-page">
         <button type="button" className="btn btn-secondary" onClick={onCancel}>
           Cancel
+        </button>
+        <button type="submit" className="btn btn-primary">
+          {existing ? "Save changes" : "Add to itinerary"}
         </button>
       </div>
     </form>
@@ -574,7 +575,7 @@ function JournalNotes({
   const place = destination.split(",")[0]?.trim() || destination.trim();
   return (
     <section className="plan-block" aria-labelledby={`${headingId}-journal`}>
-      <h3 id={`${headingId}-journal`} className={plan.h3}>
+      <h3 id={`${headingId}-journal`} className={`${plan.h3} max-sm:hidden`}>
         Notes from trips I’ve already walked
       </h3>
       {matches.length === 0 ? (
@@ -635,6 +636,7 @@ export function ItineraryHub({
   onRememberGuestDraft,
 }: Props) {
   const [copied, setCopied] = useState(false);
+  const [openLane, setOpenLane] = useState<string | null>(null);
   const [layout, setLayout] = useState<"timeline" | "week">("timeline");
   const [editor, setEditor] = useState<
     | { kind: "add-lane"; laneKey: string }
@@ -652,6 +654,13 @@ export function ItineraryHub({
   const unscheduled = sorted.filter(
     (item) => scheduledDayIndex(item, days.length) == null,
   );
+  const stillOpen = partners.filter(
+    (partner) => laneProgress(itemsForLane(items, partner)) === "open",
+  ).length;
+  const stickyPartner =
+    partners.find((partner) => partner.key === openLane) ??
+    partners.find((partner) => laneProgress(itemsForLane(items, partner)) === "open") ??
+    null;
 
   function renderTimeline(list: TripItem[]) {
     return (
@@ -736,28 +745,23 @@ export function ItineraryHub({
 
   return (
     <>
-      <div className="plan-toolbar">
-        <div className="min-w-0 plan-stack-tight">
-          <h2 id={headingId} className={plan.h2}>
-            {config.steps.next.heading}
-          </h2>
-          <p className={plan.h3}>
-            {tripTitle?.trim() || state.destination.trim()}
-          </p>
-          {tripTitle?.trim() ? (
-            <p className={`${plan.caption} text-muted`}>{state.destination.trim()}</p>
-          ) : null}
-          <p className={`${plan.caption} text-muted`}>
-            {[dates, travelers].filter(Boolean).join(" · ")}
-          </p>
-          <p className={`${plan.prose} text-muted`}>
-            {subhead}
-          </p>
-        </div>
-        <div className="plan-actions plan-actions-inline">
+      <div className="plan-stack-tight">
+        <p className={`${plan.caption} font-semibold text-muted`}>Itinerary</p>
+        <h2 id={headingId} className={plan.h2}>
+          {tripTitle?.trim() || state.destination.trim() || config.steps.next.heading}
+        </h2>
+        {tripTitle?.trim() ? (
+          <p className={`${plan.caption} text-muted`}>{state.destination.trim()}</p>
+        ) : null}
+        <p className={`${plan.caption} text-muted`}>
+          {[dates, travelers].filter(Boolean).join(" · ")}
+          {partners.length > 0 ? ` · ${stillOpen} still to book` : ""}
+        </p>
+        <p className={`${plan.prose} text-muted plan-desktop-only`}>{subhead}</p>
+        <div className="plan-inline-actions">
           <button
             type="button"
-            className="btn btn-secondary"
+            className={`${plan.textBtn} text-accent`}
             onClick={async () => {
               const url = `${window.location.origin}${sharePlanHref({
                 state,
@@ -778,10 +782,13 @@ export function ItineraryHub({
               window.setTimeout(() => setCopied(false), 2500);
             }}
           >
-            Copy itinerary link
+            Copy link
           </button>
-          <button type="button" className="btn btn-secondary" onClick={onEditTrip}>
-            Edit trip
+          <button type="button" className={`${plan.textBtn} text-heading`} onClick={onEditTrip}>
+            Edit
+          </button>
+          <button type="button" className={`${plan.textBtn} text-muted`} onClick={onStartOver}>
+            Start over
           </button>
         </div>
       </div>
@@ -792,19 +799,30 @@ export function ItineraryHub({
       ) : null}
 
       {saveMode === "local" ? (
-        <aside className={`${plan.soft} plan-section plan-stack-tight`} aria-label="Save itinerary">
-          <p className={`${plan.prose} text-text`}>
-            {tripId
-              ? "You’re signed out. This itinerary stays in this browser. Sign in to keep saving it to your account."
-              : config.checklistHint}
-          </p>
-          {tripId ? null : (
+        <>
+          <div className="plan-mobile-only">
+            <Link
+              href={planATripLoginHref(tripId, "signin")}
+              className={`${plan.textBtn} text-accent`}
+              onClick={onRememberGuestDraft}
+            >
+              Sign in to save
+            </Link>
+          </div>
+          <aside className={`${plan.soft} plan-section plan-stack-tight plan-desktop-only`} aria-label="Save itinerary">
             <p className={`${plan.prose} text-text`}>
-              Sign in or create an account and you’ll come back to this itinerary.
+              {tripId
+                ? "You’re signed out. This itinerary stays in this browser. Sign in to keep saving it to your account."
+                : config.checklistHint}
             </p>
-          )}
-          <ItineraryAuthLinks tripId={tripId} onRemember={onRememberGuestDraft} />
-        </aside>
+            {tripId ? null : (
+              <p className={`${plan.prose} text-text`}>
+                Sign in or create an account and you’ll come back to this itinerary.
+              </p>
+            )}
+            <ItineraryAuthLinks tripId={tripId} onRemember={onRememberGuestDraft} />
+          </aside>
+        </>
       ) : null}
 
       {saveMode === "offer" ? (
@@ -853,18 +871,20 @@ export function ItineraryHub({
         </div>
       ) : null}
 
-      <ForwardBookings
-        headingId={headingId}
-        tripId={tripId}
-        days={days}
-        partners={partners}
-        nextSort={nextSort}
-        onAddItem={addItem}
-        onRemember={onRememberGuestDraft}
-      />
+      <PlanFold id={`${headingId}-inbox`} title="Inbox" meta="Email">
+        <ForwardBookings
+          headingId={headingId}
+          tripId={tripId}
+          days={days}
+          partners={partners}
+          nextSort={nextSort}
+          onAddItem={addItem}
+          onRemember={onRememberGuestDraft}
+        />
+      </PlanFold>
 
       {partners.length > 0 ? (
-        <section className="plan-section" aria-labelledby={`${headingId}-left`}>
+        <section className="plan-section plan-desktop-only" aria-labelledby={`${headingId}-left`}>
           <h3 id={`${headingId}-left`} className={plan.label}>
             What’s left to book
           </h3>
@@ -900,7 +920,7 @@ export function ItineraryHub({
         </aside>
       ) : null}
 
-      <div className="plan-stack plan-block">
+      <div className="plan-lanes plan-section">
         {partners.map((partner) => {
           const href = resolveAffiliateHref(
             partner,
@@ -908,14 +928,39 @@ export function ItineraryHub({
           );
           const laneItems = itemsForLane(items, partner);
           const adding = editor?.kind === "add-lane" && editor.laneKey === partner.key;
+          const laneOpen = openLane === partner.key;
+          const panelId = `${headingId}-lane-${partner.key}`;
           return (
             <article
               key={partner.key}
-              className={`plan-inset plan-stack border border-border ${
-                partner.isCore ? "bg-surface-soft" : "bg-white"
-              }`}
+              className={`plan-lane ${partner.isCore ? "plan-lane-core" : ""}`}
             >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="sm:hidden">
+                <button
+                  type="button"
+                  className="plan-fold-toggle"
+                  aria-expanded={laneOpen}
+                  aria-controls={panelId}
+                  onClick={() =>
+                    setOpenLane((current) => (current === partner.key ? null : partner.key))
+                  }
+                >
+                  <span className="icon-tile icon-tile-sm shrink-0">
+                    <NavIcon name={laneIcon(partner)} size={16} />
+                  </span>
+                  <span className="plan-fold-title">{partner.label}</span>
+                  <span className="plan-fold-meta">
+                    {LANE_PROGRESS_LABEL[laneProgress(laneItems)]}
+                  </span>
+                  <span className="plan-fold-chevron" aria-hidden="true" />
+                </button>
+              </h3>
+              <div
+                id={panelId}
+                data-open={laneOpen ? "true" : "false"}
+                className="plan-lane-body"
+              >
+              <div className="hidden gap-3 sm:flex sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-start gap-3">
                   <span className="icon-tile icon-tile-sm shrink-0">
                     <NavIcon name={laneIcon(partner)} size={16} />
@@ -943,10 +988,17 @@ export function ItineraryHub({
                 </OutboundLink>
               </div>
 
+              {partner.blurb ? (
+                <p className={`${plan.caption} text-muted sm:hidden`}>{partner.blurb}</p>
+              ) : null}
+
               {laneItems.length === 0 ? (
-                <p className={`${plan.body} text-muted`}>
-                  Nothing saved here yet. Search, then add the booking you want to keep.
-                </p>
+                <>
+                  <p className={`${plan.caption} text-muted sm:hidden`}>Nothing saved yet</p>
+                  <p className={`${plan.body} text-muted plan-desktop-only`}>
+                    Nothing saved here yet. Search, then add the booking you want to keep.
+                  </p>
+                </>
               ) : (
                 <ul className="plan-stack-tight">
                   {laneItems.map((item) => {
@@ -997,19 +1049,46 @@ export function ItineraryHub({
                 <button
                   type="button"
                   className={`${plan.textBtn} self-start text-accent hover:underline`}
-                  onClick={() => setEditor({ kind: "add-lane", laneKey: partner.key })}
+                  onClick={() => {
+                    setOpenLane(partner.key);
+                    setEditor({ kind: "add-lane", laneKey: partner.key });
+                  }}
                 >
                   Add to itinerary
                 </button>
               )}
+              </div>
             </article>
           );
         })}
       </div>
 
-      <section className="plan-block" aria-labelledby={`${headingId}-list`}>
+      {stickyPartner && editor == null ? (
+        <div className="plan-sticky plan-sticky-page plan-sticky-solo plan-mobile-only">
+          <OutboundLink
+            href={resolveAffiliateHref(
+              stickyPartner,
+              partnerUrlValues(stickyPartner, state, flexibleOn),
+            )}
+            affiliate
+            target="_blank"
+            rel="noopener noreferrer sponsored"
+            className={`btn ${stickyPartner.isCore ? "btn-primary" : "btn-secondary"}`}
+          >
+            {stickyPartner.buttonLabel}
+            <span className="sr-only"> (opens in a new tab)</span>
+          </OutboundLink>
+        </div>
+      ) : null}
+
+      <PlanFold
+        id={`${headingId}-days`}
+        title="Days"
+        meta={days.length > 0 ? `${sorted.length} saved` : "No dates"}
+      >
+      <section aria-labelledby={`${headingId}-list`}>
         <div className="plan-toolbar">
-          <h3 id={`${headingId}-list`} className={plan.h3}>
+          <h3 id={`${headingId}-list`} className={`${plan.h3} max-sm:hidden`}>
             Day by day
           </h3>
           <div className="plan-inline-actions" role="tablist" aria-label="Itinerary layout">
@@ -1042,13 +1121,13 @@ export function ItineraryHub({
           </div>
         </div>
         {sorted.length === 0 ? (
-          <p className={`${plan.prose} plan-follow text-muted`}>
+          <p className={`${plan.prose} plan-follow text-muted plan-desktop-only`}>
             Nothing saved yet. Search a partner, then add the booking you want to keep.
           </p>
         ) : null}
         {days.length === 0 ? (
-          <p className={`${plan.prose} plan-follow text-muted`}>
-            Add start and end dates to split this trip into days.
+          <p className={`${plan.caption} plan-follow text-muted`}>
+            Add dates to split this trip into days.
           </p>
         ) : null}
         {layout === "timeline" ? (
@@ -1117,7 +1196,7 @@ export function ItineraryHub({
                     >
                       {day.index}
                     </span>
-                    <div className={`${plan.inset} min-w-0 flex-1 border border-border bg-white`}>
+                    <div className={`${plan.inset} plan-day-card min-w-0 flex-1 border border-border bg-white`}>
                       {day.detail ? (
                         <p className={`${plan.caption} font-semibold text-muted`}>
                           {day.detail}
@@ -1127,8 +1206,8 @@ export function ItineraryHub({
                         {day.label}
                       </h4>
                       {dayItems.length === 0 ? (
-                        <p className={`${plan.body} plan-follow text-muted`}>
-                          Nothing on this day yet. Add a booking above and assign it to {day.label}.
+                        <p className={`${plan.caption} text-muted plan-desktop-only`}>
+                          Nothing on this day yet.
                         </p>
                       ) : (
                         renderTimeline(dayItems)
@@ -1214,19 +1293,31 @@ export function ItineraryHub({
           </button>
         )}
       </section>
+      </PlanFold>
 
+      <PlanFold
+        id={`${headingId}-journal-fold`}
+        title="Journal"
+        meta="Stories"
+      >
       <JournalNotes
         headingId={headingId}
         destination={state.destination}
         notes={journalNotes}
         places={journalPlaceIndex}
       />
+      </PlanFold>
 
-      <section className={`${plan.soft} plan-block plan-stack-tight`} aria-labelledby={`${headingId}-packing`}>
-        <h3 id={`${headingId}-packing`} className={plan.h3}>
+      <PlanFold
+        id={`${headingId}-packing-fold`}
+        title="Packing"
+        meta={packingNotes.trim() ? `${packingNotes.trim().split("\n").filter(Boolean).length} lines` : "Empty"}
+      >
+      <section className="plan-stack-tight" aria-labelledby={`${headingId}-packing`}>
+        <h3 id={`${headingId}-packing`} className={`${plan.h3} max-sm:hidden`}>
           Packing notes
         </h3>
-        <p className={`${plan.prose} text-muted`}>
+        <p className={`${plan.prose} text-muted plan-desktop-only`}>
           A list for this trip. One line per item is enough.
         </p>
         <textarea
@@ -1238,25 +1329,17 @@ export function ItineraryHub({
           onChange={(event) => onPackingNotesChange(event.target.value.slice(0, 4000))}
         />
       </section>
+      </PlanFold>
 
-      <aside className={`${plan.soft} plan-section`} aria-label="Affiliate disclosure">
-        <p className={`${plan.prose} text-text`}>
+      <PlanFold id={`${headingId}-disclosure`} title="About these links">
+        <p className={`${plan.body} text-text`}>
           {config.disclosure}{" "}
           <Link href="/affiliate-disclosure" className="text-link hover:text-accent">
             Read the full disclosure
           </Link>
           .
         </p>
-      </aside>
-
-      <div className="plan-actions">
-        <button type="button" className="btn btn-secondary" onClick={onEditTrip}>
-          {config.editDetailsLabel}
-        </button>
-        <button type="button" className="btn btn-secondary" onClick={onStartOver}>
-          {config.startOverLabel}
-        </button>
-      </div>
+      </PlanFold>
     </>
   );
 }

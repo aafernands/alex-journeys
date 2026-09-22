@@ -414,21 +414,28 @@ export function TripPlanner({
 
   return (
     <section aria-labelledby={`${baseId}-heading`} className="plan-trip plan-block max-w-3xl">
-      <div
-        className="flex gap-2"
-        role="progressbar"
-        aria-valuemin={1}
-        aria-valuemax={4}
-        aria-valuenow={step}
-        aria-label={`Step ${step} of 4`}
-      >
-        {STEPS.map((n) => (
-          <span
-            key={n}
-            className={`h-1 flex-1 rounded-full ${n <= step ? "bg-accent" : "bg-sand"}`}
-          />
-        ))}
-      </div>
+      {step < 4 ? (
+        <>
+          <p className={`${tripDensity.caption} font-semibold text-muted`}>
+            Step {step} of 3
+          </p>
+          <div
+            className="mt-2 flex gap-2"
+            role="progressbar"
+            aria-valuemin={1}
+            aria-valuemax={3}
+            aria-valuenow={step}
+            aria-label={`Step ${step} of 3`}
+          >
+            {STEPS.filter((n) => n < 4).map((n) => (
+              <span
+                key={n}
+                className={`h-1 flex-1 rounded-full ${n <= step ? "bg-accent" : "bg-sand"}`}
+              />
+            ))}
+          </div>
+        </>
+      ) : null}
 
       <div className={`${tripDensity.panel} plan-section`}>
         {step === 1 ? (
@@ -439,7 +446,7 @@ export function TripPlanner({
             >
               {config.steps.categories.heading}
             </h2>
-            <p className={`${tripDensity.prose} plan-follow text-muted`}>
+            <p className={`${tripDensity.prose} plan-follow text-muted plan-desktop-only`}>
               {config.steps.categories.helper}
             </p>
             <div
@@ -465,7 +472,7 @@ export function TripPlanner({
                 {categoryError}
               </p>
             ) : null}
-            <div className="plan-actions plan-actions-end">
+            <div className="plan-actions plan-actions-end plan-sticky plan-sticky-solo">
               <button type="button" className="btn btn-primary" onClick={goDetails}>
                 {config.continueLabel}
               </button>
@@ -487,7 +494,7 @@ export function TripPlanner({
             >
               {config.steps.details.heading}
             </h2>
-            <p className={`${tripDensity.prose} plan-follow text-muted`}>
+            <p className={`${tripDensity.prose} plan-follow text-muted plan-desktop-only`}>
               {config.steps.details.helper}
             </p>
 
@@ -837,7 +844,7 @@ export function TripPlanner({
               ) : null}
             </div>
 
-            <div className="plan-actions">
+            <div className="plan-actions plan-sticky">
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -860,7 +867,7 @@ export function TripPlanner({
             >
               {config.steps.review.heading}
             </h2>
-            <p className={`${tripDensity.prose} plan-follow text-muted`}>
+            <p className={`${tripDensity.prose} plan-follow text-muted plan-desktop-only`}>
               {config.steps.review.helper}
             </p>
             <dl className="plan-section">
@@ -875,7 +882,7 @@ export function TripPlanner({
                 </div>
               ))}
             </dl>
-            <div className="plan-actions">
+            <div className="plan-actions plan-sticky">
               <button
                 type="button"
                 className="btn btn-secondary"

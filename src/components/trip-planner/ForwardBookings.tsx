@@ -255,14 +255,14 @@ export function ForwardBookings({
   return (
     <section className={`${plan.soft} plan-block`} aria-labelledby={titleId}>
       <div className="flex items-start gap-3">
-        <span className="icon-tile icon-tile-sm shrink-0">
+        <span className="icon-tile icon-tile-sm plan-desktop-only shrink-0">
           <NavIcon name="mail" size={16} />
         </span>
         <div className="min-w-0 flex-1 plan-stack-tight">
-          <h3 id={titleId} className={plan.h3}>
+          <h3 id={titleId} className={`${plan.h3} max-sm:hidden`}>
             Forward bookings here
           </h3>
-          <p className={`${plan.prose} text-text`}>
+          <p className={`${plan.prose} text-text plan-desktop-only`}>
             Forward airline, hotel, or car confirmation emails. We’ll suggest items — you
             approve before they land on the itinerary.
           </p>

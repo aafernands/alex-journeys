@@ -143,8 +143,8 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit }: Props)
   function renderItems(dayItems: TripItem[], day: TripDay, idPrefix: string): ReactNode {
     if (dayItems.length === 0) {
       return (
-        <p className={`${plan.body} text-muted`}>
-          Nothing on this day yet. Add a booking above and assign it to {day.label}.
+        <p className={`${plan.caption} text-muted plan-desktop-only`}>
+          Nothing on this day yet.
         </p>
       );
     }
@@ -165,7 +165,7 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit }: Props)
 
   return (
     <div className="plan-stack plan-follow">
-      <p className={`${plan.prose} text-muted`}>
+      <p className={`${plan.prose} text-muted plan-desktop-only`}>
         Drag a booking onto a day, or choose a day on the booking. Time stays on the
         booking when you move it.
       </p>

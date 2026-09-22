@@ -29,6 +29,8 @@ type Props = {
   /** Override default page-edit target (e.g. guide hubs). */
   adminEdit?: AdminEditLink;
   extraAdminLinks?: AdminEditLink[];
+  /** Tighter mobile header for an in-flow tool. Desktop keeps the full intro. */
+  compact?: boolean;
 };
 
 /** Shared product page chrome — same section shell + type system as homepage. */
@@ -45,6 +47,7 @@ export function SitePage({
   cmsSlug,
   adminEdit,
   extraAdminLinks,
+  compact = false,
 }: Props) {
   const width = narrow ? "max-w-3xl" : "max-w-none";
   const bg =
@@ -55,7 +58,7 @@ export function SitePage({
   const editLabel = adminEdit?.label ?? "Edit page";
 
   return (
-    <main className={bg}>
+    <main className={compact ? `${bg} plan-page` : bg}>
       {editHref ? (
         <AdminPublicChrome
           editHref={editHref}
@@ -89,7 +92,9 @@ export function SitePage({
           ) : null}
 
           {label ? (
-            <p className={`${crumbs ? "mt-8" : ""} eyebrow`}>{label}</p>
+            <p className={`${crumbs ? "mt-8" : ""} eyebrow ${compact ? "max-sm:hidden" : ""}`}>
+              {label}
+            </p>
           ) : null}
           <div
             className={`flex flex-wrap items-start justify-between gap-3 ${
@@ -102,7 +107,9 @@ export function SitePage({
             ) : null}
           </div>
           {description ? (
-            <p className="mt-4 max-w-2xl text-lead text-text">{description}</p>
+            <p className={`mt-4 max-w-2xl text-lead text-text ${compact ? "max-sm:hidden" : ""}`}>
+              {description}
+            </p>
           ) : null}
 
           {html ? (
