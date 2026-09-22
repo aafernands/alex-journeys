@@ -1078,8 +1078,8 @@ html.dark .places-world-map.leaflet-container {
   --plan-gap: 1rem; /* 16 — card interior */
   --plan-gap-tight: 0.75rem; /* 12 */
   --plan-gap-label: 0.5rem; /* 8 — label ↔ value */
-  --plan-section: 1.75rem; /* 28 — subsections */
-  --plan-block: 3.5rem; /* 56 — primary blocks */
+  --plan-section: 1.25rem; /* 20 — subsections */
+  --plan-block: 1.5rem; /* 24 — between primary blocks */
   --plan-radius-next: max(0.25rem, calc(var(--plan-radius) - var(--plan-pad)));
   --plan-radius-deep: max(0.25rem, calc(var(--plan-radius-next) - var(--plan-pad-inset)));
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -1254,6 +1254,51 @@ select.plan-input {
   gap: var(--plan-gap-tight);
 }
 
+/* Labeled cluster inside a form: label, choices, then the control. */
+.plan-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--plan-gap-label);
+}
+
+/* 20px between trip-detail groups. Short fields pair up even on a phone. */
+.plan-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--plan-section);
+  margin-top: var(--plan-section);
+}
+
+.plan-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--plan-gap-tight);
+}
+
+.plan-pair .plan-input {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.plan-input-short {
+  max-width: 8rem;
+}
+
+/* Quiet progress index — name over status, two columns, no pill chrome. */
+.plan-status {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--plan-gap-tight) var(--plan-gap);
+  margin-top: var(--plan-gap-tight);
+}
+
+.plan-status > li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
 .plan-section {
   margin-top: var(--plan-section);
 }
@@ -1286,11 +1331,19 @@ select.plan-input {
 
 .plan-review-row {
   display: flex;
-  flex-direction: column;
-  gap: var(--plan-gap-label);
+  flex-flow: row wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
   border-bottom: 1px solid var(--border);
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+}
+
+.plan-review-row > dd {
+  margin-left: auto;
+  max-width: 100%;
+  text-align: right;
 }
 
 .plan-toolbar {
@@ -1309,18 +1362,20 @@ select.plan-input {
 
 .plan-actions {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--plan-gap-tight);
   margin-top: var(--plan-section);
 }
 
-.plan-actions-split {
-  flex-direction: column-reverse;
-}
-
 .plan-actions-inline {
   margin-top: 0;
+  justify-content: flex-start;
+}
+
+.plan-actions-end {
+  justify-content: flex-end;
 }
 
 .plan-actions.plan-follow {
@@ -1336,8 +1391,9 @@ select.plan-input {
 }
 
 @media (max-width: 639px) {
-  .plan-actions > .btn,
-  .plan-actions > a.btn {
+  /* One primary step action spans the card. Pairs stay side by side. */
+  .plan-actions-end > .btn,
+  .plan-actions-end > a.btn {
     width: 100%;
   }
 }
@@ -1347,33 +1403,9 @@ select.plan-input {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .plan-review-row {
-    flex-direction: row;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--plan-gap);
-  }
-
   .plan-toolbar {
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;
-  }
-
-  .plan-actions,
-  .plan-actions-split {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .plan-actions-end {
-    justify-content: flex-end;
-  }
-
-  .plan-actions > .btn,
-  .plan-actions > a.btn {
-    width: auto;
   }
 }

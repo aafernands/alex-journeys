@@ -491,7 +491,7 @@ export function TripPlanner({
               {config.steps.details.helper}
             </p>
 
-            <div className="plan-stack plan-section">
+            <div className="plan-form">
               <Field
                 label="Where are you going?"
                 htmlFor={`${baseId}-destination`}
@@ -512,7 +512,7 @@ export function TripPlanner({
                 />
               </Field>
 
-              <div className="plan-stack-tight">
+              <div className="plan-group">
                 <p className={tripDensity.label}>Dates</p>
                 {flexibleOn ? (
                   <div className="flex flex-wrap gap-2">
@@ -532,7 +532,7 @@ export function TripPlanner({
                 ) : null}
 
                 {dateMode === "exact" ? (
-                  <div className="plan-grid-2">
+                  <div className="plan-pair">
                     <div className="plan-field">
                       <label htmlFor={`${baseId}-start`} className="sr-only">
                         Start date
@@ -583,7 +583,7 @@ export function TripPlanner({
                     </div>
                   </div>
                 ) : (
-                  <div className="plan-grid-2">
+                  <div className="plan-pair">
                     <Field
                       label="Month"
                       htmlFor={`${baseId}-month`}
@@ -630,7 +630,7 @@ export function TripPlanner({
                 )}
               </div>
 
-              <div className="plan-grid-2">
+              <div className="plan-pair">
                 <Field
                   label="Adults"
                   htmlFor={`${baseId}-adults`}
@@ -698,7 +698,7 @@ export function TripPlanner({
                       onChange={(origin) => patch({ origin })}
                     />
                   </Field>
-                  <div className="plan-stack-tight">
+                  <div className="plan-group">
                     <p className={tripDensity.label}>Trip type</p>
                     <div className="flex flex-wrap gap-2">
                       {(
@@ -731,7 +731,7 @@ export function TripPlanner({
                     type="number"
                     min={1}
                     inputMode="numeric"
-                    className={`${tripDensity.input} sm:max-w-[8rem]`}
+                        className={`${tripDensity.input} plan-input-short`}
                     value={state.rooms}
                     aria-invalid={Boolean(errors.rooms)}
                     aria-describedby={describedBy(`${baseId}-rooms`, errors.rooms)}
@@ -743,7 +743,7 @@ export function TripPlanner({
               ) : null}
 
               {cats.includes("car") ? (
-                <div className="plan-stack">
+                <div className="plan-stack-tight">
                   <label className={tripDensity.check}>
                     <input
                       type="checkbox"
@@ -790,7 +790,7 @@ export function TripPlanner({
                     Same dates as the trip
                   </label>
                   {state.carDatesSameAsTrip ? null : (
-                    <div className="plan-grid-2">
+                    <div className="plan-pair">
                       <Field
                         label="Pickup date"
                         htmlFor={`${baseId}-car-start`}
@@ -837,7 +837,7 @@ export function TripPlanner({
               ) : null}
             </div>
 
-            <div className="plan-actions plan-actions-split">
+            <div className="plan-actions">
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -875,7 +875,7 @@ export function TripPlanner({
                 </div>
               ))}
             </dl>
-            <div className="plan-actions plan-actions-split">
+            <div className="plan-actions">
               <button
                 type="button"
                 className="btn btn-secondary"
