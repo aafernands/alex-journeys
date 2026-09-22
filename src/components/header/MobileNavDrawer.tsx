@@ -75,7 +75,13 @@ export function MobileNavDrawer({
         aria-label="Mobile"
       >
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
-          <BrandLogo className="h-10 w-auto" priority onClick={onClose} />
+          <BrandLogo
+            className="h-12.5 w-auto"
+            width={220}
+            height={61}
+            priority
+            onClick={onClose}
+          />
           <button
             type="button"
             className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"

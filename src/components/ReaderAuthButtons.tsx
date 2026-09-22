@@ -9,7 +9,8 @@ import { UserMenu } from "@/components/UserMenu";
 
 type Props = {
   /**
-   * `header` — desktop bar. `header-mobile` — labeled control beside the menu.
+   * `header` — desktop bar.
+   * `header-mobile` — kept for callers; the sticky phone bar does not use it.
    * `drawer-cta` — full-width Sign in in the mobile menu.
    * `drawer` / `mobile` — older strips; signed-in state still uses UserMenu.
    */

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ProfileAvatar } from "@/components/account/ProfileAvatar";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -13,59 +13,6 @@ export type ProfileSettingsFormProps = {
   pendingNewEmail: string | null;
   emailConfigured: boolean;
 };
-
-function previewInitials(name: string, email: string): string {
-  const source = name.trim() || email.trim() || "FJ";
-  const parts = source.split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
-  }
-  return source.slice(0, 2).toUpperCase();
-}
-
-function AvatarPreview({
-  src,
-  alt,
-  fallback,
-}: {
-  src: string | null;
-  alt: string;
-  fallback: string;
-}) {
-  if (!src) {
-    return (
-      <span
-        className="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-dashed border-border bg-surface-soft font-display text-lg font-bold text-accent"
-        aria-hidden="true"
-      >
-        {fallback}
-      </span>
-    );
-  }
-  const isData = src.startsWith("data:");
-  const isGoogle = src.includes("googleusercontent.com");
-  if (isData || !isGoogle) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return (
-      <img
-        src={src}
-        alt={alt}
-        width={64}
-        height={64}
-        className="h-16 w-16 rounded-full border border-border object-cover"
-      />
-    );
-  }
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      width={64}
-      height={64}
-      className="h-16 w-16 rounded-full border border-border object-cover"
-    />
-  );
-}
 
 export function ProfileSettingsForm({
   initialName,
@@ -293,10 +240,12 @@ export function ProfileSettingsForm({
             Google or X photo stays until you set your own.
           </p>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <AvatarPreview
+            <ProfileAvatar
               src={displayImage}
+              name={name}
+              email={displayEmail}
+              size="settings"
               alt=""
-              fallback={previewInitials(name, displayEmail)}
             />
             <input
               ref={fileRef}

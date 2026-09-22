@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import {
   BookOpen,
@@ -16,6 +15,7 @@ import {
   type AccountTripRow,
 } from "@/components/account/MyTripsList";
 import { ChangePasswordForm } from "@/components/ChangePasswordForm";
+import { ProfileAvatar } from "@/components/account/ProfileAvatar";
 import { ProfileSettingsForm } from "@/components/ProfileSettingsForm";
 import {
   SavedPostsList,
@@ -55,15 +55,6 @@ function sectionFromHash(hash: string): Section {
     : "overview";
 }
 
-function initials(name: string, email: string): string {
-  const source = name.trim() || email.trim() || "FJ";
-  const parts = source.split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
-  }
-  return source.slice(0, 2).toUpperCase();
-}
-
 function useSiteHeaderHeight(): number {
   const [height, setHeight] = useState(112);
   useEffect(() => {
@@ -82,45 +73,6 @@ function useSiteHeaderHeight(): number {
     };
   }, []);
   return height;
-}
-
-function Avatar({
-  src,
-  name,
-  email,
-}: {
-  src: string | null;
-  name: string;
-  email: string;
-}) {
-  const label = name.trim() ? `${name.trim()} photo` : "";
-  if (!src) {
-    return (
-      <span
-        className="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-border bg-surface-soft font-display text-lg font-bold text-accent sm:h-20 sm:w-20 sm:text-xl"
-        aria-hidden="true"
-      >
-        {initials(name, email)}
-      </span>
-    );
-  }
-  const isData = src.startsWith("data:");
-  const isGoogle = src.includes("googleusercontent.com");
-  const className =
-    "h-16 w-16 shrink-0 rounded-full border border-border object-cover sm:h-20 sm:w-20";
-  if (isData || !isGoogle) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={label} width={80} height={80} className={className} />;
-  }
-  return (
-    <Image
-      src={src}
-      alt={label}
-      width={80}
-      height={80}
-      className={className}
-    />
-  );
 }
 
 function SummaryCard({
@@ -271,7 +223,7 @@ export function AccountDashboard({
             <section className="panel p-5 sm:p-7" aria-labelledby="account-identity">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-center gap-4">
-                  <Avatar src={image} name={displayName} email={email} />
+                  <ProfileAvatar src={image} name={displayName} email={email} />
                   <div className="min-w-0">
                     <h2
                       id="account-identity"
