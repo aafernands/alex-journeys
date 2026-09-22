@@ -22,7 +22,7 @@ const MESSAGES: Record<string, string> = {
     "Could not create an account from that sign-in. Try again.",
   EmailCreateAccount: "Could not create an account from that email. Try again.",
   Configuration:
-    "Sign-in is misconfigured on the server. Check AUTH_SECRET, AUTH_URL, and the provider client id and secret.",
+    "X could not finish sign-in because the server configuration does not match the X app. On Vercel, AUTH_TWITTER_ID and AUTH_TWITTER_SECRET must be the current OAuth 2.0 Client ID and Client Secret from the X portal (not the API Key or API Key Secret). Save them, redeploy, and try again. This is not a denied sign-in.",
   Verification:
     "This sign-in link is no longer valid. It may have expired or already been used.",
   OAuthAccountNotLinked: ACCOUNT_NOT_LINKED,

@@ -2,10 +2,14 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { Auth, skipCSRFCheck } from "@auth/core";
 import Twitter from "@auth/core/providers/twitter";
+import { ClientSecretPost } from "oauth4webapi";
 import {
   TWITTER_AUTHORIZE_URL,
   TWITTER_OAUTH_SCOPE,
+  TWITTER_TOKEN_AUTH_METHOD,
+  readTwitterOAuthCredentials,
   twitterAuthorization,
+  twitterClient,
 } from "../src/lib/twitter-oauth.ts";
 
 describe("twitterAuthorization", () => {
@@ -34,6 +38,7 @@ describe("twitterAuthorization", () => {
             clientId: "client-id-123",
             clientSecret: "client-secret-456",
             authorization: twitterAuthorization,
+            client: twitterClient,
           }),
         ],
         secret: "test-secret-test-secret-test-secret-test",
@@ -64,5 +69,35 @@ describe("twitterAuthorization", () => {
     );
     assert.ok(cookieNames.some((name) => name.includes("pkce.code_verifier")));
     assert.ok(cookieNames.some((name) => name.endsWith("authjs.state")));
+  });
+
+  it("sends the OAuth 2 client id and secret on the token POST body", () => {
+    assert.equal(twitterClient.token_endpoint_auth_method, TWITTER_TOKEN_AUTH_METHOD);
+    assert.equal(TWITTER_TOKEN_AUTH_METHOD, "client_secret_post");
+    const body = new URLSearchParams();
+    const headers = new Headers();
+    ClientSecretPost("client-secret-456")(
+      {},
+      { client_id: "client-id-123" },
+      body,
+      headers,
+    );
+    assert.equal(body.get("client_id"), "client-id-123");
+    assert.equal(body.get("client_secret"), "client-secret-456");
+    assert.equal(headers.get("authorization"), null);
+  });
+
+  it("trims AUTH_TWITTER_ID and AUTH_TWITTER_SECRET", () => {
+    assert.deepEqual(
+      readTwitterOAuthCredentials({
+        AUTH_TWITTER_ID: "  client-id \n",
+        AUTH_TWITTER_SECRET: "\tsecret  ",
+      }),
+      { clientId: "client-id", clientSecret: "secret" },
+    );
+    assert.deepEqual(readTwitterOAuthCredentials({}), {
+      clientId: "",
+      clientSecret: "",
+    });
   });
 });

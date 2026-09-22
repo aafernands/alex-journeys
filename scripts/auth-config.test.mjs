@@ -150,8 +150,13 @@ describe("readerLoginErrorMessage", () => {
     assert.match(callback, /callback URL and client secret/);
     assert.match(callback, /\(OAuthCallbackError\)$/);
     assert.match(readerLoginErrorMessage("OAuthCallback"), /\(OAuthCallback\)$/);
-    assert.match(readerLoginErrorMessage("Configuration"), /AUTH_URL/);
-    assert.match(readerLoginErrorMessage("Configuration"), /AUTH_SECRET/);
+    const configuration = readerLoginErrorMessage("Configuration") ?? "";
+    assert.match(configuration, /AUTH_TWITTER_ID/);
+    assert.match(configuration, /AUTH_TWITTER_SECRET/);
+    assert.match(configuration, /OAuth 2\.0 Client ID and Client Secret/);
+    assert.match(configuration, /redeploy/i);
+    assert.match(configuration, /not a denied sign-in/);
+    assert.equal(configuration.toLowerCase().includes("user denied"), false);
     assert.match(readerLoginErrorMessage("AccessDenied"), /disabled/);
     assert.match(readerLoginErrorMessage("Verification"), /no longer valid/);
   });

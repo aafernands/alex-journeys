@@ -74,10 +74,12 @@ Do not put a path on `AUTH_URL`. `AUTH_TRUST_HOST=true` does not replace a wrong
 
 Auth.js sends the failure to `/login?error=CODE` (the sign-in page and the error page are both `/login`). The form names that code. Google still working only tells you Auth.js and `AUTH_SECRET` are up; X has its own client, secret, and callback.
 
+A healthy authorize URL (www `redirect_uri`, scope `users.read offline.access`, `client_id` present) only proves the **browser** step. X then requires `client_id` on the **token POST**. Auth.js’s default Basic header does not send that field, and the thrown token error is reported as `Configuration`. This app sends the Client ID and Client Secret in the token body (`client_secret_post`). If `Configuration` remains after this deploy, the Vercel secret still does not match the X portal.
+
 | `error` | What it means | What to check |
 | --- | --- | --- |
-| `OAuthCallbackError` (also shown for `OAuthCallback`) | X accepted Authorize, then the callback failed: token exchange, PKCE/state cookie, or profile parse. | www callback listed exactly. `AUTH_TWITTER_SECRET` is the latest OAuth 2.0 Client Secret. `AUTH_URL` is `https://www.fernandesjourneys.com` so the callback host matches the browser. Vercel function logs for `[auth][error]` around the callback. |
-| `Configuration` | Auth.js could not run the provider (bad endpoints, missing secret, or a thrown callback that is not a known client error). | `AUTH_SECRET` set. `AUTH_TWITTER_ID` and `AUTH_TWITTER_SECRET` both set and not the OAuth 1.0 API key pair. `AUTH_URL` is an origin, not a path. |
+| `Configuration` | The token exchange (or another server-side step) threw. Auth.js hides that detail and shows Configuration. **This is almost always a wrong or mismatched OAuth 2.0 Client Secret, or a misconfigured provider. It is not “user denied.”** User denied is `AccessDenied`. | On Vercel, `AUTH_TWITTER_ID` / `AUTH_TWITTER_SECRET` must be the **current** OAuth 2.0 Client ID and Client Secret from the X portal. Not the OAuth 1.0 API Key or API Key Secret. If you regenerated the secret, the old value is dead. Save, **redeploy**, try again. Also confirm `AUTH_SECRET` is set and `AUTH_URL` is `https://www.fernandesjourneys.com`. |
+| `OAuthCallbackError` (also shown for `OAuthCallback`) | X accepted Authorize, then returned an OAuth error Auth.js could show (callback URL, PKCE/state cookie, or profile). | www callback listed exactly. `AUTH_URL` is the www origin so the callback host matches the browser. |
 | `AccessDenied` | The app refused the user. | `/cms/users` — the X user is disabled. Re-enable and try again. |
 | `Verification` | An email sign-in link was invalid or expired. | Not the X button. Use the link from the latest email, or start again. |
 | `OAuthAccountNotLinked` | That email is already stored on a different sign-in method. | Unusual for X, which usually has no email. Sign in with the original method. |

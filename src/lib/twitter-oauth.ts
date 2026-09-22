@@ -21,3 +21,26 @@ export const twitterAuthorization = {
   url: TWITTER_AUTHORIZE_URL,
   params: { scope: TWITTER_OAUTH_SCOPE },
 };
+
+/**
+ * X's token endpoint requires `client_id` on the POST body. Auth.js's default
+ * `client_secret_basic` only sets an Authorization header, so the token
+ * exchange fails and Auth.js reports `error=Configuration` (that failure is
+ * not a client-safe OAuthCallbackError). `client_secret_post` puts both the
+ * Client ID and Client Secret in the body.
+ */
+export const TWITTER_TOKEN_AUTH_METHOD = "client_secret_post";
+
+export const twitterClient = {
+  token_endpoint_auth_method: TWITTER_TOKEN_AUTH_METHOD,
+};
+
+/** Trimmed OAuth 2.0 client pair. Whitespace in Vercel values breaks the token POST. */
+export function readTwitterOAuthCredentials(
+  env: Record<string, string | undefined> = process.env,
+): { clientId: string; clientSecret: string } {
+  return {
+    clientId: env.AUTH_TWITTER_ID?.trim() ?? "",
+    clientSecret: env.AUTH_TWITTER_SECRET?.trim() ?? "",
+  };
+}

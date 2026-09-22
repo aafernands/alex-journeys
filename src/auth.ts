@@ -13,7 +13,11 @@ import {
   isTwitterAuthConfigured,
 } from "@/lib/auth-config";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
-import { twitterAuthorization } from "@/lib/twitter-oauth";
+import {
+  readTwitterOAuthCredentials,
+  twitterAuthorization,
+  twitterClient,
+} from "@/lib/twitter-oauth";
 import {
   authorizeCredentials,
   getUserById,
@@ -59,11 +63,11 @@ const providers = [
   ...(isTwitterAuthConfigured()
     ? [
         Twitter({
-          clientId: process.env.AUTH_TWITTER_ID!,
-          clientSecret: process.env.AUTH_TWITTER_SECRET!,
-          // url + params (not a raw authorize URL, and not params alone).
-          // Scope is users.read + offline.access — no tweet.read.
+          ...readTwitterOAuthCredentials(),
+          // url + params so PKCE, state, and client_id stay on x.com.
+          // client_secret_post so the token POST includes client_id.
           authorization: twitterAuthorization,
+          client: twitterClient,
         }),
       ]
     : []),
