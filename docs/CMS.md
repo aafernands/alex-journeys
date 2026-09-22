@@ -68,6 +68,8 @@ Never commit secrets. Never put them in client code. The dashboard only shows co
 
 **Widgets:** In the Content toolbar, **Widget** inserts a Viator partner card or a Custom HTML embed at the cursor. Viator asks for the partner id (prefilled from `VIATOR_PARTNER_ID`) and the `W-…` widget ref from the partner dashboard — not the script tag, and not tour copy. The public post loads the Viator script when a widget div is present. Custom HTML is stored in `div.cms-html-embed` so empty divs and iframes survive the visual editor. Script tags in that HTML are kept but do not run on the public page.
 
+**Experiences page:** `/experiences` uses one Dynamic widget for whatever destination Plan a Trip passes (`?dest=`). Paste that widget’s `W-…` ref into `dynamicWidgetRef` in `src/content/experiences/viator.json`, or set `VIATOR_DYNAMIC_WIDGET_REF`. Partner id stays `P00143772` unless `VIATOR_PARTNER_ID` overrides it. Name the widget `plan-experiences` in Widgets Hub so it matches `data-vi-campaign`. Book Now inside the widget is not sent through `/out` (the iframe keeps the partner id). The “browse on Viator” text link still uses `/out?to=…&aff=1`.
+
 Posts list supports search, destination filter, status (published/draft), View live, Edit, Duplicate, Delete (GitHub delete + index update).
 
 ### Pages (CMS-editable)

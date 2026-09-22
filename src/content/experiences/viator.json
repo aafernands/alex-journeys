@@ -1,0 +1,8 @@
+{
+  "partnerId": "P00143772",
+  "dynamicWidgetRef": "",
+  "campaign": "plan-experiences",
+  "language": "en",
+  "currency": "USD",
+  "instructions": "Create one Dynamic widget in Viator Widgets Hub for partner P00143772 and name it plan-experiences (campaign tracking). Paste its W-… ref into dynamicWidgetRef, or set VIATOR_DYNAMIC_WIDGET_REF in the environment. Leave dynamicWidgetRef empty until then — /experiences still loads widget.js and the destination search link. Optional partner override: VIATOR_PARTNER_ID."
+}

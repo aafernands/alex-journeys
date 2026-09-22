@@ -106,7 +106,7 @@ function loadAndScan(): Promise<void> {
   });
 }
 
-function hydrateViatorWidgets(): Promise<void> {
+export function hydrateViatorWidgets(): Promise<void> {
   const run = chain.then(() => loadAndScan());
   chain = run.catch(() => undefined);
   return run;
