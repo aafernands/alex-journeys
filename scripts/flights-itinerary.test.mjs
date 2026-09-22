@@ -103,6 +103,42 @@ describe("flights itinerary handoff", () => {
       flight,
     );
     assert.equal(local.kind, "local");
+
+    const guest = nextLocalFlightPlan(
+      null,
+      {
+        origin: "Newark (EWR)",
+        destination: "Lisbon, Portugal",
+        startDate: "2027-04-12",
+        endDate: "2027-04-19",
+        adults: 2,
+        children: 0,
+        tripType: "roundtrip",
+        tripId: null,
+      },
+      flight,
+    );
+    assert.equal(guest.kind, "local");
+    if (guest.kind === "local") {
+      assert.equal(guest.plan.tripId, null);
+      assert.equal(guest.plan.items[0]?.url.startsWith("/flights/confirmation?"), true);
+    }
+
+    const account = nextLocalFlightPlan(
+      lisbonPlan({ tripId: "trip_other" }),
+      {
+        origin: "Newark (EWR)",
+        destination: "Lisbon, Portugal",
+        startDate: "2027-04-12",
+        endDate: "2027-04-19",
+        adults: 2,
+        children: 0,
+        tripType: "roundtrip",
+        tripId: "trip_abc",
+      },
+      flight,
+    );
+    assert.equal(account.kind, "account");
   });
 
   it("replaces a search link with the confirmation for that booking", () => {

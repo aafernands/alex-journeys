@@ -40,6 +40,7 @@ import {
   type TripItemType,
 } from "@/lib/trip-record";
 import type { StoredPlan } from "@/lib/trip-planner-storage";
+import { flightItemLinkLabel } from "@/lib/flights";
 import { FLIGHT_LANE_HASH } from "@/lib/flights-itinerary";
 import { STAY_LANE_HASH } from "@/lib/stays-itinerary";
 import { plan } from "@/components/trip-planner/density";
@@ -191,11 +192,7 @@ function ItemUrl({ url, compact = false }: { url: string; compact?: boolean }) {
       className={`${plan.textBtn} truncate text-link hover:text-accent`}
     >
       {onSite
-        ? url.startsWith("/flights")
-          ? "View flight"
-          : url.startsWith("/stays")
-            ? "View stay"
-            : "View"
+        ? flightItemLinkLabel(url) || (url.startsWith("/stays") ? "View stay" : "View")
         : compact
           ? url.replace(/^https?:\/\//, "")
           : "Open link"}

@@ -317,6 +317,18 @@ export function airportFieldValue(
   return label;
 }
 
+/**
+ * City names become the main airport label. A code the reader already typed
+ * stays as they typed it, so IATA can override the city default.
+ */
+export function prefilledAirport(place: string): string {
+  const typed = place.trim();
+  if (!typed) return "";
+  const airport = primaryAirportFor(typed);
+  if (!airport) return typed;
+  return airportFieldValue(typed, airport);
+}
+
 /** Text sent to the airport lookup. City names drop a trailing country. */
 export function airportSearchText(place: string): string {
   const hint = iataHint(place);
@@ -450,6 +462,14 @@ export function isFlightConfirmationPath(href: string): boolean {
   return sitePathname(href) === "/flights/confirmation";
 }
 
+/** Label for an on-site flight link. Search URLs are not “View flight”. */
+export function flightItemLinkLabel(url: string): string {
+  if (isFlightConfirmationPath(url)) return "View flight";
+  if (isFlightSearchPath(url)) return "Search flights";
+  if (sitePathname(url) === "/flights/book") return "View fare";
+  return "";
+}
+
 function clockParam(raw: string): string {
   return /^\d{2}:\d{2}$/.test(raw) ? raw : "";
 }
@@ -477,8 +497,10 @@ export function flightConfirmationPath(
   >,
   query: FlightsQuery,
 ): string {
-  const bookingId = cleanFlightBookingId(confirmation.bookingId);
-  if (!bookingId) return flightsPath(query);
+  const bookingId =
+    cleanFlightBookingId(confirmation.bookingId) ||
+    cleanFlightBookingId(confirmation.confirmationCode);
+  if (!bookingId) return "";
   const params = new URLSearchParams(flightsQueryString(query));
   params.set("booking", bookingId);
   const ref = text(confirmation.confirmationCode, 40);

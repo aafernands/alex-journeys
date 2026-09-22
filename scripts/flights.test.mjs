@@ -11,6 +11,7 @@ import {
   flightBookingPayment,
   flightConfirmationFromParams,
   flightConfirmationPath,
+  flightItemLinkLabel,
   flightEnvPublishableKey,
   flightPrebookPaymentIssue,
   flightStripeConfirmed,
@@ -630,6 +631,12 @@ describe("flight confirmation link", () => {
     assert.equal(url.searchParams.get("dest"), "MIA");
     assert.equal(path.includes("offer="), false);
     assert.equal(path.length < 2000, true);
+    assert.equal(flightItemLinkLabel(path), "View flight");
+    assert.equal(flightItemLinkLabel(flightsPath(query)), "Search flights");
+    assert.equal(
+      flightConfirmationPath({ ...confirmation, bookingId: "", confirmationCode: "" }, query),
+      "",
+    );
 
     const params = Object.fromEntries(url.searchParams.entries());
     const fromUrl = flightConfirmationFromParams(params);
