@@ -6,7 +6,7 @@ Public readers can **Sign in** (email/password, Google, or X — see [READER-AUT
 
 | Surface | Behavior |
 | --- | --- |
-| Header | Signed out: **Sign in** → `/login` on desktop, and in the sticky mobile bar beside the menu. The mobile menu leads with a full-width **Sign in / Create account**. Signed in: avatar menu (photo + name on desktop, photo in the mobile bar and an account row in the menu) → Account dashboard, Logout; admins also see **Admin console** → `/cms`. The bottom tab bar stays Places / Stories / Guides / Saved. |
+| Header | Signed out: **Sign in** → `/login` on desktop. On a phone, Sign in is only in the menu (full-width **Sign in / Create account**), not the sticky bar. Signed in: avatar menu (photo + name on desktop; on a phone, the account row is in the menu) → Account dashboard, Logout; admins also see **Admin console** → `/cms`. The bottom tab bar stays Places / Stories / Guides / Saved. |
 | Blog post | **Save** / **Saved** toggle; signed-out tap → `/login` |
 | `/account` | Reader dashboard: Google profile, saved posts (with Remove / Clear all), explore links, sign out |
 | `/saved` | Permanent redirect → `/account` (saves are Account-only) |

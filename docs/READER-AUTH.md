@@ -8,7 +8,7 @@ Reader sessions **never** unlock `/cms`. CMS still requires `CMS_ADMIN_EMAILS` (
 
 | Surface | Behavior |
 | --- | --- |
-| Header **Sign in** | Goes to `/login` (not direct Google). On a phone it sits in the sticky bar beside the menu. The menu opens with a full-width **Sign in / Create account**. |
+| Header **Sign in** | Goes to `/login` (not direct Google). On a phone it is only in the menu, as a full-width **Sign in / Create account**. The sticky bar keeps search and the menu. |
 | `/login` | Sign in / Create account (name, email, password ≥ 8) + Continue with Google + Continue with X (when configured) + **Forgot password?** |
 | `/forgot-password` | Request a time-limited reset email (Resend) |
 | `/reset-password?token=…` | Set a new password, then sign in |

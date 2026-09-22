@@ -10,7 +10,8 @@ type Variant = "header" | "header-mobile" | "mobile" | "drawer" | "drawer-cta";
 
 type Props = {
   /**
-   * Desktop header: photo + name. Sticky mobile header: photo only.
+   * Desktop header: smaller photo + name (~32px).
+   * header-mobile is unused by the sticky bar (Sign in / avatar live in the drawer).
    * Drawer: account row (name and avatar) that opens this menu.
    */
   variant?: Variant;
@@ -79,12 +80,8 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
   const isMobile = variant === "mobile";
   const isHeaderMobile = variant === "header-mobile";
   const isDrawer = isDrawerVariant(variant);
-  const avatarBox = isDrawer
-    ? "h-10 w-10 text-sm"
-    : isHeaderMobile
-      ? "h-11 w-11 text-sm"
-      : "h-9 w-9 text-xs";
-  const avatarPx = isDrawer ? 40 : isHeaderMobile ? 44 : 36;
+  const avatarBox = isDrawer ? "h-10 w-10 text-sm" : "h-8 w-8 text-xs";
+  const avatarPx = isDrawer ? 40 : 32;
 
   const itemClass =
     "flex min-h-11 w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm font-medium text-text transition hover:bg-surface-soft hover:text-heading";
@@ -114,8 +111,8 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
   const triggerClass = isDrawer
     ? "flex min-h-11 w-full items-center gap-3 rounded-xl border border-border bg-white px-3 py-2.5 text-left transition hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     : isHeaderMobile || isMobile
-      ? "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      : "inline-flex max-w-[11rem] items-center gap-2 rounded-full py-0.5 pl-0.5 pr-2.5 transition hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:max-w-[13rem]";
+      ? "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      : "inline-flex min-h-9 max-w-[11rem] items-center gap-2 rounded-full py-0.5 pl-0.5 pr-2.5 transition hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:max-w-[13rem]";
 
   const menuClass = isDrawer
     ? "absolute left-0 right-0 top-full z-50 mt-1.5 rounded-xl border border-border bg-white py-1.5 shadow-lg"

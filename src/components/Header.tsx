@@ -171,7 +171,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           </div>
         </div>
 
-        <div className="section-shell relative grid h-[4.5rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 md:flex md:h-20 md:justify-start md:gap-4 lg:gap-6">
+        <div className="section-shell relative grid h-[4.75rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 sm:h-[5.5rem] md:flex md:h-24 md:justify-start md:gap-4 lg:gap-6">
           {/* Mobile: search (left) */}
           <button
             type="button"
@@ -216,9 +216,9 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           {/* Logo: centered in the middle column on mobile, left on desktop */}
           <div className="z-10 flex min-w-0 items-center justify-center md:shrink-0">
             <BrandLogo
-              className="h-9 w-auto max-w-full object-contain sm:h-12 md:h-16 md:max-w-none"
-              width={260}
-              height={78}
+              className="h-[2.8125rem] w-auto max-w-full object-contain sm:h-[3.75rem] md:h-20 md:max-w-none"
+              width={400}
+              height={110}
               priority
               onClick={closeAll}
             />
@@ -361,12 +361,8 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             </Link>
           </div>
 
-          {/* Mobile: Sign in stays in the sticky bar; menu opens the drawer. */}
-          <div className="relative z-10 flex shrink-0 items-center gap-0.5 md:hidden">
-            <ReaderAuthButtons
-              variant="header-mobile"
-              googleConfigured={googleConfigured}
-            />
+          {/* Mobile: Sign in and the account photo live in the drawer, not this row. */}
+          <div className="relative z-10 flex shrink-0 items-center md:hidden">
             <button
               type="button"
               className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
