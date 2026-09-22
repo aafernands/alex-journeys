@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-20T17:56:00.000Z",
+  "updatedAt": "2026-09-22T23:12:00.000Z",
   "branding": {
     "logoOnLight": "/brand/logo-fernandes-journeys.png",
     "logoOnDark": "/brand/logo-fernandes-journeys-white.png"
@@ -17,12 +17,12 @@
       "href": "/destinations"
     },
     "ctaSecondary": {
-      "label": "Read stories",
-      "href": "/blog"
-    },
-    "ctaTertiary": {
       "label": "Plan a trip",
       "href": "/guides/plan-a-trip"
+    },
+    "ctaTertiary": {
+      "label": "Read stories",
+      "href": "/blog"
     },
     "objectPosition": "center",
     "overlay": true,
