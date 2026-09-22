@@ -7,7 +7,6 @@ import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { NavIcon } from "@/components/icons/NavIcon";
 import type { TripSaveMode } from "@/components/trip-planner/useTripSync";
 import {
-  bookingCompareHref,
   dateSummary,
   hotelLaneHref,
   partnerLaneHref,
@@ -657,31 +656,6 @@ function LaneCta({
   );
 }
 
-function CompareOnBooking({
-  state,
-  flexibleOn,
-  className,
-}: {
-  state: PlannerState;
-  flexibleOn: boolean;
-  className?: string;
-}) {
-  const href = bookingCompareHref(state, flexibleOn);
-  if (!href) return null;
-  return (
-    <OutboundLink
-      href={href}
-      affiliate
-      target="_blank"
-      rel="noopener noreferrer sponsored"
-      className={className ?? `${plan.textBtn} text-link hover:text-accent`}
-    >
-      Compare on Booking
-      <span className="sr-only"> (opens in a new tab)</span>
-    </OutboundLink>
-  );
-}
-
 export function ItineraryHub({
   headingId,
   config,
@@ -1068,9 +1042,6 @@ export function ItineraryHub({
                       partner.isCore ? "btn-primary" : "btn-secondary"
                     }`}
                   />
-                  {partner.key === "booking" ? (
-                    <CompareOnBooking state={state} flexibleOn={flexibleOn} />
-                  ) : null}
                 </div>
               </div>
 
@@ -1136,29 +1107,20 @@ export function ItineraryHub({
                 </ul>
               )}
 
-              {partner.key === "booking" || !adding ? (
+              {adding ? null : (
                 <div className="plan-lane-secondaries">
-                  {partner.key === "booking" ? (
-                    <CompareOnBooking
-                      state={state}
-                      flexibleOn={flexibleOn}
-                      className={`${plan.textBtn} plan-lane-quiet plan-mobile-only text-muted hover:text-heading`}
-                    />
-                  ) : null}
-                  {adding ? null : (
-                    <button
-                      type="button"
-                      className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
-                      onClick={() => {
-                        setLanePin(partner.key);
-                        setEditor({ kind: "add-lane", laneKey: partner.key });
-                      }}
-                    >
-                      Add to itinerary
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
+                    onClick={() => {
+                      setLanePin(partner.key);
+                      setEditor({ kind: "add-lane", laneKey: partner.key });
+                    }}
+                  >
+                    Add to itinerary
+                  </button>
                 </div>
-              ) : null}
+              )}
               {adding ? (
                 <BookingItemForm
                   type={itemTypeForPartner(partner)}

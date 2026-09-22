@@ -2,10 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StayBooker } from "@/components/stays/StayBooker";
-import { StayCompareLinks } from "@/components/stays/StayCompareLinks";
 import { SitePage } from "@/components/pages/SitePage";
 import { LiteApiError, liteApiKeyInfo } from "@/lib/liteapi";
-import { stayCompareUrls } from "@/lib/stays-compare";
 import { planATripHref } from "@/lib/trip-record";
 import {
   formatStayRating,
@@ -45,7 +43,6 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
   const query = parseStaysSearchParams(await searchParams);
   const planHref = planATripHref();
   const listHref = staysPath(query);
-  const compare = stayCompareUrls(query);
   const configured = Boolean(liteApiKeyInfo());
   const issue = staysQueryIssue(query);
 
@@ -72,7 +69,7 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
           <p className="mt-3 text-text">
             {configured
               ? issue
-              : "Hotel search isn’t connected on this server yet. You can still compare on Booking or Expedia."}
+              : "Hotel search isn’t connected on this server yet."}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href={listHref} className="btn btn-primary inline-flex">
@@ -81,9 +78,6 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
             <Link href={planHref} className="btn btn-secondary inline-flex">
               Plan a trip
             </Link>
-          </div>
-          <div className="mt-4">
-            <StayCompareLinks bookingHref={compare.booking} expediaHref={compare.expedia} />
           </div>
         </div>
       </SitePage>
@@ -124,7 +118,6 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
       ]}
     >
       <div className="plan-trip hub-follow plan-stack">
-        <StayCompareLinks bookingHref={compare.booking} expediaHref={compare.expedia} />
         {loaded?.sandbox ? (
           <p className="text-sm text-muted">
             Sandbox rate. Booking finishes on Fernandes Journeys through Nuitee and is not a live charge.

@@ -288,7 +288,7 @@ export function StayBooker({
         <div className="panel plan-inset p-5">
           <h2 className="font-display text-xl font-bold text-heading">No rooms for these dates</h2>
           <p className="mt-2 text-sm leading-relaxed text-text">
-            Nuitee didn’t return a rate for {hotelName}. Try different dates, or compare the same stay elsewhere.
+            Nuitee didn’t return a rate for {hotelName}. Try different dates.
           </p>
           <Link href={listHref} className="btn btn-secondary mt-4 inline-flex">
             Search again
