@@ -2,11 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StayBooker } from "@/components/stays/StayBooker";
-import { StayCompareLinks } from "@/components/stays/StayCompareLinks";
 import { StayTripBar } from "@/components/stays/StayTripBar";
 import { SitePage } from "@/components/pages/SitePage";
 import { LiteApiError, liteApiKeyInfo } from "@/lib/liteapi";
-import { stayCompareUrls } from "@/lib/stays-compare";
 import { planATripHref } from "@/lib/trip-record";
 import {
   formatStayRating,
@@ -45,8 +43,8 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
   if (!isStayHotelId(hotelId)) notFound();
   const query = parseStaysSearchParams(await searchParams);
   const planHref = planATripHref(query.tripId || null);
+  const onTrip = Boolean(query.destination || query.tripId);
   const listHref = staysPath(query);
-  const compare = stayCompareUrls(query);
   const configured = Boolean(liteApiKeyInfo());
   const issue = staysQueryIssue(query);
 
@@ -62,32 +60,29 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
         crumbs={[
           { href: "/", label: "Home" },
           { href: planHref, label: "Plan a trip" },
-          { href: "/stays", label: "Stays" },
+          { href: listHref, label: "Stays" },
           { label: "Hotel" },
         ]}
       >
         <div className="plan-trip hub-follow plan-stack">
           <StayTripBar query={query} />
           <div className="panel max-w-2xl p-6 sm:p-8">
-          <h2 className="font-display text-2xl font-bold text-heading">
-            {configured ? "Add trip dates" : "Stays not configured"}
-          </h2>
-          <p className="mt-3 text-text">
-            {configured
-              ? issue
-              : "Hotel search isn’t connected on this server yet. You can still compare on Booking or Expedia."}
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href={listHref} className="btn btn-primary inline-flex">
-              Back to stays
-            </Link>
-            <Link href={planHref} className="btn btn-secondary inline-flex">
-              {query.destination || query.tripId ? "Back to itinerary" : "Plan a trip"}
-            </Link>
-          </div>
-          <div className="mt-4">
-            <StayCompareLinks bookingHref={compare.booking} expediaHref={compare.expedia} />
-          </div>
+            <h2 className="font-display text-2xl font-bold text-heading">
+              {configured ? "Add trip dates" : "Stays not configured"}
+            </h2>
+            <p className="mt-3 text-text">
+              {configured
+                ? issue
+                : "Hotel search isn’t connected on this server yet."}
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link href={planHref} className="btn btn-primary inline-flex">
+                {onTrip ? "Back to itinerary" : "Plan a trip"}
+              </Link>
+              <Link href={listHref} className="btn btn-secondary inline-flex">
+                Search more stays
+              </Link>
+            </div>
           </div>
         </div>
       </SitePage>
@@ -129,7 +124,6 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
     >
       <div className="plan-trip hub-follow plan-stack">
         <StayTripBar query={query} />
-        <StayCompareLinks bookingHref={compare.booking} expediaHref={compare.expedia} />
         {loaded?.sandbox ? (
           <p className="text-sm text-muted">
             Sandbox rate. Booking finishes on Fernandes Journeys through Nuitee and is not a live charge.
@@ -181,7 +175,7 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
           />
         ) : (
           <Link href={listHref} className="btn btn-secondary inline-flex self-start">
-            Back to stays
+            Search more stays
           </Link>
         )}
       </div>

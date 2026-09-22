@@ -96,13 +96,8 @@ export function StayConfirmation({
           </button>
         )}
         <Link href={listHref} className="btn btn-secondary">
-          Back to stays
+          Search more stays
         </Link>
-        {itinerary === "added" ? null : (
-          <Link href={planHref} className="btn btn-secondary">
-            Plan a trip
-          </Link>
-        )}
       </div>
       {itinerary === "adding" ? (
         <p className="text-sm text-muted" role="status">

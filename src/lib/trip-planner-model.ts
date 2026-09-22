@@ -204,7 +204,7 @@ export const DEFAULT_PARTNERS: TripPlannerPartner[] = [
     key: "booking",
     label: "Find a place to stay",
     buttonLabel: "Search stays",
-    blurb: "Search hotels here. Booking.com is still there if you want a second price.",
+    blurb: "Search hotels here and book the stay on this site.",
     affiliateUrlTemplate: BOOKING_TEMPLATE,
     affiliateUrl: BOOKING,
     showWhen: "hotel",
@@ -621,10 +621,7 @@ export function resolveAffiliateHref(
   return partner.affiliateUrl.trim();
 }
 
-/**
- * Hotel lane opens in-app stays with the active trip. Booking.com remains
- * the compare link via `bookingCompareHref`.
- */
+/** Hotel lane opens in-app stays with the active trip. */
 export function hotelLaneHref(
   state: PlannerState,
   flexibleDatesEnabled: boolean,
@@ -642,23 +639,10 @@ export function hotelLaneHref(
   });
 }
 
-/** Booking.com affiliate URL for the same trip, wrapped later by /out. */
-export function bookingCompareHref(
-  state: PlannerState,
-  flexibleDatesEnabled: boolean,
-): string {
-  const booking = DEFAULT_PARTNERS.find((partner) => partner.key === "booking");
-  if (!booking) return "";
-  return resolveAffiliateHref(
-    booking,
-    partnerUrlValues(booking, state, flexibleDatesEnabled),
-  );
-}
-
 /**
- * Lane CTA. Viator opens /experiences and the hotel lane opens /stays.
- * Expedia, Booking’s compare link, Rentcars, and the other partners keep
- * their affiliate URLs so OutboundLink can still wrap them in /out.
+ * Lane CTA for partners that leave the site. Viator opens /experiences.
+ * The hotel lane uses `hotelLaneHref` instead, so stays stay on this site.
+ * Flights, cars, and the other partners keep their affiliate URLs.
  */
 export function partnerLaneHref(
   partner: TripPlannerPartner,

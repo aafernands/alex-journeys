@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { randomUUID } from "node:crypto";
-import { StayCompareLinks } from "@/components/stays/StayCompareLinks";
 import { StayTripBar } from "@/components/stays/StayTripBar";
 import { StaysSearchForm } from "@/components/stays/StaysSearchForm";
 import { SitePage } from "@/components/pages/SitePage";
 import { LiteApiError, liteApiKeyInfo } from "@/lib/liteapi";
-import { stayCompareUrls } from "@/lib/stays-compare";
 import { getTripPlannerConfig } from "@/lib/trip-planner";
 import { planATripHref } from "@/lib/trip-record";
 import {
@@ -69,7 +67,7 @@ export default async function StaysPage({ searchParams }: PageProps) {
     ? parsed
     : { ...parsed, sessionId: randomUUID() };
   const planHref = planATripHref(query.tripId || null);
-  const compare = stayCompareUrls(query);
+  const returnLabel = query.destination || query.tripId ? "Back to itinerary" : "Plan a trip";
   const disclosure = getTripPlannerConfig().disclosure;
   const configured = Boolean(liteApiKeyInfo());
   const issue = query.destination ? staysQueryIssue(query) : "Add a destination.";
@@ -95,7 +93,7 @@ export default async function StaysPage({ searchParams }: PageProps) {
       title={place ? `Stays in ${place}` : "Stays"}
       description={
         place
-          ? "Hotels for this stop, searched here. Booking and Expedia stay available to compare."
+          ? "Hotels for this stop, searched and booked here."
           : "Hotels for the trip you’re planning."
       }
       narrow={false}
@@ -114,18 +112,17 @@ export default async function StaysPage({ searchParams }: PageProps) {
             title="Add a destination in Plan a Trip"
             body="Stays follow the place on your trip. Set a destination and this page opens hotels for it."
             planHref={planHref}
-            actionLabel={query.tripId ? "Back to itinerary" : "Plan a trip"}
+            actionLabel={returnLabel}
           />
         ) : (
           <>
             <StaysSearchForm key={staysQueryString(query)} query={query} />
-            <StayCompareLinks bookingHref={compare.booking} expediaHref={compare.expedia} />
             {!configured ? (
               <Notice
                 title="Stays not configured"
-                body="Hotel search isn’t connected on this server yet. You can still compare the same dates on Booking or Expedia."
+                body="Hotel search isn’t connected on this server yet."
                 planHref={planHref}
-                actionLabel="Back to itinerary"
+                actionLabel={returnLabel}
               />
             ) : null}
             {configured && issue ? (
@@ -145,7 +142,7 @@ export default async function StaysPage({ searchParams }: PageProps) {
               <div className="panel plan-inset max-w-2xl p-6">
                 <h2 className="font-display text-xl font-bold text-heading">No stays for these dates</h2>
                 <p className="mt-2 text-sm leading-relaxed text-text">
-                  Nothing bookable came back for {result.placeName}. Shift the dates, or compare on Booking.
+                  Nothing bookable came back for {result.placeName}. Shift the dates and search again.
                 </p>
               </div>
             ) : null}

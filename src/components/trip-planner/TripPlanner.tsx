@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
+import { DateRangeField } from "@/components/trip-planner/DateRangeField";
 import { plan as tripDensity } from "@/components/trip-planner/density";
 import { ItineraryHub } from "@/components/trip-planner/ItineraryHub";
 import { PlaceCombobox } from "@/components/trip-planner/PlaceCombobox";
@@ -589,56 +590,17 @@ export function TripPlanner({
                 ) : null}
 
                 {dateMode === "exact" ? (
-                  <div className="plan-pair">
-                    <div className="plan-field">
-                      <label htmlFor={`${baseId}-start`} className="sr-only">
-                        Start date
-                      </label>
-                      <input
-                        id={`${baseId}-start`}
-                        type="date"
-                        className={tripDensity.input}
-                        value={state.startDate}
-                        aria-invalid={Boolean(errors.startDate)}
-                        aria-describedby={describedBy(
-                          `${baseId}-start`,
-                          errors.startDate,
-                        )}
-                        onChange={(event) =>
-                          patch({ startDate: event.target.value })
-                        }
-                      />
-                      {errors.startDate ? (
-                        <p id={`${baseId}-start-error`} className={tripDensity.error}>
-                          {errors.startDate}
-                        </p>
-                      ) : null}
-                    </div>
-                    <div className="plan-field">
-                      <label htmlFor={`${baseId}-end`} className="sr-only">
-                        End date
-                      </label>
-                      <input
-                        id={`${baseId}-end`}
-                        type="date"
-                        className={tripDensity.input}
-                        value={state.endDate}
-                        aria-invalid={Boolean(errors.endDate)}
-                        aria-describedby={describedBy(
-                          `${baseId}-end`,
-                          errors.endDate,
-                        )}
-                        onChange={(event) =>
-                          patch({ endDate: event.target.value })
-                        }
-                      />
-                      {errors.endDate ? (
-                        <p id={`${baseId}-end-error`} className={tripDensity.error}>
-                          {errors.endDate}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
+                  <DateRangeField
+                    id={`${baseId}-dates`}
+                    startDate={state.startDate}
+                    endDate={state.endDate}
+                    startLabel="Start"
+                    endLabel="End"
+                    dialogLabel="Trip dates"
+                    startError={errors.startDate}
+                    endError={errors.endDate}
+                    onChange={(next) => patch(next)}
+                  />
                 ) : (
                   <div className="plan-pair">
                     <Field
@@ -847,48 +809,22 @@ export function TripPlanner({
                     Same dates as the trip
                   </label>
                   {state.carDatesSameAsTrip ? null : (
-                    <div className="plan-pair">
-                      <Field
-                        label="Pickup date"
-                        htmlFor={`${baseId}-car-start`}
-                        error={errors.carPickupDate}
-                      >
-                        <input
-                          id={`${baseId}-car-start`}
-                          type="date"
-                          className={tripDensity.input}
-                          value={state.carPickupDate}
-                          aria-invalid={Boolean(errors.carPickupDate)}
-                          aria-describedby={describedBy(
-                            `${baseId}-car-start`,
-                            errors.carPickupDate,
-                          )}
-                          onChange={(event) =>
-                            patch({ carPickupDate: event.target.value })
-                          }
-                        />
-                      </Field>
-                      <Field
-                        label="Drop-off date"
-                        htmlFor={`${baseId}-car-end`}
-                        error={errors.carDropoffDate}
-                      >
-                        <input
-                          id={`${baseId}-car-end`}
-                          type="date"
-                          className={tripDensity.input}
-                          value={state.carDropoffDate}
-                          aria-invalid={Boolean(errors.carDropoffDate)}
-                          aria-describedby={describedBy(
-                            `${baseId}-car-end`,
-                            errors.carDropoffDate,
-                          )}
-                          onChange={(event) =>
-                            patch({ carDropoffDate: event.target.value })
-                          }
-                        />
-                      </Field>
-                    </div>
+                    <DateRangeField
+                      id={`${baseId}-car-dates`}
+                      startDate={state.carPickupDate}
+                      endDate={state.carDropoffDate}
+                      startLabel="Pickup"
+                      endLabel="Drop-off"
+                      dialogLabel="Car dates"
+                      startError={errors.carPickupDate}
+                      endError={errors.carDropoffDate}
+                      onChange={(next) =>
+                        patch({
+                          carPickupDate: next.startDate,
+                          carDropoffDate: next.endDate,
+                        })
+                      }
+                    />
                   )}
                 </div>
               ) : null}

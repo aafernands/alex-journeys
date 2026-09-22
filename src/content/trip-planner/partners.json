@@ -16,7 +16,7 @@
       "key": "booking",
       "label": "Find a place to stay",
       "buttonLabel": "Search stays",
-      "blurb": "Search hotels here. Booking.com is still there if you want a second price.",
+      "blurb": "Search hotels here and book the stay on this site.",
       "affiliateUrlTemplate": "https://www.awin1.com/cread.php?awinmid=6776&awinaffid=1762577&clickref=plan-a-trip&ued=https%3A%2F%2Fwww.booking.com%2Fsearchresults.html%3Fss%3D{destination}%26checkin%3D{startDate}%26checkout%3D{endDate}%26group_adults%3D{adults}%26no_rooms%3D{rooms}",
       "affiliateUrl": "https://tidd.ly/4kgHAYw",
       "showWhen": "hotel",

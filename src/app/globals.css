@@ -1317,6 +1317,222 @@ select.plan-input {
   max-width: 8rem;
 }
 
+/* Date range — one calendar for the trip interval. Size and radius follow plan density. */
+.plan-date-trigger {
+  min-height: 4.25rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.plan-date-backdrop {
+  display: none;
+}
+
+.plan-date-popover {
+  position: absolute;
+  z-index: 40;
+  left: 0;
+  top: calc(100% + 0.5rem);
+  width: min(20.5rem, calc(100vw - 2rem));
+  max-height: min(36rem, calc(100dvh - 6rem));
+  border: 1px solid var(--border);
+  background: var(--white);
+  padding: var(--plan-pad-inset);
+  box-shadow: 0 12px 32px rgba(60, 40, 20, 0.12);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.plan-date-popover > p {
+  flex-shrink: 0;
+}
+
+.plan-date-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.plan-date-footer {
+  flex-shrink: 0;
+}
+
+.plan-date-months {
+  display: grid;
+  gap: var(--plan-gap);
+}
+
+.plan-date-nav {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.plan-date-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--heading);
+  cursor: pointer;
+}
+
+.plan-date-nav-btn:hover {
+  background: var(--sand);
+}
+
+.plan-date-weekdays,
+.plan-date-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.plan-date-weekday {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  font-size: var(--plan-fs-caption);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--muted);
+}
+
+.plan-date-day {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+}
+
+.plan-date-day > button {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: min(2.75rem, 100%);
+  height: 2.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-size: var(--plan-fs-body);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--heading);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.plan-date-day[data-outside="true"] > button {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.plan-date-day > button:disabled {
+  color: var(--muted-light);
+  font-weight: 500;
+  cursor: not-allowed;
+}
+
+.plan-date-day[data-range="between"],
+.plan-date-day[data-range="start"],
+.plan-date-day[data-range="end"] {
+  background: color-mix(in srgb, var(--accent) 36%, var(--white));
+}
+
+.plan-date-day[data-range="start"] {
+  border-radius: 999px 0 0 999px;
+}
+
+.plan-date-day[data-range="end"] {
+  border-radius: 0 999px 999px 0;
+}
+
+.plan-date-day[data-range="single"] {
+  background: transparent;
+}
+
+.plan-date-day[data-selected="true"] > button,
+.plan-date-day[data-outside="true"][data-selected="true"] > button {
+  background: var(--accent);
+  color: var(--on-solid);
+  font-weight: 600;
+}
+
+.plan-date-day[data-today="true"] > button {
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
+.plan-date-day[data-selected="true"][data-today="true"] > button {
+  box-shadow: none;
+}
+
+.plan-date-day[data-preview="end"]:not([data-selected="true"]) > button {
+  background: color-mix(in srgb, var(--accent) 32%, var(--white));
+  color: var(--heading);
+}
+
+@media (hover: hover) {
+  .plan-date-day > button:hover:not(:disabled) {
+    background: var(--sand);
+  }
+
+  .plan-date-day[data-selected="true"] > button:hover {
+    background: var(--accent-deep);
+    color: var(--on-solid);
+  }
+}
+
+@media (min-width: 640px) {
+  .plan-date-popover {
+    width: min(42rem, calc(100vw - 2rem));
+  }
+
+  .plan-date-months {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--plan-section);
+  }
+}
+
+@media (max-width: 639px) {
+  .plan-date-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 180;
+    border: 0;
+    background: color-mix(in srgb, var(--ink) 35%, transparent);
+    padding: 0;
+  }
+
+  .plan-date-popover {
+    position: fixed;
+    z-index: 190;
+    top: 7.25rem;
+    right: 0.75rem;
+    left: 0.75rem;
+    width: auto;
+    max-height: calc(100dvh - 7.25rem - 5.5rem - env(safe-area-inset-bottom, 0px));
+  }
+
+  body.mobile-bottom-nav-visible .plan-date-popover {
+    max-height: calc(
+      100dvh - 7.25rem - 5.5rem - var(--mobile-nav-bar) - env(safe-area-inset-bottom, 0px)
+    );
+  }
+}
+
 /* Quiet progress index — name over status, two columns, no pill chrome. */
 .plan-status {
   display: grid;
@@ -1443,11 +1659,22 @@ select.plan-input {
   }
 }
 
+/* The planner is the page. Keep the journal signup and the guide index
+   off this flow so they don’t sit under the steps. Other pages keep both. */
+body:has(main.plan-flow) #newsletter,
+body:has(main.plan-flow) a[href="#newsletter"] {
+  display: none;
+}
+
 /* Instructional copy that stays on desktop and drops out of the phone flow. */
 @media (max-width: 639px) {
   .plan-page-chrome,
   .plan-desktop-only {
     display: none !important;
+  }
+
+  main.plan-flow {
+    min-height: 100dvh;
   }
 
   .plan-page .section-band {
@@ -1505,13 +1732,71 @@ select.plan-input {
   }
 
   .plan-lane-next {
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
-    border-bottom-color: transparent;
-    border-radius: var(--plan-radius-next);
-    background: var(--surface-soft);
-    padding-right: 0.75rem;
-    padding-left: 0.75rem;
+    margin-top: 0.35rem;
+    margin-bottom: 0.35rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--border));
+    border-radius: 0.75rem;
+    background: var(--white);
+    box-shadow: 0 8px 22px rgba(20, 17, 13, 0.1);
+    padding: 0.2rem 0.85rem 0.85rem;
+  }
+
+  .plan-lane:not(.plan-lane-next) .plan-fold-title {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .plan-lane:not(.plan-lane-next) .plan-fold-toggle .icon-tile {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-color: transparent;
+    background: transparent;
+    color: var(--muted);
+  }
+
+  .plan-next-badge {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    min-height: 1.35rem;
+    padding: 0.12rem 0.5rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--on-solid);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .plan-lane-hero {
+    margin-top: 0.15rem;
+  }
+
+  .plan-lane-secondaries {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.15rem 1rem;
+  }
+
+  .plan-lane-quiet {
+    min-height: 2.25rem;
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+    font-weight: 500;
+  }
+
+  .plan-hub-lead .plan-hub-actions {
+    gap: 0.1rem 1rem;
+  }
+
+  .plan-hub-lead .plan-hub-actions .plan-text-btn {
+    min-height: 2rem;
+    padding: 0.2rem 0;
+    font-weight: 500;
   }
 
   .plan-page .plan-block {
@@ -1550,6 +1835,10 @@ select.plan-input {
 @media (min-width: 640px) {
   .plan-mobile-only {
     display: none !important;
+  }
+
+  .plan-lane-secondaries {
+    display: contents;
   }
 }
 

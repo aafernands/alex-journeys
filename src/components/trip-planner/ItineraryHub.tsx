@@ -7,7 +7,6 @@ import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { NavIcon } from "@/components/icons/NavIcon";
 import type { TripSaveMode } from "@/components/trip-planner/useTripSync";
 import {
-  bookingCompareHref,
   dateSummary,
   hotelLaneHref,
   partnerLaneHref,
@@ -186,17 +185,6 @@ function ItemUrl({ url, compact = false }: { url: string; compact?: boolean }) {
       {onSite ? null : <span className="sr-only"> (opens in a new tab)</span>}
     </OutboundLink>
   );
-}
-
-function laneFoldMeta(
-  partner: TripPlannerPartner,
-  items: TripItem[],
-  isNext: boolean,
-): string {
-  if (partner.key === "booking" && isNext && laneProgress(items) === "open") {
-    return "Search stays";
-  }
-  return laneMeta(items, isNext);
 }
 
 function laneMeta(items: TripItem[], isNext: boolean): string {
@@ -680,31 +668,6 @@ function LaneCta({
   );
 }
 
-function CompareOnBooking({
-  state,
-  flexibleOn,
-  className,
-}: {
-  state: PlannerState;
-  flexibleOn: boolean;
-  className?: string;
-}) {
-  const href = bookingCompareHref(state, flexibleOn);
-  if (!href) return null;
-  return (
-    <OutboundLink
-      href={href}
-      affiliate
-      target="_blank"
-      rel="noopener noreferrer sponsored"
-      className={className ?? `${plan.textBtn} text-link hover:text-accent`}
-    >
-      Compare on Booking
-      <span className="sr-only"> (opens in a new tab)</span>
-    </OutboundLink>
-  );
-}
-
 export function ItineraryHub({
   headingId,
   config,
@@ -865,10 +828,10 @@ export function ItineraryHub({
             : ""}
         </p>
         <p className={`${plan.prose} text-muted plan-desktop-only`}>{subhead}</p>
-        <div className="plan-inline-actions">
+        <div className="plan-inline-actions plan-hub-actions">
           <button
             type="button"
-            className={`${plan.textBtn} text-accent`}
+            className={`${plan.textBtn} text-muted sm:text-accent`}
             onClick={async () => {
               const url = `${window.location.origin}${sharePlanHref({
                 state,
@@ -891,7 +854,7 @@ export function ItineraryHub({
           >
             Copy link
           </button>
-          <button type="button" className={`${plan.textBtn} text-heading`} onClick={onEditTrip}>
+          <button type="button" className={`${plan.textBtn} text-muted sm:text-heading`} onClick={onEditTrip}>
             Edit
           </button>
           <button type="button" className={`${plan.textBtn} text-muted`} onClick={onStartOver}>
@@ -1061,23 +1024,12 @@ export function ItineraryHub({
                     <NavIcon name={laneIcon(partner)} size={16} />
                   </span>
                   <span className="plan-fold-title">{partner.label}</span>
-                  <span className="plan-fold-meta">
-                    {laneFoldMeta(partner, laneItems, isNext)}
+                  <span className={isNext ? "plan-next-badge" : "plan-fold-meta"}>
+                    {laneMeta(laneItems, isNext)}
                   </span>
                   <span className="plan-fold-chevron" aria-hidden="true" />
                 </button>
               </h3>
-              {partner.key === "booking" ? (
-                <div className="pb-3 sm:hidden">
-                  <LaneCta
-                    partner={partner}
-                    state={state}
-                    flexibleOn={flexibleOn}
-                    tripId={tripId}
-                    className="btn btn-primary w-full"
-                  />
-                </div>
-              ) : null}
               <div
                 id={panelId}
                 data-open={laneOpen ? "true" : "false"}
@@ -1107,45 +1059,37 @@ export function ItineraryHub({
                       partner.isCore ? "btn-primary" : "btn-secondary"
                     }`}
                   />
-                  {partner.key === "booking" ? (
-                    <CompareOnBooking state={state} flexibleOn={flexibleOn} />
-                  ) : null}
                 </div>
               </div>
 
-              {partner.blurb ? (
+              {laneItems.length === 0 ? (
+                <p className={`${plan.caption} text-muted sm:hidden`}>Nothing saved yet.</p>
+              ) : partner.blurb ? (
                 <PlanHint label="About this search" mobileOnly>
                   {partner.blurb}
                 </PlanHint>
               ) : null}
 
-              {partner.key === "booking" ? (
-                <CompareOnBooking
-                  state={state}
-                  flexibleOn={flexibleOn}
-                  className={`${plan.textBtn} text-link hover:text-accent sm:hidden`}
-                />
+              {laneOpen && !laneItems.some((item) => item.status === "booked") ? (
+                <div className="plan-mobile-only">
+                  <LaneCta
+                    partner={partner}
+                    state={state}
+                    flexibleOn={flexibleOn}
+                    tripId={tripId}
+                    className={`btn btn-block plan-lane-hero ${
+                      partner.isCore ? "btn-primary" : "btn-secondary"
+                    }`}
+                  />
+                </div>
               ) : null}
 
               {laneItems.length === 0 ? (
-                partner.key === "booking" ? (
-                  <>
-                    <p className={`${plan.caption} text-muted sm:hidden`}>
-                      Search stays for this trip
-                    </p>
-                    <p className={`${plan.body} text-muted plan-desktop-only`}>
-                      Nothing saved here yet. Search stays and the hotel you book comes back
-                      to this itinerary.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className={`${plan.caption} text-muted sm:hidden`}>Nothing saved yet</p>
-                    <p className={`${plan.body} text-muted plan-desktop-only`}>
-                      Nothing saved here yet. Search, then add the booking you want to keep.
-                    </p>
-                  </>
-                )
+                <p className={`${plan.body} text-muted plan-desktop-only`}>
+                  {partner.key === "booking"
+                    ? "Nothing saved here yet. Search stays and the hotel you book comes back to this itinerary."
+                    : "Nothing saved here yet. Search, then add the booking you want to keep."}
+                </p>
               ) : (
                 <ul className="plan-stack-tight">
                   {laneItems.map((item) => {
@@ -1188,6 +1132,20 @@ export function ItineraryHub({
                 </ul>
               )}
 
+              {adding ? null : (
+                <div className="plan-lane-secondaries">
+                  <button
+                    type="button"
+                    className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
+                    onClick={() => {
+                      setLanePin(partner.key);
+                      setEditor({ kind: "add-lane", laneKey: partner.key });
+                    }}
+                  >
+                    Add to itinerary
+                  </button>
+                </div>
+              )}
               {adding ? (
                 <BookingItemForm
                   type={itemTypeForPartner(partner)}
@@ -1197,18 +1155,7 @@ export function ItineraryHub({
                   onCancel={() => setEditor(null)}
                   onSave={addItem}
                 />
-              ) : (
-                <button
-                  type="button"
-                  className={`${plan.textBtn} self-start text-accent hover:underline`}
-                  onClick={() => {
-                    setLanePin(partner.key);
-                    setEditor({ kind: "add-lane", laneKey: partner.key });
-                  }}
-                >
-                  Add to itinerary
-                </button>
-              )}
+              ) : null}
               </div>
             </article>
           );
@@ -1480,7 +1427,7 @@ export function ItineraryHub({
       </PlanFold>
       </div>
 
-      {stickyPartner && editor == null ? (
+      {stickyPartner && editor == null && openLane == null ? (
         <div className="plan-hub-sticky plan-sticky plan-sticky-page plan-sticky-solo plan-mobile-only">
           <LaneCta
             partner={stickyPartner}

@@ -31,6 +31,8 @@ type Props = {
   extraAdminLinks?: AdminEditLink[];
   /** Tighter mobile header for an in-flow tool. Desktop keeps the full intro. */
   compact?: boolean;
+  /** Plan a Trip is the page. Hide site newsletter chrome that would sit in the steps. */
+  planFlow?: boolean;
 };
 
 /** Shared product page chrome — same section shell + type system as homepage. */
@@ -48,6 +50,7 @@ export function SitePage({
   adminEdit,
   extraAdminLinks,
   compact = false,
+  planFlow = false,
 }: Props) {
   const width = narrow ? "max-w-3xl" : "max-w-none";
   const bg =
@@ -58,7 +61,11 @@ export function SitePage({
   const editLabel = adminEdit?.label ?? "Edit page";
 
   return (
-    <main className={compact ? `${bg} plan-page` : bg}>
+    <main
+      className={[bg, compact ? "plan-page" : "", planFlow ? "plan-flow" : ""]
+        .filter(Boolean)
+        .join(" ")}
+    >
       {editHref ? (
         <AdminPublicChrome
           editHref={editHref}
