@@ -30,7 +30,7 @@ Admins sign in with Google and/or GitHub. Only emails listed in **`CMS_ADMIN_EMA
 | Variable | Required | Notes |
 | --- | --- | --- |
 | `AUTH_SECRET` | Yes for OAuth | Random secret for signing session cookies. Generate with `openssl rand -base64 32`. |
-| `AUTH_URL` | Set on Production | `https://www.fernandesjourneys.com` (no path). Auth.js uses it for the OAuth callback host. `AUTH_TRUST_HOST=true` does not override a wrong value. www vs apex: [`docs/X-SIGN-IN.md`](./X-SIGN-IN.md). |
+| `AUTH_URL` | Set on Production | `https://www.fernandesjourneys.com` (no path). Auth.js uses it for the OAuth callback host. Remove `NEXTAUTH_URL` if it disagrees. `AUTH_TRUST_HOST=true` does not override a wrong value. www vs apex, and the X `users/me` 403: [`docs/X-SIGN-IN.md`](./X-SIGN-IN.md). |
 | `AUTH_TRUST_HOST` | Recommended on Vercel | Set to `true` so Auth.js trusts the `Host` / `X-Forwarded-Host` headers. |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | For Google | OAuth 2.0 client from Google Cloud Console. |
 | `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | For GitHub | OAuth App credentials. |
