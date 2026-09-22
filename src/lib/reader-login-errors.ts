@@ -31,6 +31,8 @@ const MESSAGES: Record<string, string> = {
   CredentialsSignin: "Invalid email or password.",
   SessionRequired: "Please sign in to continue.",
   MissingCSRF: "This sign-in request expired. Refresh the page and try again.",
+  InvalidCheck:
+    "Sign-in could not be confirmed in this browser. Refresh the page and start again on www.fernandesjourneys.com, without switching to the address that has no www.",
 };
 
 export function readerLoginErrorMessage(

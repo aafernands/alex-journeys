@@ -156,6 +156,8 @@ describe("readerLoginErrorMessage", () => {
     assert.match(readerLoginErrorMessage("Configuration"), /AUTH_SECRET/);
     assert.match(readerLoginErrorMessage("AccessDenied"), /disabled/);
     assert.match(readerLoginErrorMessage("Verification"), /no longer valid/);
+    assert.match(readerLoginErrorMessage("InvalidCheck"), /www\.fernandesjourneys\.com/);
+    assert.match(readerLoginErrorMessage("InvalidCheck"), /\(InvalidCheck\)$/);
   });
 
   it("keeps unknown codes visible and ignores blanks", () => {
