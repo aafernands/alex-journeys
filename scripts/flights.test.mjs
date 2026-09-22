@@ -6,8 +6,11 @@ import {
   buildFlightConfirmation,
   classifyFlightFailure,
   FLIGHT_CARD_REQUIRED,
+  FLIGHT_PUBLISHABLE_KEY_MISSING,
   flightBookBody,
   flightBookingPayment,
+  flightPrebookPaymentIssue,
+  flightStripeConfirmed,
   flightOfferId,
   flightUpstreamMessage,
   flightsBookPath,
@@ -320,6 +323,26 @@ describe("flight payment payload", () => {
       },
     });
     assert.equal(FLIGHT_CARD_REQUIRED, "Complete card payment first");
+    assert.equal(flightStripeConfirmed("succeeded"), true);
+    assert.equal(flightStripeConfirmed("requires_capture"), true);
+    assert.equal(flightStripeConfirmed("requires_payment_method"), false);
+
+    const held = {
+      prebookId: "019d0674-834d-7db7-9c8b-93fe8e46e7b8",
+      transactionId: "tr_cts_WaTMwICRB0h_dOfyvLvvN",
+      secretKey: "pi_3TChNEA4FXPoRk9Y1hbH6uVq_secret_CRhCAan4jSlXcwLs8N3r1qN6D",
+    };
+    assert.equal(
+      flightPrebookPaymentIssue({ data: [held] }),
+      FLIGHT_PUBLISHABLE_KEY_MISSING,
+    );
+    assert.equal(flightPrebookPaymentIssue({ data: [{ prebookId: held.prebookId }] }), FLIGHT_CARD_REQUIRED);
+    assert.equal(
+      flightPrebookPaymentIssue({
+        data: [{ ...held, publishableKey: "pk_test_51Hh1234567890abcdef" }],
+      }),
+      null,
+    );
 
     const prebook = mapFlightPrebook({
       data: [
@@ -356,12 +379,12 @@ describe("flight payment payload", () => {
             prebookId: "019d0674-834d-7db7-9c8b-93fe8e46e7b8",
             transactionId: "tr_cts_WaTMwICRB0h_dOfyvLvvN",
             secretKey: "pi_3TChNEA4FXPoRk9Y1hbH6uVq_secret_CRhCAan4jSlXcwLs8N3r1qN6D",
-            publishableKey: "pk_test_51Hh1234567890abcdef",
+            publishableKey: "pk_live_51Hh1234567890abcdef",
             paymentTypes: ["CREDIT", "ACC_CREDIT_CARD"],
           },
         ],
-      }).payment,
-      null,
+      }).payment.publishableKey,
+      "pk_live_51Hh1234567890abcdef",
     );
   });
 });

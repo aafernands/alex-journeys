@@ -21,6 +21,7 @@ import {
   isFlightPrebookId,
   FLIGHT_CARD_REQUIRED,
   flightBookBody,
+  flightPrebookPaymentIssue,
   mapAirportMatch,
   mapFlightBooking,
   mapFlightPrebook,
@@ -217,7 +218,11 @@ export async function prebookFlight(offerId: string, party: FlightParty): Promis
     );
   }
   if (!prebook.payment) {
-    throw new LiteApiError(FLIGHT_CARD_REQUIRED, 409, "bad_request");
+    throw new LiteApiError(
+      flightPrebookPaymentIssue(payload) ?? FLIGHT_CARD_REQUIRED,
+      409,
+      "bad_request",
+    );
   }
   return prebook;
 }
