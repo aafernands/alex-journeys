@@ -192,6 +192,10 @@ describe("plan a trip planner", () => {
       hotelLaneHref(lisbonTrip(), true),
       "/stays?dest=Lisbon%2C+Portugal&start=2027-04-12&end=2027-04-19&adults=2",
     );
+    assert.equal(
+      hotelLaneHref(lisbonTrip(), true, "trip_abc"),
+      "/stays?dest=Lisbon%2C+Portugal&start=2027-04-12&end=2027-04-19&adults=2&trip=trip_abc",
+    );
     assert.equal(hotelLaneHref(initialPlannerState(), true), "/stays");
     const bookingHref = bookingCompareHref(lisbonTrip(), true);
     assert.match(bookingHref, /booking\.com/);

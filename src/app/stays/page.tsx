@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { randomUUID } from "node:crypto";
 import { StayCompareLinks } from "@/components/stays/StayCompareLinks";
+import { StayTripBar } from "@/components/stays/StayTripBar";
 import { StaysSearchForm } from "@/components/stays/StaysSearchForm";
 import { SitePage } from "@/components/pages/SitePage";
 import { LiteApiError, liteApiKeyInfo } from "@/lib/liteapi";
@@ -65,7 +66,7 @@ export default async function StaysPage({ searchParams }: PageProps) {
   const query: StaysQuery = parsed.sessionId
     ? parsed
     : { ...parsed, sessionId: randomUUID() };
-  const planHref = planATripHref();
+  const planHref = planATripHref(query.tripId || null);
   const compare = stayCompareUrls(query);
   const disclosure = getTripPlannerConfig().disclosure;
   const configured = Boolean(liteApiKeyInfo());
@@ -105,6 +106,7 @@ export default async function StaysPage({ searchParams }: PageProps) {
       ]}
     >
       <div className="plan-trip hub-follow plan-stack">
+        <StayTripBar query={query} />
         {!place ? (
           <Notice
             title="Add a destination in Plan a Trip"

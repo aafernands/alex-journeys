@@ -8,7 +8,8 @@ type Props = {
   confirmation: StayConfirmationDetails;
   listHref: string;
   planHref: string;
-  itinerary: "" | "added" | "missing";
+  itinerary: "adding" | "added" | "missing";
+  saved?: "account" | "local" | "pending";
   onAddToItinerary?: () => void;
 };
 
@@ -27,6 +28,7 @@ export function StayConfirmation({
   listHref,
   planHref,
   itinerary,
+  saved = "local",
   onAddToItinerary = () => undefined,
 }: Props) {
   const showBookingId = confirmation.bookingId !== confirmation.confirmationCode;
@@ -79,21 +81,41 @@ export function StayConfirmation({
         </p>
       ) : null}
       <div className="flex flex-wrap gap-3">
-        {itinerary === "added" ? null : (
-          <button type="button" className="btn btn-primary" onClick={onAddToItinerary}>
-            Add to itinerary
+        {itinerary === "added" ? (
+          <Link href={planHref} className="btn btn-primary">
+            View on itinerary
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={itinerary === "adding"}
+            onClick={onAddToItinerary}
+          >
+            {itinerary === "adding" ? "Adding to itinerary…" : "Add to itinerary"}
           </button>
         )}
         <Link href={listHref} className="btn btn-secondary">
           Back to stays
         </Link>
-        <Link href={planHref} className="btn btn-secondary">
-          Plan a trip
-        </Link>
+        {itinerary === "added" ? null : (
+          <Link href={planHref} className="btn btn-secondary">
+            Plan a trip
+          </Link>
+        )}
       </div>
+      {itinerary === "adding" ? (
+        <p className="text-sm text-muted" role="status">
+          Adding this stay to your itinerary…
+        </p>
+      ) : null}
       {itinerary === "added" ? (
         <p className="text-sm font-semibold text-heading" role="status">
-          Added to the trip open in this browser.
+          {saved === "pending"
+            ? "This stay is ready for your itinerary. Open the trip to see the hotel."
+            : saved === "account"
+              ? "This stay is on your itinerary."
+              : "Added to the trip open in this browser."}
         </p>
       ) : null}
       {itinerary === "missing" ? (

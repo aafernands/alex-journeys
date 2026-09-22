@@ -30,6 +30,7 @@ export function StaysSearchForm({ query }: Props) {
             children: value("children"),
             rooms: value("rooms"),
             sessionId: query.sessionId,
+            tripId: query.tripId,
           }),
         );
       }}
