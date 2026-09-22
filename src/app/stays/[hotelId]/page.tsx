@@ -165,11 +165,14 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
         ) : null}
         {loaded ? (
           <StayBooker
+            hotelId={hotel?.id || hotelId}
             hotelName={name}
             rooms={loaded.rooms}
             query={query}
             sandbox={loaded.sandbox}
             stayHref={staysHotelPath(hotelId, query)}
+            listHref={listHref}
+            planHref={planHref}
           />
         ) : (
           <Link href={listHref} className="btn btn-secondary inline-flex self-start">

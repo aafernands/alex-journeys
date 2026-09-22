@@ -2,12 +2,21 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { StayConfirmation } from "@/components/stays/StayConfirmation";
+import { StayFailureNotice } from "@/components/stays/StayFailureNotice";
 import { plan } from "@/components/trip-planner/density";
-import { planATripHref } from "@/lib/trip-record";
 import {
+  buildStayConfirmation,
+  classifyStayFailure,
   formatStayMoney,
+  parseStayGuest,
   refundableLabel,
+  stayGuestFieldErrors,
+  staysQueryString,
   type StayBooking,
+  type StayConfirmationDetails,
+  type StayFailure,
+  type StayGuest,
   type StayPrebook,
   type StayRoomOffer,
   type StaysQuery,
@@ -15,49 +24,111 @@ import {
 import { addBookedStayToActivePlan } from "@/lib/stays-itinerary";
 
 type Props = {
+  hotelId: string;
   hotelName: string;
   rooms: StayRoomOffer[];
   query: StaysQuery;
   sandbox: boolean;
   stayHref: string;
+  listHref: string;
+  planHref: string;
 };
 
 const inputClass = plan.input;
+type Pending = "" | "prebook" | "book" | "rates";
+type ItineraryState = "" | "added" | "missing";
 
-export function StayBooker({ hotelName, rooms, query, sandbox, stayHref }: Props) {
-  const [offerId, setOfferId] = useState(rooms[0]?.offerId ?? "");
-  const [guest, setGuest] = useState({
+export function StayBooker({
+  hotelId,
+  hotelName,
+  rooms: initialRooms,
+  query,
+  sandbox,
+  stayHref,
+  listHref,
+  planHref,
+}: Props) {
+  const [rooms, setRooms] = useState(initialRooms);
+  const [offerId, setOfferId] = useState(initialRooms[0]?.offerId ?? "");
+  const [guest, setGuest] = useState<StayGuest>({
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
   });
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof StayGuest, string>>>({});
   const [prebook, setPrebook] = useState<StayPrebook | null>(null);
-  const [booking, setBooking] = useState<StayBooking | null>(null);
-  const [error, setError] = useState("");
-  const [pending, setPending] = useState<"prebook" | "book" | "">("");
-  const [itinerary, setItinerary] = useState<"added" | "missing" | "">("");
+  const [confirmation, setConfirmation] = useState<StayConfirmationDetails | null>(null);
+  const [failure, setFailure] = useState<StayFailure | null>(null);
+  const [pending, setPending] = useState<Pending>("");
+  const [itinerary, setItinerary] = useState<ItineraryState>("");
   const clientReference = useRef("");
+  const lock = useRef(false);
+  const retryStage = useRef<"prebook" | "book" | "rates">("prebook");
 
   const selected = rooms.find((room) => room.offerId === offerId) ?? null;
+  const busy = pending !== "";
 
-  async function readError(response: Response): Promise<string> {
+  async function readError(response: Response): Promise<{ message: string; code: string }> {
     try {
-      const payload = (await response.json()) as { error?: unknown };
-      if (typeof payload.error === "string" && payload.error.trim()) {
-        return payload.error;
-      }
+      const payload = (await response.json()) as { error?: unknown; code?: unknown };
+      const message =
+        typeof payload.error === "string" && payload.error.trim()
+          ? payload.error
+          : "Nuitee could not complete that step.";
+      const code = typeof payload.code === "string" ? payload.code : "";
+      return { message, code };
     } catch {
-      /* ignore */
+      return { message: "Nuitee could not complete that step.", code: "" };
     }
-    return "Nuitee could not complete that step.";
+  }
+
+  async function refreshRooms(): Promise<boolean> {
+    if (lock.current) return false;
+    lock.current = true;
+    setPending("rates");
+    try {
+      const response = await fetch(
+        `/api/stays/hotels/${encodeURIComponent(hotelId)}?${staysQueryString(query)}`,
+      );
+      if (!response.ok) return false;
+      const payload = (await response.json()) as { rooms?: StayRoomOffer[] };
+      const next = Array.isArray(payload.rooms) ? payload.rooms : [];
+      setRooms(next);
+      setOfferId(next[0]?.offerId ?? "");
+      setPrebook(null);
+      clientReference.current = "";
+      return true;
+    } catch {
+      return false;
+    } finally {
+      lock.current = false;
+      setPending("");
+    }
+  }
+
+  async function followFailure(next: StayFailure) {
+    setFailure(next);
+    if (next.recovery !== "refresh-rooms") return;
+    setPrebook(null);
+    const refreshed = await refreshRooms();
+    if (!refreshed) {
+      setFailure({
+        title: next.title,
+        message: `${next.message} The room list could not be refreshed.`,
+        recovery: "back-to-search",
+      });
+    }
   }
 
   async function confirmRoom() {
-    if (!offerId) return;
-    setError("");
+    if (lock.current || !offerId) return;
+    lock.current = true;
+    retryStage.current = "prebook";
+    setFailure(null);
     setPrebook(null);
     setPending("prebook");
+    let followup: StayFailure | null = null;
     try {
       const response = await fetch("/api/stays/prebook", {
         method: "POST",
@@ -65,30 +136,51 @@ export function StayBooker({ hotelName, rooms, query, sandbox, stayHref }: Props
         body: JSON.stringify({ offerId }),
       });
       if (!response.ok) {
-        setError(await readError(response));
+        const { message, code } = await readError(response);
+        followup = classifyStayFailure({ stage: "prebook", message, code });
         return;
       }
       const payload = (await response.json()) as { prebook?: StayPrebook };
       if (!payload.prebook?.prebookId) {
-        setError("Nuitee did not confirm that room. Pick another rate.");
+        followup = classifyStayFailure({
+          stage: "prebook",
+          message: "Nuitee did not confirm that room. Pick another rate.",
+        });
         return;
       }
       setPrebook(payload.prebook);
+      clientReference.current = "";
     } catch {
-      setError("Nuitee could not be reached. Try that room again.");
+      followup = classifyStayFailure({
+        stage: "prebook",
+        message: "Nuitee could not be reached. Try that room again.",
+      });
     } finally {
+      lock.current = false;
       setPending("");
     }
+    if (followup) await followFailure(followup);
   }
 
-  async function bookRoom(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!prebook) return;
-    setError("");
+  async function bookRoom(event?: FormEvent<HTMLFormElement>) {
+    event?.preventDefault();
+    if (lock.current || !prebook) return;
+    const errors = stayGuestFieldErrors(guest);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setFailure(null);
+      return;
+    }
+    const parsed = parseStayGuest(guest);
+    if (!parsed) return;
+    lock.current = true;
+    retryStage.current = "book";
+    setFailure(null);
     if (!clientReference.current && typeof crypto !== "undefined" && crypto.randomUUID) {
       clientReference.current = `fj-${crypto.randomUUID()}`;
     }
     setPending("book");
+    let followup: StayFailure | null = null;
     try {
       const response = await fetch("/api/stays/book", {
         method: "POST",
@@ -97,173 +189,190 @@ export function StayBooker({ hotelName, rooms, query, sandbox, stayHref }: Props
           prebookId: prebook.prebookId,
           clientReference: clientReference.current,
           rooms: query.rooms,
-          guest,
+          guest: parsed,
         }),
       });
       if (!response.ok) {
-        setError(await readError(response));
+        const { message, code } = await readError(response);
+        if (/duplicate|already exists|client.?reference/i.test(message)) {
+          clientReference.current = "";
+        }
+        followup = classifyStayFailure({ stage: "book", message, code });
         return;
       }
       const payload = (await response.json()) as { booking?: StayBooking };
       if (!payload.booking?.bookingId) {
-        setError("Nuitee did not return a confirmation.");
+        followup = classifyStayFailure({
+          stage: "book",
+          message: "Nuitee did not return a confirmation. Check the sandbox dashboard before trying again.",
+        });
         return;
       }
-      setBooking(payload.booking);
+      setConfirmation(
+        buildStayConfirmation({
+          booking: payload.booking,
+          hotelName,
+          guest: parsed,
+          prebook,
+          query,
+          sandbox,
+        }),
+      );
     } catch {
-      setError("Nuitee could not be reached. If you already submitted, check before booking again.");
+      followup = classifyStayFailure({
+        stage: "book",
+        message: "Nuitee could not be reached. If you already submitted, check the sandbox dashboard before booking again.",
+      });
     } finally {
+      lock.current = false;
       setPending("");
     }
+    if (followup) await followFailure(followup);
   }
 
-  if (rooms.length === 0) {
-    return (
-      <div className="panel plan-inset p-5">
-        <h2 className="font-display text-xl font-bold text-heading">No rooms for these dates</h2>
-        <p className="mt-2 text-sm leading-relaxed text-text">
-          Nuitee didn’t return a rate for {hotelName}. Try different dates, or compare the same stay elsewhere.
-        </p>
-      </div>
-    );
+  function pickAnotherRoom() {
+    setPrebook(null);
+    setFailure(null);
+    clientReference.current = "";
+    void refreshRooms();
   }
 
-  if (booking) {
-    const confirmedName = booking.hotelName || hotelName;
-    const confirmation = booking.hotelConfirmationCode || booking.bookingId;
+  function retryLast() {
+    if (retryStage.current === "book") void bookRoom();
+    else if (retryStage.current === "rates") void refreshRooms();
+    else void confirmRoom();
+  }
+
+  function addToItinerary() {
+    if (!confirmation) return;
+    const result = addBookedStayToActivePlan({
+      hotelName: confirmation.hotelName,
+      confirmation: confirmation.confirmationCode,
+      href: stayHref,
+      notes: [confirmation.dateLabel, confirmation.roomName].filter(Boolean).join(" · "),
+    });
+    setItinerary(result.ok ? "added" : "missing");
+  }
+
+  if (confirmation) {
     return (
-      <div className="panel plan-inset plan-stack p-5">
-        <p className="eyebrow">Booked</p>
-        <h2 className="font-display text-2xl font-bold text-heading">{confirmedName}</h2>
-        <p className="text-sm leading-relaxed text-text">
-          Nuitee accepted this {sandbox ? "sandbox " : ""}reservation
-          {booking.status ? ` · ${booking.status}` : ""}.
-          {sandbox
-            ? " Sandbox bookings are simulated and are not charged to a guest card."
-            : ""}
-        </p>
-        <dl className="plan-stack-tight text-sm">
-          <div>
-            <dt className={plan.label}>Confirmation</dt>
-            <dd className="font-semibold text-heading">{confirmation}</dd>
-          </div>
-          {booking.price != null ? (
-            <div>
-              <dt className={plan.label}>Total</dt>
-              <dd className="font-semibold text-heading">
-                {formatStayMoney({ amount: booking.price, currency: booking.currency || "USD" })}
-              </dd>
-            </div>
-          ) : null}
-        </dl>
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => {
-              const result = addBookedStayToActivePlan({
-                hotelName: confirmedName,
-                confirmation,
-                href: stayHref,
-                notes: [
-                  booking.checkin && booking.checkout
-                    ? `${booking.checkin}–${booking.checkout}`
-                    : "",
-                  prebook?.roomName ?? "",
-                ]
-                  .filter(Boolean)
-                  .join(" · "),
-              });
-              setItinerary(result.ok ? "added" : "missing");
-            }}
-          >
-            Add to itinerary
-          </button>
-          <Link href={planATripHref()} className="btn btn-secondary">
-            Open Plan a Trip
-          </Link>
-        </div>
-        {itinerary === "added" ? (
-          <p className="text-sm font-semibold text-heading" role="status">
-            Added to the trip open in this browser.
-          </p>
-        ) : null}
-        {itinerary === "missing" ? (
-          <p className="text-sm text-text" role="status">
-            There’s no trip open in this browser yet. Start one in Plan a Trip, then add the stay.
-          </p>
-        ) : null}
-      </div>
+      <StayConfirmation
+        confirmation={confirmation}
+        listHref={listHref}
+        planHref={planHref}
+        itinerary={itinerary}
+        onAddToItinerary={addToItinerary}
+      />
     );
   }
 
   return (
-    <div className="plan-stack">
-      <fieldset className="plan-stack">
-        <legend className="font-display text-xl font-bold text-heading">Rooms</legend>
-        <div className="plan-stack">
-          {rooms.map((room) => {
-            const checked = room.offerId === offerId;
-            return (
-              <label
-                key={room.offerId}
-                className={`panel plan-inset flex cursor-pointer flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between ${
-                  checked ? "border-accent" : ""
-                }`}
-              >
-                <span className="flex min-w-0 gap-3">
-                  <input
-                    type="radio"
-                    name="room"
-                    className="mt-1 accent-[var(--accent)]"
-                    checked={checked}
-                    onChange={() => {
-                      setOfferId(room.offerId);
-                      setPrebook(null);
-                      setError("");
-                      clientReference.current = "";
-                    }}
-                  />
-                  <span className="min-w-0">
-                    <span className="block font-semibold text-heading">{room.name}</span>
-                    <span className="mt-1 block text-sm text-muted">
-                      {[room.boardName, refundableLabel(room.refundable)]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </span>
-                    {room.remarks ? (
-                      <span className="mt-2 block text-sm leading-relaxed text-text">
-                        {room.remarks}
-                      </span>
-                    ) : null}
-                  </span>
-                </span>
-                <span className="shrink-0 font-display text-lg font-bold text-heading sm:text-right">
-                  {room.price ? formatStayMoney(room.price) : "Price on confirm"}
-                </span>
-              </label>
-            );
-          })}
+    <div className="plan-stack" aria-busy={busy}>
+      {failure ? (
+        <StayFailureNotice
+          failure={failure}
+          listHref={listHref}
+          pending={busy}
+          onRefreshRooms={() => void refreshRooms()}
+          onPickAnother={pickAnotherRoom}
+          onRetry={retryLast}
+        />
+      ) : null}
+      {pending === "rates" ? (
+        <p className="text-sm text-muted" role="status">
+          Checking which rooms are still open…
+        </p>
+      ) : null}
+
+      {rooms.length === 0 ? (
+        <div className="panel plan-inset p-5">
+          <h2 className="font-display text-xl font-bold text-heading">No rooms for these dates</h2>
+          <p className="mt-2 text-sm leading-relaxed text-text">
+            Nuitee didn’t return a rate for {hotelName}. Try different dates, or compare the same stay elsewhere.
+          </p>
+          <Link href={listHref} className="btn btn-secondary mt-4 inline-flex">
+            Search again
+          </Link>
         </div>
-      </fieldset>
+      ) : (
+        <fieldset className="plan-stack" disabled={busy}>
+          <legend className="font-display text-xl font-bold text-heading">Rooms</legend>
+          <div className="plan-stack">
+            {rooms.map((room) => {
+              const checked = room.offerId === offerId;
+              return (
+                <label
+                  key={room.offerId}
+                  className={`panel plan-inset flex cursor-pointer flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between ${
+                    checked ? "border-accent" : ""
+                  }`}
+                >
+                  <span className="flex min-w-0 gap-3">
+                    <input
+                      type="radio"
+                      name="room"
+                      className="mt-1 accent-[var(--accent)]"
+                      checked={checked}
+                      onChange={() => {
+                        setOfferId(room.offerId);
+                        setPrebook(null);
+                        setFailure(null);
+                        clientReference.current = "";
+                      }}
+                    />
+                    <span className="min-w-0">
+                      <span className="block font-semibold text-heading">{room.name}</span>
+                      <span className="mt-1 block text-sm text-muted">
+                        {[room.boardName, refundableLabel(room.refundable)].filter(Boolean).join(" · ")}
+                      </span>
+                      {room.cancellation.map((line) => (
+                        <span key={line} className="mt-1 block text-sm leading-relaxed text-text">
+                          {line}
+                        </span>
+                      ))}
+                      {room.conditions.map((line) => (
+                        <span key={line} className="mt-1 block text-sm leading-relaxed text-text">
+                          {line}
+                        </span>
+                      ))}
+                      {room.remarks ? (
+                        <span className="mt-2 block text-sm leading-relaxed text-text">{room.remarks}</span>
+                      ) : null}
+                    </span>
+                  </span>
+                  <span className="shrink-0 font-display text-lg font-bold text-heading sm:text-right">
+                    {room.price ? formatStayMoney(room.price) : "Price on confirm"}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
+      )}
 
       {selected ? (
         <div className="plan-actions">
           <button
             type="button"
             className="btn btn-ink"
-            disabled={pending === "prebook"}
+            disabled={busy}
             onClick={() => void confirmRoom()}
           >
             {pending === "prebook" ? "Checking the rate…" : "Continue with this room"}
           </button>
         </div>
       ) : null}
+      {pending === "prebook" ? (
+        <p className="text-sm text-muted" role="status">
+          Checking that this rate is still open…
+        </p>
+      ) : null}
 
       {prebook ? (
         <form className="panel plan-inset plan-stack p-5" onSubmit={(event) => void bookRoom(event)}>
           <h2 className="font-display text-xl font-bold text-heading">Guest details</h2>
           <p className="text-sm leading-relaxed text-text">
+            {prebook.roomName ? `${prebook.roomName}. ` : ""}
             {prebook.price != null
               ? `Confirmed total ${formatStayMoney({
                   amount: prebook.price,
@@ -279,66 +388,122 @@ export function StayBooker({ hotelName, rooms, query, sandbox, stayHref }: Props
               ? "Sandbox checkout uses Nuitee’s simulated account card, so this does not charge a guest card."
               : "A sandbox key is required to finish a test booking."}
           </p>
-          {query.children > 0 ? (
-            <p className="text-sm text-muted">
-              Children are priced as age 10, in the first room.
+          {prebook.cancellation.length > 0 ? (
+            <ul className="plan-stack-tight text-sm leading-relaxed text-text">
+              {prebook.cancellation.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+          {prebook.conditions.map((line) => (
+            <p key={line} className="text-sm leading-relaxed text-text">
+              {line}
             </p>
+          ))}
+          {prebook.remarks ? <p className="text-sm leading-relaxed text-text">{prebook.remarks}</p> : null}
+          {prebook.terms ? <p className="text-sm leading-relaxed text-text">{prebook.terms}</p> : null}
+          {query.children > 0 ? (
+            <p className="text-sm text-muted">Children are priced as age 10, in the first room.</p>
           ) : null}
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="plan-stack-tight">
-              <span className={plan.label}>First name</span>
-              <input
-                required
-                autoComplete="given-name"
-                className={inputClass}
-                value={guest.firstName}
-                onChange={(event) => setGuest({ ...guest, firstName: event.target.value })}
-              />
-            </label>
-            <label className="plan-stack-tight">
-              <span className={plan.label}>Last name</span>
-              <input
-                required
-                autoComplete="family-name"
-                className={inputClass}
-                value={guest.lastName}
-                onChange={(event) => setGuest({ ...guest, lastName: event.target.value })}
-              />
-            </label>
-            <label className="plan-stack-tight">
-              <span className={plan.label}>Email</span>
-              <input
-                required
-                type="email"
-                autoComplete="email"
-                className={inputClass}
-                value={guest.email}
-                onChange={(event) => setGuest({ ...guest, email: event.target.value })}
-              />
-            </label>
-            <label className="plan-stack-tight">
-              <span className={plan.label}>Phone</span>
-              <input
-                required
-                type="tel"
-                autoComplete="tel"
-                className={inputClass}
-                value={guest.phone}
-                onChange={(event) => setGuest({ ...guest, phone: event.target.value })}
-              />
-            </label>
+            <GuestField
+              label="First name"
+              autoComplete="given-name"
+              value={guest.firstName}
+              error={fieldErrors.firstName}
+              disabled={pending === "book"}
+              onChange={(firstName) => {
+                setGuest({ ...guest, firstName });
+                setFieldErrors({ ...fieldErrors, firstName: undefined });
+              }}
+            />
+            <GuestField
+              label="Last name"
+              autoComplete="family-name"
+              value={guest.lastName}
+              error={fieldErrors.lastName}
+              disabled={pending === "book"}
+              onChange={(lastName) => {
+                setGuest({ ...guest, lastName });
+                setFieldErrors({ ...fieldErrors, lastName: undefined });
+              }}
+            />
+            <GuestField
+              label="Email"
+              type="email"
+              autoComplete="email"
+              value={guest.email}
+              error={fieldErrors.email}
+              disabled={pending === "book"}
+              onChange={(email) => {
+                setGuest({ ...guest, email });
+                setFieldErrors({ ...fieldErrors, email: undefined });
+              }}
+            />
+            <GuestField
+              label="Phone"
+              type="tel"
+              autoComplete="tel"
+              value={guest.phone}
+              error={fieldErrors.phone}
+              disabled={pending === "book"}
+              onChange={(phone) => {
+                setGuest({ ...guest, phone });
+                setFieldErrors({ ...fieldErrors, phone: undefined });
+              }}
+            />
           </div>
-          <button type="submit" className="btn btn-primary" disabled={pending === "book"}>
+          <button type="submit" className="btn btn-primary" disabled={pending === "book" || pending === "rates"}>
             {pending === "book" ? "Booking…" : "Book this stay"}
           </button>
+          {pending === "book" ? (
+            <p className="text-sm text-muted" role="status">
+              Sending the reservation to Nuitee…
+            </p>
+          ) : null}
         </form>
       ) : null}
-
-      {error ? (
-        <p className="text-sm font-semibold text-link" role="alert">
-          {error}
-        </p>
-      ) : null}
     </div>
+  );
+}
+
+function GuestField({
+  label,
+  value,
+  error,
+  onChange,
+  autoComplete,
+  type = "text",
+  disabled,
+}: {
+  label: string;
+  value: string;
+  error?: string;
+  onChange: (value: string) => void;
+  autoComplete: string;
+  type?: string;
+  disabled: boolean;
+}) {
+  const errorId = error ? `guest-${autoComplete}-error` : undefined;
+  return (
+    <label className="plan-stack-tight">
+      <span className={plan.label}>{label}</span>
+      <input
+        required
+        type={type}
+        autoComplete={autoComplete}
+        className={inputClass}
+        value={value}
+        disabled={disabled}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={errorId}
+        onChange={(event) => onChange(event.target.value)}
+      />
+      {error ? (
+        <span id={errorId} className={plan.error}>
+          {error}
+        </span>
+      ) : null}
+    </label>
   );
 }
