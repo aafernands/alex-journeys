@@ -7,7 +7,11 @@ import {
   isReaderAuthConfigured,
   isTwitterAuthConfigured,
 } from "../src/lib/auth-config.ts";
-import { oauthOnlySignInMessage } from "../src/lib/users.ts";
+import {
+  oauthOnlySignInMessage,
+  optionalOauthEmail,
+} from "../src/lib/users.ts";
+import { readerLoginErrorMessage } from "../src/lib/reader-login-errors.ts";
 
 const KEYS = [
   "AUTH_SECRET",
@@ -114,6 +118,48 @@ describe("grantsCmsAdmin", () => {
       grantsCmsAdmin({ email: "reader@example.com", authProvider: "google" }),
       false,
     );
+  });
+});
+
+describe("optionalOauthEmail", () => {
+  it("accepts a missing X email and normalizes a real one", () => {
+    assert.equal(optionalOauthEmail(null), null);
+    assert.equal(optionalOauthEmail(undefined), null);
+    assert.equal(optionalOauthEmail(""), null);
+    assert.equal(optionalOauthEmail("   "), null);
+    assert.equal(optionalOauthEmail(0), null);
+    assert.equal(optionalOauthEmail(" Ada@Example.com "), "ada@example.com");
+  });
+
+  it("does not grant CMS admin to X when email is missing", () => {
+    clearAuthEnv();
+    process.env.CMS_ADMIN_EMAILS = "alex@example.com";
+    assert.equal(
+      grantsCmsAdmin({
+        email: optionalOauthEmail(null) ?? undefined,
+        authProvider: "twitter",
+      }),
+      false,
+    );
+  });
+});
+
+describe("readerLoginErrorMessage", () => {
+  it("names OAuth callback, configuration, denial, and verification", () => {
+    const callback = readerLoginErrorMessage("OAuthCallbackError");
+    assert.match(callback, /callback URL and client secret/);
+    assert.match(callback, /\(OAuthCallbackError\)$/);
+    assert.match(readerLoginErrorMessage("OAuthCallback"), /\(OAuthCallback\)$/);
+    assert.match(readerLoginErrorMessage("Configuration"), /AUTH_URL/);
+    assert.match(readerLoginErrorMessage("Configuration"), /AUTH_SECRET/);
+    assert.match(readerLoginErrorMessage("AccessDenied"), /disabled/);
+    assert.match(readerLoginErrorMessage("Verification"), /no longer valid/);
+  });
+
+  it("keeps unknown codes visible and ignores blanks", () => {
+    assert.match(readerLoginErrorMessage("SomethingNew"), /\(SomethingNew\)$/);
+    assert.equal(readerLoginErrorMessage(null), null);
+    assert.equal(readerLoginErrorMessage("  "), null);
   });
 });
 

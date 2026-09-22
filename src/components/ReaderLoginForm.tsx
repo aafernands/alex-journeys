@@ -9,6 +9,7 @@ import {
   isTurnstileWidgetEnabled,
   type TurnstileFieldHandle,
 } from "@/components/TurnstileField";
+import { readerLoginErrorMessage } from "@/lib/reader-login-errors";
 
 type Mode = "signin" | "signup";
 
@@ -169,6 +170,15 @@ export function ReaderLoginForm({
           ? "After you continue, you’ll return to this itinerary. A draft in this browser can be saved to your account."
           : "Keep the stories you love and the trips you’re planning, ready on any device."}
       </p>
+
+      {error || authError ? (
+        <p
+          className="mt-4 text-sm font-medium text-red-600 dark:text-red-400"
+          role="alert"
+        >
+          {error || readerLoginErrorMessage(authError)}
+        </p>
+      ) : null}
 
       {credentialsConfigured ? (
         <div className="mt-6 flex rounded-lg border border-border bg-surface-soft p-1">
@@ -359,15 +369,6 @@ export function ReaderLoginForm({
         </Link>
         .
       </p>
-
-      {error || authError ? (
-        <p className="mt-4 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
-          {error ||
-            (authError === "AccessDenied"
-              ? "Sign-in was denied. Your account may be disabled."
-              : "Sign-in failed. Try again.")}
-        </p>
-      ) : null}
 
       <p className="mt-6 text-center text-sm text-muted">
         <Link href="/blog" className="font-semibold text-accent hover:underline">

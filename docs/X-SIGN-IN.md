@@ -11,12 +11,25 @@ Set these on **Production** (and Preview only if you also register that preview 
 | Variable | Value |
 | --- | --- |
 | `AUTH_TWITTER_ID` | OAuth **2.0 Client ID** from the X app |
-| `AUTH_TWITTER_SECRET` | OAuth **2.0 Client Secret** from the X app |
+| `AUTH_TWITTER_SECRET` | OAuth **2.0 Client Secret** from the X app. Must be the **current** secret. Regenerating it in the portal invalidates the old value; paste the new one here and redeploy. |
 | `AUTH_SECRET` | Already required for Auth.js. X does nothing without it. |
+| `AUTH_URL` | **Set on Production** to `https://www.fernandesjourneys.com` (no path, no trailing slash). See below. |
 
 Use the OAuth 2.0 client pair. The older **API Key** and **API Key Secret** are OAuth 1.0a and will not work with this app’s Auth.js Twitter provider (it calls `https://x.com/i/oauth2/authorize` and `https://api.x.com/2/oauth2/token`).
 
-`npm run build` succeeds when these are unset. The X button stays hidden until both are present.
+`npm run build` succeeds when the Twitter pair is unset. The X button stays hidden until both are present.
+
+### `AUTH_URL` (www, not apex)
+
+Auth.js builds the OAuth `redirect_uri` from `AUTH_URL` when that variable is set. When it is unset, it uses the request host (`trustHost` is already on in code). Production readers and the callback this app advertises are on **www**:
+
+`https://www.fernandesjourneys.com/api/auth/callback/twitter`
+
+Set Production `AUTH_URL` to `https://www.fernandesjourneys.com`.
+
+If `AUTH_URL` is the apex (`https://fernandesjourneys.com`) while the browser is on www, Auth.js sends X a callback on a different host than the one that stored the PKCE and state cookies. After Authorize, those cookies are not sent, the token exchange fails, and the reader lands on `/login` with no session.
+
+Do not put a path on `AUTH_URL`. `AUTH_TRUST_HOST=true` does not replace a wrong `AUTH_URL`; a set `AUTH_URL` wins.
 
 ## X Developer Portal
 
@@ -24,15 +37,13 @@ Use the OAuth 2.0 client pair. The older **API Key** and **API Key Secret** are 
 2. **User authentication settings** → Set up / Edit.
 3. App permissions: **Read** is enough. This site asks only for `users.read` and `offline.access` (name, profile photo, and a refresh token). It does not request `tweet.read` and does not post.
 4. Type of app: **Web App, Automated App or Bot** (confidential client, so you get a client secret).
-5. Callback / Redirect URIs — add each exact URL:
+5. Callback / Redirect URIs — add each exact URL. The one Auth.js uses in production is the **www** row. X compares it character for character (scheme, host, path).
 
    | Where | Callback |
    | --- | --- |
-   | Production (apex, required) | `https://fernandesjourneys.com/api/auth/callback/twitter` |
-   | Production (www — live site and the Google callback use www) | `https://www.fernandesjourneys.com/api/auth/callback/twitter` |
+   | Production (required — this is the callback Auth.js advertises) | `https://www.fernandesjourneys.com/api/auth/callback/twitter` |
+   | Production apex, only if that host can open `/login` without redirecting to www first | `https://fernandesjourneys.com/api/auth/callback/twitter` |
    | Local | `http://localhost:3000/api/auth/callback/twitter` |
-
-   Auth.js builds the callback from the host the browser is on, so both apex and www need to be listed if both hosts can reach `/login`.
 
    Google’s branding doc in this repo does **not** list Vercel preview callbacks. X will not accept a wildcard. To try X on a preview deployment, add that deployment’s exact URL too:
 
@@ -40,7 +51,7 @@ Use the OAuth 2.0 client pair. The older **API Key** and **API Key Secret** are 
 
 6. Website URL: `https://www.fernandesjourneys.com`
 7. Optional but useful on the app settings: privacy `https://www.fernandesjourneys.com/privacy`, terms `https://www.fernandesjourneys.com/terms`.
-8. Save, then copy **OAuth 2.0 Client ID** and **Client Secret** into the Vercel vars above.
+8. Save, then copy **OAuth 2.0 Client ID** and **Client Secret** into the Vercel vars above. If the portal only shows the secret once, or you regenerate it, update `AUTH_TWITTER_SECRET` to that new value. The OAuth 1.0 API Key Secret will not work here.
 9. Redeploy Production.
 
 ## What readers get (and don’t)
@@ -58,3 +69,20 @@ Use the OAuth 2.0 client pair. The older **API Key** and **API Key Secret** are 
 3. The header menu must **not** show the admin console for that session.
 4. `/cms` still asks for Google, GitHub, or the passcode — no X button.
 5. In `/cms/users`, disable the X user → the next X sign-in is denied → enable again.
+
+## After Authorize, back on `/login` with no session
+
+Auth.js sends the failure to `/login?error=CODE` (the sign-in page and the error page are both `/login`). The form names that code. Google still working only tells you Auth.js and `AUTH_SECRET` are up; X has its own client, secret, and callback.
+
+| `error` | What it means | What to check |
+| --- | --- | --- |
+| `OAuthCallbackError` (also shown for `OAuthCallback`) | X accepted Authorize, then the callback failed: token exchange, PKCE/state cookie, or profile parse. | www callback listed exactly. `AUTH_TWITTER_SECRET` is the latest OAuth 2.0 Client Secret. `AUTH_URL` is `https://www.fernandesjourneys.com` so the callback host matches the browser. Vercel function logs for `[auth][error]` around the callback. |
+| `Configuration` | Auth.js could not run the provider (bad endpoints, missing secret, or a thrown callback that is not a known client error). | `AUTH_SECRET` set. `AUTH_TWITTER_ID` and `AUTH_TWITTER_SECRET` both set and not the OAuth 1.0 API key pair. `AUTH_URL` is an origin, not a path. |
+| `AccessDenied` | The app refused the user. | `/cms/users` — the X user is disabled. Re-enable and try again. |
+| `Verification` | An email sign-in link was invalid or expired. | Not the X button. Use the link from the latest email, or start again. |
+| `OAuthAccountNotLinked` | That email is already stored on a different sign-in method. | Unusual for X, which usually has no email. Sign in with the original method. |
+| `MissingCSRF` | The sign-in request expired or the CSRF cookie was dropped. | Refresh `/login` and start X again. Do not mix www and apex in the same attempt. |
+
+X OAuth 2 usually returns **no email**. That is expected. The account is stored under the X user id with an empty email, and sign-in still completes. It does not merge with Google or email/password unless X actually returned an address.
+
+Redeploy after any env change. The X button can be visible (vars present at build/runtime) while the secret or callback is still wrong.
