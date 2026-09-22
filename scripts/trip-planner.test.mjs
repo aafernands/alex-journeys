@@ -6,6 +6,8 @@ import {
   dateSummary,
   effectiveCategories,
   fillAffiliateUrl,
+  hotelLaneHref,
+  bookingCompareHref,
   planFingerprint,
   flexibleRange,
   formatDateRange,
@@ -185,6 +187,18 @@ describe("plan a trip planner", () => {
       partnerLaneHref(viator, initialPlannerState(), true),
       "/experiences",
     );
+
+    assert.equal(
+      hotelLaneHref(lisbonTrip(), true),
+      "/stays?dest=Lisbon%2C+Portugal&start=2027-04-12&end=2027-04-19&adults=2",
+    );
+    assert.equal(hotelLaneHref(initialPlannerState(), true), "/stays");
+    const bookingHref = bookingCompareHref(lisbonTrip(), true);
+    assert.match(bookingHref, /booking\.com/);
+    assert.match(bookingHref, /Lisbon/);
+    const bookingPartner = DEFAULT_PARTNERS.find((partner) => partner.key === "booking");
+    assert.ok(bookingPartner);
+    assert.match(partnerLaneHref(bookingPartner, lisbonTrip(), true), /booking\.com/);
   });
 
   it("keeps one checklist fingerprint for the same plan", () => {

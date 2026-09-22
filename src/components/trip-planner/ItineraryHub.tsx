@@ -7,7 +7,9 @@ import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { NavIcon } from "@/components/icons/NavIcon";
 import type { TripSaveMode } from "@/components/trip-planner/useTripSync";
 import {
+  bookingCompareHref,
   dateSummary,
+  hotelLaneHref,
   partnerLaneHref,
   travelerSummary,
   type PlannerState,
@@ -636,18 +638,46 @@ function LaneCta({
   flexibleOn: boolean;
   className: string;
 }) {
-  const href = partnerLaneHref(partner, state, flexibleOn);
-  const external = partner.key !== "viator";
+  const inApp = partner.key === "viator" || partner.key === "booking";
+  const href =
+    partner.key === "booking"
+      ? hotelLaneHref(state, flexibleOn)
+      : partnerLaneHref(partner, state, flexibleOn);
   return (
     <OutboundLink
       href={href}
-      affiliate={external}
-      target={external ? "_blank" : undefined}
-      rel={external ? "noopener noreferrer sponsored" : undefined}
+      affiliate={!inApp}
+      target={inApp ? undefined : "_blank"}
+      rel={inApp ? undefined : "noopener noreferrer sponsored"}
       className={className}
     >
       {partner.buttonLabel}
-      {external ? <span className="sr-only"> (opens in a new tab)</span> : null}
+      {inApp ? null : <span className="sr-only"> (opens in a new tab)</span>}
+    </OutboundLink>
+  );
+}
+
+function CompareOnBooking({
+  state,
+  flexibleOn,
+  className,
+}: {
+  state: PlannerState;
+  flexibleOn: boolean;
+  className?: string;
+}) {
+  const href = bookingCompareHref(state, flexibleOn);
+  if (!href) return null;
+  return (
+    <OutboundLink
+      href={href}
+      affiliate
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+      className={className ?? `${plan.textBtn} text-link hover:text-accent`}
+    >
+      Compare on Booking
+      <span className="sr-only"> (opens in a new tab)</span>
     </OutboundLink>
   );
 }
@@ -1027,20 +1057,33 @@ export function ItineraryHub({
                     ) : null}
                   </div>
                 </div>
-                <LaneCta
-                  partner={partner}
-                  state={state}
-                  flexibleOn={flexibleOn}
-                  className={`btn self-start shrink-0 sm:self-center ${
-                    partner.isCore ? "btn-primary" : "btn-secondary"
-                  }`}
-                />
+                <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
+                  <LaneCta
+                    partner={partner}
+                    state={state}
+                    flexibleOn={flexibleOn}
+                    className={`btn self-start sm:self-end ${
+                      partner.isCore ? "btn-primary" : "btn-secondary"
+                    }`}
+                  />
+                  {partner.key === "booking" ? (
+                    <CompareOnBooking state={state} flexibleOn={flexibleOn} />
+                  ) : null}
+                </div>
               </div>
 
               {partner.blurb ? (
                 <PlanHint label="About this search" mobileOnly>
                   {partner.blurb}
                 </PlanHint>
+              ) : null}
+
+              {partner.key === "booking" ? (
+                <CompareOnBooking
+                  state={state}
+                  flexibleOn={flexibleOn}
+                  className={`${plan.textBtn} text-link hover:text-accent sm:hidden`}
+                />
               ) : null}
 
               {laneItems.length === 0 ? (
