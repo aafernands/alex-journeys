@@ -184,6 +184,16 @@ export function MobileNavDrawer({
               ) : null}
             </li>
 
+            <li>
+              <Link
+                href="/guides/plan-a-trip"
+                className={topLinkClass}
+                onClick={onClose}
+              >
+                Plan a trip
+              </Link>
+            </li>
+
             <MobileTopicSection
               label="Guides"
               href="/guides"

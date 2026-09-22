@@ -676,6 +676,50 @@ export function DesignForm({ initial }: Props) {
                 />
               </div>
             </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label
+                  htmlFor="design-cta3-label"
+                  className="text-sm font-semibold text-heading"
+                >
+                  Plan a trip link label
+                </label>
+                <input
+                  id="design-cta3-label"
+                  value={hero.ctaTertiary.label}
+                  onChange={(e) =>
+                    patchHero("ctaTertiary", {
+                      ...hero.ctaTertiary,
+                      label: e.target.value,
+                    })
+                  }
+                  className={fieldClass}
+                />
+                <p className="mt-1.5 text-xs leading-relaxed text-muted">
+                  Quieter text link beside Explore places and Read stories.
+                  Leave the label blank to hide it.
+                </p>
+              </div>
+              <div>
+                <label
+                  htmlFor="design-cta3-href"
+                  className="text-sm font-semibold text-heading"
+                >
+                  Plan a trip link
+                </label>
+                <input
+                  id="design-cta3-href"
+                  value={hero.ctaTertiary.href}
+                  onChange={(e) =>
+                    patchHero("ctaTertiary", {
+                      ...hero.ctaTertiary,
+                      href: e.target.value,
+                    })
+                  }
+                  className={fieldClass}
+                />
+              </div>
+            </div>
           </div>
         </section>
 

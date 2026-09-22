@@ -226,7 +226,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
 
           {/* Desktop: primary nav */}
           <nav
-            className="hidden min-w-0 flex-1 items-center justify-center gap-5 lg:gap-6 md:flex"
+            className="hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-3 lg:gap-5 xl:gap-6 md:flex"
             aria-label="Primary"
           >
             <div className="relative" ref={destWrapRef}>
@@ -313,6 +313,13 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
                 </div>
               )}
             </div>
+
+            <Link
+              href="/guides/plan-a-trip"
+              className={`whitespace-nowrap font-sans text-sm font-semibold tracking-tight transition ${navLinkClass}`}
+            >
+              Plan a trip
+            </Link>
 
             <Link
               href="/blog"

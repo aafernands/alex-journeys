@@ -61,7 +61,7 @@ export function Hero() {
             {hero.subtitle}
           </p>
 
-          <div className="animate-fade-up animate-delay-3 mt-8 flex w-full max-w-sm flex-col gap-3 sm:max-w-none sm:flex-row sm:items-center">
+          <div className="animate-fade-up animate-delay-3 mt-8 flex w-full max-w-sm flex-col items-start gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
             <Link
               href={hero.ctaPrimary.href}
               className="btn btn-block border border-transparent bg-hero-type text-near-black hover:bg-hero-type/90 sm:w-auto sm:min-w-[11rem]"
@@ -75,6 +75,15 @@ export function Hero() {
             >
               {hero.ctaSecondary.label}
             </Link>
+            {hero.ctaTertiary.label.trim() ? (
+              <Link
+                href={hero.ctaTertiary.href}
+                className="inline-flex min-h-11 items-center gap-1.5 px-0.5 text-sm font-semibold text-hero-type/85 underline decoration-hero-type/40 underline-offset-4 transition hover:text-hero-type hover:decoration-hero-type sm:ml-1"
+              >
+                {hero.ctaTertiary.label}
+                <span aria-hidden="true">→</span>
+              </Link>
+            ) : null}
           </div>
 
           {hero.showFromTheRoad ? (
