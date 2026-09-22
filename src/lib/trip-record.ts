@@ -287,6 +287,21 @@ export function isSafeHttpUrl(value: string): boolean {
   }
 }
 
+/** Same-site path a trip item can store, such as `/stays/…`. */
+export function isSafeSitePath(value: string): boolean {
+  if (!value.startsWith("/") || value.startsWith("//") || value.startsWith("/\\")) {
+    return false;
+  }
+  if (/[\u0000-\u001f\u007f\s\\]/.test(value)) return false;
+  const path = value.split("?")[0]?.split("#")[0] ?? value;
+  return !path.includes(":");
+}
+
+/** External http(s) link, or a same-site path. */
+export function isTripItemUrl(value: string): boolean {
+  return isSafeHttpUrl(value) || isSafeSitePath(value);
+}
+
 export function createTripItemId(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
@@ -565,7 +580,7 @@ export function normalizeTripItem(raw: unknown, index: number): TripItem | null 
 
   let url = typeof record.url === "string" ? record.url.trim() : "";
   if (url.length > 2000) url = url.slice(0, 2000);
-  if (url && !isSafeHttpUrl(url)) return null;
+  if (url && !isTripItemUrl(url)) return null;
 
   const title =
     typeof record.title === "string" ? record.title.trim().slice(0, 160) : "";

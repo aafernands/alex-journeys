@@ -12,6 +12,7 @@ import {
   accountSaveIntent,
   isReasonableTripDraft,
   isSafeHttpUrl,
+  isTripItemUrl,
   normalizeTripItems,
   parseTitleOnlyPatch,
   parseTripWrite,
@@ -69,6 +70,31 @@ describe("saved trips", () => {
     if (bad.ok) assert.equal(bad.data.items.length, 0);
     assert.equal(isSafeHttpUrl("https://www.booking.com/hotel"), true);
     assert.equal(isSafeHttpUrl("javascript:alert(1)"), false);
+    assert.equal(isTripItemUrl("/stays/lp1897?dest=Lisbon&trip=trip_abc"), true);
+    assert.equal(isTripItemUrl("//evil.example/phish"), false);
+    const onSite = parseTripWrite({
+      ...tripWriteFromPlan({ state: lisbonState(), items: [] }, true),
+      items: [
+        {
+          id: "item-stay1234",
+          type: "hotel",
+          title: "Hotel du Test",
+          url: "/stays/lp1897?dest=Lisbon&trip=trip_abc",
+          notes: "Apr 12–19",
+          confirmation: "CONF-12345",
+          status: "booked",
+          laneKey: "booking",
+          sortOrder: 0,
+          updatedAt: "2026-09-22T00:00:00.000Z",
+        },
+      ],
+    });
+    assert.equal(onSite.ok, true);
+    if (onSite.ok) {
+      assert.equal(onSite.data.items[0]?.url, "/stays/lp1897?dest=Lisbon&trip=trip_abc");
+      assert.equal(onSite.data.items[0]?.status, "booked");
+      assert.equal(onSite.data.items[0]?.confirmation, "CONF-12345");
+    }
   });
 
   it("keeps a pasted https link and derives a booked checklist", () => {

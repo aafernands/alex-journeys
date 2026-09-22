@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StayBooker } from "@/components/stays/StayBooker";
+import { StayTripBar } from "@/components/stays/StayTripBar";
 import { SitePage } from "@/components/pages/SitePage";
 import { LiteApiError, liteApiKeyInfo } from "@/lib/liteapi";
 import { planATripHref } from "@/lib/trip-record";
@@ -41,7 +42,8 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
   const { hotelId } = await params;
   if (!isStayHotelId(hotelId)) notFound();
   const query = parseStaysSearchParams(await searchParams);
-  const planHref = planATripHref();
+  const planHref = planATripHref(query.tripId || null);
+  const onTrip = Boolean(query.destination || query.tripId);
   const listHref = staysPath(query);
   const configured = Boolean(liteApiKeyInfo());
   const issue = staysQueryIssue(query);
@@ -58,11 +60,13 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
         crumbs={[
           { href: "/", label: "Home" },
           { href: planHref, label: "Plan a trip" },
-          { href: "/stays", label: "Stays" },
+          { href: listHref, label: "Stays" },
           { label: "Hotel" },
         ]}
       >
-        <div className="panel hub-follow max-w-2xl p-6 sm:p-8">
+        <div className="plan-trip hub-follow plan-stack">
+          <StayTripBar query={query} />
+          <div className="panel max-w-2xl p-6 sm:p-8">
           <h2 className="font-display text-2xl font-bold text-heading">
             {configured ? "Add trip dates" : "Stays not configured"}
           </h2>
@@ -72,12 +76,13 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
               : "Hotel search isn’t connected on this server yet."}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href={listHref} className="btn btn-primary inline-flex">
-              Back to stays
+            <Link href={planHref} className="btn btn-primary inline-flex">
+              {onTrip ? "Back to itinerary" : "Plan a trip"}
             </Link>
-            <Link href={planHref} className="btn btn-secondary inline-flex">
-              Plan a trip
+            <Link href={listHref} className="btn btn-secondary inline-flex">
+              Search more stays
             </Link>
+          </div>
           </div>
         </div>
       </SitePage>
@@ -118,6 +123,7 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
       ]}
     >
       <div className="plan-trip hub-follow plan-stack">
+        <StayTripBar query={query} />
         {loaded?.sandbox ? (
           <p className="text-sm text-muted">
             Sandbox rate. Booking finishes on Fernandes Journeys through Nuitee and is not a live charge.
@@ -169,7 +175,7 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
           />
         ) : (
           <Link href={listHref} className="btn btn-secondary inline-flex self-start">
-            Back to stays
+            Search more stays
           </Link>
         )}
       </div>

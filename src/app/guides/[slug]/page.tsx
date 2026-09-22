@@ -77,7 +77,7 @@ function GuideIndex({
 
 type PageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ trip?: string | string[] }>;
+  searchParams: Promise<{ trip?: string | string[]; stay?: string | string[] }>;
 };
 
 export function generateStaticParams() {
@@ -115,6 +115,7 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
   const { slug } = await params;
   const query = await searchParams;
   const rawTrip = Array.isArray(query.trip) ? query.trip[0] : query.trip;
+  const rawStay = Array.isArray(query.stay) ? query.stay[0] : query.stay;
   const hub = getGuideHub(slug);
   if (!hub) notFound();
 
@@ -185,6 +186,7 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
           config={plannerConfig}
           partners={plannerPartners}
           urlTripId={rawTrip?.trim() || null}
+          focusStay={rawStay === "booked"}
           journalPlaces={getAllDestinations().map(
             (dest) => `${destinationCity(dest)}, ${dest.name}`,
           )}
