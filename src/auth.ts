@@ -71,7 +71,8 @@ const providers = [
           clientId: twitterCredentials.clientId,
           clientSecret: twitterCredentials.clientSecret,
           // url + params (not a raw authorize URL, and not params alone).
-          // Scope is users.read + offline.access — no tweet.read.
+          // Scope matches Auth.js: users.read tweet.read offline.access.
+          // tweet.read is required for GET /2/users/me. This app does not post.
           authorization: twitterAuthorization,
           token: TWITTER_TOKEN_URL,
           userinfo: TWITTER_USERINFO_URL,

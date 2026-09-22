@@ -1,9 +1,7 @@
+import { OAuthCallbackError } from "@auth/core/errors";
+
 /**
  * X OAuth 2.0 authorize endpoint for the Auth.js Twitter provider.
- *
- * The built-in provider sets `authorization` to a URL string whose default
- * scope includes `tweet.read`. This site only needs the signed-in user's
- * profile and a refresh token.
  *
  * Pass `url` and `params` together. On @auth/core 0.41 the provider default
  * is a string, and a params-only object is merged onto that string by
@@ -14,8 +12,16 @@
  */
 export const TWITTER_AUTHORIZE_URL = "https://x.com/i/oauth2/authorize";
 
-/** Profile + refresh token. Do not add `tweet.read`. */
-export const TWITTER_OAUTH_SCOPE = "users.read offline.access";
+/**
+ * Auth.js Twitter default: `users.read tweet.read offline.access`.
+ *
+ * `tweet.read` is required for profile login. X returns HTTP 403 on
+ * `GET /2/users/me` when the token only has `users.read`. Auth.js then logs
+ * `OAuthProfileParseError` and the reader lands on `/login?error=Configuration`.
+ * This app still does not post, so the scope has no write permission.
+ * Readers who already approved the narrower scope need to authorize once more.
+ */
+export const TWITTER_OAUTH_SCOPE = "users.read tweet.read offline.access";
 
 export const twitterAuthorization = {
   url: TWITTER_AUTHORIZE_URL,
@@ -69,12 +75,33 @@ export function ensureTwitterTokenClientId(
   if (!body.get("client_id")) body.set("client_id", clientId);
 }
 
+function isTwitterUsersMe(input: Parameters<typeof fetch>[0]): boolean {
+  try {
+    const url = new URL(requestHref(input));
+    return (
+      (url.hostname === "api.x.com" || url.hostname === "api.twitter.com") &&
+      url.pathname === "/2/users/me"
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function twitterTokenFetch(
   clientId: string,
   inner: typeof fetch = fetch,
 ): typeof fetch {
   return async (input, init) => {
     ensureTwitterTokenClientId(input, init, clientId);
-    return inner(input, init);
+    const response = await inner(input, init);
+    // A 403 body is not `{ data }`. Auth.js logs OAuthProfileParseError, then
+    // redirects to the callback URL with `/signin` glued on, which becomes
+    // `/login?error=Configuration`. Throw a client-safe error instead.
+    if (response.status === 403 && isTwitterUsersMe(input)) {
+      throw new OAuthCallbackError(
+        "X refused GET /2/users/me with HTTP 403. The token needs tweet.read (users.read alone is not enough). This app does not post. The reader must authorize again",
+      );
+    }
+    return response;
   };
 }

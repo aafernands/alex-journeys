@@ -35,7 +35,11 @@ Do not put a path on `AUTH_URL`. `AUTH_TRUST_HOST=true` does not replace a wrong
 
 1. Open [developer.x.com](https://developer.x.com/) → your project → the app used for Fernandes Journeys (or create one).
 2. **User authentication settings** → Set up / Edit.
-3. App permissions: **Read** is enough. This site asks only for `users.read` and `offline.access` (name, profile photo, and a refresh token). It does not request `tweet.read` and does not post.
+3. App permissions: **Read** is enough. Do not switch the app to Read and Write. The authorize request uses the Auth.js Twitter default, `users.read tweet.read offline.access` (name, profile photo, a refresh token, and the scope X requires for the profile lookup). The site still does not post.
+
+   `tweet.read` is required even though this app never reads a timeline. After Authorize, Auth.js calls `GET https://api.x.com/2/users/me`. X returns **HTTP 403** when the token only has `users.read`. Auth.js logs `OAuthProfileParseError` and would send the reader to `/login?error=Configuration`. This app turns that 403 into `OAuthCallbackError` instead (see the table below).
+
+   Readers who already pressed Authorize under the old scope (`users.read` and `offline.access` only) need to authorize **once more** so X grants `tweet.read`. Use **Continue with X** again. If X does not show a new consent screen and sign-in still fails, revoke Fernandes Journeys in X settings (Settings → Security and account access → Apps and sessions) and try again.
 4. Type of app: **Web App, Automated App or Bot** (confidential client, so you get a client secret).
 5. Callback / Redirect URIs — add each exact URL. The one Auth.js uses in production is the **www** row. X compares it character for character (scheme, host, path).
 
@@ -76,8 +80,8 @@ Auth.js sends the failure to `/login?error=CODE` (the sign-in page and the error
 
 | `error` | What it means | What to check |
 | --- | --- | --- |
-| `OAuthCallbackError` (also shown for `OAuthCallback`) | X accepted Authorize, then the callback failed: token exchange, PKCE/state cookie, or profile parse. | www callback listed exactly. `AUTH_TWITTER_SECRET` is the latest OAuth 2.0 Client Secret. `AUTH_URL` is `https://www.fernandesjourneys.com` so the callback host matches the browser. Vercel function logs for `[auth][error]` around the callback. |
-| `Configuration` | Auth.js hid a token-endpoint error that is not one of its client-safe types. X's token URL is `https://api.x.com/2/oauth2/token`. A Basic-only POST (no `client_id` in the body) is `Missing required parameter [client_id]`, and a body secret without Basic is `Missing valid authorization header`. Both became this code. The app now sends Basic plus body `client_id` only. A profile with no email does not. | Vercel logs `[auth][error] oauth` for `error` and `error_description`. That line does not print the client secret or tokens. |
+| `OAuthCallbackError` (also shown for `OAuthCallback`) | X accepted Authorize, then the callback failed: token exchange, PKCE/state cookie, profile parse, or `GET /2/users/me` returned **403**. A 403 means the token is missing `tweet.read` (old consent, or the portal app is not allowed to read). The login message asks the reader to try again and approve access, and says this site does not post. | Try **Continue with X** again so the new scope is granted. If X skips the consent screen, revoke the app and authorize once more. Also check the www callback, the current OAuth 2.0 Client Secret, and `AUTH_URL`. Vercel function logs for `[auth][error]` around the callback. |
+| `Configuration` | Auth.js hid an error that is not one of its client-safe types. X's token URL is `https://api.x.com/2/oauth2/token`. A Basic-only POST (no `client_id` in the body) is `Missing required parameter [client_id]`, and a body secret without Basic is `Missing valid authorization header`. Both became this code. The app now sends Basic plus body `client_id` only. A `users/me` 403 is `OAuthCallbackError`, not this code. A profile with no email does not cause it. | Vercel logs `[auth][error] oauth` for `error` and `error_description`. That line does not print the client secret or tokens. |
 | `AccessDenied` | The app refused the user. | `/cms/users` — the X user is disabled. Re-enable and try again. |
 | `Verification` | An email sign-in link was invalid or expired. | Not the X button. Use the link from the latest email, or start again. |
 | `OAuthAccountNotLinked` | That email is already stored on a different sign-in method. | Unusual for X, which usually has no email. Sign in with the original method. |

@@ -17,10 +17,20 @@ import {
 import { optionalOauthEmail, upsertOauthUser } from "../src/lib/users.ts";
 
 describe("twitterAuthorization", () => {
-  it("asks X for profile and refresh only", () => {
+  it("asks X for the Auth.js default scope, including tweet.read", () => {
     assert.equal(twitterAuthorization.url, TWITTER_AUTHORIZE_URL);
     assert.equal(twitterAuthorization.params.scope, TWITTER_OAUTH_SCOPE);
-    assert.equal(twitterAuthorization.params.scope.includes("tweet.read"), false);
+    assert.equal(
+      twitterAuthorization.params.scope,
+      "users.read tweet.read offline.access",
+    );
+    assert.equal(twitterAuthorization.params.scope.includes("users.read"), true);
+    assert.equal(twitterAuthorization.params.scope.includes("tweet.read"), true);
+    assert.equal(
+      twitterAuthorization.params.scope.includes("offline.access"),
+      true,
+    );
+    assert.equal(twitterAuthorization.params.scope.includes("tweet.write"), false);
     assert.equal(typeof twitterAuthorization.url, "string");
   });
 
@@ -55,8 +65,12 @@ describe("twitterAuthorization", () => {
     const payload = await response.json();
     const url = new URL(payload.url);
     assert.equal(url.origin + url.pathname, TWITTER_AUTHORIZE_URL);
-    assert.equal(url.searchParams.get("scope"), "users.read offline.access");
-    assert.equal(url.searchParams.get("scope")?.includes("tweet.read"), false);
+    assert.equal(
+      url.searchParams.get("scope"),
+      "users.read tweet.read offline.access",
+    );
+    assert.equal(url.searchParams.get("scope")?.includes("tweet.read"), true);
+    assert.equal(url.searchParams.get("scope")?.includes("tweet.write"), false);
     assert.equal(url.searchParams.get("client_id"), "client-id-123");
     assert.equal(url.searchParams.get("response_type"), "code");
     assert.equal(
@@ -200,7 +214,7 @@ function xApi() {
           token_type: "bearer",
           access_token: "access-token",
           expires_in: 7200,
-          scope: "users.read offline.access",
+          scope: "users.read tweet.read offline.access",
           refresh_token: "refresh-token",
         }),
         { status: 200, headers: { "content-type": "application/json" } },
@@ -387,6 +401,53 @@ describe("Twitter callback Configuration", () => {
     const session = await sessionRes.json();
     assert.equal(session.user.name, "Alex");
     assert.equal(session.user.email ?? null, null);
+  });
+
+  it("maps GET /2/users/me HTTP 403 to error=OAuthCallbackError", async () => {
+    const requests = [];
+    const fetchImpl = async (input, init = {}) => {
+      const href = typeof input === "string" ? input : input.url;
+      const body = init.body instanceof URLSearchParams ? init.body : null;
+      requests.push({ href, clientId: body?.get("client_id") ?? null });
+      if (href.startsWith(TWITTER_TOKEN_URL)) {
+        return new Response(
+          JSON.stringify({
+            token_type: "bearer",
+            access_token: "access-token",
+            expires_in: 7200,
+            scope: TWITTER_OAUTH_SCOPE,
+            refresh_token: "refresh-token",
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        );
+      }
+      if (href.startsWith("https://api.x.com/2/users/me")) {
+        return new Response(
+          JSON.stringify({
+            title: "Forbidden",
+            detail: "Request forbidden by Twitter API.",
+            status: 403,
+          }),
+          { status: 403, headers: { "content-type": "application/json" } },
+        );
+      }
+      throw new Error(`unexpected X request ${href}`);
+    };
+    const { location } = await callbackLocation(
+      Twitter({
+        clientId: CLIENT_ID,
+        clientSecret: CLIENT_SECRET,
+        authorization: twitterAuthorization,
+        token: TWITTER_TOKEN_URL,
+        userinfo: TWITTER_USERINFO_URL,
+        [customFetch]: twitterTokenFetch(CLIENT_ID, fetchImpl),
+      }),
+    );
+    assert.match(location, /\/login\?error=OAuthCallbackError$/);
+    assert.equal(location.includes("error=Configuration"), false);
+    assert.equal(requests[0].href, TWITTER_TOKEN_URL);
+    assert.equal(requests[0].clientId, CLIENT_ID);
+    assert.equal(requests[1].href, TWITTER_USERINFO_URL);
   });
 
   it("does not turn a profile parse failure into error=Configuration", async () => {
