@@ -15,7 +15,11 @@ export async function GET() {
     return NextResponse.json({ error: UNAVAILABLE }, { status: 503 });
   }
   try {
-    const mailbox = await readOrCreateMailbox(gate.userId, { kind: "account" });
+    const mailbox = await readOrCreateMailbox(
+      gate.userId,
+      { kind: "account" },
+      { displayName: gate.displayName },
+    );
     return NextResponse.json({ mailbox });
   } catch (err) {
     return inboundFailure(err, "Could not load your forward address.");
@@ -40,7 +44,9 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Nothing to change." }, { status: 400 });
   }
   try {
-    const mailbox = await updateMailbox(gate.userId, { kind: "account" }, patch);
+    const mailbox = await updateMailbox(gate.userId, { kind: "account" }, patch, {
+      displayName: gate.displayName,
+    });
     return NextResponse.json({ ok: true, mailbox });
   } catch (err) {
     return inboundFailure(err, "Could not update your forward address.");

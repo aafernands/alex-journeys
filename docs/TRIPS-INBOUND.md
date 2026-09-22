@@ -13,8 +13,9 @@ Out of scope: Gmail mailbox scan, scraping booking sites, and silent auto-add.
 Firestore, under the signed-in reader only:
 
 ```
-inboundRoutes/{token}
+inboundRoutes/{localPart}
   userId, scope: "account" | "trip", tripId|null, enabled, createdAt, updatedAt
+  Optional: rotatedAt (replaced), retired: true (trip deleted). The doc is not removed.
 
 users/{userId}/inboundMailbox/settings
   token, enabled, createdAt, updatedAt
@@ -26,9 +27,9 @@ users/{userId}/trips/{tripId}/inboundImports/{id}
 users/{userId}/trips/{tripId}/inboundReceipts/{hash}
 ```
 
-A suggestion stores: type guess, title, confirmation, dates, time, link, truncated subject, `source: "email"`, and the Resend `email_id`. The raw HTML is read in memory to parse and is **not** written. Deleting a trip removes that trip’s address, queue, and route. Attachments (PDF-only confirmations) are not read — the subject can still become a suggestion to dismiss or edit.
+A suggestion stores: type guess, title, confirmation, dates, time, link, truncated subject, `source: "email"`, and the Resend `email_id`. The raw HTML is read in memory to parse and is **not** written. Deleting a trip removes that trip’s queue and mailbox settings. The route document stays with `enabled: false` so the local-part is never given to another trip. Attachments (PDF-only confirmations) are not read — the subject can still become a suggestion to dismiss or edit.
 
-The webhook looks up `inboundRoutes/{token}` so it does not scan every user.
+The webhook looks up `inboundRoutes/{localPart}` so it does not scan every user. `localPart` is either a legacy 32-hex token or a friendly `name-NN`.
 
 ## Env
 
@@ -66,7 +67,14 @@ Do **not** put this MX on the root domain `fernandesjourneys.com`. That domain a
 
 Preview deploys can use the same webhook only if you point a second webhook at the preview URL. Real forwards should hit production. Use the sample harness on a preview when DNS is not ready.
 
-Address shape: `{32-hex-token}@inbound.fernandesjourneys.com`. `trip+{token}@` on that host is also accepted, in case a forwarder keeps plus-addressing. The hub copies the plain token address.
+Address shape for a **new** mailbox (and for **Get a new address**): `{slug}-{NN}@inbound.fernandesjourneys.com`, for example `alex-24@inbound.fernandesjourneys.com`.
+
+- `slug` is the reader’s first name: lowercase ASCII letters, digits, and hyphens (`José María` → `jose`, `Mary-Jane` → `mary-jane`). A signed-in reader whose display name is blank or has no letters or digits gets the stem `trip` (`trip-17@…`). Guests still see **Sign in to get a forward address** and do not receive one.
+- `NN` is an unused two-digit suffix (`00`–`99`), chosen at random so the first address is not always `-00`. The route document is the uniqueness check. An address already stored — including one that was replaced, turned off, or left behind when a trip was deleted — is never assigned again.
+- The same first name shares those 100 suffixes across the whole site. When all 100 are taken, the next address uses a three-digit suffix (`alex-042`), then four (`alex-0042`). New mail does not go back to a 32-character hex token.
+- Mailboxes that already have a 32-hex local-part **keep it** until the reader chooses **Get a new address**. Copy address copies whatever is stored.
+
+`trip+{local-part}@` on that host is also accepted, in case a forwarder keeps plus-addressing. The hub copies the plain address. The webhook resolves both the friendly form and the legacy hex form.
 
 ## Webhook
 
@@ -85,7 +93,7 @@ Example metadata payload (what Resend posts):
   "data": {
     "email_id": "56761188-7520-42d8-8898-ff6fc54ce618",
     "from": "united@example.com",
-    "to": ["TOKEN@inbound.fernandesjourneys.com"],
+    "to": ["alex-24@inbound.fernandesjourneys.com"],
     "cc": [],
     "bcc": [],
     "received_for": [],
@@ -126,7 +134,7 @@ Hotel-shaped body you can send the same way (change `messageId` each time you wa
 
 ```json
 {
-  "to": "TOKEN@inbound.fernandesjourneys.com",
+  "to": "alex-24@inbound.fernandesjourneys.com",
   "subject": "Reservation confirmed — Alfama apartment",
   "text": "Check-in: Monday, April 12, 2027\nCheck-out: April 19, 2027\nConfirmation code: HMAB12CD\nhttps://www.airbnb.com/trips/HMAB12CD\n",
   "messageId": "sample-airbnb-hmab12cd"
@@ -155,7 +163,7 @@ Add only closes the suggestion. The hub inserts the itinerary item in the browse
 
 ## Code map
 
-- `src/lib/inbound-address.ts` — token and recipient parsing
+- `src/lib/inbound-address.ts` — friendly local-parts, legacy hex tokens, and recipient parsing
 - `src/lib/inbound-parse.ts` — heuristics and “add” → trip item
 - `src/lib/inbound-webhook.ts` — Svix check, sample body, receiving fetch
 - `src/lib/inbound-store.ts` — Firestore

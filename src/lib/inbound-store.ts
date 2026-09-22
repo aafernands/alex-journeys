@@ -7,17 +7,22 @@
  *   users/{userId}/trips/{tripId}/inbound/settings
  *   users/{userId}/trips/{tripId}/inboundImports/{id}
  *
- * inboundRoutes/{token} is an index so the webhook can find the owner
- * without scanning users. Suggestions keep parsed fields and the provider
- * message id — not the raw HTML.
+ * inboundRoutes/{localPart} is an index so the webhook can find the owner
+ * without scanning users. The id is the mailbox local-part: a legacy 32-hex
+ * token, or a friendly `name-NN` (longer numeric suffix only when `00`–`99`
+ * are already stored). An existing route is never reused, including after it
+ * is turned off, replaced, or the trip is deleted. Suggestions keep parsed
+ * fields and the provider message id — not the raw HTML.
  */
 import { createHash } from "node:crypto";
 import { getFirestoreDb, isFirebaseConfigured } from "@/lib/firebase-admin";
-import type { Query } from "firebase-admin/firestore";
+import type { Query, Transaction } from "firebase-admin/firestore";
 import {
-  createInboundToken,
+  INBOUND_NAME_FALLBACK,
   formatInboundAddress,
-  isInboundToken,
+  inboundLocalPartAttempts,
+  isInboundLocalPart,
+  slugifyInboundName,
   tokensFromRecipients,
 } from "@/lib/inbound-address";
 import {
@@ -87,8 +92,51 @@ function receiptsRef(userId: string, scope: InboundScope) {
 }
 
 function routeRef(token: string) {
-  if (!isInboundToken(token)) throw new Error("Invalid forward address.");
+  if (!isInboundLocalPart(token)) throw new Error("Invalid forward address.");
   return requireDb().collection("inboundRoutes").doc(token);
+}
+
+type MailboxNaming = { displayName?: string | null };
+
+function activeRoute(userId: string, scope: InboundScope, now: string) {
+  return {
+    userId: sanitizeUserId(userId),
+    scope: scope.kind,
+    tripId: scope.kind === "trip" ? sanitizeTripId(scope.tripId) : null,
+    enabled: true,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+/** Session name when it slugs cleanly; otherwise the profile name on the user doc. */
+async function readerDisplayName(userId: string, hinted?: string | null): Promise<string | null> {
+  const hint = typeof hinted === "string" ? hinted.trim() : "";
+  if (hint && slugifyInboundName(hint) !== INBOUND_NAME_FALLBACK) return hint;
+  try {
+    const snap = await userRef(userId).get();
+    const name = snap.data()?.name;
+    if (typeof name === "string") {
+      const trimmed = name.trim();
+      if (trimmed && slugifyInboundName(trimmed) !== INBOUND_NAME_FALLBACK) return trimmed;
+    }
+  } catch (err) {
+    console.warn("[inbound] display name lookup failed:", err instanceof Error ? err.name : "error");
+  }
+  return hint || null;
+}
+
+/**
+ * First friendly local-part whose route doc does not exist.
+ * A disabled or retired route still counts as taken, so an address is never
+ * handed to a different trip or account.
+ */
+async function claimLocalPart(tx: Transaction, displayName: string | null): Promise<string> {
+  for (const local of inboundLocalPartAttempts(displayName)) {
+    const snap = await tx.get(routeRef(local));
+    if (!snap.exists) return local;
+  }
+  throw new InboundUnavailableError("Could not prepare a forward address.");
 }
 
 function scopeFromRoute(data: Record<string, unknown>): InboundScope | null {
@@ -106,7 +154,7 @@ async function tripExists(userId: string, tripId: string): Promise<boolean> {
 }
 
 function mailboxFromData(data: Record<string, unknown> | undefined): MailboxRecord | null {
-  if (!data || typeof data.token !== "string" || !isInboundToken(data.token)) return null;
+  if (!data || typeof data.token !== "string" || !isInboundLocalPart(data.token)) return null;
   const now = new Date().toISOString();
   return {
     token: data.token,
@@ -171,27 +219,22 @@ function viewFor(mailbox: MailboxRecord, scope: InboundScope, suggestions: Inbou
 export async function readOrCreateMailbox(
   userId: string,
   scope: InboundScope,
+  options: MailboxNaming = {},
 ): Promise<InboundMailboxView | null> {
   if (scope.kind === "trip" && !(await tripExists(userId, scope.tripId))) return null;
   const ref = settingsRef(userId, scope);
   const existing = mailboxFromData((await ref.get()).data() as Record<string, unknown> | undefined);
   if (!existing) {
-    const token = createInboundToken();
+    const displayName = await readerDisplayName(userId, options.displayName);
     const now = new Date().toISOString();
     const db = requireDb();
     await db.runTransaction(async (tx) => {
       const snap = await tx.get(ref);
       const current = mailboxFromData(snap.data() as Record<string, unknown> | undefined);
       if (current) return;
+      const token = await claimLocalPart(tx, displayName);
       tx.set(ref, { token, enabled: true, createdAt: now, updatedAt: now });
-      tx.set(routeRef(token), {
-        userId: sanitizeUserId(userId),
-        scope: scope.kind,
-        tripId: scope.kind === "trip" ? sanitizeTripId(scope.tripId) : null,
-        enabled: true,
-        createdAt: now,
-        updatedAt: now,
-      });
+      tx.set(routeRef(token), activeRoute(userId, scope, now));
     });
   }
   const mailbox = mailboxFromData((await ref.get()).data() as Record<string, unknown> | undefined);
@@ -204,39 +247,31 @@ export async function updateMailbox(
   userId: string,
   scope: InboundScope,
   patch: { enabled?: boolean; rotate?: boolean },
+  options: MailboxNaming = {},
 ): Promise<InboundMailboxView | null> {
   if (scope.kind === "trip" && !(await tripExists(userId, scope.tripId))) return null;
   const ref = settingsRef(userId, scope);
   const now = new Date().toISOString();
+  const prior = mailboxFromData((await ref.get()).data() as Record<string, unknown> | undefined);
+  const displayName =
+    !prior || patch.rotate ? await readerDisplayName(userId, options.displayName) : null;
   const db = requireDb();
   await db.runTransaction(async (tx) => {
     const snap = await tx.get(ref);
-    let mailbox = mailboxFromData(snap.data() as Record<string, unknown> | undefined);
-    if (!mailbox) {
-      const token = createInboundToken();
-      mailbox = { token, enabled: true, createdAt: now, updatedAt: now };
-      tx.set(ref, mailbox);
-      tx.set(routeRef(token), {
-        userId: sanitizeUserId(userId),
-        scope: scope.kind,
-        tripId: scope.kind === "trip" ? sanitizeTripId(scope.tripId) : null,
-        enabled: true,
-        createdAt: now,
-        updatedAt: now,
-      });
-    }
-    if (patch.rotate) {
-      const next = createInboundToken();
-      tx.set(routeRef(mailbox.token), { enabled: false, updatedAt: now, rotatedAt: now }, { merge: true });
-      tx.set(routeRef(next), {
-        userId: sanitizeUserId(userId),
-        scope: scope.kind,
-        tripId: scope.kind === "trip" ? sanitizeTripId(scope.tripId) : null,
-        enabled: true,
-        createdAt: now,
-        updatedAt: now,
-      });
-      tx.set(ref, { token: next, enabled: true, createdAt: mailbox.createdAt, updatedAt: now }, { merge: true });
+    const mailbox = mailboxFromData(snap.data() as Record<string, unknown> | undefined);
+    if (!mailbox || patch.rotate) {
+      const token = await claimLocalPart(tx, displayName);
+      if (mailbox) {
+        tx.set(
+          routeRef(mailbox.token),
+          { enabled: false, updatedAt: now, rotatedAt: now },
+          { merge: true },
+        );
+      }
+      const enabled = patch.rotate ? true : patch.enabled !== false;
+      const createdAt = mailbox?.createdAt ?? now;
+      tx.set(ref, { token, enabled, createdAt, updatedAt: now }, { merge: Boolean(mailbox) });
+      tx.set(routeRef(token), { ...activeRoute(userId, scope, now), enabled });
       return;
     }
     if (typeof patch.enabled === "boolean") {
@@ -244,7 +279,7 @@ export async function updateMailbox(
       tx.set(routeRef(mailbox.token), { enabled: patch.enabled, updatedAt: now }, { merge: true });
     }
   });
-  return readOrCreateMailbox(userId, scope);
+  return readOrCreateMailbox(userId, scope, options);
 }
 
 export async function setSuggestionStatus(
@@ -419,14 +454,20 @@ async function deleteQuery(query: Query): Promise<void> {
   if (snap.size === 100) await deleteQuery(query);
 }
 
-/** Drop a trip's forward address, suggestions, and route index. */
+/**
+ * Drop a trip's suggestions and mailbox settings.
+ * The route stays, disabled, so its local-part is never assigned again.
+ */
 export async function deleteTripInbound(userId: string, tripId: string): Promise<void> {
   if (!isFirebaseConfigured()) return;
   const scope: InboundScope = { kind: "trip", tripId };
   const settings = await settingsRef(userId, scope).get();
   const mailbox = mailboxFromData(settings.data() as Record<string, unknown> | undefined);
   if (mailbox) {
-    await routeRef(mailbox.token).delete().catch(() => undefined);
+    const now = new Date().toISOString();
+    await routeRef(mailbox.token)
+      .set({ enabled: false, retired: true, updatedAt: now }, { merge: true })
+      .catch(() => undefined);
   }
   await deleteQuery(importsRef(userId, scope));
   await deleteQuery(receiptsRef(userId, scope));
