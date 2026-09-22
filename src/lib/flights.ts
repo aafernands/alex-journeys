@@ -7,6 +7,7 @@ const PLACE_MAX = 80;
 const OFFER_ID_RE = /^[A-Za-z0-9+/=_-]{8,8000}$/;
 const PREBOOK_ID_RE = /^[A-Za-z0-9_-]{4,128}$/;
 const TRIP_ID_RE = /^[A-Za-z0-9_-]{1,128}$/;
+const BOOKING_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,79}$/;
 const NAME_RE = /^[\p{L}][\p{L}'’ .-]{0,39}$/u;
 
 export const FLIGHT_CABINS = ["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"] as const;
@@ -272,6 +273,11 @@ export function cleanFlightTripId(raw: string | null | undefined): string {
   return TRIP_ID_RE.test(id) ? id : "";
 }
 
+export function cleanFlightBookingId(raw: string | null | undefined): string {
+  const id = raw?.trim() ?? "";
+  return BOOKING_ID_RE.test(id) ? id : "";
+}
+
 export function cleanFlightCabin(raw: string | null | undefined): FlightCabin {
   const value = raw?.trim().toUpperCase().replace(/[\s-]+/g, "_") ?? "";
   if (value === "PREMIUM" || value === "PREMIUM_ECONOMY") return "PREMIUM_ECONOMY";
@@ -309,6 +315,18 @@ export function airportFieldValue(
   if (!airport.code) return typed;
   if (iataHint(typed) === airport.code && typed.trim().toUpperCase() !== airport.code) return typed;
   return label;
+}
+
+/**
+ * City names become the main airport label. A code the reader already typed
+ * stays as they typed it, so IATA can override the city default.
+ */
+export function prefilledAirport(place: string): string {
+  const typed = place.trim();
+  if (!typed) return "";
+  const airport = primaryAirportFor(typed);
+  if (!airport) return typed;
+  return airportFieldValue(typed, airport);
 }
 
 /** Text sent to the airport lookup. City names drop a trailing country. */
@@ -426,6 +444,119 @@ export function flightsBookPath(offerId: string, query: FlightsQuery): string {
   const params = new URLSearchParams(flightsQueryString(query));
   params.set("offer", id);
   return `/flights/book?${params.toString()}`;
+}
+
+function sitePathname(href: string): string {
+  const path = href.trim().split("?")[0]?.split("#")[0] ?? "";
+  if (path.length > 1 && path.endsWith("/")) return path.slice(0, -1);
+  return path;
+}
+
+/** Search results, not a stored reservation. */
+export function isFlightSearchPath(href: string): boolean {
+  return sitePathname(href) === "/flights";
+}
+
+/** Confirmation for one paid booking. */
+export function isFlightConfirmationPath(href: string): boolean {
+  return sitePathname(href) === "/flights/confirmation";
+}
+
+/** Label for an on-site flight link. Search URLs are not “View flight”. */
+export function flightItemLinkLabel(url: string): string {
+  if (isFlightConfirmationPath(url)) return "View flight";
+  if (isFlightSearchPath(url)) return "Search flights";
+  if (sitePathname(url) === "/flights/book") return "View fare";
+  return "";
+}
+
+function clockParam(raw: string): string {
+  return /^\d{2}:\d{2}$/.test(raw) ? raw : "";
+}
+
+/**
+ * Deep link to the reservation that was just paid.
+ * Search params stay on the URL so “Search more flights” can return to the same route,
+ * and the booking facts survive a refresh without sessionStorage.
+ */
+export function flightConfirmationPath(
+  confirmation: Pick<
+    FlightConfirmationDetails,
+    | "bookingId"
+    | "confirmationCode"
+    | "title"
+    | "routeLabel"
+    | "dateLabel"
+    | "totalLabel"
+    | "cabin"
+    | "baggage"
+    | "status"
+    | "departDate"
+    | "departTime"
+    | "sandbox"
+  >,
+  query: FlightsQuery,
+): string {
+  const bookingId =
+    cleanFlightBookingId(confirmation.bookingId) ||
+    cleanFlightBookingId(confirmation.confirmationCode);
+  if (!bookingId) return "";
+  const params = new URLSearchParams(flightsQueryString(query));
+  params.set("booking", bookingId);
+  const ref = text(confirmation.confirmationCode, 40);
+  if (ref) params.set("ref", ref);
+  const title = text(confirmation.title, 160);
+  if (title) params.set("title", title);
+  const route = text(confirmation.routeLabel, 80);
+  if (route) params.set("route", route);
+  const dates = text(confirmation.dateLabel, 80);
+  if (dates) params.set("dates", dates);
+  const total = text(confirmation.totalLabel, 40);
+  if (total) params.set("total", total);
+  const fare = text(confirmation.cabin, 40);
+  if (fare) params.set("fare", fare);
+  const bags = text(confirmation.baggage, 160);
+  if (bags) params.set("bags", bags);
+  const status = text(confirmation.status, 40);
+  if (status) params.set("status", status);
+  const depart = cleanFlightDate(confirmation.departDate);
+  if (depart) params.set("depart", depart);
+  const time = clockParam(confirmation.departTime);
+  if (time) params.set("time", time);
+  if (confirmation.sandbox) params.set("sandbox", "1");
+  return `/flights/confirmation?${params.toString()}`;
+}
+
+/** Rebuild the visible reservation from the confirmation URL. Null when no booking id is present. */
+export function flightConfirmationFromParams(
+  searchParams: Record<string, string | string[] | undefined>,
+): FlightConfirmationDetails | null {
+  const bookingId = cleanFlightBookingId(firstParam(searchParams, "booking"));
+  if (!bookingId) return null;
+  const ref = text(firstParam(searchParams, "ref"), 40);
+  const sandbox = firstParam(searchParams, "sandbox") === "1";
+  const departTime = clockParam(firstParam(searchParams, "time"));
+  return {
+    title: text(firstParam(searchParams, "title"), 160) || "Flight",
+    bookingId,
+    confirmationCode: ref || bookingId,
+    status: text(firstParam(searchParams, "status"), 40),
+    routeLabel: text(firstParam(searchParams, "route"), 80),
+    dateLabel: text(firstParam(searchParams, "dates"), 80),
+    cabin: text(firstParam(searchParams, "fare"), 40),
+    baggage: text(firstParam(searchParams, "bags"), 160),
+    conditions: [],
+    totalLabel: text(firstParam(searchParams, "total"), 40),
+    passengerName: "",
+    email: "",
+    payment: {
+      method: "guest_card",
+      label: "Paid with the card confirmed through Nuitee.",
+    },
+    sandbox,
+    departDate: cleanFlightDate(firstParam(searchParams, "depart")),
+    departTime,
+  };
 }
 
 export function isFlightOfferId(offerId: string): boolean {

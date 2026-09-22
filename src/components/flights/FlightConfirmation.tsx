@@ -84,7 +84,7 @@ export function FlightConfirmation({
           </button>
         )}
         <Link href={listHref} className="btn btn-secondary">
-          Back to flights
+          Search more flights
         </Link>
       </div>
       {itinerary === "adding" ? (

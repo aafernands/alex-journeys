@@ -1,4 +1,11 @@
-import type { FlightConfirmationDetails, FlightsQuery } from "@/lib/flights";
+import {
+  cleanFlightBookingId,
+  cleanFlightDate,
+  type FlightConfirmationDetails,
+  type FlightsQuery,
+  isFlightConfirmationPath,
+  isFlightSearchPath,
+} from "@/lib/flights";
 import {
   formatDateRange,
   initialPlannerState,
@@ -188,6 +195,24 @@ function isSameFlight(item: TripItem, confirmation: string, href: string, title:
   return Boolean(href) && item.url === href && item.title === title;
 }
 
+/** Point an older search link at the confirmation for the same reservation. */
+function withConfirmationHref(
+  items: TripItem[],
+  confirmation: string,
+  href: string,
+  title: string,
+): TripItem[] {
+  if (!href || !isFlightConfirmationPath(href)) return items;
+  let changed = false;
+  const next = items.map((item) => {
+    if (!isSameFlight(item, confirmation, href, title)) return item;
+    if (item.url === href || !isFlightSearchPath(item.url)) return item;
+    changed = true;
+    return { ...item, url: href, updatedAt: new Date().toISOString() };
+  });
+  return changed ? next : items;
+}
+
 export function mergeBookedFlight(
   plan: StoredPlan,
   flight: BookedFlightInput,
@@ -198,10 +223,11 @@ export function mergeBookedFlight(
   const state = withFlightCategory(plan.state);
   const already = plan.items.some((item) => isSameFlight(item, confirmation, href, title));
   if (already) {
-    const changed = state !== plan.state || plan.step !== 4;
+    const items = withConfirmationHref(plan.items, confirmation, href, title);
+    const changed = state !== plan.state || plan.step !== 4 || items !== plan.items;
     return {
       added: false,
-      plan: changed ? { ...plan, step: 4, state } : plan,
+      plan: changed ? { ...plan, step: 4, state, items } : plan,
     };
   }
   const sortOrder = plan.items.reduce((max, item) => Math.max(max, item.sortOrder), -1) + 1;
@@ -397,6 +423,129 @@ function writeGuestFlight(
   if (guest.kind !== "local") return null;
   writeActivePlan(guest.plan);
   return guest.plan;
+}
+
+const CONFIRMATIONS_KEY = "fj.flight-confirmations.v1";
+
+function confirmationStore(): Storage | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
+function storedText(value: unknown, max: number): string {
+  if (typeof value !== "string") return "";
+  return value
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, max);
+}
+
+export function parseStoredFlightConfirmation(value: unknown): FlightConfirmationDetails | null {
+  if (!value || typeof value !== "object") return null;
+  const record = value as Record<string, unknown>;
+  const bookingId = cleanFlightBookingId(storedText(record.bookingId, 80));
+  if (!bookingId) return null;
+  const payment =
+    record.payment && typeof record.payment === "object"
+      ? (record.payment as Record<string, unknown>)
+      : null;
+  const method = payment?.method === "sandbox_account" ? "sandbox_account" : "guest_card";
+  const conditions = Array.isArray(record.conditions)
+    ? record.conditions
+        .filter((line): line is string => typeof line === "string")
+        .map((line) => storedText(line, 300))
+        .filter(Boolean)
+        .slice(0, 12)
+    : [];
+  const departTime = storedText(record.departTime, 5);
+  return {
+    title: storedText(record.title, 160) || "Flight",
+    bookingId,
+    confirmationCode: storedText(record.confirmationCode, 40) || bookingId,
+    status: storedText(record.status, 40),
+    routeLabel: storedText(record.routeLabel, 80),
+    dateLabel: storedText(record.dateLabel, 80),
+    cabin: storedText(record.cabin, 40),
+    baggage: storedText(record.baggage, 160),
+    conditions,
+    totalLabel: storedText(record.totalLabel, 40),
+    passengerName: storedText(record.passengerName, 80),
+    email: storedText(record.email, 120),
+    payment: {
+      method,
+      label:
+        storedText(payment?.label, 200) ||
+        (method === "guest_card"
+          ? "Paid with the card confirmed through Nuitee."
+          : "Nuitee’s sandbox credit. No guest card was charged."),
+    },
+    sandbox: record.sandbox === true,
+    departDate: cleanFlightDate(storedText(record.departDate, 10)),
+    departTime: /^\d{2}:\d{2}$/.test(departTime) ? departTime : "",
+  };
+}
+
+export function parseStoredFlightConfirmations(raw: string | null): FlightConfirmationDetails[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    const details: FlightConfirmationDetails[] = [];
+    for (const entry of parsed) {
+      if (!entry || typeof entry !== "object") continue;
+      const record = entry as { confirmation?: unknown };
+      const confirmation = parseStoredFlightConfirmation(record.confirmation ?? entry);
+      if (confirmation) details.push(confirmation);
+    }
+    return details;
+  } catch {
+    return [];
+  }
+}
+
+/** Keep the paid reservation in this tab so a refresh still shows it. */
+export function rememberFlightConfirmation(confirmation: FlightConfirmationDetails) {
+  const store = confirmationStore();
+  if (!store) return;
+  const normalized = parseStoredFlightConfirmation(confirmation);
+  if (!normalized) return;
+  const existing = parseStoredFlightConfirmations(store.getItem(CONFIRMATIONS_KEY)).filter(
+    (item) => item.bookingId !== normalized.bookingId,
+  );
+  try {
+    store.setItem(
+      CONFIRMATIONS_KEY,
+      JSON.stringify([{ confirmation: normalized }, ...existing.map((item) => ({ confirmation: item }))].slice(0, 20)),
+    );
+  } catch {
+    /* private mode or quota */
+  }
+}
+
+export function readStoredFlightConfirmation(bookingId: string): FlightConfirmationDetails | null {
+  const id = cleanFlightBookingId(bookingId);
+  if (!id) return null;
+  const store = confirmationStore();
+  if (!store) return null;
+  return (
+    parseStoredFlightConfirmations(store.getItem(CONFIRMATIONS_KEY)).find(
+      (item) => item.bookingId === id,
+    ) ?? null
+  );
+}
+
+/** Session copy wins for the same booking. The URL copy is the fallback. */
+export function resolveFlightConfirmation(
+  fromUrl: FlightConfirmationDetails | null,
+  stored: FlightConfirmationDetails | null,
+): FlightConfirmationDetails | null {
+  if (stored && (!fromUrl || stored.bookingId === fromUrl.bookingId)) return stored;
+  return fromUrl;
 }
 
 const inflight = new Map<string, Promise<FlightCommitResult>>();

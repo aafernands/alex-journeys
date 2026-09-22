@@ -3,15 +3,21 @@ import { describe, it } from "node:test";
 import {
   airportFieldValue,
   airportSearchText,
+  prefilledAirport,
   buildFlightConfirmation,
   classifyFlightFailure,
   FLIGHT_CARD_REQUIRED,
   FLIGHT_PUBLISHABLE_KEY_MISSING,
   flightBookBody,
   flightBookingPayment,
+  flightConfirmationFromParams,
+  flightConfirmationPath,
+  flightItemLinkLabel,
   flightEnvPublishableKey,
   flightPrebookPaymentIssue,
   flightStripeConfirmed,
+  isFlightConfirmationPath,
+  isFlightSearchPath,
   flightOfferId,
   flightUpstreamMessage,
   flightsBookPath,
@@ -587,6 +593,70 @@ describe("verify payload", () => {
   });
 });
 
+describe("flight confirmation link", () => {
+  it("opens the paid booking instead of the search results", () => {
+    const query = parseFlightsSearchParams({
+      origin: "EWR",
+      dest: "MIA",
+      start: "2027-04-12",
+      end: "2027-04-19",
+      type: "roundtrip",
+      adults: "1",
+      trip: "trip_abc",
+    });
+    const confirmation = buildFlightConfirmation({
+      booking: {
+        bookingId: "book_123",
+        status: "CONFIRMED",
+        bookingRef: "ABC123",
+        currency: "USD",
+        price: 655,
+        email: "ada@example.com",
+      },
+      offer: mapFlightSearch(RATES)[0],
+      party: parseFlightParty([lead], 1, 0, "2027-04-12"),
+      sandbox: true,
+      paidBy: "card",
+    });
+    const path = flightConfirmationPath(confirmation, query);
+    const url = new URL(path, "http://localhost");
+    assert.equal(url.pathname, "/flights/confirmation");
+    assert.equal(isFlightConfirmationPath(path), true);
+    assert.equal(isFlightSearchPath(path), false);
+    assert.equal(isFlightSearchPath(flightsPath(query)), true);
+    assert.equal(url.searchParams.get("booking"), "book_123");
+    assert.equal(url.searchParams.get("ref"), "ABC123");
+    assert.match(url.searchParams.get("route") ?? "", /EWR/);
+    assert.match(url.searchParams.get("total") ?? "", /655/);
+    assert.equal(url.searchParams.get("origin"), "EWR");
+    assert.equal(url.searchParams.get("dest"), "MIA");
+    assert.equal(path.includes("offer="), false);
+    assert.equal(path.length < 2000, true);
+    assert.equal(flightItemLinkLabel(path), "View flight");
+    assert.equal(flightItemLinkLabel(flightsPath(query)), "Search flights");
+    assert.equal(
+      flightConfirmationPath({ ...confirmation, bookingId: "", confirmationCode: "" }, query),
+      "",
+    );
+
+    const params = Object.fromEntries(url.searchParams.entries());
+    const fromUrl = flightConfirmationFromParams(params);
+    assert.ok(fromUrl);
+    assert.equal(fromUrl.bookingId, "book_123");
+    assert.equal(fromUrl.confirmationCode, "ABC123");
+    assert.equal(fromUrl.routeLabel, confirmation.routeLabel);
+    assert.equal(fromUrl.dateLabel, confirmation.dateLabel);
+    assert.equal(fromUrl.totalLabel, confirmation.totalLabel);
+    assert.equal(fromUrl.payment.method, "guest_card");
+    assert.equal(fromUrl.sandbox, true);
+    assert.equal(flightConfirmationFromParams({ origin: "EWR", dest: "MIA" }), null);
+    assert.equal(
+      flightConfirmationPath(fromUrl, parseFlightsSearchParams(params)),
+      path,
+    );
+  });
+});
+
 describe("city airports", () => {
   it("reads nested Nuitee airport results and prefers the main airport", () => {
     assert.equal(iataHint("Miami · MIA"), "MIA");
@@ -624,5 +694,9 @@ describe("city airports", () => {
       airportFieldValue("Miami, United States", { code: "MIA", label: "Miami · MIA" }),
       "Miami · MIA",
     );
+    assert.equal(prefilledAirport("Lisbon, Portugal"), "Lisbon · LIS");
+    assert.equal(prefilledAirport("Newark (EWR)"), "Newark (EWR)");
+    assert.equal(prefilledAirport("JFK"), "JFK");
+    assert.equal(prefilledAirport("Miami, United States"), "Miami · MIA");
   });
 });
