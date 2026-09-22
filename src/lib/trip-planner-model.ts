@@ -4,6 +4,7 @@
  */
 
 import { experiencesPath } from "@/lib/experiences";
+import { staysPath } from "@/lib/stays";
 
 export const PLAN_A_TRIP_SLUG = "plan-a-trip";
 
@@ -203,7 +204,7 @@ export const DEFAULT_PARTNERS: TripPlannerPartner[] = [
     key: "booking",
     label: "Find a place to stay",
     buttonLabel: "Search stays",
-    blurb: "Where I usually start when hunting a place to sleep.",
+    blurb: "Search hotels here. Booking.com is still there if you want a second price.",
     affiliateUrlTemplate: BOOKING_TEMPLATE,
     affiliateUrl: BOOKING,
     showWhen: "hotel",
@@ -621,9 +622,41 @@ export function resolveAffiliateHref(
 }
 
 /**
- * Lane CTA. The Viator lane stays on this site and opens /experiences with
- * the active destination. Expedia, Booking, Rentcars, and the other partners
- * keep their affiliate URLs so OutboundLink can still wrap them in /out.
+ * Hotel lane opens in-app stays with the active trip. Booking.com remains
+ * the compare link via `bookingCompareHref`.
+ */
+export function hotelLaneHref(
+  state: PlannerState,
+  flexibleDatesEnabled: boolean,
+): string {
+  const values = tripUrlValues(state, flexibleDatesEnabled);
+  return staysPath({
+    destination: values.destination,
+    startDate: values.startDate,
+    endDate: values.endDate,
+    adults: state.adults,
+    children: state.children,
+    rooms: state.rooms,
+  });
+}
+
+/** Booking.com affiliate URL for the same trip, wrapped later by /out. */
+export function bookingCompareHref(
+  state: PlannerState,
+  flexibleDatesEnabled: boolean,
+): string {
+  const booking = DEFAULT_PARTNERS.find((partner) => partner.key === "booking");
+  if (!booking) return "";
+  return resolveAffiliateHref(
+    booking,
+    partnerUrlValues(booking, state, flexibleDatesEnabled),
+  );
+}
+
+/**
+ * Lane CTA. Viator opens /experiences and the hotel lane opens /stays.
+ * Expedia, Booking’s compare link, Rentcars, and the other partners keep
+ * their affiliate URLs so OutboundLink can still wrap them in /out.
  */
 export function partnerLaneHref(
   partner: TripPlannerPartner,

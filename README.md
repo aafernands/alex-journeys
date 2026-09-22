@@ -77,6 +77,12 @@ Public forms (newsletter, contact, register, forgot password) use Cloudflare Tur
 
 Google Analytics 4 (gtag) loads only when `NEXT_PUBLIC_GA_MEASUREMENT_ID` (or alias `NEXT_PUBLIC_GA_ID`) is set at build time. Optional Search Console HTML-tag verification uses `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`. Setup, Vercel Production, and redeploy steps: [`docs/ANALYTICS.md`](docs/ANALYTICS.md).
 
+## Stays (Nuitee / LiteAPI)
+
+`/stays` searches and books hotels on Fernandes Journeys through Nuitee Connect. The browser never sees the key.
+
+Set `LITEAPI_API_KEY` on Vercel Preview and Production (sandbox keys start with `sand_`; `NUITEE_API_KEY` is accepted as an alias). Until that variable is set, `/stays` shows a “Stays not configured” state. Sandbox bookings use Nuitee’s simulated account card (`ACC_CREDIT_CARD`) and are not guest charges. A production key can search, and refuses checkout until a live card flow exists.
+
 ## In-site CMS
 
 Passcode-gated editor at **`/cms`** (not linked in the public header). Publishes posts to GitHub so Vercel redeploys.
