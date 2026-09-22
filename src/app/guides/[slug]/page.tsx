@@ -6,7 +6,6 @@ import { destinationCity, getAllDestinations } from "@/data/destinations";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { SitePage } from "@/components/pages/SitePage";
 import { TripPlanner } from "@/components/trip-planner/TripPlanner";
-import { PlanFold } from "@/components/trip-planner/PlanFold";
 import {
   getGuideHub,
   getGuideHubSlugs,
@@ -173,6 +172,7 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
       description={plannerConfig?.intro || hub.description}
       narrow={false}
       compact={isPlanner}
+      planFlow={isPlanner}
       tone={isPlanner ? "default" : "white"}
       crumbs={[
         { href: "/", label: "Home" },
@@ -201,16 +201,6 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
             city: destinationCity(dest),
           }))}
         />
-      ) : null}
-
-      {plannerConfig ? (
-        <PlanFold
-          id={`${slug}-journal-index`}
-          title={plannerConfig.guidesHeading}
-          mobileOnly
-        >
-          <GuideIndex pages={pages} posts={posts} />
-        </PlanFold>
       ) : null}
 
       {plannerConfig ? (

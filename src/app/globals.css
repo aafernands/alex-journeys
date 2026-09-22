@@ -1651,11 +1651,22 @@ select.plan-input {
   }
 }
 
+/* The planner is the page. Keep the journal signup and the guide index
+   off this flow so they don’t sit under the steps. Other pages keep both. */
+body:has(main.plan-flow) #newsletter,
+body:has(main.plan-flow) a[href="#newsletter"] {
+  display: none;
+}
+
 /* Instructional copy that stays on desktop and drops out of the phone flow. */
 @media (max-width: 639px) {
   .plan-page-chrome,
   .plan-desktop-only {
     display: none !important;
+  }
+
+  main.plan-flow {
+    min-height: 100dvh;
   }
 
   .plan-page .section-band {
