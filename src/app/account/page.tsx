@@ -130,6 +130,8 @@ export default async function AccountPage() {
           stars: hotel.stars,
           savedAt: hotel.savedAt,
           href: hotel.href,
+          tripId: hotel.tripId,
+          tripHref: hotel.tripHref,
         }));
       } catch (err) {
         if (err instanceof SavedHotelsUnavailableError) {

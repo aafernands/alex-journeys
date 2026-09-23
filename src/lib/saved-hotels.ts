@@ -133,12 +133,25 @@ function hotelHref(hotelId: string, destination: string, context: SaveHotelConte
   return `/stays/${hotelId}${params.size ? `?${params.toString()}` : ""}`;
 }
 
+function isoTimestamp(value: unknown, fallback: string): string {
+  if (typeof value === "string" && !Number.isNaN(Date.parse(value))) return value;
+  if (
+    value &&
+    typeof value === "object" &&
+    "toDate" in value &&
+    typeof (value as { toDate?: () => Date }).toDate === "function"
+  ) {
+    const date = (value as { toDate: () => Date }).toDate();
+    if (date instanceof Date && !Number.isNaN(date.getTime())) {
+      return date.toISOString();
+    }
+  }
+  return fallback;
+}
+
 function savedHotelFromData(id: string, data: Record<string, unknown>): SavedHotel {
   const hotelId = cleanHotelId(typeof data.hotelId === "string" ? data.hotelId : id);
-  const savedAt =
-    typeof data.savedAt === "string"
-      ? data.savedAt
-      : data.savedAt?.toDate?.()?.toISOString?.() ?? new Date(0).toISOString();
+  const savedAt = isoTimestamp(data.savedAt, new Date(0).toISOString());
   const tripId = cleanTripId(data.tripId);
   return {
     hotelId,
