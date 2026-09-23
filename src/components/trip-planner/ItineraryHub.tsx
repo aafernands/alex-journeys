@@ -1300,14 +1300,18 @@ export function ItineraryHub({
       <div className="plan-hub-days">
       <PlanFold
         id={`${headingId}-days`}
-        title="Days"
-        meta={days.length > 0 ? `${sorted.length} saved` : "No dates"}
+        title="Itinerary"
+        meta={
+          days.length > 0
+            ? `${sorted.length} ${sorted.length === 1 ? "item" : "items"}`
+            : "Add dates"
+        }
         defaultOpen={nextLaneKey == null}
       >
       <section aria-labelledby={`${headingId}-list`}>
         <div className="plan-toolbar">
           <h3 id={`${headingId}-list`} className={`${plan.h3} max-sm:hidden`}>
-            Day by day
+            Day-by-day schedule
           </h3>
           <div className="plan-inline-actions" role="tablist" aria-label="Itinerary layout">
             {(
@@ -1516,50 +1520,39 @@ export function ItineraryHub({
 
       <div className="plan-hub-more">
       <PlanFold
-        id={`${headingId}-journal-fold`}
-        title="Journal"
-        meta="Stories"
-      >
-      <JournalNotes
-        headingId={headingId}
-        destination={state.destination}
-        notes={journalNotes}
-        places={journalPlaceIndex}
-      />
-      </PlanFold>
-
-      <PlanFold
         id={`${headingId}-packing-fold`}
-        title="Packing"
-        meta={packingNotes.trim() ? `${packingNotes.trim().split("\n").filter(Boolean).length} lines` : "Empty"}
+        title="Packing list"
+        meta={
+          packingNotes.trim()
+            ? `${packingNotes.trim().split("\n").filter(Boolean).length} ${packingNotes.trim().split("\n").filter(Boolean).length === 1 ? "item" : "items"}`
+            : "Optional"
+        }
       >
       <section className="plan-stack-tight" aria-labelledby={`${headingId}-packing`}>
         <h3 id={`${headingId}-packing`} className={`${plan.h3} max-sm:hidden`}>
-          Packing notes
+          Packing list
         </h3>
         <p className={`${plan.prose} text-muted plan-desktop-only`}>
-          A list for this trip. One line per item is enough.
+          Keep the essentials for this trip in one simple list.
         </p>
         <textarea
           className={plan.input}
           rows={5}
           maxLength={4000}
-          placeholder={"Layers for the evening\nAdapter\nWalking shoes"}
+          placeholder={"Passport\nWalking shoes\nPhone charger"}
           value={packingNotes}
           onChange={(event) => onPackingNotesChange(event.target.value.slice(0, 4000))}
         />
       </section>
       </PlanFold>
 
-      <PlanFold id={`${headingId}-disclosure`} title="About these links">
-        <p className={`${plan.body} text-text`}>
-          {config.disclosure}{" "}
-          <Link href="/affiliate-disclosure" className="text-link hover:text-accent">
-            Read the full disclosure
-          </Link>
-          .
-        </p>
-      </PlanFold>
+      <p className={`${plan.caption} px-1 pt-3 text-muted`}>
+        {config.disclosure}{" "}
+        <Link href="/affiliate-disclosure" className="text-link hover:text-accent">
+          Affiliate disclosure
+        </Link>
+        .
+      </p>
       </div>
 
     </div>
