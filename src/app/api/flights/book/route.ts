@@ -24,7 +24,7 @@ function fail(error: unknown) {
  * Books only after Stripe confirms, with payment.method TRANSACTION_ID.
  */
 export async function POST(request: Request) {
-  const limit = rateLimit(staysCallerKey(request, "flights-book"), 8, 60_000);
+  const limit = await rateLimit(staysCallerKey(request, "flights-book"), 8, 60_000);
   if (!limit.ok) {
     return NextResponse.json(
       { error: "Too many booking attempts. Wait a moment and try again." },

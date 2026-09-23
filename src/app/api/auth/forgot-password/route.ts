@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     request.headers.get("x-real-ip") ||
     "unknown";
-  const limited = rateLimit(`forgot-password:${ip}`, 5, 60_000);
+  const limited = await rateLimit(`forgot-password:${ip}`, 5, 60_000);
   if (!limited.ok) {
     return NextResponse.json(
       { error: "Too many attempts. Try again shortly." },

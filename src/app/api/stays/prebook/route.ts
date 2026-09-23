@@ -21,7 +21,7 @@ function fail(error: unknown) {
 
 /** POST /api/stays/prebook { offerId } */
 export async function POST(request: Request) {
-  const limit = rateLimit(staysCallerKey(request, "stays-prebook"), 20, 60_000);
+  const limit = await rateLimit(staysCallerKey(request, "stays-prebook"), 20, 60_000);
   if (!limit.ok) {
     return NextResponse.json(
       { error: "Too many room checks. Wait a moment and try again." },

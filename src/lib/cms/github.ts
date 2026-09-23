@@ -20,6 +20,10 @@ import {
   MAX_MEDIA_UPLOAD_BYTES,
   MAX_MEDIA_UPLOAD_LABEL,
 } from "@/lib/cms/media-limits";
+import {
+  commitFilesAtomically,
+  type AtomicFile,
+} from "@/lib/cms/github-atomic";
 
 const DEFAULT_REPO = "aafernands/fernandes-journeys";
 const DEFAULT_BRANCH = "main";
@@ -219,15 +223,6 @@ export async function publishPost(
     updatedAt: stamped.updatedAt,
   });
 
-  const postResult = await putFile(
-    postPath,
-    `${JSON.stringify(post, null, 2)}\n`,
-    created
-      ? `cms: create post ${validated.slug}`
-      : `cms: update post ${validated.slug}`,
-    existingSha,
-  );
-
   const indexPath = `${POSTS_PATH}/_index.json`;
   const indexFile = await getFileJson<PostsIndex>(indexPath);
   if (!indexFile) {
@@ -241,11 +236,22 @@ export async function publishPost(
       updatedAt: post.updatedAt,
     }),
   );
-  const indexResult = await putFile(
-    indexPath,
-    `${JSON.stringify(nextIndex, null, 2)}\n`,
-    `cms: update posts index for ${validated.slug}`,
-    indexFile.sha,
+  const result = await commitFilesAtomically(
+    [
+      {
+        path: postPath,
+        content: `${JSON.stringify(post, null, 2)}\n`,
+        expectedSha: existingSha,
+      },
+      {
+        path: indexPath,
+        content: `${JSON.stringify(nextIndex, null, 2)}\n`,
+        expectedSha: indexFile.sha,
+      },
+    ],
+    created
+      ? `cms: create post ${validated.slug}`
+      : `cms: update post ${validated.slug}`,
   );
 
   // Best-effort: remove matching draft after publish
@@ -260,7 +266,7 @@ export async function publishPost(
   }
 
   return {
-    commitUrl: indexResult.commitUrl || postResult.commitUrl,
+    commitUrl: result.commitUrl,
     slug: validated.slug,
     created,
   };
@@ -440,12 +446,6 @@ export async function deletePost(
     throw new Error(`Post "${slug}" not found on GitHub.`);
   }
 
-  const delResult = await deleteFile(
-    postPath,
-    `cms: delete post ${slug}`,
-    existingSha,
-  );
-
   const indexPath = `${POSTS_PATH}/_index.json`;
   const indexFile = await getFileJson<PostsIndex>(indexPath);
   if (indexFile) {
@@ -459,19 +459,28 @@ export async function deletePost(
       posts,
       featuredHomepage,
     };
-    const indexResult = await putFile(
-      indexPath,
-      `${JSON.stringify(nextIndex, null, 2)}\n`,
-      `cms: remove ${slug} from posts index`,
-      indexFile.sha,
+    const result = await commitFilesAtomically(
+      [
+        { path: postPath, content: null, expectedSha: existingSha },
+        {
+          path: indexPath,
+          content: `${JSON.stringify(nextIndex, null, 2)}\n`,
+          expectedSha: indexFile.sha,
+        },
+      ],
+      `cms: delete post ${slug}`,
     );
     return {
-      commitUrl: indexResult.commitUrl || delResult.commitUrl,
-      commitSha: delResult.commitSha,
+      commitUrl: result.commitUrl,
+      commitSha: result.commitSha,
     };
   }
 
-  return delResult;
+  const result = await commitFilesAtomically(
+    [{ path: postPath, content: null, expectedSha: existingSha }],
+    `cms: delete post ${slug}`,
+  );
+  return { commitUrl: result.commitUrl, commitSha: result.commitSha };
 }
 
 export async function publishDraft(
@@ -557,15 +566,6 @@ export async function publishPage(
     ...(source ? { source } : {}),
   };
 
-  const pageResult = await putFile(
-    pagePath,
-    `${JSON.stringify(payload, null, 2)}\n`,
-    created
-      ? `cms: create page ${page.slug}`
-      : `cms: update page ${page.slug}`,
-    existingSha,
-  );
-
   const indexPath = `${PAGES_PATH}/_index.json`;
   const indexFile = await getFileJson<PagesIndexFile>(indexPath);
   if (indexFile) {
@@ -573,21 +573,42 @@ export async function publishPage(
       ? indexFile.data.pages
       : [...indexFile.data.pages, page.slug];
     const nextIndex: PagesIndexFile = { ...indexFile.data, pages };
-    const indexResult = await putFile(
-      indexPath,
-      `${JSON.stringify(nextIndex, null, 2)}\n`,
-      `cms: update pages index for ${page.slug}`,
-      indexFile.sha,
+    const result = await commitFilesAtomically(
+      [
+        {
+          path: pagePath,
+          content: `${JSON.stringify(payload, null, 2)}\n`,
+          expectedSha: existingSha,
+        },
+        {
+          path: indexPath,
+          content: `${JSON.stringify(nextIndex, null, 2)}\n`,
+          expectedSha: indexFile.sha,
+        },
+      ],
+      created
+        ? `cms: create page ${page.slug}`
+        : `cms: update page ${page.slug}`,
     );
     return {
-      commitUrl: indexResult.commitUrl || pageResult.commitUrl,
+      commitUrl: result.commitUrl,
       slug: page.slug,
       created,
     };
   }
 
+  const result = await commitFilesAtomically(
+    [
+      {
+        path: pagePath,
+        content: `${JSON.stringify(payload, null, 2)}\n`,
+        expectedSha: existingSha,
+      },
+    ],
+    created ? `cms: create page ${page.slug}` : `cms: update page ${page.slug}`,
+  );
   return {
-    commitUrl: pageResult.commitUrl,
+    commitUrl: result.commitUrl,
     slug: page.slug,
     created,
   };
@@ -609,30 +630,33 @@ export async function deletePage(
     throw new Error(`Page "${slug}" not found on GitHub.`);
   }
 
-  const delResult = await deleteFile(
-    pagePath,
-    `cms: delete page ${slug}`,
-    existingSha,
-  );
-
   const indexPath = `${PAGES_PATH}/_index.json`;
   const indexFile = await getFileJson<PagesIndexFile>(indexPath);
   if (indexFile) {
     const pages = indexFile.data.pages.filter((s) => s !== slug);
     const nextIndex: PagesIndexFile = { ...indexFile.data, pages };
-    const indexResult = await putFile(
-      indexPath,
-      `${JSON.stringify(nextIndex, null, 2)}\n`,
-      `cms: remove ${slug} from pages index`,
-      indexFile.sha,
+    const result = await commitFilesAtomically(
+      [
+        { path: pagePath, content: null, expectedSha: existingSha },
+        {
+          path: indexPath,
+          content: `${JSON.stringify(nextIndex, null, 2)}\n`,
+          expectedSha: indexFile.sha,
+        },
+      ],
+      `cms: delete page ${slug}`,
     );
     return {
-      commitUrl: indexResult.commitUrl || delResult.commitUrl,
-      commitSha: delResult.commitSha,
+      commitUrl: result.commitUrl,
+      commitSha: result.commitSha,
     };
   }
 
-  return delResult;
+  const result = await commitFilesAtomically(
+    [{ path: pagePath, content: null, expectedSha: existingSha }],
+    `cms: delete page ${slug}`,
+  );
+  return { commitUrl: result.commitUrl, commitSha: result.commitSha };
 }
 
 export const MEDIA_INDEX_PATH = "src/content/media/_index.json";
@@ -958,21 +982,41 @@ export async function uploadMediaFile(options: {
   const imagePath = `${MEDIA_UPLOAD_DIR}/${filename}`;
   const publicUrl = `/media/${filename}`;
 
-  const imageResult = await putBinaryFile(
-    imagePath,
-    base64,
+  const { data: index, sha } = await readMediaIndexFromGithub();
+  const id = ensureUniqueMediaId(
+    mediaIdFromUrl(publicUrl),
+    new Set(index.items.map((item) => item.id)),
+    publicUrl,
+  );
+  const item: MediaItem = {
+    id,
+    slug: id,
+    url: publicUrl,
+    alt: (options.alt ?? "").trim(),
+    source: "upload",
+    usedBy: [],
+    createdAt: new Date().toISOString(),
+  };
+  const result = await commitFilesAtomically(
+    [
+      { path: imagePath, content: base64, encoding: "base64", expectedSha: null },
+      {
+        path: MEDIA_INDEX_PATH,
+        content: `${JSON.stringify({
+          ...index,
+          updatedAt: new Date().toISOString(),
+          count: index.items.length + 1,
+          items: [item, ...index.items],
+        }, null, 2)}\n`,
+        expectedSha: sha,
+      },
+    ],
     `cms: upload media ${filename}`,
-    null,
   );
 
-  const added = await addMediaByUrl({
-    url: publicUrl,
-    alt: options.alt,
-  });
-
   return {
-    item: added.item,
-    commitUrl: added.commitUrl || imageResult.commitUrl,
+    item,
+    commitUrl: result.commitUrl,
   };
 }
 
@@ -1008,19 +1052,22 @@ export async function publishTripPlanner(content: {
 }): Promise<{ commitUrl: string }> {
   const configSha = await getFileSha(TRIP_PLANNER_CONFIG_PATH);
   const partnersSha = await getFileSha(TRIP_PLANNER_PARTNERS_PATH);
-  const configResult = await putFile(
-    TRIP_PLANNER_CONFIG_PATH,
-    `${JSON.stringify(content.config, null, 2)}\n`,
-    "cms: update trip planner config",
-    configSha,
+  const result = await commitFilesAtomically(
+    [
+      {
+        path: TRIP_PLANNER_CONFIG_PATH,
+        content: `${JSON.stringify(content.config, null, 2)}\n`,
+        expectedSha: configSha,
+      },
+      {
+        path: TRIP_PLANNER_PARTNERS_PATH,
+        content: `${JSON.stringify({ partners: content.partners }, null, 2)}\n`,
+        expectedSha: partnersSha,
+      },
+    ],
+    "cms: update trip planner",
   );
-  const partnersResult = await putFile(
-    TRIP_PLANNER_PARTNERS_PATH,
-    `${JSON.stringify({ partners: content.partners }, null, 2)}\n`,
-    "cms: update trip planner partners",
-    partnersSha,
-  );
-  return { commitUrl: partnersResult.commitUrl || configResult.commitUrl };
+  return { commitUrl: result.commitUrl };
 }
 
 export async function deleteMediaItem(
@@ -1031,32 +1078,31 @@ export async function deleteMediaItem(
   if (!item) throw new Error(`Media "${id}" not found.`);
 
   const items = index.items.filter((i) => i.id !== item.id);
-  const indexResult = await writeMediaIndex(
-    { ...index, items },
-    sha,
-    `cms: remove media ${item.id}`,
-  );
-
-  let deletedFile: string | undefined;
+  let filePath: string | undefined;
+  let fileSha: string | null = null;
   if (item.source === "upload" && isOwnedUploadUrl(item.url)) {
-    const filePath = uploadPathFromUrl(item.url);
+    filePath = uploadPathFromUrl(item.url) ?? undefined;
     if (filePath) {
-      try {
-        const fileSha = await getFileSha(filePath);
-        if (fileSha) {
-          await deleteFile(
-            filePath,
-            `cms: delete media file ${filePath.split("/").pop()}`,
-            fileSha,
-          );
-          deletedFile = filePath;
-        }
-      } catch {
-        // Index already updated; file cleanup is best-effort
-      }
+      fileSha = await getFileSha(filePath);
     }
   }
 
-  return { commitUrl: indexResult.commitUrl, deletedFile };
+  const files: AtomicFile[] = [
+    {
+      path: MEDIA_INDEX_PATH,
+      content: `${JSON.stringify({
+        ...index,
+        updatedAt: new Date().toISOString(),
+        count: items.length,
+        items,
+      }, null, 2)}\n`,
+      expectedSha: sha,
+    },
+  ];
+  if (filePath && fileSha) {
+    files.push({ path: filePath, content: null, expectedSha: fileSha });
+  }
+  const result = await commitFilesAtomically(files, `cms: delete media ${item.id}`);
+  return { commitUrl: result.commitUrl, ...(filePath && fileSha ? { deletedFile: filePath } : {}) };
 }
 

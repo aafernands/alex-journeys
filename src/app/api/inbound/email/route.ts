@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
+import { rateLimit } from "@/lib/cms/rate-limit";
 import {
   InboundUnavailableError,
   ingestInboundEmail,
@@ -19,6 +20,21 @@ const UNAVAILABLE = "Forwarding isn’t available right now.";
  * The raw body is verified with RESEND_WEBHOOK_SECRET (Svix) before any write.
  */
 export async function POST(request: Request) {
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+  const limited = await rateLimit(`inbound-email:${ip}`, 30, 60_000);
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "Too many webhook requests. Try again shortly." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limited.retryAfterSec) },
+      },
+    );
+  }
+
   const secret = process.env.RESEND_WEBHOOK_SECRET?.trim() ?? "";
   if (!secret) {
     return NextResponse.json({ error: UNAVAILABLE }, { status: 503 });

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createHash } from "crypto";
+import { rateLimit } from "@/lib/cms/rate-limit";
 import {
   clientIpFromRequest,
   verifyTurnstileToken,
@@ -101,6 +102,21 @@ async function requiredMergeFields(
 }
 
 export async function POST(req: Request) {
+  const limited = await rateLimit(
+    `newsletter:${clientIpFromRequest(req)}`,
+    5,
+    60_000,
+  );
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "Too many subscription attempts. Try again shortly." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limited.retryAfterSec) },
+      },
+    );
+  }
+
   const { apiKey, audienceId } = readConfig();
 
   if (!apiKey || !audienceId) {

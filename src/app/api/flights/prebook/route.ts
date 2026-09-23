@@ -22,7 +22,7 @@ function fail(error: unknown) {
 
 /** POST /api/flights/prebook { offerId, passengers, adults, children, departDate } */
 export async function POST(request: Request) {
-  const limit = rateLimit(staysCallerKey(request, "flights-prebook"), 12, 60_000);
+  const limit = await rateLimit(staysCallerKey(request, "flights-prebook"), 12, 60_000);
   if (!limit.ok) {
     return NextResponse.json(
       { error: "Too many fare checks. Wait a moment and try again." },

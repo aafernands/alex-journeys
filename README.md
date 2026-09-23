@@ -56,6 +56,12 @@ Open [http://localhost:3000](http://localhost:3000).
 npm run build
 ```
 
+## Distributed rate limiting
+
+Production rate limiting uses Upstash Redis. Set `UPSTASH_REDIS_REST_URL` and
+`UPSTASH_REDIS_REST_TOKEN` in Vercel. Local development uses an in-memory
+limiter; production requests fail closed if the shared store is unavailable.
+
 
 ## Outbound links
 

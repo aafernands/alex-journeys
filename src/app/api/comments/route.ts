@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
 
-  const rl = rateLimit(`comments:post:${userId}`, 5, 60_000);
+  const rl = await rateLimit(`comments:post:${userId}`, 5, 60_000);
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Too many comments. Try again shortly." },

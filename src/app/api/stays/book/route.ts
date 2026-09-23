@@ -25,7 +25,7 @@ function fail(error: unknown) {
  * Sandbox keys complete the reservation with Nuitee’s simulated account card.
  */
 export async function POST(request: Request) {
-  const limit = rateLimit(staysCallerKey(request, "stays-book"), 8, 60_000);
+  const limit = await rateLimit(staysCallerKey(request, "stays-book"), 8, 60_000);
   if (!limit.ok) {
     return NextResponse.json(
       { error: "Too many booking attempts. Wait a moment and try again." },
