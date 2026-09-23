@@ -420,7 +420,7 @@ export function StayBooker({
             );
           })}
         </fieldset>
-      )}
+      ) : null}
       {pending === "prebook" ? (
         <div className={checkoutMode ? "rounded-xl border border-line bg-white p-6 text-center" : ""} role="status">
           <p className="font-semibold text-heading">Checking your selected room…</p>
