@@ -53,18 +53,22 @@
       ]
     },
     {
-      "slug": "cancun-5-day-travel-guide",
       "title": "Cancun in 5 Days: Beaches, Parties, and Island Adventures",
+      "slug": "cancun-5-day-travel-guide",
       "date": "2026-06-14T22:04:34",
+      "updatedAt": "2026-09-23T16:43:54.390Z",
       "excerpt": "A five-day trip to Cancun was packed with unforgettable experiences, from exploring the ancient Mayan pyramids of Chichen Itza and soaring over the jungle at Xplor Park to relaxing at the all-inclusive Emporio Cancun. Add in a day trip to Isla Mujeres and the electrifying nightlife of Coco Bongo, and this Mexican getaway delivered the perfect mix of adventure, culture, and tropical relaxation.",
       "featuredImage": {
         "url": "/media/migrated/2026-06-img-9395-scaled-1a44b1f7.webp",
-        "alt": "Cancun in 5 Days: Beaches, Parties, and Island Adventures",
-        "width": 1440,
-        "height": 1920
+        "alt": "Cancun in 5 Days: Beaches, Parties, and Island Adventures"
       },
       "destinations": [
         "mexico"
+      ],
+      "bookingTools": [
+        "hotel",
+        "flight",
+        "experience"
       ]
     },
     {
