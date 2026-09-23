@@ -1,7 +1,16 @@
 {
-  "updatedAt": "2026-09-23T20:37:41.445Z",
-  "count": 92,
+  "updatedAt": "2026-09-23T20:37:44.978Z",
+  "count": 93,
   "items": [
+    {
+      "id": "img-0680-mueke9t4",
+      "slug": "img-0680-mueke9t4",
+      "url": "/media/img_0680-mueke9t4.jpg",
+      "alt": "",
+      "source": "upload",
+      "usedBy": [],
+      "createdAt": "2026-09-23T20:37:44.978Z"
+    },
     {
       "id": "img-8846-mueke72m",
       "slug": "img-8846-mueke72m",
