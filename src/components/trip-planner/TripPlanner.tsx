@@ -290,7 +290,24 @@ export function TripPlanner({
   }
 
   function patch(partial: Partial<PlannerState>) {
-    savePlan({ step, state: { ...state, ...partial } });
+    const nextState = { ...state, ...partial };
+    const destinationChanged =
+      typeof partial.destination === "string" &&
+      partial.destination.trim() !== state.destination.trim();
+    const oldDestination = state.destination.trim();
+    const oldPlace = oldDestination.split(",")[0]?.trim() ?? "";
+    const titleLooksGenerated =
+      Boolean(plan.titleCustom && plan.title?.trim()) &&
+      (plan.title?.trim() === oldDestination ||
+        Boolean(oldPlace && plan.title?.trim().startsWith(`${oldPlace} ·`)));
+
+    savePlan({
+      step,
+      state: nextState,
+      ...(destinationChanged && titleLooksGenerated
+        ? { title: "", titleCustom: false }
+        : {}),
+    });
     setErrors((current) => {
       const next = { ...current };
       for (const key of Object.keys(partial)) delete next[key];
