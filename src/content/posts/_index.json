@@ -1,7 +1,7 @@
 {
   "migratedAt": "2026-09-19T19:52:59.137Z",
   "source": "alexjournly.com WordPress REST API",
-  "count": 31,
+  "count": 32,
   "featuredHomepage": [
     "cancun-5-day-travel-guide",
     "discovering-iceland-a-week-in-the-land-of-fire-and-ice",
@@ -11,6 +11,19 @@
     "best-solo-travel-destinations"
   ],
   "posts": [
+    {
+      "title": "TSA Is Letting People Go to Airport Gates Without a Plane Ticket Again — Here’s How It Works",
+      "slug": "tsa",
+      "date": "2026-09-23T12:00:00",
+      "excerpt": "TSA’s new Gateside by TSA PreCheck program lets eligible visitors enter secure airport terminals without a plane ticket. Here’s how it works, who qualifies, which airports are participating, and what travelers should know before applying.",
+      "featuredImage": {
+        "url": "/media/migrated/2024-11-img-5900-7b23f5ea.webp",
+        "alt": "How to Score Cheap Flights for Your Next Adventure"
+      },
+      "destinations": [
+        "united-states"
+      ]
+    },
     {
       "title": "The One Travel Mistake I’ll Never Make Again (2026)",
       "slug": "travel-mistake-never-again",
