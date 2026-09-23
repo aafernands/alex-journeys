@@ -45,6 +45,7 @@ export const PAGE_DEFAULTS: Record<string, SitePage> = {
         title: "Prefer email?",
         body: "Reach me at {email}. I read every message — replies may take a few days if I’m mid-itinerary.",
       },
+      mailingAddress: "PO BOX 2101 · Ocean, NJ 07712 · USA",
     },
   },
   "start-here": {
@@ -130,6 +131,7 @@ export const PAGE_DEFAULTS: Record<string, SitePage> = {
         ],
       },
       platformsHeading: "Where to find the journal",
+      mailingAddress: "PO BOX 2101 · Ocean, NJ 07712 · USA",
       createHeading: "What I create",
       createItems: [
         "Destination stories from trips I’ve already taken",
