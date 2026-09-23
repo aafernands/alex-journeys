@@ -17,6 +17,7 @@ import { experiencesPath } from "@/lib/experiences";
 import { flightsPath } from "@/lib/flights";
 import { staysPath } from "@/lib/stays";
 import type { PostBookingTool } from "@/lib/post-types";
+import { PostHotelSuggestion } from "@/components/blog/PostHotelSuggestion";
 
 type Props = {
   tools: PostBookingTool[];
@@ -125,6 +126,16 @@ export function PostBookingBox({
 
         <div className="divide-y divide-border">
           {tools.map((tool) => {
+            if (tool === "hotel") {
+              return (
+                <PostHotelSuggestion
+                  key={tool}
+                  destination={destination}
+                  placeLabel={placeLabel}
+                />
+              );
+            }
+
             const meta = TOOL_META[tool];
             const Icon = meta.icon;
             const toolPlace = tool === "flight" ? countryName || placeLabel : placeLabel;
