@@ -19,7 +19,6 @@ import { staysPath } from "@/lib/stays";
 import type { PostBookingTool } from "@/lib/post-types";
 import { PostHotelSuggestion } from "@/components/blog/PostHotelSuggestion";
 import { PostExperienceAffiliateWidget } from "@/components/blog/PostExperienceAffiliateWidget";
-import { PostFlightSuggestions } from "@/components/blog/PostFlightSuggestions";
 
 type Props = {
   tools: PostBookingTool[];
@@ -149,16 +148,6 @@ export function PostBookingBox({
                 <PostExperienceAffiliateWidget
                   key={tool}
                   html={experienceWidgetHtml}
-                  placeLabel={placeLabel}
-                />
-              );
-            }
-
-            if (tool === "flight") {
-              return (
-                <PostFlightSuggestions
-                  key={tool}
-                  destination={destination}
                   placeLabel={placeLabel}
                 />
               );
