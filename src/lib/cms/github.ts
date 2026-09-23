@@ -262,6 +262,7 @@ export async function fetchDraftFromGithub(
   destinations: string[];
   guideHubs?: string[];
   bookingTools?: Post["bookingTools"];
+  experienceWidgetHtml?: Post["experienceWidgetHtml"];
   contentHtml: string;
   itinerary?: Post["itinerary"];
   source?: unknown;
