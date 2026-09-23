@@ -704,9 +704,40 @@ function LaneCta({
   );
 }
 
-function destinationHeroUrl(destination: string): string {
-  const place = destination.split(",")[0]?.trim() || destination.trim() || "travel";
-  return `https://source.unsplash.com/1600x900/?${encodeURIComponent(place)},travel,city`;
+function destinationHero(destination: string): {
+  image: string;
+  photographer: string;
+  photographerUrl: string;
+} {
+  const place = destination.split(",")[0]?.trim().toLowerCase() ?? "";
+  const known: Record<string, { image: string; photographer: string; photographerUrl: string }> = {
+    "las vegas": {
+      image: "https://images.unsplash.com/photo-1718227756483-c11c3d4eee42?auto=format&fit=crop&q=80&w=1800",
+      photographer: "Wesley Tingey",
+      photographerUrl: "https://unsplash.com/@wesleyphotography?utm_source=fernandes_journeys&utm_medium=referral",
+    },
+    miami: {
+      image: "https://images.unsplash.com/photo-1605107140735-3640719d3404?auto=format&fit=crop&q=80&w=1800",
+      photographer: "Arnaud Civray",
+      photographerUrl: "https://unsplash.com/@arnsc?utm_source=fernandes_journeys&utm_medium=referral",
+    },
+    "miami beach": {
+      image: "https://images.unsplash.com/photo-1605107140735-3640719d3404?auto=format&fit=crop&q=80&w=1800",
+      photographer: "Arnaud Civray",
+      photographerUrl: "https://unsplash.com/@arnsc?utm_source=fernandes_journeys&utm_medium=referral",
+    },
+    "los angeles": {
+      image: "https://images.unsplash.com/photo-1619678562883-7f77b7c68d3c?auto=format&fit=crop&q=80&w=1800",
+      photographer: "Jesus Curiel",
+      photographerUrl: "https://unsplash.com/?utm_source=fernandes_journeys&utm_medium=referral",
+    },
+  };
+
+  return known[place] ?? {
+    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&q=80&w=1800",
+    photographer: "Unsplash",
+    photographerUrl: "https://unsplash.com/?utm_source=fernandes_journeys&utm_medium=referral",
+  };
 }
 
 export function ItineraryHub({
@@ -781,6 +812,7 @@ export function ItineraryHub({
   const stillOpen = partners.filter(
     (partner) => laneProgress(itemsForLane(items, partner)) === "open",
   ).length;
+  const hero = destinationHero(state.destination);
 
   function renderTimeline(list: TripItem[]) {
     return (
@@ -937,17 +969,14 @@ export function ItineraryHub({
       <div className="plan-hub-lead plan-stack-tight">
         <div
           className="plan-trip-hero"
-          style={{ backgroundImage: `url("${destinationHeroUrl(state.destination)}")` }}
+          style={{ backgroundImage: `url("${hero.image}")` }}
         >
           <div className="plan-trip-hero-shade" aria-hidden="true" />
           <div className="plan-trip-hero-content">
             <p className="plan-trip-hero-kicker">Your trip</p>
             <h2 id={headingId} className="plan-trip-hero-title">
-              {tripTitle?.trim() || state.destination.trim() || config.steps.next.heading}
+              {state.destination.trim() || config.steps.next.heading}
             </h2>
-            {tripTitle?.trim() && state.destination.trim() ? (
-              <p className="plan-trip-hero-place">{state.destination.trim()}</p>
-            ) : null}
             <p className="plan-trip-hero-meta">
               {[dates, travelers].filter(Boolean).join(" · ")}
               {partners.length > 0
@@ -957,14 +986,24 @@ export function ItineraryHub({
                 : ""}
             </p>
           </div>
-          <a
-            href="https://unsplash.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="plan-trip-hero-credit"
-          >
-            Unsplash
-          </a>
+          <span className="plan-trip-hero-credit">
+            Photo by{" "}
+            <a
+              href={hero.photographerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {hero.photographer}
+            </a>{" "}
+            on{" "}
+            <a
+              href="https://unsplash.com/?utm_source=fernandes_journeys&utm_medium=referral"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Unsplash
+            </a>
+          </span>
         </div>
         <p className={`${plan.prose} text-muted plan-desktop-only`}>{subhead}</p>
         <div className="plan-inline-actions plan-hub-actions">
