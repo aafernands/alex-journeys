@@ -1028,18 +1028,6 @@ export function ItineraryHub({
           <button type="button" className={`${plan.textBtn} text-muted sm:text-heading`} onClick={onEditTrip}>
             Edit
           </button>
-          <button
-            type="button"
-            className={`${plan.textBtn} text-muted sm:text-heading`}
-            onClick={() => {
-              setLanePin(OUTSIDE_TAB);
-              window.requestAnimationFrame(() => {
-                document.querySelector(".plan-hub-lanes")?.scrollIntoView({ block: "start" });
-              });
-            }}
-          >
-            Email booking
-          </button>
           <button type="button" className={`${plan.textBtn} text-muted`} onClick={onStartOver}>
             Start over
           </button>
@@ -1605,6 +1593,29 @@ export function ItineraryHub({
         />
       </section>
       </PlanFold>
+
+      <section className="plan-section border-t border-border pt-5" aria-label="Add a booking from email">
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <p className={plan.label}>Booked outside Fernandes Journeys?</p>
+            <p className={`${plan.caption} mt-1 text-muted`}>
+              Forward the confirmation email to import it into this itinerary.
+            </p>
+          </div>
+          <button
+            type="button"
+            className={`${plan.textBtn} shrink-0 font-semibold text-accent hover:underline`}
+            onClick={() => {
+              setLanePin(OUTSIDE_TAB);
+              window.requestAnimationFrame(() => {
+                document.querySelector(".plan-hub-lanes")?.scrollIntoView({ block: "start" });
+              });
+            }}
+          >
+            Forward confirmation
+          </button>
+        </div>
+      </section>
 
       <p className={`${plan.caption} px-1 pt-3 text-muted`}>
         {config.disclosure}{" "}
