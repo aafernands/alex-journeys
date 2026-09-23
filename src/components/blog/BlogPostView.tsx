@@ -5,6 +5,7 @@ import {
   AdminPublicChrome,
   AdminSectionEdit,
 } from "@/components/admin/AdminPublicChrome";
+import { PostBookingBox } from "@/components/blog/PostBookingBox";
 import { PostContent } from "@/components/blog/PostContent";
 import { PinnableImage } from "@/components/pinterest/PinnableImage";
 import { PostItineraryTimeline } from "@/components/blog/PostItineraryTimeline";
@@ -22,6 +23,7 @@ import {
 import { publicPostPath } from "@/lib/public-paths";
 import { blogPostingJsonLd } from "@/lib/seo";
 import { site } from "@/data/content";
+import { destinationCity, getDestinationBySlug } from "@/data/destinations";
 import { cmsEditPostHref } from "@/lib/admin-edit";
 
 /** Pull simple TOC from h2 text in HTML when present */
@@ -62,6 +64,14 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
   });
 
   const editHref = cmsEditPostHref(slug);
+  const primaryDestination = post.destinations[0]
+    ? getDestinationBySlug(post.destinations[0])
+    : undefined;
+  const bookingDestination = primaryDestination
+    ? primaryDestination.city?.trim()
+      ? `${destinationCity(primaryDestination)}, ${primaryDestination.name}`
+      : primaryDestination.name
+    : "";
 
   return (
     <main>
@@ -242,6 +252,13 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
               shareDescription={post.title}
             />
           </div>
+
+          {post.bookingTools?.length && bookingDestination ? (
+            <PostBookingBox
+              tools={post.bookingTools}
+              destination={bookingDestination}
+            />
+          ) : null}
 
           {post.itinerary?.enabled && post.itinerary.days.length > 0 ? (
             <PostItineraryTimeline itinerary={post.itinerary} />
