@@ -260,11 +260,11 @@ export function ForwardBookings({
         </span>
         <div className="min-w-0 flex-1 plan-stack-tight">
           <h3 id={titleId} className={plan.h4}>
-            Forward a confirmation
+            Import a booking
           </h3>
           <p className={`${plan.prose} text-muted`}>
-            Insurance, an eSIM, an experience, or anything booked outside Fernandes Journeys.
-            Forward the email and approve it before it lands on this itinerary.
+            Use your private trip address for confirmations from airlines, hotels, cars,
+            experiences, insurance, eSIMs, and other services booked elsewhere.
           </p>
 
           {status === "loading" || (status === "authenticated" && loading && !primary) ? (
@@ -325,7 +325,7 @@ export function ForwardBookings({
                   className="btn btn-secondary"
                   onClick={() => void copyAddress(primary.address)}
                 >
-                  {copied ? "Copied" : "Copy address"}
+                  {copied ? "Copied" : "Copy import address"}
                 </button>
                 <button
                   type="button"
@@ -386,7 +386,7 @@ export function ForwardBookings({
                 <>
                   <p className={`${plan.caption} text-muted sm:hidden`}>Nothing waiting.</p>
                   <p className={`${plan.prose} text-muted plan-desktop-only`}>
-                    Nothing waiting. Forward a confirmation, then add or dismiss what we find.
+                    Nothing waiting. Send a confirmation to your import address, then add or dismiss what we find.
                   </p>
                 </>
               ) : (
