@@ -299,6 +299,14 @@ export default function MediaKitPage() {
             Contact form
           </Link>
         </div>
+        <div className="mt-6 border-t border-border pt-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
+            Mailing address
+          </p>
+          <address className="mt-2 not-italic text-sm font-semibold text-heading">
+            {asString(s.mailingAddress, "PO BOX 2101 · Ocean, NJ 07712 · USA")}
+          </address>
+        </div>
         <p className="mt-5 text-xs text-muted">
           Tip: this page prints cleanly from your browser if you need a PDF
           (File → Print → Save as PDF).
