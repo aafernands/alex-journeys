@@ -14,9 +14,18 @@ type Props = {
     rating: number | null;
     stars: number | null;
   };
+  tripContext?: {
+    destination: string;
+    startDate: string;
+    endDate: string;
+    adults: number;
+    children: number;
+    rooms: number;
+    tripId: string;
+  };
 };
 
-export function SaveHotelButton({ hotel }: Props) {
+export function SaveHotelButton({ hotel, tripContext }: Props) {
   const { data: session, status } = useSession();
   const signedIn = status === "authenticated" && Boolean(session?.user?.id);
   const [saved, setSaved] = useState(false);
@@ -64,14 +73,37 @@ export function SaveHotelButton({ hotel }: Props) {
       const response = await fetch("/api/saved-hotels", {
         method: saved ? "DELETE" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(saved ? { hotelId: hotel.hotelId } : hotel),
+        body: JSON.stringify(
+          saved
+            ? { hotelId: hotel.hotelId }
+            : {
+                ...hotel,
+                destination: tripContext?.destination ?? "",
+                startDate: tripContext?.startDate ?? "",
+                endDate: tripContext?.endDate ?? "",
+                adults: tripContext?.adults,
+                children: tripContext?.children,
+                rooms: tripContext?.rooms,
+                tripId: tripContext?.tripId ?? "",
+              },
+        ),
       });
       if (!response.ok) {
         const payload = (await response.json().catch(() => null)) as { error?: string } | null;
         setError(payload?.error || "Could not update favorites.");
         return;
       }
+      const payload = (await response.json().catch(() => null)) as
+        | { hotel?: { tripHref?: string } }
+        | null;
       setSaved((current) => !current);
+      if (!saved && payload?.hotel?.tripHref) {
+        window.dispatchEvent(
+          new CustomEvent("fj:hotel-saved", {
+            detail: { tripHref: payload.hotel.tripHref, hotelName: hotel.name },
+          }),
+        );
+      }
     } catch {
       setError("Could not update favorites.");
     } finally {
