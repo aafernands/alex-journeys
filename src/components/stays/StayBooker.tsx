@@ -333,73 +333,141 @@ export function StayBooker({
         </div>
       ) : (
         <fieldset className="plan-stack" disabled={busy}>
-          <legend className="font-display text-xl font-bold text-heading">Rooms</legend>
-          <div className="plan-stack">
+          <legend className="sr-only">Choose a room</legend>
+          <div className="grid gap-5">
             {rooms.map((room) => {
               const checked = room.offerId === offerId;
+              const cancellation = room.cancellation[0] ?? "";
+              const extraCancellation = room.cancellation.slice(1);
+              const rateLabel = refundableLabel(room.refundable);
+              const nights = stayNights(query.startDate, query.endDate);
+              const nightly =
+                room.price && nights > 0
+                  ? formatStayMoney({
+                      amount: room.price.amount / nights,
+                      currency: room.price.currency,
+                    })
+                  : "";
               return (
-                <label
+                <article
                   key={room.offerId}
-                  className={`panel plan-inset flex cursor-pointer flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between ${
-                    checked ? "border-accent" : ""
+                  className={`overflow-hidden rounded-xl border bg-white transition ${
+                    checked
+                      ? "border-heading shadow-[0_0_0_1px_var(--heading)]"
+                      : "border-line hover:border-heading/40"
                   }`}
                 >
-                  <span className="flex min-w-0 gap-3">
-                    <input
-                      type="radio"
-                      name="room"
-                      className="mt-1 accent-[var(--accent)]"
-                      checked={checked}
-                      onChange={() => {
-                        setOfferId(room.offerId);
-                        setPrebook(null);
-                        setFailure(null);
-                        clientReference.current = "";
-                      }}
-                    />
-                    <RoomPhotos photos={room.photos ?? []} fallback={fallbackPhoto} />
-                    <span className="min-w-0">
-                      <span className="block font-semibold text-heading">{room.name}</span>
-                      <span className="mt-1 block text-sm text-muted">
-                        {[room.boardName, refundableLabel(room.refundable)].filter(Boolean).join(" · ")}
-                      </span>
-                      {room.cancellation.map((line) => (
-                        <span key={line} className="mt-1 block text-sm leading-relaxed text-text">
-                          {line}
+                  <div className="grid md:grid-cols-[220px_minmax(0,1fr)]">
+                    <div className="relative min-h-44 bg-surface md:min-h-full">
+                      <RoomCardPhoto photos={room.photos ?? []} fallback={fallbackPhoto} />
+                      {room.photos?.length > 1 ? (
+                        <span className="absolute bottom-3 right-3 rounded-full bg-heading/85 px-2.5 py-1 text-xs font-semibold text-white">
+                          {room.photos.length} photos
                         </span>
-                      ))}
-                      {room.conditions.map((line) => (
-                        <span key={line} className="mt-1 block text-sm leading-relaxed text-text">
-                          {line}
-                        </span>
-                      ))}
-                      {room.remarks ? (
-                        <span className="mt-2 block text-sm leading-relaxed text-text">{room.remarks}</span>
                       ) : null}
-                    </span>
-                  </span>
-                  <span className="shrink-0 font-display text-lg font-bold text-heading sm:text-right">
-                    {room.price ? formatStayMoney(room.price) : "Price on confirm"}
-                  </span>
-                </label>
+                    </div>
+
+                    <div className="flex min-w-0 flex-col p-4 sm:p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <h3 className="font-display text-xl font-bold leading-tight text-heading">
+                            {room.name}
+                          </h3>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {room.boardName ? (
+                              <span className="rounded-full bg-surface px-3 py-1 text-xs font-semibold text-text">
+                                {room.boardName}
+                              </span>
+                            ) : null}
+                            <span
+                              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                                room.refundable === "refundable"
+                                  ? "bg-emerald-50 text-emerald-800"
+                                  : "bg-surface text-text"
+                              }`}
+                            >
+                              {rateLabel}
+                            </span>
+                          </div>
+                        </div>
+                        <input
+                          type="radio"
+                          name="room"
+                          aria-label={`Select ${room.name}`}
+                          className="mt-1 h-5 w-5 shrink-0 accent-[var(--accent)]"
+                          checked={checked}
+                          onChange={() => {
+                            setOfferId(room.offerId);
+                            setPrebook(null);
+                            setFailure(null);
+                            clientReference.current = "";
+                          }}
+                        />
+                      </div>
+
+                      <div className="mt-4 space-y-2 text-sm">
+                        {cancellation ? (
+                          <p className="leading-relaxed text-text">{cancellation}</p>
+                        ) : (
+                          <p className="text-muted">Cancellation details confirmed before booking.</p>
+                        )}
+                        {extraCancellation.length > 0 || room.conditions.length > 0 || room.remarks ? (
+                          <details>
+                            <summary className="cursor-pointer font-semibold text-link">
+                              More rate details
+                            </summary>
+                            <div className="mt-2 space-y-1.5 text-sm leading-relaxed text-text">
+                              {extraCancellation.map((line) => (
+                                <p key={line}>{line}</p>
+                              ))}
+                              {room.conditions.map((line) => (
+                                <p key={line}>{line}</p>
+                              ))}
+                              {room.remarks ? <p>{room.remarks}</p> : null}
+                            </div>
+                          </details>
+                        ) : null}
+                      </div>
+
+                      <div className="mt-5 flex flex-col gap-4 border-t border-line pt-4 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                          {nightly ? (
+                            <p className="text-sm text-muted">
+                              {nightly} average per night
+                            </p>
+                          ) : null}
+                          <p className="mt-0.5 font-display text-2xl font-bold text-heading">
+                            {room.price ? formatStayMoney(room.price) : "Price on confirm"}
+                          </p>
+                          {room.price ? <p className="text-xs text-muted">Total for your stay</p> : null}
+                        </div>
+                        <button
+                          type="button"
+                          className={checked ? "btn btn-primary" : "btn btn-secondary"}
+                          disabled={busy}
+                          onClick={() => {
+                            setOfferId(room.offerId);
+                            setPrebook(null);
+                            setFailure(null);
+                            clientReference.current = "";
+                            if (checked) void confirmRoom();
+                          }}
+                        >
+                          {pending === "prebook" && checked
+                            ? "Checking the rate…"
+                            : checked
+                              ? "Continue with this room"
+                              : "Select room"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
               );
             })}
           </div>
         </fieldset>
       )}
-
-      {selected ? (
-        <div className="plan-actions">
-          <button
-            type="button"
-            className="btn btn-ink"
-            disabled={busy}
-            onClick={() => void confirmRoom()}
-          >
-            {pending === "prebook" ? "Checking the rate…" : "Continue with this room"}
-          </button>
-        </div>
-      ) : null}
       {pending === "prebook" ? (
         <p className="text-sm text-muted" role="status">
           Checking that this rate is still open…
@@ -530,6 +598,23 @@ export function StayBooker({
         </form>
       ) : null}
     </div>
+  );
+}
+
+function RoomCardPhoto({ photos, fallback }: { photos: StayPhoto[]; fallback: string }) {
+  const photo = photos[0]?.url ? photos[0] : fallback ? { url: fallback, caption: "" } : null;
+  if (!photo) {
+    return (
+      <div className="grid h-full min-h-44 place-items-center text-sm text-muted">
+        Room photo unavailable
+      </div>
+    );
+  }
+  return (
+    <RoomImage
+      photo={photo}
+      className="h-full min-h-44 w-full rounded-none object-cover md:min-h-56"
+    />
   );
 }
 
