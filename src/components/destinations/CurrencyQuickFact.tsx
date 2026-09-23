@@ -53,6 +53,7 @@ export function CurrencyQuickFact({ currencyLabel }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const [savedItems, setSavedItems] = useState<SavedConversion[]>([]);
 
   useEffect(() => {
     if (localCode) setTo(localCode);
@@ -89,6 +90,7 @@ export function CurrencyQuickFact({ currencyLabel }: Props) {
 
   useEffect(() => {
     if (!open || !localCode) return;
+    setSavedItems(readSaved());
     void convert();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, localCode]);
@@ -112,6 +114,7 @@ export function CurrencyQuickFact({ currencyLabel }: Props) {
     };
     const next = [item, ...readSaved()].slice(0, 20);
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setSavedItems(next);
     setSaved(true);
   }
 
@@ -263,6 +266,33 @@ export function CurrencyQuickFact({ currencyLabel }: Props) {
                 </button>
                 <p className="mt-2 text-[0.7rem] leading-relaxed text-muted">
                   Reference rate only. Banks, cards, ATMs, and exchange counters may use different rates or fees.
+                </p>
+              </div>
+            ) : null}
+
+            {savedItems.length > 0 ? (
+              <div className="mt-5 border-t border-border pt-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
+                  Your saved conversions
+                </p>
+                <ul className="mt-2 space-y-2">
+                  {savedItems.slice(0, 3).map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex items-center justify-between gap-3 rounded-lg bg-surface-soft px-3 py-2 text-sm"
+                    >
+                      <span className="font-medium text-heading">
+                        {item.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })} {item.from}
+                      </span>
+                      <span className="text-muted">≈</span>
+                      <span className="font-semibold text-heading">
+                        {item.result.toLocaleString(undefined, { maximumFractionDigits: 2 })} {item.to}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-[0.7rem] text-muted">
+                  Saved in your Fernandes Journeys travel tools on this device.
                 </p>
               </div>
             ) : null}
