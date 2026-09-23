@@ -1185,25 +1185,23 @@ export function ItineraryHub({
                   onKeyDown={(event) => onLaneTabKeyDown(event, partner.key)}
                 >
                   <span className="plan-lane-tab-label">{laneName(partner)}</span>
-                  <span className="plan-lane-tab-meta">{laneTabCue(laneItems, isNext)}</span>
                 </button>
               );
             })}
+            <button
+              type="button"
+              role="tab"
+              id={`${headingId}-outside-tab`}
+              className="plan-lane-tab"
+              aria-selected={outsideSelected}
+              aria-controls={`${headingId}-outside`}
+              tabIndex={outsideSelected ? 0 : -1}
+              onClick={() => setLanePin(OUTSIDE_TAB)}
+              onKeyDown={(event) => onLaneTabKeyDown(event, OUTSIDE_TAB)}
+            >
+              <span className="plan-lane-tab-label">Booked elsewhere</span>
+            </button>
           </div>
-          <button
-            type="button"
-            role="tab"
-            id={`${headingId}-outside-tab`}
-            className="plan-lane-tab plan-lane-tab-aside"
-            aria-selected={outsideSelected}
-            aria-controls={`${headingId}-outside`}
-            tabIndex={outsideSelected ? 0 : -1}
-            onClick={() => setLanePin(OUTSIDE_TAB)}
-            onKeyDown={(event) => onLaneTabKeyDown(event, OUTSIDE_TAB)}
-          >
-            <span className="plan-lane-tab-label">Booked elsewhere</span>
-            <span className="plan-lane-tab-meta">Forward email</span>
-          </button>
         </div>
 
         {partners.map((partner) => {
