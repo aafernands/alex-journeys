@@ -14,6 +14,7 @@ import {
   refundableLabel,
   stayGuestFieldErrors,
   stayNights,
+  staysCheckoutPath,
   staysQueryString,
   type StayBooking,
   type StayConfirmationDetails,
@@ -42,6 +43,10 @@ type Props = {
   stayHref: string;
   listHref: string;
   planHref: string;
+  /** Dedicated checkout mode verifies one selected offer and shows only checkout. */
+  checkoutMode?: boolean;
+  selectedOfferId?: string;
+  hotelHref?: string;
 };
 
 const inputClass = plan.input;
@@ -69,9 +74,12 @@ export function StayBooker({
   stayHref,
   listHref,
   planHref,
+  checkoutMode = false,
+  selectedOfferId = "",
+  hotelHref = stayHref,
 }: Props) {
   const [rooms, setRooms] = useState(initialRooms);
-  const [offerId, setOfferId] = useState(initialRooms[0]?.offerId ?? "");
+  const [offerId, setOfferId] = useState(selectedOfferId || initialRooms[0]?.offerId || "");
   const [guest, setGuest] = useState<StayGuest>({
     firstName: "",
     lastName: "",
@@ -91,10 +99,19 @@ export function StayBooker({
   const clientReference = useRef("");
   const lock = useRef(false);
   const retryStage = useRef<"prebook" | "book" | "rates">("prebook");
+  const autoPrebookStarted = useRef(false);
 
   const selected = rooms.find((room) => room.offerId === offerId) ?? null;
   const roomGroups = groupRoomOffers(rooms);
   const busy = pending !== "";
+
+  useEffect(() => {
+    if (!checkoutMode || !selectedOfferId || autoPrebookStarted.current) return;
+    autoPrebookStarted.current = true;
+    void confirmRoom(selectedOfferId);
+    // The selected offer is fixed for this checkout route.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkoutMode, selectedOfferId]);
 
   async function readError(response: Response): Promise<{ message: string; code: string }> {
     try {
@@ -262,6 +279,10 @@ export function StayBooker({
     setPrebook(null);
     setFailure(null);
     clientReference.current = "";
+    if (checkoutMode) {
+      window.location.assign(`${hotelHref}#rooms`);
+      return;
+    }
     void refreshRooms();
   }
 
@@ -335,7 +356,7 @@ export function StayBooker({
         </p>
       ) : null}
 
-      {rooms.length === 0 ? (
+      {!checkoutMode && rooms.length === 0 ? (
         <div className="panel plan-inset p-5">
           <h2 className="font-display text-xl font-bold text-heading">No rooms for these dates</h2>
           <p className="mt-2 text-sm leading-relaxed text-text">
@@ -345,7 +366,7 @@ export function StayBooker({
             Search again
           </Link>
         </div>
-      ) : (
+      ) : !checkoutMode ? (
         <fieldset className="space-y-5" disabled={busy}>
           <legend className="sr-only">Available rooms</legend>
           {roomGroups.map((group) => {
@@ -363,7 +384,6 @@ export function StayBooker({
                 </div>
                 <div className="divide-y divide-line">
                   {group.map((rate) => {
-                    const checking = pending === "prebook" && rate.offerId === offerId;
                     return (
                       <div key={rate.offerId} className="grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:p-5">
                         <div className="min-w-0">
@@ -385,19 +405,12 @@ export function StayBooker({
                           <p className="mt-1 font-display text-2xl font-bold text-heading">
                             {rate.price ? formatStayMoney(rate.price) : "Price on confirm"}
                           </p>
-                          <button
-                            type="button"
+                          <Link
+                            href={staysCheckoutPath(hotelId, rate.offerId, query)}
                             className="btn btn-primary mt-3 w-full sm:w-auto"
-                            disabled={busy}
-                            onClick={() => {
-                              setPrebook(null);
-                              setFailure(null);
-                              clientReference.current = "";
-                              void confirmRoom(rate.offerId);
-                            }}
                           >
-                            {checking ? "Checking…" : "Select"}
-                          </button>
+                            Select
+                          </Link>
                         </div>
                       </div>
                     );
@@ -409,9 +422,10 @@ export function StayBooker({
         </fieldset>
       )}
       {pending === "prebook" ? (
-        <p className="text-sm text-muted" role="status">
-          Checking that this rate is still open…
-        </p>
+        <div className={checkoutMode ? "rounded-xl border border-line bg-white p-6 text-center" : ""} role="status">
+          <p className="font-semibold text-heading">Checking your selected room…</p>
+          <p className="mt-2 text-sm text-muted">Confirming the latest rate and cancellation terms with Nuitee.</p>
+        </div>
       ) : null}
 
       {prebook ? (
@@ -421,18 +435,24 @@ export function StayBooker({
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Selected room</p>
               <h2 className="mt-1 font-display text-xl font-bold text-heading">Review your room</h2>
             </div>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              disabled={busy}
-              onClick={() => {
-                setPrebook(null);
-                setFailure(null);
-                clientReference.current = "";
-              }}
-            >
-              Change room
-            </button>
+            {checkoutMode ? (
+              <Link href={`${hotelHref}#rooms`} className="btn btn-secondary">
+                Change room
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                disabled={busy}
+                onClick={() => {
+                  setPrebook(null);
+                  setFailure(null);
+                  clientReference.current = "";
+                }}
+              >
+                Change room
+              </button>
+            )}
           </div>
           {selected ? (
             <SelectedRoomSummary
