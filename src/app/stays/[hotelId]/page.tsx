@@ -167,6 +167,7 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
             hotelId={hotel?.id || hotelId}
             hotelName={name}
             rooms={loaded.rooms}
+            fallbackPhoto={hotel?.photos[0]?.url ?? ""}
             query={query}
             sandbox={loaded.sandbox}
             stayHref={staysHotelPath(hotelId, query)}

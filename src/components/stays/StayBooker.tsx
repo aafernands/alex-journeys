@@ -17,6 +17,7 @@ import {
   type StayConfirmationDetails,
   type StayFailure,
   type StayGuest,
+  type StayPhoto,
   type StayPrebook,
   type StayRoomOffer,
   type StaysQuery,
@@ -32,6 +33,8 @@ type Props = {
   hotelId: string;
   hotelName: string;
   rooms: StayRoomOffer[];
+  /** Hotel hero, used when a room has no Nuitee photo. */
+  fallbackPhoto?: string;
   query: StaysQuery;
   sandbox: boolean;
   stayHref: string;
@@ -47,6 +50,7 @@ export function StayBooker({
   hotelId,
   hotelName,
   rooms: initialRooms,
+  fallbackPhoto = "",
   query,
   sandbox,
   stayHref,
@@ -352,6 +356,7 @@ export function StayBooker({
                         clientReference.current = "";
                       }}
                     />
+                    <RoomPhotos photos={room.photos ?? []} fallback={fallbackPhoto} />
                     <span className="min-w-0">
                       <span className="block font-semibold text-heading">{room.name}</span>
                       <span className="mt-1 block text-sm text-muted">
@@ -496,6 +501,70 @@ export function StayBooker({
         </form>
       ) : null}
     </div>
+  );
+}
+
+function RoomPhotos({ photos, fallback }: { photos: StayPhoto[]; fallback: string }) {
+  const gallery = photos.slice(0, 3);
+  if (gallery.length > 0) {
+    return (
+      <span className="mt-0.5 flex shrink-0 gap-1">
+        {gallery.map((photo, index) => (
+          <RoomImage
+            key={photo.url}
+            photo={photo}
+            className={
+              index === 0
+                ? "h-16 w-20 sm:h-[4.5rem] sm:w-24"
+                : "hidden h-16 w-12 sm:block"
+            }
+          />
+        ))}
+      </span>
+    );
+  }
+  if (fallback) {
+    return (
+      <span className="mt-0.5 flex w-20 shrink-0 flex-col gap-1 sm:w-24">
+        <RoomImage
+          photo={{ url: fallback, caption: "" }}
+          className="h-16 w-full sm:h-[4.5rem]"
+        />
+        <span className={`${plan.caption} text-muted`}>Hotel photo</span>
+      </span>
+    );
+  }
+  return (
+    <span
+      className={`${plan.caption} mt-0.5 grid h-16 w-20 shrink-0 place-items-center rounded-md bg-surface text-center text-muted sm:h-[4.5rem] sm:w-24`}
+    >
+      No photo
+    </span>
+  );
+}
+
+function RoomImage({ photo, className }: { photo: StayPhoto; className: string }) {
+  return (
+    // Room CDNs are not a fixed host list, same as hotel cards on /stays.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={photo.url}
+      alt=""
+      width={96}
+      height={72}
+      loading="lazy"
+      decoding="async"
+      className={`rounded-md object-cover ${className}`}
+      onError={(event) => {
+        const img = event.currentTarget;
+        if (photo.fallbackUrl && img.dataset.fallback !== "1") {
+          img.dataset.fallback = "1";
+          img.src = photo.fallbackUrl;
+          return;
+        }
+        img.classList.add("hidden");
+      }}
+    />
   );
 }
 

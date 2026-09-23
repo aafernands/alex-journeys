@@ -175,6 +175,123 @@ describe("stays mapping", () => {
     assert.equal(plainStayText("Resort fee<br/>due"), "Resort fee\ndue");
     assert.match(rooms[1].remarks, /Resort fee/);
     assert.equal(rooms[1].remarks.includes("<br"), false);
+    assert.deepEqual(rooms[0].photos, []);
+    assert.deepEqual(rooms[1].photos, []);
+  });
+
+  it("joins room photos from hotel content by mapped room id", () => {
+    const hotel = {
+      data: {
+        id: "lp1897",
+        name: "Hotel du Test",
+        rooms: [
+          {
+            id: 5787126,
+            roomName: "Studio King",
+            photos: [
+              {
+                url: "http://insecure.example/skip.jpg",
+                mainPhoto: true,
+              },
+              {
+                url: "https://snaphotelapi.com/rooms-large-pictures/322367511.jpg",
+                imageDescription: "Second",
+                mainPhoto: false,
+                score: 1,
+              },
+              {
+                url: "https://snaphotelapi.com/rooms-large-pictures/322367522.jpg",
+                imageDescription: "Main room",
+                failoverPhoto:
+                  "https://q-xx.bstatic.com/xdata/images/hotel/max1200/322367522.jpg?k=abc&o=",
+                mainPhoto: true,
+                score: 4,
+              },
+            ],
+          },
+          {
+            id: "99",
+            roomName: "Queen Room",
+            photos: [{ url: "https://cdn.example.com/queen.jpg", imageDescription: "Queen" }],
+          },
+        ],
+      },
+    };
+    const rooms = mapRoomOffers(
+      {
+        data: [
+          {
+            hotelId: "lp1897",
+            roomTypes: [
+              {
+                offerId: "MAPPEDOFFER12345678",
+                offerRetailRate: [{ amount: 180, currency: "USD" }],
+                photos: [{ url: "https://cdn.example.com/decoy.jpg" }],
+                rates: [
+                  {
+                    name: "Studio King – Non Refundable",
+                    mappedRoomId: 5787126,
+                    boardName: "Room Only",
+                    cancellationPolicies: { refundableTag: "NRFN" },
+                  },
+                ],
+              },
+              {
+                offerId: "NAMEONLYOFFER123456",
+                offerRetailRate: [{ amount: 140, currency: "USD" }],
+                rates: [
+                  {
+                    name: "Queen Room with city view",
+                    boardName: "Breakfast",
+                    cancellationPolicies: { refundableTag: "RFN" },
+                  },
+                ],
+              },
+              {
+                offerId: "NOPHOTOOFFER1234567",
+                offerRetailRate: [{ amount: 100, currency: "USD" }],
+                rates: [{ name: "Bunk", boardName: "Room Only" }],
+              },
+            ],
+          },
+        ],
+      },
+      hotel,
+    );
+    const studio = rooms.find((room) => room.offerId === "MAPPEDOFFER12345678");
+    const queen = rooms.find((room) => room.offerId === "NAMEONLYOFFER123456");
+    const bunk = rooms.find((room) => room.offerId === "NOPHOTOOFFER1234567");
+    assert.ok(studio && queen && bunk);
+    assert.equal(studio.photos[0].url, "https://snaphotelapi.com/rooms-large-pictures/322367522.jpg");
+    assert.equal(studio.photos[0].caption, "Main room");
+    assert.match(studio.photos[0].fallbackUrl, /bstatic\.com/);
+    assert.equal(studio.photos[1].url, "https://snaphotelapi.com/rooms-large-pictures/322367511.jpg");
+    assert.equal(studio.photos.some((photo) => photo.url.startsWith("http://")), false);
+    assert.equal(queen.photos[0].url, "https://cdn.example.com/queen.jpg");
+    assert.deepEqual(bunk.photos, []);
+  });
+
+  it("uses photos embedded on a rate when the room is not mapped", () => {
+    const [room] = mapRoomOffers({
+      data: [
+        {
+          hotelId: "lp1897",
+          roomTypes: [
+            {
+              offerId: "EMBEDDEDPHOTOS12345",
+              offerRetailRate: [{ amount: 90, currency: "USD" }],
+              photos: [
+                { failoverPhoto: "https://cdn.example.com/backup.jpg", imageDescription: "Bath" },
+              ],
+              rates: [{ name: "Bath", boardName: "Room Only" }],
+            },
+          ],
+        },
+      ],
+    });
+    assert.equal(room.photos[0].url, "https://cdn.example.com/backup.jpg");
+    assert.equal(room.photos[0].caption, "Bath");
+    assert.equal(room.photos[0].fallbackUrl, undefined);
   });
 
   it("maps hotel content, prebook, and booking without payment secrets", () => {

@@ -167,7 +167,7 @@ export async function loadStayHotel(
   const contentPayload = contentResult.status === "fulfilled" ? contentResult.value : null;
   const ratesPayload = ratesResult.status === "fulfilled" ? ratesResult.value : null;
   const hotel = contentPayload ? mapHotelContent(contentPayload, hotelId) : null;
-  const rooms = ratesPayload ? mapRoomOffers(ratesPayload) : [];
+  const rooms = ratesPayload ? mapRoomOffers(ratesPayload, contentPayload) : [];
 
   if (!hotel && rooms.length === 0) {
     const error =
