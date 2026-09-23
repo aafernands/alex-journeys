@@ -38,6 +38,7 @@ async function loadDraft(slug: string): Promise<DraftPost | null> {
         featuredImage: fromGh.featuredImage ?? null,
         destinations: fromGh.destinations ?? [],
         guideHubs: fromGh.guideHubs,
+        bookingTools: fromGh.bookingTools,
         contentHtml: fromGh.contentHtml ?? "",
         itinerary: fromGh.itinerary,
         source: fromGh.source,
@@ -122,6 +123,7 @@ export default async function CmsEditPostPage({ params, searchParams }: PageProp
           featuredImageAlt: source.featuredImage?.alt ?? "",
           destinations: source.destinations,
           guideHubs: "guideHubs" in source ? (source.guideHubs ?? []) : [],
+          bookingTools: "bookingTools" in source ? (source.bookingTools ?? []) : [],
           itinerary:
             "itinerary" in source ? (source.itinerary ?? undefined) : undefined,
         }}

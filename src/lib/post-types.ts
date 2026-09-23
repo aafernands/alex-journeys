@@ -5,6 +5,9 @@ export type FeaturedImage = {
   height?: number;
 };
 
+export const POST_BOOKING_TOOLS = ["flight", "hotel", "experience"] as const;
+export type PostBookingTool = (typeof POST_BOOKING_TOOLS)[number];
+
 export type PostMeta = {
   slug: string;
   title: string;
@@ -20,6 +23,8 @@ export type PostMeta = {
   destinations: string[];
   /** Optional guide hub slugs (e.g. "plan-a-trip") — lists the post on that Guides page. */
   guideHubs?: string[];
+  /** Optional booking actions rendered inside the post. */
+  bookingTools?: PostBookingTool[];
 };
 
 /** Day-by-day trip timeline stored separately from contentHtml. */
