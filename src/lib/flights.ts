@@ -1099,6 +1099,16 @@ const CITY_AIRPORTS: Record<string, string> = {
   denver: "DEN",
   "fort lauderdale": "FLL",
   cancun: "CUN",
+  "rio de janeiro": "GIG",
+  "sao paulo": "GRU",
+  "são paulo": "GRU",
+  reykjavik: "KEF",
+  reykjavík: "KEF",
+  toronto: "YYZ",
+  montreal: "YUL",
+  montréal: "YUL",
+  vancouver: "YVR",
+  "mexico city": "MEX",
 };
 
 function cityKey(place: string): string {
