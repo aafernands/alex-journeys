@@ -20,6 +20,10 @@ export default function ContactPage() {
   const page = getPageWithFallback("contact", PAGE_DEFAULTS.contact);
   const form = asRecord(page.sections?.form);
   const aside = asRecord(page.sections?.emailAside);
+  const mailingAddress = asString(
+    page.sections?.mailingAddress,
+    "PO BOX 2101 · Ocean, NJ 07712 · USA",
+  );
   const asideBody = asString(
     aside.body,
     "Reach me at {email}. I read every message — replies may take a few days if I’m mid-itinerary.",
@@ -64,6 +68,14 @@ export default function ContactPage() {
           </Link>
           .
         </p>
+        <div className="mt-5 border-t border-border pt-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
+            Mailing address
+          </p>
+          <address className="mt-2 not-italic text-sm font-semibold text-heading">
+            {mailingAddress}
+          </address>
+        </div>
       </aside>
     </SitePage>
   );
