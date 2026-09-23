@@ -12,6 +12,7 @@ import {
 type Props = {
   hotelId: string;
   query: StaysQuery;
+  initiallyEditing?: boolean;
 };
 
 function displayDate(value: string) {
@@ -25,9 +26,9 @@ function displayDate(value: string) {
   }).format(date);
 }
 
-export function StayDetailSearch({ hotelId, query }: Props) {
+export function StayDetailSearch({ hotelId, query, initiallyEditing = false }: Props) {
   const router = useRouter();
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(initiallyEditing);
   const [pending, setPending] = useState(false);
   const [startDate, setStartDate] = useState(query.startDate);
   const [endDate, setEndDate] = useState(query.endDate);
