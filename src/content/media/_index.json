@@ -1,7 +1,16 @@
 {
-  "updatedAt": "2026-09-23T20:37:24.512Z",
-  "count": 88,
+  "updatedAt": "2026-09-23T20:37:28.766Z",
+  "count": 89,
   "items": [
+    {
+      "id": "img-0276-muekdx8s",
+      "slug": "img-0276-muekdx8s",
+      "url": "/media/img_0276-muekdx8s.jpg",
+      "alt": "",
+      "source": "upload",
+      "usedBy": [],
+      "createdAt": "2026-09-23T20:37:28.766Z"
+    },
     {
       "id": "img-8782-muekdtzn",
       "slug": "img-8782-muekdtzn",
