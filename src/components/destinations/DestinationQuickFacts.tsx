@@ -3,9 +3,13 @@ import {
   CalendarDays,
   Clock,
   Droplets,
+  ExternalLink,
   Languages,
   Plug,
 } from "lucide-react";
+import Link from "next/link";
+import { CurrencyQuickFact } from "@/components/destinations/CurrencyQuickFact";
+import { OutboundLink } from "@/components/outbound/OutboundLink";
 import type { DestinationQuickFacts as QuickFactsData } from "@/data/destinations";
 
 type Props = {
@@ -120,9 +124,29 @@ export function DestinationQuickFacts({
                   <span className="block text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted">
                     {label}
                   </span>
-                  <span className="mt-0.5 block text-sm leading-snug text-heading">
-                    {value}
-                  </span>
+                  {key === "currency" ? (
+                    <CurrencyQuickFact currencyLabel={value} />
+                  ) : key === "language" ? (
+                    <OutboundLink
+                      href="http://babbel.sjv.io/YRjqnr"
+                      affiliate
+                      className="mt-0.5 inline-flex items-start gap-1.5 text-sm leading-snug text-heading underline decoration-border-strong underline-offset-4 transition hover:text-accent"
+                    >
+                      <span>{value}</span>
+                      <ExternalLink className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+                    </OutboundLink>
+                  ) : key === "plugs" ? (
+                    <Link
+                      href="/travel-tech-essentials"
+                      className="mt-0.5 inline-flex text-sm leading-snug text-heading underline decoration-border-strong underline-offset-4 transition hover:text-accent"
+                    >
+                      {value}
+                    </Link>
+                  ) : (
+                    <span className="mt-0.5 block text-sm leading-snug text-heading">
+                      {value}
+                    </span>
+                  )}
                 </span>
               </li>
             ))}
