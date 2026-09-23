@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BedDouble, CalendarDays, MapPin, Plane, Sparkles } from "lucide-react";
+import { BedDouble, CalendarDays, Plane } from "lucide-react";
 import { notFound } from "next/navigation";
 import { PostCard } from "@/components/blog/PostCard";
 import { destinationCity, getAllDestinations } from "@/data/destinations";
