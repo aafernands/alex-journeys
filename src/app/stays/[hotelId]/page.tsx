@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StayBooker } from "@/components/stays/StayBooker";
+import { StayHotelOverview } from "@/components/stays/StayHotelOverview";
 import { StayTripBar } from "@/components/stays/StayTripBar";
 import { SitePage } from "@/components/pages/SitePage";
 import { LiteApiError, liteApiKeyInfo } from "@/lib/liteapi";
@@ -107,6 +108,32 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
     .filter(Boolean)
     .join(" · ");
 
+  if (loaded && hotel) {
+    return (
+      <StayHotelOverview
+        hotel={hotel}
+        reviews={loaded.reviews}
+        rooms={loaded.rooms}
+        listHref={listHref}
+        sandbox={loaded.sandbox}
+        failure={failure}
+        tripBar={<StayTripBar query={query} />}
+      >
+        <StayBooker
+          hotelId={hotel.id || hotelId}
+          hotelName={name}
+          rooms={loaded.rooms}
+          fallbackPhoto={hotel.photos[0]?.url ?? ""}
+          query={query}
+          sandbox={loaded.sandbox}
+          stayHref={staysHotelPath(hotelId, query)}
+          listHref={listHref}
+          planHref={planHref}
+        />
+      </StayHotelOverview>
+    );
+  }
+
   return (
     <SitePage
       label="Plan a trip"
@@ -124,61 +151,14 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
     >
       <div className="plan-trip hub-follow plan-stack">
         <StayTripBar query={query} />
-        {loaded?.sandbox ? (
-          <p className="text-sm text-muted">
-            Sandbox rate. Booking finishes on Fernandes Journeys through Nuitee and is not a live charge.
-          </p>
-        ) : null}
         {failure ? (
           <p className="text-sm font-semibold text-link" role="alert">
             {failure}
           </p>
         ) : null}
-        {hotel?.photos?.length ? (
-          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {hotel.photos.slice(0, 4).map((photo) => (
-              <li key={photo.url} className="overflow-hidden rounded-md">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={photo.url}
-                  alt={photo.caption || ""}
-                  className="h-32 w-full object-cover sm:h-40"
-                />
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        {hotel?.description ? (
-          <p className="max-w-3xl text-sm leading-relaxed text-text">{hotel.description}</p>
-        ) : null}
-        {hotel && (hotel.checkIn || hotel.facilities.length > 0) ? (
-          <p className="text-sm text-muted">
-            {[
-              hotel.checkIn ? `Check-in ${hotel.checkIn}` : "",
-              hotel.checkOut ? `Check-out ${hotel.checkOut}` : "",
-              hotel.facilities.slice(0, 6).join(" · "),
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-        ) : null}
-        {loaded ? (
-          <StayBooker
-            hotelId={hotel?.id || hotelId}
-            hotelName={name}
-            rooms={loaded.rooms}
-            fallbackPhoto={hotel?.photos[0]?.url ?? ""}
-            query={query}
-            sandbox={loaded.sandbox}
-            stayHref={staysHotelPath(hotelId, query)}
-            listHref={listHref}
-            planHref={planHref}
-          />
-        ) : (
-          <Link href={listHref} className="btn btn-secondary inline-flex self-start">
-            Search more stays
-          </Link>
-        )}
+        <Link href={listHref} className="btn btn-secondary inline-flex self-start">
+          Search more stays
+        </Link>
       </div>
     </SitePage>
   );

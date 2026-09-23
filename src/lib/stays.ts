@@ -52,15 +52,28 @@ export type StayHotelContent = {
   id: string;
   name: string;
   description: string;
+  importantInformation: string;
   photos: StayPhoto[];
   address: string;
   neighborhood: string;
   city: string;
+  country: string;
+  latitude: number | null;
+  longitude: number | null;
   rating: number | null;
+  reviewCount: number;
   stars: number | null;
   facilities: string[];
   checkIn: string;
   checkOut: string;
+};
+
+export type StayReviewSummary = {
+  count: number;
+  average: number | null;
+  categories: Array<{ name: string; rating: number | null; description: string }>;
+  pros: string[];
+  cons: string[];
 };
 
 export type StayRefundable = "refundable" | "non-refundable" | "unknown";
@@ -832,19 +845,82 @@ export function mapHotelContent(
   const description = plainStayText(
     text(data.hotelDescription ?? data.description, 4000),
   ).slice(0, 1400);
+  const importantInformation = plainStayText(
+    text(data.hotelImportantInformation ?? data.importantInformation, 4000),
+  ).slice(0, 1200);
+  const location = asRecord(data.location);
+  const latitude = numberOrNull(location?.latitude ?? data.latitude);
+  const longitude = numberOrNull(location?.longitude ?? data.longitude);
+  const reviewCount = Math.max(
+    0,
+    Math.trunc(numberOrNull(data.reviewCount ?? data.reviewsCount) ?? 0),
+  );
   return {
     id,
     name,
     description,
+    importantInformation,
     photos,
     address: text(data.address, 180),
     neighborhood: neighborhoodOf(data),
     city: text(data.city ?? data.city_name, 80),
+    country: text(data.country ?? data.countryCode, 40).toUpperCase(),
+    latitude: latitude != null && latitude >= -90 && latitude <= 90 ? latitude : null,
+    longitude: longitude != null && longitude >= -180 && longitude <= 180 ? longitude : null,
     rating: numberOrNull(data.rating),
+    reviewCount,
     stars: numberOrNull(data.starRating ?? data.stars),
     facilities,
     checkIn: text(times?.checkin ?? times?.checkinStart, 40),
     checkOut: text(times?.checkout ?? times?.checkoutEnd, 40),
+  };
+}
+
+export function mapStayReviews(payload: unknown): StayReviewSummary {
+  const root = asRecord(payload);
+  const items = asArray(root?.data);
+  let total = 0;
+  let count = 0;
+  for (const item of items) {
+    const record = asRecord(item);
+    const score = numberOrNull(record?.averageScore ?? record?.rating);
+    if (score == null || score < 0 || score > 10) continue;
+    total += score;
+    count += 1;
+  }
+
+  const sentiment = asRecord(root?.sentimentAnalysis);
+  const categories: StayReviewSummary["categories"] = [];
+  for (const item of asArray(sentiment?.categories)) {
+    const record = asRecord(item);
+    if (!record) continue;
+    const name = text(record.name, 80);
+    if (!name) continue;
+    categories.push({
+      name,
+      rating: numberOrNull(record.rating),
+      description: plainStayText(text(record.description, 360)).slice(0, 220),
+    });
+    if (categories.length >= 6) break;
+  }
+
+  function sentimentList(value: unknown): string[] {
+    const output: string[] = [];
+    for (const item of asArray(value)) {
+      const label = text(item, 100);
+      if (!label || output.includes(label)) continue;
+      output.push(label);
+      if (output.length >= 8) break;
+    }
+    return output;
+  }
+
+  return {
+    count: items.length,
+    average: count > 0 ? Math.round((total / count) * 10) / 10 : null,
+    categories,
+    pros: sentimentList(sentiment?.pros),
+    cons: sentimentList(sentiment?.cons),
   };
 }
 
