@@ -47,6 +47,116 @@ export type StayHotelResult = {
   rooms: StayRoomOffer[];
 };
 
+export type StaySuggestion = {
+  id: string;
+  name: string;
+  photo: string;
+  rating: number | null;
+  reviewCount: number;
+  stars: number | null;
+  neighborhood: string;
+  city: string;
+  facilities: string[];
+};
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  return value as Record<string, unknown>;
+}
+
+function hotelSuggestionRows(payload: unknown): unknown[] {
+  const root = asRecord(payload);
+  if (!root) return [];
+  if (Array.isArray(root.data)) return root.data;
+  if (Array.isArray(root.hotels)) return root.hotels;
+  const data = asRecord(root.data);
+  if (data && Array.isArray(data.hotels)) return data.hotels;
+  return [];
+}
+
+function mapHotelSuggestions(payload: unknown): StaySuggestion[] {
+  const suggestions: StaySuggestion[] = [];
+  for (const row of hotelSuggestionRows(payload)) {
+    const record = asRecord(row);
+    if (!record) continue;
+    const rawId = record.id ?? record.hotelId;
+    const fallbackId =
+      typeof rawId === "string" || typeof rawId === "number" ? String(rawId) : "";
+    if (!fallbackId) continue;
+    const hotel = mapHotelContent({ data: record }, fallbackId);
+    if (!hotel) continue;
+    suggestions.push({
+      id: hotel.id,
+      name: hotel.name,
+      photo: hotel.photos[0]?.url ?? "",
+      rating: hotel.rating,
+      reviewCount: hotel.reviewCount,
+      stars: hotel.stars,
+      neighborhood: hotel.neighborhood,
+      city: hotel.city,
+      facilities: hotel.facilities.slice(0, 4),
+    });
+  }
+  return suggestions;
+}
+
+function suggestionScore(hotel: StaySuggestion): number {
+  const rating = hotel.rating ?? 0;
+  const reviews = Math.min(5000, Math.max(0, hotel.reviewCount));
+  const stars = hotel.stars ?? 0;
+  return (hotel.photo ? 50 : 0) + rating * 20 + Math.log10(reviews + 1) * 15 + stars * 3;
+}
+
+/**
+ * Date-free hotel discovery for editorial cards.
+ * Uses Nuitee hotel metadata only; live room rates still require travel dates.
+ */
+export async function suggestStay(destination: string): Promise<StaySuggestion | null> {
+  const clean = destination.trim().slice(0, 80);
+  if (!clean) return null;
+  const info = liteApiKeyInfo();
+  if (!info) return null;
+
+  try {
+    const place = await placeIdFor(clean);
+    const query: Record<string, string | undefined> = {
+      language: "en",
+      limit: "20",
+      minRating: "8",
+      minReviewsCount: "25",
+      ...(place?.placeId ? { placeId: place.placeId } : { aiSearch: `well reviewed hotels in ${clean}` }),
+    };
+    let payload = await liteApiCall({
+      base: LITEAPI_SEARCH_BASE,
+      path: "/data/hotels",
+      query,
+      timeoutMs: 10_000,
+    });
+    let hotels = mapHotelSuggestions(payload);
+
+    // Some smaller destinations will not have enough highly reviewed properties.
+    if (hotels.length === 0) {
+      payload = await liteApiCall({
+        base: LITEAPI_SEARCH_BASE,
+        path: "/data/hotels",
+        query: {
+          language: "en",
+          limit: "20",
+          ...(place?.placeId ? { placeId: place.placeId } : { aiSearch: `hotels in ${clean}` }),
+        },
+        timeoutMs: 10_000,
+      });
+      hotels = mapHotelSuggestions(payload);
+    }
+
+    hotels.sort((a, b) => suggestionScore(b) - suggestionScore(a));
+    return hotels[0] ?? null;
+  } catch {
+    // Editorial cards should never break an article when Nuitee is unavailable.
+    return null;
+  }
+}
+
 function ratesBody(query: StaysQuery, extra: Record<string, unknown>) {
   return {
     checkin: query.startDate,
