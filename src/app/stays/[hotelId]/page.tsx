@@ -16,7 +16,7 @@ import {
   staysPath,
   staysQueryIssue,
 } from "@/lib/stays";
-import { loadStayHotel } from "@/lib/stays-service";
+import { loadStayHotel, loadStayHotelPreview } from "@/lib/stays-service";
 
 type PageProps = {
   params: Promise<{ hotelId: string }>;
@@ -49,8 +49,9 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
   const listHref = staysPath(query);
   const configured = Boolean(liteApiKeyInfo());
   const issue = staysQueryIssue(query);
+  const previewWithoutDates = issue === "Add check-in and check-out.";
 
-  if (!configured || issue) {
+  if (!configured || (issue && !previewWithoutDates)) {
     return (
       <SitePage
         label="Plan a trip"
@@ -94,7 +95,9 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
   let failure = "";
   let loaded: Awaited<ReturnType<typeof loadStayHotel>> | null = null;
   try {
-    loaded = await loadStayHotel(hotelId, query);
+    loaded = previewWithoutDates
+      ? await loadStayHotelPreview(hotelId)
+      : await loadStayHotel(hotelId, query);
   } catch (error) {
     failure =
       error instanceof LiteApiError
@@ -127,19 +130,36 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
           rooms: query.rooms,
           tripId: query.tripId,
         }}
-        tripBar={<StayDetailSearch hotelId={hotelId} query={query} />}
+        tripBar={
+          <StayDetailSearch
+            hotelId={hotelId}
+            query={query}
+            initiallyEditing={previewWithoutDates}
+          />
+        }
       >
-        <StayBooker
-          hotelId={hotel.id || hotelId}
-          hotelName={name}
-          rooms={loaded.rooms}
-          fallbackPhoto={hotel.photos[0]?.url ?? ""}
-          query={query}
-          sandbox={loaded.sandbox}
-          stayHref={staysHotelPath(hotelId, query)}
-          listHref={listHref}
-          planHref={planHref}
-        />
+        {previewWithoutDates ? (
+          <div className="rounded-xl border border-line bg-white p-5 sm:p-6">
+            <h3 className="font-display text-xl font-bold text-heading">
+              Choose your stay dates
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-text">
+              Add check-in and check-out above to see live rooms, prices, and cancellation terms for this hotel.
+            </p>
+          </div>
+        ) : (
+          <StayBooker
+            hotelId={hotel.id || hotelId}
+            hotelName={name}
+            rooms={loaded.rooms}
+            fallbackPhoto={hotel.photos[0]?.url ?? ""}
+            query={query}
+            sandbox={loaded.sandbox}
+            stayHref={staysHotelPath(hotelId, query)}
+            listHref={listHref}
+            planHref={planHref}
+          />
+        )}
       </StayHotelOverview>
     );
   }

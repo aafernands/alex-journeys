@@ -159,6 +159,7 @@ export function StayHotelOverview({
   const fromPriceLabel = fromPrice ? formatStayMoney(fromPrice) : "";
   const stars = Math.max(0, Math.min(5, Math.round(hotel.stars ?? 0)));
   const fullAddress = [hotel.address, hotel.city, hotel.country].filter(Boolean).join(", ");
+  const hasStayDates = Boolean(saveTripContext?.startDate && saveTripContext?.endDate);
 
   return (
     <main className="bg-bg pb-28 md:pb-16">
@@ -484,11 +485,15 @@ export function StayHotelOverview({
           <section id="rooms" className="scroll-mt-24 py-8 sm:py-10">
             <div className="mb-6 sm:flex sm:items-end sm:justify-between sm:gap-6">
               <div>
-                <p className="eyebrow">Available for your dates</p>
-                <h2 className="mt-2 font-display text-2xl font-bold text-heading sm:text-3xl">Choose your room</h2>
+                <p className="eyebrow">{hasStayDates ? "Available for your dates" : "Check availability"}</p>
+                <h2 className="mt-2 font-display text-2xl font-bold text-heading sm:text-3xl">
+                  {hasStayDates ? "Choose your room" : "Add dates to see rooms"}
+                </h2>
               </div>
               <p className="mt-2 text-sm text-muted">
-                Live rates and cancellation terms are provided by Nuitee.
+                {hasStayDates
+                  ? "Live rates and cancellation terms are provided by Nuitee."
+                  : "Choose check-in and check-out dates above to load live room rates."}
               </p>
             </div>
             {sandbox ? (
@@ -509,9 +514,12 @@ export function StayHotelOverview({
               <p className="truncate font-display text-lg font-bold text-heading">{fromPriceLabel}</p>
             </div>
           ) : null}
-          <a href="#rooms" className="btn btn-primary flex-1 justify-center text-center">
+          <a
+            href={hasStayDates ? "#rooms" : "#hotel-search-editor"}
+            className="btn btn-primary flex-1 justify-center text-center"
+          >
             <BedDouble className="mr-2 h-4 w-4" aria-hidden="true" />
-            Select a room
+            {hasStayDates ? "Select a room" : "Add dates"}
           </a>
         </div>
       </div>
