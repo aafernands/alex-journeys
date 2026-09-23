@@ -6,6 +6,7 @@ import {
   CloudRain,
   CloudSnow,
   CloudSun,
+  ExternalLink,
   Sun,
 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -104,9 +105,18 @@ export function DestinationClimate({ destinationName, climate }: Props) {
           >
             Weather in {destinationName}
           </h2>
-          <p className="mt-1 text-xs text-muted">
-            Typical monthly averages, not a live forecast
-          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+            <span>Typical monthly averages, not a live forecast</span>
+            <a
+              href={`https://www.google.com/search?q=${encodeURIComponent(`weather ${destinationName}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 font-semibold text-link transition hover:text-accent"
+            >
+              Live weather
+              <ExternalLink className="size-3" aria-hidden="true" />
+            </a>
+          </div>
         </div>
 
         <div
