@@ -23,6 +23,7 @@ type Props = {
   nextSort: number;
   onAddItem: (item: TripItem) => void;
   onRemember: () => void;
+  onClose: () => void;
 };
 
 const TYPE_LABEL = {
@@ -103,6 +104,7 @@ export function ForwardBookings({
   nextSort,
   onAddItem,
   onRemember,
+  onClose,
 }: Props) {
   const { status } = useSession();
   const [account, setAccount] = useState<InboundMailboxView | null>(null);
@@ -259,13 +261,25 @@ export function ForwardBookings({
           <NavIcon name="mail" size={16} />
         </span>
         <div className="min-w-0 flex-1 plan-stack-tight">
-          <h3 id={titleId} className={plan.h4}>
-            Import a booking
-          </h3>
-          <p className={`${plan.prose} text-muted`}>
-            Use your private trip address for confirmations from airlines, hotels, cars,
-            experiences, insurance, eSIMs, and other services booked elsewhere.
-          </p>
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h3 id={titleId} className={plan.h4}>
+                Import a booking
+              </h3>
+              <p className={`${plan.prose} mt-1 text-muted`}>
+                Use your private trip address for confirmations from airlines, hotels, cars,
+                experiences, insurance, eSIMs, and other services booked elsewhere.
+              </p>
+            </div>
+            <button
+              type="button"
+              className={`${plan.textBtn} shrink-0 text-muted hover:text-heading`}
+              onClick={onClose}
+              aria-label="Close booking import"
+            >
+              Close
+            </button>
+          </div>
 
           {status === "loading" || (status === "authenticated" && loading && !primary) ? (
             <p className={`${plan.caption} text-muted`} role="status">
