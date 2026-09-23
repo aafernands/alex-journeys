@@ -135,14 +135,10 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
       return;
     }
 
+    // A signed-in saved trip must always be refreshed from the account.
+    // Do not trust the browser's active-plan cache just because the trip id matches:
+    // it can contain stale destination/title data from an earlier edit.
     const current = getActivePlanSnapshot();
-    if (current?.tripId === urlTripId && current.step === 4) {
-      loadedUrlTrip.current = urlTripId;
-      applyPendingBookedStays(urlTripId);
-      applyPendingBookedFlights(urlTripId);
-      setRemote("ready");
-      return;
-    }
 
     let cancelled = false;
     setRemote("loading");
