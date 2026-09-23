@@ -60,15 +60,27 @@ export async function POST(request: Request) {
   if (!record) return NextResponse.json({ error: "Invalid hotel." }, { status: 400 });
 
   try {
-    const hotel = await addSavedHotel(gate.userId, {
-      hotelId: typeof record.hotelId === "string" ? record.hotelId : "",
-      name: typeof record.name === "string" ? record.name : "",
-      city: typeof record.city === "string" ? record.city : "",
-      neighborhood: typeof record.neighborhood === "string" ? record.neighborhood : "",
-      photo: typeof record.photo === "string" ? record.photo : "",
-      rating: typeof record.rating === "number" ? record.rating : null,
-      stars: typeof record.stars === "number" ? record.stars : null,
-    });
+    const hotel = await addSavedHotel(
+      gate.userId,
+      {
+        hotelId: typeof record.hotelId === "string" ? record.hotelId : "",
+        name: typeof record.name === "string" ? record.name : "",
+        city: typeof record.city === "string" ? record.city : "",
+        neighborhood: typeof record.neighborhood === "string" ? record.neighborhood : "",
+        photo: typeof record.photo === "string" ? record.photo : "",
+        rating: typeof record.rating === "number" ? record.rating : null,
+        stars: typeof record.stars === "number" ? record.stars : null,
+      },
+      {
+        destination: typeof record.destination === "string" ? record.destination : "",
+        startDate: typeof record.startDate === "string" ? record.startDate : "",
+        endDate: typeof record.endDate === "string" ? record.endDate : "",
+        adults: typeof record.adults === "number" ? record.adults : undefined,
+        children: typeof record.children === "number" ? record.children : undefined,
+        rooms: typeof record.rooms === "number" ? record.rooms : undefined,
+        tripId: typeof record.tripId === "string" ? record.tripId : "",
+      },
+    );
     return NextResponse.json({ ok: true, hotel });
   } catch (error) {
     if (error instanceof SavedHotelsUnavailableError) return unavailable();
