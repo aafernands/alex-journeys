@@ -25,8 +25,6 @@ export type PostMeta = {
   guideHubs?: string[];
   /** Optional booking actions rendered inside the post. */
   bookingTools?: PostBookingTool[];
-  /** Sanitized affiliate widget markup shown when Experiences is enabled. */
-  experienceWidgetHtml?: string;
 };
 
 /** Day-by-day trip timeline stored separately from contentHtml. */
@@ -63,6 +61,8 @@ export type PostSource =
 
 export type Post = PostMeta & {
   contentHtml: string;
+  /** Sanitized affiliate widget markup shown when Experiences is enabled. */
+  experienceWidgetHtml?: string;
   source: PostSource;
   /** Optional structured day-by-day timeline (not HTML in content). */
   itinerary?: PostItinerary;
