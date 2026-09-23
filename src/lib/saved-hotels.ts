@@ -133,9 +133,8 @@ function hotelHref(hotelId: string, destination: string, context: SaveHotelConte
   return `/stays/${hotelId}${params.size ? `?${params.toString()}` : ""}`;
 }
 
-function savedHotelFromDoc(doc: { id: string; data(): Record<string, any> }): SavedHotel {
-  const data = doc.data();
-  const hotelId = cleanHotelId(typeof data.hotelId === "string" ? data.hotelId : doc.id);
+function savedHotelFromData(id: string, data: Record<string, unknown>): SavedHotel {
+  const hotelId = cleanHotelId(typeof data.hotelId === "string" ? data.hotelId : id);
   const savedAt =
     typeof data.savedAt === "string"
       ? data.savedAt
@@ -162,7 +161,9 @@ function savedHotelFromDoc(doc: { id: string; data(): Record<string, any> }): Sa
 export async function listSavedHotels(userId: string): Promise<SavedHotel[]> {
   const uid = cleanUserId(userId);
   const snap = await collection(uid).orderBy("savedAt", "desc").get();
-  return snap.docs.map((doc) => savedHotelFromDoc(doc as never));
+  return snap.docs.map((doc) =>
+    savedHotelFromData(doc.id, doc.data() as Record<string, unknown>),
+  );
 }
 
 async function getSavedHotel(userId: string, hotelId: string): Promise<SavedHotel | null> {
@@ -170,7 +171,7 @@ async function getSavedHotel(userId: string, hotelId: string): Promise<SavedHote
   const id = cleanHotelId(hotelId);
   const doc = await collection(uid).doc(id).get();
   if (!doc.exists) return null;
-  return savedHotelFromDoc(doc as never);
+  return savedHotelFromData(doc.id, (doc.data() ?? {}) as Record<string, unknown>);
 }
 
 function buildDraftTrip(destination: string, context: SaveHotelContext, hotelName: string, href: string): TripWrite {
@@ -284,7 +285,17 @@ async function ensureTripForSavedHotel(
   const matching =
     trips.find((trip) =>
       trip.items.some((item) => item.type === "hotel" && item.url === input.href),
-    ) ?? trips.find((trip) => sameDestination(trip.destination, destination));
+    ) ??
+    trips.find(
+      (trip) =>
+        sameDestination(trip.destination, destination) &&
+        trip.items.some(
+          (item) =>
+            item.type === "hotel" &&
+            item.status === "todo" &&
+            item.notes.trim().toLowerCase() === "saved hotel",
+        ),
+    );
 
   if (matching) {
     const updated = await updateTrip(
@@ -349,6 +360,8 @@ export async function removeSavedHotel(userId: string, hotelId: string): Promise
         (item) =>
           !(
             item.type === "hotel" &&
+            item.status === "todo" &&
+            item.notes.trim().toLowerCase() === "saved hotel" &&
             (item.url === saved.href ||
               item.title.trim().toLowerCase() === saved.name.trim().toLowerCase())
           ),
