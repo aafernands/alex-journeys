@@ -211,7 +211,7 @@ function StepHeading({
 
 function PlannerShell() {
   return (
-    <section className="plan-trip plan-block max-w-3xl" aria-hidden="true">
+    <section className="plan-trip plan-trip-hotel plan-block max-w-6xl" aria-hidden="true">
       <div className="h-1 rounded-full bg-sand" />
       <div className={`${tripDensity.panel} plan-section h-48`} />
     </section>
@@ -391,7 +391,7 @@ export function TripPlanner({
   ) {
     const hasLocalDraft = Boolean(plan.state.destination.trim());
     return (
-      <section className="plan-trip plan-block max-w-3xl" aria-labelledby={`${baseId}-heading`}>
+      <section className="plan-trip plan-trip-hotel plan-block max-w-6xl" aria-labelledby={`${baseId}-heading`}>
         <div className={tripDensity.panel}>
           <h2
             id={`${baseId}-heading`}
@@ -426,7 +426,7 @@ export function TripPlanner({
 
   if (urlTripId && sync.signedIn && sync.remote === "missing") {
     return (
-      <section className="plan-trip plan-block max-w-3xl" aria-labelledby={`${baseId}-heading`}>
+      <section className="plan-trip plan-trip-hotel plan-block max-w-6xl" aria-labelledby={`${baseId}-heading`}>
         <div className={tripDensity.panel}>
           <h2
             id={`${baseId}-heading`}
@@ -453,7 +453,7 @@ export function TripPlanner({
     plan.tripId !== urlTripId
   ) {
     return (
-      <section className="plan-trip plan-block max-w-3xl" aria-labelledby={`${baseId}-heading`}>
+      <section className="plan-trip plan-trip-hotel plan-block max-w-6xl" aria-labelledby={`${baseId}-heading`}>
         <div className={tripDensity.panel}>
           <h2
             id={`${baseId}-heading`}
@@ -481,7 +481,7 @@ export function TripPlanner({
   }
 
   return (
-    <section aria-labelledby={`${baseId}-heading`} className="plan-trip plan-block max-w-3xl">
+    <section aria-labelledby={`${baseId}-heading`} className="plan-trip plan-trip-hotel plan-block max-w-6xl">
       {step < 4 ? (
         <div className="plan-desktop-only">
           <p className={`${tripDensity.caption} font-semibold text-muted`}>
