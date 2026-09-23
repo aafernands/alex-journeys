@@ -45,6 +45,7 @@ export const PAGE_DEFAULTS: Record<string, SitePage> = {
         title: "Prefer email?",
         body: "Reach me at {email}. I read every message — replies may take a few days if I’m mid-itinerary.",
       },
+      mailingAddress: "PO BOX 2101 · Ocean, NJ 07712 · USA",
     },
   },
   "start-here": {
