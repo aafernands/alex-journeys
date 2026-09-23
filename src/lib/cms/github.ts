@@ -276,6 +276,7 @@ export async function fetchDraftFromGithub(
     destinations: string[];
     guideHubs?: string[];
     bookingTools?: Post["bookingTools"];
+    experienceWidgetHtml?: Post["experienceWidgetHtml"];
     contentHtml: string;
     itinerary?: Post["itinerary"];
     source?: unknown;
@@ -474,6 +475,9 @@ export async function publishDraft(
       : {}),
     ...(validated.bookingTools.length > 0
       ? { bookingTools: validated.bookingTools }
+      : {}),
+    ...(validated.experienceWidgetHtml
+      ? { experienceWidgetHtml: validated.experienceWidgetHtml }
       : {}),
     contentHtml: validated.contentHtml,
     source: "cms" as const,
