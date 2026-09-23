@@ -19,6 +19,7 @@ import { staysPath } from "@/lib/stays";
 import type { PostBookingTool } from "@/lib/post-types";
 import { PostHotelSuggestion } from "@/components/blog/PostHotelSuggestion";
 import { PostExperienceAffiliateWidget } from "@/components/blog/PostExperienceAffiliateWidget";
+import { PostFlightSuggestions } from "@/components/blog/PostFlightSuggestions";
 
 type Props = {
   tools: PostBookingTool[];
@@ -89,7 +90,6 @@ export function PostBookingBox({
   tools,
   destination,
   placeLabel,
-  countryName,
   image,
   imageAlt,
   experienceWidgetHtml = "",
@@ -153,9 +153,19 @@ export function PostBookingBox({
               );
             }
 
+            if (tool === "flight") {
+              return (
+                <PostFlightSuggestions
+                  key={tool}
+                  destination={destination}
+                  placeLabel={placeLabel}
+                />
+              );
+            }
+
             const meta = TOOL_META[tool];
             const Icon = meta.icon;
-            const toolPlace = tool === "flight" ? countryName || placeLabel : placeLabel;
+            const toolPlace = placeLabel;
             return (
               <section key={tool} className="p-5 sm:p-6">
                 <div className="flex items-start gap-4">
