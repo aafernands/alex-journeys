@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BedDouble, CalendarDays, Plane } from "lucide-react";
 import { notFound } from "next/navigation";
 import { PostCard } from "@/components/blog/PostCard";
 import { destinationCity, getAllDestinations } from "@/data/destinations";
@@ -179,6 +180,7 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
       narrow={false}
       compact={isPlanner}
       planFlow={isPlanner}
+      hideHeader={isPlanner}
       tone={isPlanner ? "default" : "white"}
       crumbs={[
         { href: "/", label: "Home" },
@@ -187,23 +189,95 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
       ]}
     >
       {plannerConfig ? (
-        <div className="plan-hotel-intro">
-          <p className="eyebrow">Build the trip in one place</p>
-          <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="font-display text-2xl font-bold text-heading sm:text-3xl">
-                Plan, book, and keep everything together
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-                Choose the basics first. Your flights, stay, bookings, day-by-day plan, and notes stay connected to the same itinerary.
-              </p>
+        <div className="plan-hotel-page">
+          <nav aria-label="Planner navigation" className="mb-4 text-sm text-muted">
+            <Link href="/guides" className="text-link transition hover:text-accent">
+              ← Back to guides
+            </Link>
+          </nav>
+
+          <section id="overview" className="border-b border-border pb-8 sm:pb-10">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+              <div>
+                <p className="eyebrow">Trip planner</p>
+                <h1 className="mt-2 font-display text-3xl font-bold leading-tight text-heading sm:text-4xl lg:text-5xl">
+                  {plannerConfig.title}
+                </h1>
+                <p className="mt-4 max-w-3xl text-base leading-7 text-text sm:text-lg">
+                  {plannerConfig.intro}
+                </p>
+              </div>
+              <a href="#planner" className="btn btn-primary hidden lg:inline-flex">
+                Start planning
+              </a>
             </div>
-          </div>
+
+            <div className="mt-8 grid gap-5 md:grid-cols-3">
+              <div className="flex gap-4">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-surface text-heading">
+                  <Plane className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-heading">Flights</h2>
+                  <p className="mt-1 text-sm leading-relaxed text-muted">
+                    Compare routes and keep your flight search connected to the same trip.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-surface text-heading">
+                  <BedDouble className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-heading">Stays</h2>
+                  <p className="mt-1 text-sm leading-relaxed text-muted">
+                    Search hotels, compare rooms, and return to your itinerary without starting over.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-surface text-heading">
+                  <CalendarDays className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-heading">Itinerary</h2>
+                  <p className="mt-1 text-sm leading-relaxed text-muted">
+                    Keep bookings, notes, and the day-by-day plan together in one place.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <nav
+            aria-label="Plan a trip sections"
+            className="sticky top-0 z-20 -mx-5 flex gap-1 overflow-x-auto border-b border-border bg-bg/95 px-5 py-2 backdrop-blur sm:static sm:mx-0 sm:bg-transparent sm:px-0"
+          >
+            <a href="#overview" className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-heading hover:bg-surface">
+              Overview
+            </a>
+            <a href="#planner" className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-heading hover:bg-surface">
+              Planner
+            </a>
+            <a href="#travel-notes" className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-heading hover:bg-surface">
+              Travel notes
+            </a>
+          </nav>
         </div>
       ) : null}
 
       {plannerConfig ? (
-        <TripPlanner
+        <section id="planner" className="scroll-mt-28 plan-hotel-planner-section">
+          <div className="mb-6 border-b border-border pb-6 sm:mb-8 sm:pb-8">
+            <p className="eyebrow">Build your trip</p>
+            <h2 className="mt-2 font-display text-2xl font-bold text-heading sm:text-3xl">
+              Start with the basics
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+              Choose what you need first. You can add flights, stays, bookings, and itinerary details as you go.
+            </p>
+          </div>
+          <TripPlanner
           config={plannerConfig}
           partners={plannerPartners}
           urlTripId={rawTrip?.trim() || null}
@@ -225,10 +299,11 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
             city: destinationCity(dest),
           }))}
         />
+        </section>
       ) : null}
 
       {plannerConfig ? (
-        <div className="mt-14 hidden border-t border-border pt-10 sm:block">
+        <div id="travel-notes" className="mt-14 hidden scroll-mt-28 border-t border-border pt-10 sm:block">
           <p className="eyebrow">{plannerConfig.guidesEyebrow}</p>
           <h2 className="font-display mt-2 text-3xl font-bold tracking-tight text-heading md:text-4xl">
             {plannerConfig.guidesHeading}
