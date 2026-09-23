@@ -8,6 +8,7 @@ import {
 } from "@/components/account/AccountDashboard";
 import { type AccountTripRow } from "@/components/account/MyTripsList";
 import { type SavedPostRow } from "@/components/SavedPostsList";
+import { type SavedHotelRow } from "@/components/account/SavedHotelsList";
 import { isEmailConfigured } from "@/lib/email";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
 import { getPostBySlug } from "@/lib/posts";
@@ -19,6 +20,10 @@ import {
   listSavedPosts,
   SavedPostsUnavailableError,
 } from "@/lib/saved-posts";
+import {
+  listSavedHotels,
+  SavedHotelsUnavailableError,
+} from "@/lib/saved-hotels";
 import { dateSummary } from "@/lib/trip-planner-model";
 import { getTripPlannerConfig } from "@/lib/trip-planner";
 import {
@@ -63,6 +68,8 @@ export default async function AccountPage() {
 
   let posts: SavedPostRow[] = [];
   let postsError: string | null = null;
+  let hotels: SavedHotelRow[] = [];
+  let hotelsError: string | null = null;
   let firebaseOk = isFirebaseConfigured();
   let hasPassword = false;
   let profileLoaded = false;
@@ -108,6 +115,33 @@ export default async function AccountPage() {
     }
   }
 
+  if (signedIn && userId) {
+    if (!firebaseOk) {
+      hotelsError = "Saved hotels aren’t available right now.";
+    } else {
+      try {
+        hotels = (await listSavedHotels(userId)).map((hotel) => ({
+          hotelId: hotel.hotelId,
+          name: hotel.name,
+          city: hotel.city,
+          neighborhood: hotel.neighborhood,
+          photo: hotel.photo,
+          rating: hotel.rating,
+          stars: hotel.stars,
+          savedAt: hotel.savedAt,
+          href: hotel.href,
+        }));
+      } catch (err) {
+        if (err instanceof SavedHotelsUnavailableError) {
+          hotelsError = "Saved hotels are temporarily unavailable. Try again later.";
+        } else {
+          console.error("[account] list saved hotels failed:", err);
+          hotelsError = "Could not load your saved hotels. Try again in a moment.";
+        }
+      }
+    }
+  }
+
   let trips: AccountTripRow[] = [];
   let tripsError: string | null = null;
   if (signedIn && userId) {
@@ -146,6 +180,8 @@ export default async function AccountPage() {
     tripsError,
     posts,
     postsError,
+    hotels,
+    hotelsError,
   };
 
   return (
@@ -159,8 +195,8 @@ export default async function AccountPage() {
             </h1>
             <p className="mt-3 max-w-xl text-sm text-muted md:text-base">
               {signedIn
-                ? "Trips you’re planning, stories you saved, and the details of your account."
-                : "Sign in to keep trip plans and saved stories with you on any device."}
+                ? "Trips you’re planning, favorite hotels, saved stories, and your account details."
+                : "Sign in to keep trip plans, favorite hotels, and saved stories with you on any device."}
             </p>
           </div>
         </div>
