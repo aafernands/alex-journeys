@@ -1148,6 +1148,30 @@ export function ItineraryHub({
         </section>
       ) : null}
 
+      <section className={`${plan.soft} plan-section plan-stack-tight`} aria-label="Email booking confirmations">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className={plan.label}>Booked somewhere else?</p>
+            <h3 className={plan.h3}>Email the confirmation to your itinerary</h3>
+            <p className={`${plan.prose} mt-1 text-muted`}>
+              Forward airline, hotel, car, or experience confirmations and review them before adding anything.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-secondary shrink-0"
+            onClick={() => {
+              setLanePin(OUTSIDE_TAB);
+              window.requestAnimationFrame(() => {
+                document.querySelector(".plan-hub-lanes")?.scrollIntoView({ block: "start" });
+              });
+            }}
+          >
+            Email a booking
+          </button>
+        </div>
+      </section>
+
       {guestBackup ? (
         <aside className={`plan-hub-draft ${plan.soft} plan-section plan-stack-tight`} aria-label="Browser draft">
           <p className={`${plan.prose} text-text`}>
@@ -1199,7 +1223,7 @@ export function ItineraryHub({
               onClick={() => setLanePin(OUTSIDE_TAB)}
               onKeyDown={(event) => onLaneTabKeyDown(event, OUTSIDE_TAB)}
             >
-              <span className="plan-lane-tab-label">Booked elsewhere</span>
+              <span className="plan-lane-tab-label">Email bookings</span>
             </button>
           </div>
         </div>
