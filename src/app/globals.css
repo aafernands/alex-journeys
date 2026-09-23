@@ -2324,3 +2324,136 @@ body.mobile-bottom-nav-visible .plan-sticky {
     bottom: auto;
   }
 }
+
+
+/* Plan a Trip — premium hotel-detail visual language */
+.plan-hotel-intro {
+  margin-top: 1.5rem;
+  max-width: 72rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1.5rem;
+}
+
+.plan-trip-hotel {
+  width: 100%;
+}
+
+.plan-trip-hotel > .plan-panel {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--white);
+  box-shadow: 0 8px 24px rgba(20, 17, 13, 0.06);
+}
+
+.plan-trip-hotel .plan-h2 {
+  font-size: clamp(1.55rem, 2.4vw, 2.25rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+
+.plan-trip-hotel .plan-h3 {
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.plan-trip-hotel .plan-form,
+.plan-trip-hotel .plan-group,
+.plan-trip-hotel .plan-pair {
+  gap: 1rem;
+}
+
+.plan-trip-hotel .plan-control {
+  border-radius: 0.8rem;
+  background: var(--white);
+}
+
+.plan-trip-hotel .plan-chip {
+  border-radius: 999px;
+  padding-inline: 0.95rem;
+}
+
+.plan-trip-hotel .plan-hub {
+  max-width: 72rem;
+}
+
+.plan-trip-hotel .plan-hub-lead {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1.25rem;
+}
+
+.plan-trip-hotel .plan-hub-lanes {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1.5rem;
+}
+
+.plan-trip-hotel .plan-lane-tabs-bar {
+  border-bottom: 0;
+}
+
+.plan-trip-hotel .plan-lane-tab {
+  border-radius: 0.9rem;
+  background: var(--white);
+}
+
+.plan-trip-hotel .plan-lane-panel:not([hidden]) {
+  margin-top: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--white);
+  padding: 1rem;
+  box-shadow: 0 6px 20px rgba(20, 17, 13, 0.04);
+}
+
+.plan-trip-hotel .plan-fold {
+  border-top: 1px solid var(--border);
+  border-bottom: 0;
+}
+
+.plan-trip-hotel .plan-fold-toggle {
+  min-height: 3.5rem;
+  padding-block: 0.9rem;
+}
+
+.plan-trip-hotel .plan-day-card {
+  border-radius: 0.85rem;
+}
+
+@media (max-width: 639px) {
+  .plan-hotel-intro {
+    margin-top: 0.75rem;
+    padding-bottom: 1rem;
+  }
+
+  .plan-trip-hotel {
+    padding-bottom: calc(6rem + var(--mobile-nav-bar) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .plan-trip-hotel > .plan-panel {
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--white);
+    padding: 1rem;
+    box-shadow: 0 6px 20px rgba(20, 17, 13, 0.05);
+  }
+
+  .plan-trip-hotel .plan-hub-lanes {
+    margin-top: 1rem;
+  }
+
+  .plan-trip-hotel .plan-lane-tabs {
+    gap: 0.6rem;
+    padding-bottom: 0.4rem;
+  }
+
+  .plan-trip-hotel .plan-lane-tab {
+    min-width: 7.25rem;
+    min-height: 4.25rem;
+    border-radius: 0.9rem;
+  }
+
+  .plan-trip-hotel .plan-lane-panel:not([hidden]) {
+    margin-top: 0.5rem;
+    border-radius: 0.9rem;
+    padding: 0.9rem;
+  }
+}
