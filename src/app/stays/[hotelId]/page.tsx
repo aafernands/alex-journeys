@@ -16,7 +16,7 @@ import {
   staysPath,
   staysQueryIssue,
 } from "@/lib/stays";
-import { loadStayHotel, loadStayHotelPreview } from "@/lib/stays-service";
+import { loadStayHotel } from "@/lib/stays-service";
 
 type PageProps = {
   params: Promise<{ hotelId: string }>;
@@ -95,9 +95,7 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
   let failure = "";
   let loaded: Awaited<ReturnType<typeof loadStayHotel>> | null = null;
   try {
-    loaded = previewWithoutDates
-      ? await loadStayHotelPreview(hotelId)
-      : await loadStayHotel(hotelId, query);
+    loaded = await loadStayHotel(hotelId, query);
   } catch (error) {
     failure =
       error instanceof LiteApiError
