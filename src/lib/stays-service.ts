@@ -211,10 +211,7 @@ async function postRates(query: StaysQuery, extra: Record<string, unknown>): Pro
 
 export async function searchStays(query: StaysQuery): Promise<StaySearchResult> {
   const issue = staysQueryIssue(query);
-  const previewWithoutDates = issue === "Add check-in and check-out.";
-  if (issue && !previewWithoutDates) {
-    throw new LiteApiError(issue, 400, "bad_request");
-  }
+  if (issue) throw new LiteApiError(issue, 400, "bad_request");
   const info = liteApiKeyInfo();
   if (!info) {
     throw new LiteApiError("Stays aren’t configured.", 503, "not_configured");
@@ -252,7 +249,10 @@ export async function loadStayHotel(
     throw new LiteApiError("That hotel link is not valid.", 400, "bad_request");
   }
   const issue = staysQueryIssue(query);
-  if (issue) throw new LiteApiError(issue, 400, "bad_request");
+  const previewWithoutDates = issue === "Add check-in and check-out.";
+  if (issue && !previewWithoutDates) {
+    throw new LiteApiError(issue, 400, "bad_request");
+  }
   const info = liteApiKeyInfo();
   if (!info) {
     throw new LiteApiError("Stays aren’t configured.", 503, "not_configured");
