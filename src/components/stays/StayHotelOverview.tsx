@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import {
   Accessibility,
@@ -30,7 +31,9 @@ type Props = {
   hotel: StayHotelContent;
   reviews: StayReviewSummary;
   rooms: StayRoomOffer[];
-  children: React.ReactNode;
+  children: ReactNode;
+  tripBar?: ReactNode;
+  failure?: string;
   listHref: string;
   sandbox: boolean;
 };
@@ -119,6 +122,8 @@ export function StayHotelOverview({
   reviews,
   rooms,
   children,
+  tripBar,
+  failure,
   listHref,
   sandbox,
 }: Props) {
@@ -136,6 +141,12 @@ export function StayHotelOverview({
   return (
     <main className="bg-bg pb-28 md:pb-16">
       <div className="section-shell pt-4 sm:pt-6">
+        {tripBar ? <div className="mb-5">{tripBar}</div> : null}
+        {failure ? (
+          <p className="mb-4 text-sm font-semibold text-link" role="alert">
+            {failure}
+          </p>
+        ) : null}
         <nav aria-label="Breadcrumb" className="mb-4 text-sm text-muted">
           <Link href={listHref} className="text-link transition hover:text-accent">
             ← Back to stays
