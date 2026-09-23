@@ -146,36 +146,6 @@ async function putFile(
   return { commitUrl };
 }
 
-async function putBinaryFile(
-  path: string,
-  base64Content: string,
-  message: string,
-  sha?: string | null,
-): Promise<{ commitUrl: string }> {
-  const body: Record<string, string> = {
-    message,
-    content: base64Content.replace(/\s/g, ""),
-    branch: getBranch(),
-  };
-  if (sha) body.sha = sha;
-
-  const res = await ghFetch(path, {
-    method: "PUT",
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`GitHub PUT ${path} failed (${res.status}): ${text.slice(0, 300)}`);
-  }
-  const data = (await res.json()) as GhPutResponse;
-  const commitUrl =
-    data.commit?.html_url ||
-    data.content?.html_url ||
-    `https://github.com/${getRepo()}/blob/${getBranch()}/${path}`;
-  return { commitUrl };
-}
-
-
 type PostsIndex = {
   migratedAt?: string;
   source?: string;
@@ -355,27 +325,30 @@ export async function updateAuthorPhoto(options: {
   const updatedAt = new Date().toISOString();
 
   const existingImageSha = await getFileSha(imagePath);
-  const imageResult = await putBinaryFile(
-    imagePath,
-    base64,
-    `cms: update author photo (${mapping.basename})`,
-    existingImageSha,
-  );
-
   const meta = {
     src,
     updatedAt,
   };
   const existingMetaSha = await getFileSha(AUTHOR_PHOTO_META_PATH);
-  const metaResult = await putFile(
-    AUTHOR_PHOTO_META_PATH,
-    `${JSON.stringify(meta, null, 2)}\n`,
-    `cms: update author photo meta`,
-    existingMetaSha,
+  const result = await commitFilesAtomically(
+    [
+      {
+        path: imagePath,
+        content: base64,
+        encoding: "base64",
+        expectedSha: existingImageSha,
+      },
+      {
+        path: AUTHOR_PHOTO_META_PATH,
+        content: `${JSON.stringify(meta, null, 2)}\n`,
+        expectedSha: existingMetaSha,
+      },
+    ],
+    `cms: update author photo (${mapping.basename})`,
   );
 
   return {
-    commitUrl: metaResult.commitUrl || imageResult.commitUrl,
+    commitUrl: result.commitUrl,
     src: `${src}?v=${encodeURIComponent(updatedAt)}`,
   };
 }
@@ -678,45 +651,6 @@ type DesignImageUpload = {
   filename?: string;
 };
 
-async function commitBrandLogoUpload(
-  upload: DesignImageUpload,
-  slot: "logoOnLight" | "logoOnDark",
-): Promise<{ publicUrl: string; commitUrl: string }> {
-  const contentType = (
-    upload.contentType.trim().toLowerCase().split(";")[0] || ""
-  ).trim();
-  const ext = MEDIA_UPLOAD_TYPES[contentType];
-  if (!ext) {
-    throw new Error(
-      "Unsupported image type. Use JPEG, PNG, WebP, or GIF.",
-    );
-  }
-  const base64 = upload.base64.replace(/\s/g, "");
-  if (!base64) throw new Error("Empty image data.");
-  const decodedBytes = Buffer.from(base64, "base64");
-  if (decodedBytes.length === 0) {
-    throw new Error("Could not decode image data.");
-  }
-  if (decodedBytes.length > MAX_MEDIA_UPLOAD_BYTES) {
-    throw new Error(
-      `Image too large (${(decodedBytes.length / (1024 * 1024)).toFixed(1)}MB). Max is about ${MAX_MEDIA_UPLOAD_LABEL}.`,
-    );
-  }
-
-  const basename =
-    slot === "logoOnLight" ? `logo-on-light${ext}` : `logo-on-dark${ext}`;
-  const imagePath = `${AUTHOR_PHOTO_DIR}/${basename}`;
-  const publicUrl = `/brand/${basename}`;
-  const existingSha = await getFileSha(imagePath);
-  const imageResult = await putBinaryFile(
-    imagePath,
-    base64,
-    `cms: update brand ${slot} (${basename})`,
-    existingSha,
-  );
-  return { publicUrl, commitUrl: imageResult.commitUrl };
-}
-
 export async function updateSiteDesign(options: {
   design: SiteDesign;
   /** Optional new hero image upload (base64, no data: prefix) */
@@ -727,38 +661,44 @@ export async function updateSiteDesign(options: {
   logoOnDarkUpload?: DesignImageUpload;
 }): Promise<{ commitUrl: string; design: SiteDesign }> {
   let design = options.design;
-  let imageCommitUrl = "";
+  const files: AtomicFile[] = [];
+  const updatedAt = new Date().toISOString();
 
-  if (options.logoOnLightUpload) {
-    const result = await commitBrandLogoUpload(
-      options.logoOnLightUpload,
-      "logoOnLight",
-    );
-    imageCommitUrl = result.commitUrl || imageCommitUrl;
+  const addBrandUpload = async (
+    upload: DesignImageUpload,
+    slot: "logoOnLight" | "logoOnDark",
+  ) => {
+    const contentType = upload.contentType.trim().toLowerCase().split(";")[0] || "";
+    const ext = MEDIA_UPLOAD_TYPES[contentType];
+    if (!ext) throw new Error("Unsupported image type. Use JPEG, PNG, WebP, or GIF.");
+    const base64 = upload.base64.replace(/\s/g, "");
+    const decodedBytes = Buffer.from(base64, "base64");
+    if (!base64 || decodedBytes.length === 0) throw new Error("Could not decode image data.");
+    if (decodedBytes.length > MAX_MEDIA_UPLOAD_BYTES) {
+      throw new Error(
+        `Image too large (${(decodedBytes.length / (1024 * 1024)).toFixed(1)}MB). Max is about ${MAX_MEDIA_UPLOAD_LABEL}.`,
+      );
+    }
+    const basename = slot === "logoOnLight" ? `logo-on-light${ext}` : `logo-on-dark${ext}`;
+    const imagePath = `${AUTHOR_PHOTO_DIR}/${basename}`;
+    files.push({
+      path: imagePath,
+      content: base64,
+      encoding: "base64",
+      expectedSha: await getFileSha(imagePath),
+    });
     design = {
       ...design,
-      branding: {
-        ...design.branding,
-        logoOnLight: result.publicUrl,
-      },
-      updatedAt: new Date().toISOString(),
+      branding: { ...design.branding, [slot]: `/brand/${basename}` },
     };
+  };
+
+  if (options.logoOnLightUpload) {
+    await addBrandUpload(options.logoOnLightUpload, "logoOnLight");
   }
 
   if (options.logoOnDarkUpload) {
-    const result = await commitBrandLogoUpload(
-      options.logoOnDarkUpload,
-      "logoOnDark",
-    );
-    imageCommitUrl = result.commitUrl || imageCommitUrl;
-    design = {
-      ...design,
-      branding: {
-        ...design.branding,
-        logoOnDark: result.publicUrl,
-      },
-      updatedAt: new Date().toISOString(),
-    };
+    await addBrandUpload(options.logoOnDarkUpload, "logoOnDark");
   }
 
   if (options.imageUpload) {
@@ -794,23 +734,37 @@ export async function updateSiteDesign(options: {
     const imagePath = `${MEDIA_UPLOAD_DIR}/${filename}`;
     const publicUrl = `/media/${filename}`;
 
-    const imageResult = await putBinaryFile(
-      imagePath,
-      base64,
-      `cms: upload hero image ${filename}`,
-      null,
-    );
-    imageCommitUrl = imageResult.commitUrl;
+    files.push({
+      path: imagePath,
+      content: base64,
+      encoding: "base64",
+      expectedSha: null,
+    });
 
-    // Best-effort: index in media library (ignore failures so design still saves)
-    try {
-      await addMediaByUrl({
-        url: publicUrl,
-        alt: design.hero.imageAlt || "Homepage hero",
-      });
-    } catch {
-      // non-fatal
-    }
+    const media = await readMediaIndexFromGithub();
+    const item: MediaItem = {
+      id: ensureUniqueMediaId(
+        mediaIdFromUrl(publicUrl),
+        new Set(media.data.items.map((entry) => entry.id)),
+        publicUrl,
+      ),
+      slug: mediaIdFromUrl(publicUrl),
+      url: publicUrl,
+      alt: design.hero.imageAlt || "Homepage hero",
+      source: "upload",
+      usedBy: [],
+      createdAt: new Date().toISOString(),
+    };
+    files.push({
+      path: MEDIA_INDEX_PATH,
+      content: `${JSON.stringify({
+        ...media.data,
+        updatedAt: new Date().toISOString(),
+        count: media.data.items.length + 1,
+        items: [item, ...media.data.items],
+      }, null, 2)}\n`,
+      expectedSha: media.sha,
+    });
 
     design = {
       ...design,
@@ -818,20 +772,23 @@ export async function updateSiteDesign(options: {
         ...design.hero,
         image: publicUrl,
       },
-      updatedAt: new Date().toISOString(),
     };
   }
 
   const existingSha = await getFileSha(SITE_DESIGN_PATH);
-  const metaResult = await putFile(
-    SITE_DESIGN_PATH,
-    `${JSON.stringify(design, null, 2)}\n`,
+  design = { ...design, updatedAt };
+  files.push({
+    path: SITE_DESIGN_PATH,
+    content: `${JSON.stringify(design, null, 2)}\n`,
+    expectedSha: existingSha,
+  });
+  const result = await commitFilesAtomically(
+    files,
     "cms: update site design",
-    existingSha,
   );
 
   return {
-    commitUrl: metaResult.commitUrl || imageCommitUrl,
+    commitUrl: result.commitUrl,
     design,
   };
 }

@@ -121,3 +121,76 @@ test("atomic GitHub commit surfaces blob and ref failures without partial succes
     /create blob a\.json failed/,
   );
 });
+
+test("atomic GitHub commit stops before tree creation when a later metadata blob fails", async () => {
+  const requests = [];
+  setupGithubFetch([
+    response({ object: { sha: "head" } }),
+    response({ tree: { sha: "tree" } }),
+    response({ tree: [{ path: "meta.json", type: "blob", sha: "old-meta" }] }),
+    async () => {
+      requests.push("image-blob");
+      return response({ sha: "new-image" });
+    },
+    async () => {
+      requests.push("metadata-blob");
+      return response({ message: "metadata failed" }, 500);
+    },
+  ]);
+
+  await assert.rejects(
+    commitFilesAtomically(
+      [
+        { path: "image.png", content: "image", expectedSha: null },
+        { path: "meta.json", content: "{}", expectedSha: "old-meta" },
+      ],
+      "test metadata failure",
+    ),
+    /create blob meta\.json failed/,
+  );
+  assert.deepEqual(requests, ["image-blob", "metadata-blob"]);
+});
+
+test("atomic GitHub commit can retry successfully after a stale conflict", async () => {
+  setupGithubFetch([
+    response({ object: { sha: "head" } }),
+    response({ tree: { sha: "tree" } }),
+    response({ tree: [{ path: "meta.json", type: "blob", sha: "new-meta" }] }),
+  ]);
+  await assert.rejects(
+    commitFilesAtomically(
+      [{ path: "meta.json", content: "{}", expectedSha: "old-meta" }],
+      "stale attempt",
+    ),
+    /changed; reload and retry/,
+  );
+
+  const requests = [];
+  setupGithubFetch([
+    response({ object: { sha: "head-2" } }),
+    response({ tree: { sha: "tree-2" } }),
+    response({ tree: [{ path: "meta.json", type: "blob", sha: "new-meta" }] }),
+    async () => {
+      requests.push("blob");
+      return response({ sha: "retry-blob" });
+    },
+    async () => {
+      requests.push("tree");
+      return response({ sha: "retry-tree" });
+    },
+    async () => {
+      requests.push("commit");
+      return response({ sha: "retry-commit" });
+    },
+    async () => {
+      requests.push("ref");
+      return response({});
+    },
+  ]);
+  const result = await commitFilesAtomically(
+    [{ path: "meta.json", content: "retry", expectedSha: "new-meta" }],
+    "retry after conflict",
+  );
+  assert.equal(result.commitSha, "retry-commit");
+  assert.deepEqual(requests, ["blob", "tree", "commit", "ref"]);
+});
