@@ -704,6 +704,11 @@ function LaneCta({
   );
 }
 
+function destinationHeroUrl(destination: string): string {
+  const place = destination.split(",")[0]?.trim() || destination.trim() || "travel";
+  return `https://source.unsplash.com/1600x900/?${encodeURIComponent(place)},travel,city`;
+}
+
 export function ItineraryHub({
   headingId,
   config,
@@ -930,21 +935,37 @@ export function ItineraryHub({
   return (
     <div className="plan-hub">
       <div className="plan-hub-lead plan-stack-tight">
-        <p className={`${plan.caption} font-semibold text-muted plan-desktop-only`}>Itinerary</p>
-        <h2 id={headingId} className={plan.h2}>
-          {tripTitle?.trim() || state.destination.trim() || config.steps.next.heading}
-        </h2>
-        {tripTitle?.trim() ? (
-          <p className={`${plan.caption} text-muted`}>{state.destination.trim()}</p>
-        ) : null}
-        <p className={`${plan.caption} text-muted`}>
-          {[dates, travelers].filter(Boolean).join(" · ")}
-          {partners.length > 0
-            ? stillOpen > 0
-              ? ` · ${stillOpen} still to book`
-              : " · All booked"
-            : ""}
-        </p>
+        <div
+          className="plan-trip-hero"
+          style={{ backgroundImage: `url("${destinationHeroUrl(state.destination)}")` }}
+        >
+          <div className="plan-trip-hero-shade" aria-hidden="true" />
+          <div className="plan-trip-hero-content">
+            <p className="plan-trip-hero-kicker">Your trip</p>
+            <h2 id={headingId} className="plan-trip-hero-title">
+              {tripTitle?.trim() || state.destination.trim() || config.steps.next.heading}
+            </h2>
+            {tripTitle?.trim() && state.destination.trim() ? (
+              <p className="plan-trip-hero-place">{state.destination.trim()}</p>
+            ) : null}
+            <p className="plan-trip-hero-meta">
+              {[dates, travelers].filter(Boolean).join(" · ")}
+              {partners.length > 0
+                ? stillOpen > 0
+                  ? ` · ${stillOpen} still to book`
+                  : " · All booked"
+                : ""}
+            </p>
+          </div>
+          <a
+            href="https://unsplash.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="plan-trip-hero-credit"
+          >
+            Unsplash
+          </a>
+        </div>
         <p className={`${plan.prose} text-muted plan-desktop-only`}>{subhead}</p>
         <div className="plan-inline-actions plan-hub-actions">
           <button
@@ -1132,10 +1153,7 @@ export function ItineraryHub({
                   onKeyDown={(event) => onLaneTabKeyDown(event, partner.key)}
                 >
                   <span className="plan-lane-tab-label">{laneName(partner)}</span>
-                  <span className="plan-lane-tab-cue">
-                    <span className={`plan-lane-dot plan-lane-dot-${progress}`} aria-hidden="true" />
-                    <span className="plan-lane-tab-meta">{laneTabCue(laneItems, isNext)}</span>
-                  </span>
+                  <span className="plan-lane-tab-meta">{laneTabCue(laneItems, isNext)}</span>
                 </button>
               );
             })}
