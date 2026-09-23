@@ -18,6 +18,7 @@ import { flightsPath } from "@/lib/flights";
 import { staysPath } from "@/lib/stays";
 import type { PostBookingTool } from "@/lib/post-types";
 import { PostHotelSuggestion } from "@/components/blog/PostHotelSuggestion";
+import { PostExperienceAffiliateWidget } from "@/components/blog/PostExperienceAffiliateWidget";
 
 type Props = {
   tools: PostBookingTool[];
@@ -26,6 +27,7 @@ type Props = {
   countryName: string;
   image?: string;
   imageAlt?: string;
+  experienceWidgetHtml?: string;
 };
 
 const TOOL_META = {
@@ -90,6 +92,7 @@ export function PostBookingBox({
   countryName,
   image,
   imageAlt,
+  experienceWidgetHtml = "",
 }: Props) {
   if (tools.length === 0 || !destination.trim()) return null;
 
@@ -131,6 +134,16 @@ export function PostBookingBox({
                 <PostHotelSuggestion
                   key={tool}
                   destination={destination}
+                  placeLabel={placeLabel}
+                />
+              );
+            }
+
+            if (tool === "experience" && experienceWidgetHtml.trim()) {
+              return (
+                <PostExperienceAffiliateWidget
+                  key={tool}
+                  html={experienceWidgetHtml}
                   placeLabel={placeLabel}
                 />
               );

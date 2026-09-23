@@ -61,6 +61,8 @@ export type PostSource =
 
 export type Post = PostMeta & {
   contentHtml: string;
+  /** Sanitized affiliate widget markup shown when Experiences is enabled. */
+  experienceWidgetHtml?: string;
   source: PostSource;
   /** Optional structured day-by-day timeline (not HTML in content). */
   itinerary?: PostItinerary;

@@ -36,6 +36,7 @@ export type PostFormInitial = {
   destinations: string[];
   guideHubs?: string[];
   bookingTools?: PostBookingTool[];
+  experienceWidgetHtml?: string;
   itinerary?: PostItinerary;
 };
 
@@ -102,6 +103,9 @@ export function PostForm({
   );
   const [selectedBookingTools, setSelectedBookingTools] = useState<PostBookingTool[]>(
     initial?.bookingTools ?? [],
+  );
+  const [experienceWidgetHtml, setExperienceWidgetHtml] = useState(
+    initial?.experienceWidgetHtml ?? "",
   );
   const [itinerary, setItinerary] = useState<PostItinerary>(() =>
     itineraryFromInitial(initial?.itinerary),
@@ -174,6 +178,7 @@ export function PostForm({
             destinations: selectedDestinations,
             guideHubs: selectedGuideHubs,
             bookingTools: selectedBookingTools,
+            experienceWidgetHtml,
             itinerary: itinerary.enabled ? itinerary : { enabled: false },
             update: mode === "edit" && !isDraft && !asDraft,
             draft: asDraft,
@@ -213,6 +218,7 @@ export function PostForm({
       contentHtml,
       date,
       excerpt,
+      experienceWidgetHtml,
       featuredImageAlt,
       featuredImageUrl,
       finalSlug,
@@ -512,6 +518,38 @@ export function PostForm({
               <p className="mt-2 text-xs font-semibold text-link">
                 Select a destination above before publishing so the booking links can be prefilled.
               </p>
+            ) : null}
+
+            {selectedBookingTools.includes("experience") ? (
+              <div className="mt-4 rounded-lg border border-border bg-surface-soft p-4">
+                <label
+                  htmlFor="cms-experience-widget-html"
+                  className="text-sm font-semibold text-heading"
+                >
+                  Experiences affiliate widget HTML
+                </label>
+                <p className="mt-1 text-xs leading-relaxed text-muted">
+                  Paste the affiliate widget embed code here. Viator widget markup is supported.
+                  Script tags are removed for security; Fernandes Journeys loads the approved
+                  Viator widget script itself.
+                </p>
+                <textarea
+                  id="cms-experience-widget-html"
+                  value={experienceWidgetHtml}
+                  onChange={(e) => {
+                    setExperienceWidgetHtml(e.target.value);
+                    markDirty();
+                  }}
+                  rows={8}
+                  maxLength={20000}
+                  spellCheck={false}
+                  placeholder={'<div class="viator-widget" data-vi-partner-id="..." data-vi-widget-ref="..."></div>'}
+                  className={areaClass + " font-mono text-xs"}
+                />
+                <p className="mt-2 text-xs text-muted">
+                  Leave this blank to use the normal Experiences card instead.
+                </p>
+              </div>
             ) : null}
           </fieldset>
 

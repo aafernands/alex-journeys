@@ -261,6 +261,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
               countryName={primaryDestination!.name}
               image={primaryDestination!.image}
               imageAlt={primaryDestination!.imageAlt}
+              experienceWidgetHtml={post.experienceWidgetHtml}
             />
           ) : null}
 
