@@ -20,6 +20,7 @@ import {
   mapHotelContent,
   mapPrebook,
   mapRoomOffers,
+  mapStayReviews,
   mapStaySearch,
   stayOccupancies,
   staysQueryIssue,
@@ -28,6 +29,7 @@ import {
   type StayHotelContent,
   type StayListItem,
   type StayPrebook,
+  type StayReviewSummary,
   type StayRoomOffer,
   type StaysQuery,
 } from "@/lib/stays";
@@ -41,6 +43,7 @@ export type StaySearchResult = {
 export type StayHotelResult = {
   sandbox: boolean;
   hotel: StayHotelContent | null;
+  reviews: StayReviewSummary;
   rooms: StayRoomOffer[];
 };
 
@@ -142,11 +145,11 @@ export async function loadStayHotel(
     throw new LiteApiError("Stays aren’t configured.", 503, "not_configured");
   }
 
-  const [contentResult, ratesResult] = await Promise.allSettled([
+  const [contentResult, ratesResult, reviewsResult] = await Promise.allSettled([
     liteApiCall({
       base: LITEAPI_SEARCH_BASE,
       path: "/data/hotel",
-      query: { hotelId },
+      query: { hotelId, language: "en" },
       timeoutMs: 12_000,
     }),
     postRates(query, {
@@ -155,6 +158,12 @@ export async function loadStayHotel(
       maxRatesPerHotel: 8,
       roomMapping: true,
       limit: 1,
+    }),
+    liteApiCall({
+      base: LITEAPI_SEARCH_BASE,
+      path: "/data/reviews",
+      query: { hotelId, limit: "100", getSentiment: "true" },
+      timeoutMs: 12_000,
     }),
   ]);
 
@@ -166,7 +175,11 @@ export async function loadStayHotel(
 
   const contentPayload = contentResult.status === "fulfilled" ? contentResult.value : null;
   const ratesPayload = ratesResult.status === "fulfilled" ? ratesResult.value : null;
+  const reviewsPayload = reviewsResult.status === "fulfilled" ? reviewsResult.value : null;
   const hotel = contentPayload ? mapHotelContent(contentPayload, hotelId) : null;
+  const reviews = reviewsPayload
+    ? mapStayReviews(reviewsPayload)
+    : { count: 0, average: null, categories: [], pros: [], cons: [] };
   const rooms = ratesPayload ? mapRoomOffers(ratesPayload, contentPayload) : [];
 
   if (!hotel && rooms.length === 0) {
@@ -180,7 +193,7 @@ export async function loadStayHotel(
     throw new LiteApiError("Nuitee could not load this hotel.", 502, "upstream");
   }
 
-  return { sandbox: info.sandbox, hotel, rooms };
+  return { sandbox: info.sandbox, hotel, reviews, rooms };
 }
 
 export async function prebookStay(offerId: string): Promise<StayPrebook> {
