@@ -169,6 +169,9 @@ const LANE_PROGRESS_LABEL = {
   skipped: "skipped",
 } as const;
 
+/** Sentinel lane pin for the forward-email panel. Not a partner key. */
+const OUTSIDE_TAB = "outside";
+
 function lanePanelId(
   headingId: string,
   partner: TripPlannerPartner,
@@ -701,58 +704,6 @@ function LaneCta({
   );
 }
 
-function OutsideBookings({
-  headingId,
-  tripId,
-  days,
-  partners,
-  nextSort,
-  onAddItem,
-  onRemember,
-}: {
-  headingId: string;
-  tripId: string | null;
-  days: TripDay[];
-  partners: TripPlannerPartner[];
-  nextSort: number;
-  onAddItem: (item: TripItem) => void;
-  onRemember: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const panelId = `${headingId}-outside`;
-  return (
-    <section className="plan-follow">
-      <button
-        type="button"
-        className={`${plan.textBtn} text-muted`}
-        aria-expanded={open}
-        aria-controls={panelId}
-        onClick={() => setOpen((value) => !value)}
-      >
-        Booked outside FJ?
-      </button>
-      {open ? null : (
-        <p className={`${plan.caption} text-muted`}>
-          Insurance, an eSIM, an experience, or a booking that started somewhere else.
-        </p>
-      )}
-      {open ? (
-        <div id={panelId} className="plan-follow">
-          <ForwardBookings
-            headingId={headingId}
-            tripId={tripId}
-            days={days}
-            partners={partners}
-            nextSort={nextSort}
-            onAddItem={onAddItem}
-            onRemember={onRemember}
-          />
-        </div>
-      ) : null}
-    </section>
-  );
-}
-
 export function ItineraryHub({
   headingId,
   config,
@@ -794,11 +745,16 @@ export function ItineraryHub({
   const [lanePin, setLanePin] = useState<string>(
     focusFlight ? flightLaneKey : focusStay ? stayLaneKey : "auto",
   );
+  const outsideSelected = lanePin === OUTSIDE_TAB;
   const pinnedLane =
-    lanePin !== "auto" && partners.some((partner) => partner.key === lanePin)
+    !outsideSelected &&
+    lanePin !== "auto" &&
+    partners.some((partner) => partner.key === lanePin)
       ? lanePin
       : null;
-  const selectedLaneKey = pinnedLane ?? nextLaneKey ?? partners[0]?.key ?? null;
+  const selectedLaneKey = outsideSelected
+    ? null
+    : (pinnedLane ?? nextLaneKey ?? partners[0]?.key ?? null);
   const appliedHash = useRef<string | null>(null);
   const [layout, setLayout] = useState<"timeline" | "week">("timeline");
   const [editor, setEditor] = useState<
@@ -932,7 +888,7 @@ export function ItineraryHub({
   }, [headingId, selectedLaneKey]);
 
   function onLaneTabKeyDown(event: { key: string; preventDefault: () => void }, current: string) {
-    const order = partners.map((partner) => partner.key);
+    const order = [...partners.map((partner) => partner.key), OUTSIDE_TAB];
     const index = order.indexOf(current);
     if (index < 0) return;
     let nextIndex = index;
@@ -951,8 +907,9 @@ export function ItineraryHub({
     const next = order[nextIndex];
     if (!next) return;
     setLanePin(next);
+    const tabId = next === OUTSIDE_TAB ? `${headingId}-outside-tab` : `${headingId}-tab-${next}`;
     window.requestAnimationFrame(() => {
-      document.getElementById(`${headingId}-tab-${next}`)?.focus();
+      document.getElementById(tabId)?.focus();
     });
   }
 
@@ -1183,6 +1140,20 @@ export function ItineraryHub({
               );
             })}
           </div>
+          <button
+            type="button"
+            role="tab"
+            id={`${headingId}-outside-tab`}
+            className="plan-lane-tab plan-lane-tab-aside"
+            aria-selected={outsideSelected}
+            aria-controls={`${headingId}-outside`}
+            tabIndex={outsideSelected ? 0 : -1}
+            onClick={() => setLanePin(OUTSIDE_TAB)}
+            onKeyDown={(event) => onLaneTabKeyDown(event, OUTSIDE_TAB)}
+          >
+            <span className="plan-lane-tab-label">Booked elsewhere</span>
+            <span className="plan-lane-tab-meta">Forward email</span>
+          </button>
         </div>
 
         {partners.map((partner) => {
@@ -1304,6 +1275,26 @@ export function ItineraryHub({
             </div>
           );
         })}
+
+        <div
+          role="tabpanel"
+          id={`${headingId}-outside`}
+          aria-labelledby={`${headingId}-outside-tab`}
+          hidden={!outsideSelected}
+          className="plan-lane-panel plan-lane-outside scroll-mt-24"
+        >
+          {outsideSelected ? (
+            <ForwardBookings
+              headingId={headingId}
+              tripId={tripId}
+              days={days}
+              partners={partners}
+              nextSort={nextSort}
+              onAddItem={addItem}
+              onRemember={onRememberGuestDraft}
+            />
+          ) : null}
+        </div>
       </section>
 
       <div className="plan-hub-days">
@@ -1569,16 +1560,6 @@ export function ItineraryHub({
           .
         </p>
       </PlanFold>
-
-      <OutsideBookings
-        headingId={headingId}
-        tripId={tripId}
-        days={days}
-        partners={partners}
-        nextSort={nextSort}
-        onAddItem={addItem}
-        onRemember={onRememberGuestDraft}
-      />
       </div>
 
     </div>
