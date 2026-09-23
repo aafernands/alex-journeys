@@ -130,6 +130,7 @@ export const PAGE_DEFAULTS: Record<string, SitePage> = {
         ],
       },
       platformsHeading: "Where to find the journal",
+      mailingAddress: "PO BOX 2101 · Ocean, NJ 07712 · USA",
       createHeading: "What I create",
       createItems: [
         "Destination stories from trips I’ve already taken",
