@@ -32,6 +32,7 @@ export type PostInput = {
   destinations?: unknown;
   guideHubs?: unknown;
   bookingTools?: unknown;
+  experienceWidgetHtml?: unknown;
   itinerary?: unknown;
 };
 
@@ -47,6 +48,7 @@ export type ValidatedPost = {
   destinations: string[];
   guideHubs: string[];
   bookingTools: PostBookingTool[];
+  experienceWidgetHtml: string;
   /** Present only when enabled with at least one day. */
   itinerary?: PostItinerary;
 };
@@ -350,6 +352,10 @@ export function validatePostInput(
     };
   }
 
+  const experienceWidgetHtml = bookingTools.includes("experience")
+    ? sanitizeCmsHtml(asString(input.experienceWidgetHtml)).slice(0, 20_000)
+    : "";
+
   const itineraryResult = validateItinerary(input.itinerary);
   if (!itineraryResult.ok) return itineraryResult;
 
@@ -365,6 +371,7 @@ export function validatePostInput(
       destinations,
       guideHubs,
       bookingTools,
+      experienceWidgetHtml,
       ...(itineraryResult.data ? { itinerary: itineraryResult.data } : {}),
     },
   };
@@ -381,6 +388,7 @@ export function toPostJson(data: ValidatedPost): Post {
     destinations: data.destinations,
     ...(data.guideHubs.length > 0 ? { guideHubs: data.guideHubs } : {}),
     ...(data.bookingTools.length > 0 ? { bookingTools: data.bookingTools } : {}),
+    ...(data.experienceWidgetHtml ? { experienceWidgetHtml: data.experienceWidgetHtml } : {}),
     contentHtml: data.contentHtml,
     source: "cms",
     ...(data.itinerary ? { itinerary: data.itinerary } : {}),
@@ -398,5 +406,6 @@ export function toPostMeta(data: ValidatedPost): PostMeta {
     destinations: data.destinations,
     ...(data.guideHubs.length > 0 ? { guideHubs: data.guideHubs } : {}),
     ...(data.bookingTools.length > 0 ? { bookingTools: data.bookingTools } : {}),
+    ...(data.experienceWidgetHtml ? { experienceWidgetHtml: data.experienceWidgetHtml } : {}),
   };
 }
