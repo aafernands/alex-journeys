@@ -1,0 +1,84 @@
+{
+  "slug": "niagara-falls",
+  "title": "Niagara Falls in 2 Days: My Weekend on the U.S. Side",
+  "date": "2026-09-20T12:00:00",
+  "status": "draft",
+  "excerpt": "A two-day Niagara Falls road trip from New Jersey with a helicopter flight, Maid of the Mist, Niagara Falls State Park, local food, and a casino night.",
+  "featuredImage": {
+    "url": "/media/photo-1745_singular_display_fullpicture-mua3y8bo.jpg",
+    "alt": "Niagara Falls"
+  },
+  "destinations": [
+    "united-states"
+  ],
+  "guideHubs": [
+    "plan-a-trip"
+  ],
+  "bookingTools": [
+    "flight",
+    "hotel",
+    "experience"
+  ],
+  "experienceWidgetHtml": "<div data-vi-partner-id=\"U00440427\" data-vi-widget-ref=\"W-5e7e4c38-9175-4c90-bb5d-379586cbe0ec\"></div>",
+  "contentHtml": "<p>Niagara Falls had been on my list for a while, and this two-day road trip from New Jersey gave us enough time to experience the U.S. side without turning the weekend into a race.</p><p>We left New Jersey at 4 AM, spent our first afternoon seeing the falls from a helicopter, returned after dark for the illuminated views, and finished the night at the casino. The next morning was all about Niagara Falls State Park and Maid of the Mist before a relaxed lunch and the drive home.</p><p>This is the exact itinerary we followed, including where we stayed, what I would book again, and the experiences that made the trip worth the drive.</p><h2>Where we stayed</h2><p>We stayed at <strong>Quality Hotel &amp; Suites At The Falls</strong>. For a short trip, the location worked well because we were close to Niagara Falls State Park and the main attractions. We could check in, drop off our bags, and get straight back out to explore.</p><p><em>Photo placeholder: Quality Hotel &amp; Suites At The Falls</em></p><p><strong>Hotel affiliate placeholder:</strong> Quality Hotel &amp; Suites At The Falls</p><h2>The experiences I would book again</h2><p>The Rainbow Air helicopter flight was the splurge of the weekend. The flight lasts about 8–10 minutes and gives you a full aerial view of the American Falls, Bridal Veil Falls, Horseshoe Falls, the Niagara River, and both sides of the border. We paid $185 by card; the listed cash price was $180.</p><p><em>Photo placeholder: Rainbow Air helicopter gallery</em></p><p><strong>Viator widget placeholder:</strong> Niagara Falls helicopter experience</p><p>Maid of the Mist was the essential Niagara experience for me. The boat leaves from the U.S. side, passes the American Falls and Bridal Veil Falls, and heads toward Horseshoe Falls. You get a poncho, but expect to feel the mist anyway. The sound and scale of the water are completely different from what you see at the overlooks above.</p><p><em>Photo placeholder: Maid of the Mist gallery</em></p><p><strong>Viator widget placeholder:</strong> Guided Niagara Falls and Maid of the Mist experience</p><h2>What I would keep the same</h2><p>The balance made this trip work: one major experience on the first afternoon, Niagara after dark, and most of the second morning inside the state park. Staying close to the falls also saved us from wasting time driving back and forth.</p><p>Two days was enough for the highlights, but it still left room to stop, enjoy the views, and relax before the drive back to New Jersey.</p>",
+  "source": "cms",
+  "itinerary": {
+    "enabled": true,
+    "title": "2 days on the U.S. side of Niagara Falls",
+    "intro": "A quick road trip from New Jersey with aerial views, Niagara at night, Maid of the Mist, good food, and time to enjoy the park without rushing.",
+    "days": [
+      {
+        "id": "day-b6febf6a",
+        "label": "Road trip, helicopter & Niagara night",
+        "title": "From New Jersey to Niagara after dark",
+        "summary": "An early drive, an aerial view of the falls, and a full evening in Niagara Falls, New York.",
+        "blocks": [
+          {
+            "id": "block-e4816507",
+            "time": "4:00 AM–3:00 PM",
+            "place": "New Jersey to Niagara Falls, NY",
+            "body": "We left New Jersey around 4 AM, stopped for lunch at a local Indian restaurant, and checked in at Quality Hotel & Suites At The Falls around 3 PM."
+          },
+          {
+            "id": "block-eaa07a1e",
+            "time": "4:00–6:00 PM",
+            "place": "Rainbow Air Helicopter Tours",
+            "body": "We took an 8–10 minute helicopter flight over the American Falls, Bridal Veil Falls, Horseshoe Falls, and the Niagara River. Tickets were $185 by card or $180 cash. Afterward, we returned to the hotel for a short break."
+          },
+          {
+            "id": "block-ad426188",
+            "time": "7:00–10:00 PM",
+            "place": "Niagara Falls, LongHorn & Seneca Casino",
+            "body": "We explored the illuminated falls, drove to LongHorn Steakhouse for dinner around 8 PM, and finished the night at Seneca Niagara Resort & Casino."
+          }
+        ]
+      },
+      {
+        "id": "day-63b433cc",
+        "label": "State park & Maid of the Mist",
+        "title": "A guided morning beside the falls",
+        "summary": "History, mist, park viewpoints, lunch at The Red Coach Inn, and one last hotel break.",
+        "blocks": [
+          {
+            "id": "block-e3cb0fbd",
+            "time": "9:00 AM",
+            "place": "Niagara Falls State Park",
+            "body": "We started the morning with our guide, Douglas, who explained the history of Niagara Falls and helped us explore the state park and its viewpoints."
+          },
+          {
+            "id": "block-064de2f6",
+            "time": "11:00 AM",
+            "place": "Maid of the Mist",
+            "body": "The boat took us past the American Falls and Bridal Veil Falls toward Horseshoe Falls. The poncho helps, but getting wet is part of the experience."
+          },
+          {
+            "id": "block-b8698e7d",
+            "time": "12:30–2:00 PM",
+            "place": "The Red Coach Inn & hotel",
+            "body": "We had lunch at The Red Coach Inn, returned to the hotel for some time in the hot tub, checked out around 2 PM, and started the drive back to New Jersey."
+          }
+        ]
+      }
+    ]
+  }
+}
