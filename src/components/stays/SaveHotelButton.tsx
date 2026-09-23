@@ -32,6 +32,7 @@ export function SaveHotelButton({ hotel, tripContext }: Props) {
   const [ready, setReady] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [tripHref, setTripHref] = useState("");
 
   const refresh = useCallback(async () => {
     if (!signedIn) {
@@ -45,8 +46,12 @@ export function SaveHotelButton({ hotel, tripContext }: Props) {
         setReady(true);
         return;
       }
-      const payload = (await response.json()) as { hotels?: Array<{ hotelId: string }> };
-      setSaved(Boolean(payload.hotels?.some((item) => item.hotelId === hotel.hotelId)));
+      const payload = (await response.json()) as {
+        hotels?: Array<{ hotelId: string; tripHref?: string }>;
+      };
+      const match = payload.hotels?.find((item) => item.hotelId === hotel.hotelId);
+      setSaved(Boolean(match));
+      setTripHref(match?.tripHref ?? "");
       setError("");
     } catch {
       // Keep the control usable on a transient network failure.
@@ -97,12 +102,10 @@ export function SaveHotelButton({ hotel, tripContext }: Props) {
         | { hotel?: { tripHref?: string } }
         | null;
       setSaved((current) => !current);
-      if (!saved && payload?.hotel?.tripHref) {
-        window.dispatchEvent(
-          new CustomEvent("fj:hotel-saved", {
-            detail: { tripHref: payload.hotel.tripHref, hotelName: hotel.name },
-          }),
-        );
+      if (saved) {
+        setTripHref("");
+      } else {
+        setTripHref(payload?.hotel?.tripHref ?? "");
       }
     } catch {
       setError("Could not update favorites.");
@@ -129,6 +132,11 @@ export function SaveHotelButton({ hotel, tripContext }: Props) {
         <Heart className={`h-4 w-4 ${saved ? "fill-current" : ""}`} aria-hidden="true" />
         {pending ? (saved ? "Removing…" : "Saving…") : label}
       </button>
+      {saved && tripHref ? (
+        <a href={tripHref} className="text-xs font-semibold text-link hover:text-accent">
+          Saved to trip · View trip
+        </a>
+      ) : null}
       {error ? <p className="text-xs text-red-600" role="status">{error}</p> : null}
     </div>
   );
