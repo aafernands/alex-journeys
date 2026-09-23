@@ -257,6 +257,10 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
             <PostBookingBox
               tools={post.bookingTools}
               destination={bookingDestination}
+              placeLabel={destinationCity(primaryDestination!)}
+              countryName={primaryDestination!.name}
+              image={primaryDestination!.image}
+              imageAlt={primaryDestination!.imageAlt}
             />
           ) : null}
 
