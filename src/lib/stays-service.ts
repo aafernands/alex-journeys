@@ -211,7 +211,10 @@ async function postRates(query: StaysQuery, extra: Record<string, unknown>): Pro
 
 export async function searchStays(query: StaysQuery): Promise<StaySearchResult> {
   const issue = staysQueryIssue(query);
-  if (issue) throw new LiteApiError(issue, 400, "bad_request");
+  const previewWithoutDates = issue === "Add check-in and check-out.";
+  if (issue && !previewWithoutDates) {
+    throw new LiteApiError(issue, 400, "bad_request");
+  }
   const info = liteApiKeyInfo();
   if (!info) {
     throw new LiteApiError("Stays aren’t configured.", 503, "not_configured");
@@ -241,51 +244,6 @@ export async function searchStays(query: StaysQuery): Promise<StaySearchResult> 
   };
 }
 
-export async function loadStayHotelPreview(
-  hotelId: string,
-): Promise<StayHotelResult> {
-  if (!isStayHotelId(hotelId)) {
-    throw new LiteApiError("That hotel link is not valid.", 400, "bad_request");
-  }
-  const info = liteApiKeyInfo();
-  if (!info) {
-    throw new LiteApiError("Stays aren’t configured.", 503, "not_configured");
-  }
-
-  const [contentResult, reviewsResult] = await Promise.allSettled([
-    liteApiCall({
-      base: LITEAPI_SEARCH_BASE,
-      path: "/data/hotel",
-      query: { hotelId, language: "en" },
-      timeoutMs: 12_000,
-    }),
-    liteApiCall({
-      base: LITEAPI_SEARCH_BASE,
-      path: "/data/reviews",
-      query: { hotelId, limit: "100", getSentiment: "true" },
-      timeoutMs: 12_000,
-    }),
-  ]);
-
-  if (contentResult.status === "rejected") {
-    const error = contentResult.reason;
-    if (error instanceof LiteApiError) throw error;
-    throw new LiteApiError("Nuitee could not load this hotel.", 502, "upstream");
-  }
-
-  const hotel = mapHotelContent(contentResult.value, hotelId);
-  if (!hotel) {
-    throw new LiteApiError("Nuitee could not load this hotel.", 502, "upstream");
-  }
-
-  const reviews =
-    reviewsResult.status === "fulfilled"
-      ? mapStayReviews(reviewsResult.value)
-      : { count: 0, average: null, categories: [], pros: [], cons: [], reviews: [] };
-
-  return { sandbox: info.sandbox, hotel, reviews, rooms: [] };
-}
-
 export async function loadStayHotel(
   hotelId: string,
   query: StaysQuery,
@@ -307,13 +265,15 @@ export async function loadStayHotel(
       query: { hotelId, language: "en" },
       timeoutMs: 12_000,
     }),
-    postRates(query, {
-      hotelIds: [hotelId],
-      includeHotelData: true,
-      maxRatesPerHotel: 8,
-      roomMapping: true,
-      limit: 1,
-    }),
+    previewWithoutDates
+      ? Promise.resolve(null)
+      : postRates(query, {
+          hotelIds: [hotelId],
+          includeHotelData: true,
+          maxRatesPerHotel: 8,
+          roomMapping: true,
+          limit: 1,
+        }),
     liteApiCall({
       base: LITEAPI_SEARCH_BASE,
       path: "/data/reviews",
@@ -322,7 +282,11 @@ export async function loadStayHotel(
     }),
   ]);
 
-  if (contentResult.status === "rejected" && ratesResult.status === "rejected") {
+  if (
+    contentResult.status === "rejected" &&
+    !previewWithoutDates &&
+    ratesResult.status === "rejected"
+  ) {
     const error = ratesResult.reason;
     if (error instanceof LiteApiError) throw error;
     throw new LiteApiError("Nuitee could not load this hotel.", 502, "upstream");
