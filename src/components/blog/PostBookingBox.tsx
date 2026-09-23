@@ -90,7 +90,6 @@ export function PostBookingBox({
   tools,
   destination,
   placeLabel,
-  countryName,
   image,
   imageAlt,
   experienceWidgetHtml = "",
@@ -166,7 +165,7 @@ export function PostBookingBox({
 
             const meta = TOOL_META[tool];
             const Icon = meta.icon;
-            const toolPlace = tool === "flight" ? countryName || placeLabel : placeLabel;
+            const toolPlace = placeLabel;
             return (
               <section key={tool} className="p-5 sm:p-6">
                 <div className="flex items-start gap-4">
