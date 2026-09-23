@@ -68,12 +68,24 @@ export type StayHotelContent = {
   checkOut: string;
 };
 
+export type StayReview = {
+  score: number | null;
+  country: string;
+  travelerType: string;
+  name: string;
+  date: string;
+  headline: string;
+  pros: string;
+  cons: string;
+};
+
 export type StayReviewSummary = {
   count: number;
   average: number | null;
   categories: Array<{ name: string; rating: number | null; description: string }>;
   pros: string[];
   cons: string[];
+  reviews: StayReview[];
 };
 
 export type StayRefundable = "refundable" | "non-refundable" | "unknown";
@@ -893,12 +905,36 @@ export function mapStayReviews(payload: unknown): StayReviewSummary {
   const items = asArray(root?.data);
   let total = 0;
   let count = 0;
+  const reviews: StayReview[] = [];
+
   for (const item of items) {
     const record = asRecord(item);
-    const score = numberOrNull(record?.averageScore ?? record?.rating);
-    if (score == null || score < 0 || score > 10) continue;
-    total += score;
-    count += 1;
+    if (!record) continue;
+    const score = numberOrNull(record.averageScore ?? record.rating);
+    if (score != null && score >= 0 && score <= 10) {
+      total += score;
+      count += 1;
+    }
+
+    const review: StayReview = {
+      score: score != null && score >= 0 && score <= 10 ? score : null,
+      country: text(record.country, 8).toUpperCase(),
+      travelerType: text(record.type, 80),
+      name: text(record.name, 80),
+      date: text(record.date, 40).slice(0, 10),
+      headline: plainStayText(text(record.headline, 240)).slice(0, 180),
+      pros: plainStayText(text(record.pros, 1200)).slice(0, 700),
+      cons: plainStayText(text(record.cons, 1200)).slice(0, 700),
+    };
+    if (
+      review.name ||
+      review.headline ||
+      review.pros ||
+      review.cons ||
+      review.score != null
+    ) {
+      reviews.push(review);
+    }
   }
 
   const sentiment = asRecord(root?.sentimentAnalysis);
@@ -913,7 +949,7 @@ export function mapStayReviews(payload: unknown): StayReviewSummary {
       rating: numberOrNull(record.rating),
       description: plainStayText(text(record.description, 360)).slice(0, 220),
     });
-    if (categories.length >= 6) break;
+    if (categories.length >= 8) break;
   }
 
   function sentimentList(value: unknown): string[] {
@@ -933,6 +969,7 @@ export function mapStayReviews(payload: unknown): StayReviewSummary {
     categories,
     pros: sentimentList(sentiment?.pros),
     cons: sentimentList(sentiment?.cons),
+    reviews: reviews.slice(0, 24),
   };
 }
 

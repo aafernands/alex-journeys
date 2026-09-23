@@ -289,7 +289,7 @@ export async function loadStayHotel(
   const hotel = contentPayload ? mapHotelContent(contentPayload, hotelId) : null;
   const reviews = reviewsPayload
     ? mapStayReviews(reviewsPayload)
-    : { count: 0, average: null, categories: [], pros: [], cons: [] };
+    : { count: 0, average: null, categories: [], pros: [], cons: [], reviews: [] };
   const rooms = ratesPayload ? mapRoomOffers(ratesPayload, contentPayload) : [];
 
   if (!hotel && rooms.length === 0) {
