@@ -2,7 +2,9 @@ import { destinationSlugs } from "@/data/destinations";
 import { getGuideHubSlugs } from "@/data/guides";
 import type {
   FeaturedImage,
+  POST_BOOKING_TOOLS,
   Post,
+  PostBookingTool,
   PostItinerary,
   PostItineraryBlock,
   PostItineraryDay,
@@ -29,6 +31,7 @@ export type PostInput = {
   featuredImageAlt?: unknown;
   destinations?: unknown;
   guideHubs?: unknown;
+  bookingTools?: unknown;
   itinerary?: unknown;
 };
 
@@ -43,6 +46,7 @@ export type ValidatedPost = {
   featuredImage: FeaturedImage | null;
   destinations: string[];
   guideHubs: string[];
+  bookingTools: PostBookingTool[];
   /** Present only when enabled with at least one day. */
   itinerary?: PostItinerary;
 };
@@ -331,6 +335,21 @@ export function validatePostInput(
     }
   }
 
+  const bookingToolsRaw = asStringArray(input.bookingTools);
+  const bookingTools = [...new Set(bookingToolsRaw)].filter(
+    (value): value is PostBookingTool =>
+      (POST_BOOKING_TOOLS as readonly string[]).includes(value),
+  );
+  if (bookingTools.length !== bookingToolsRaw.length) {
+    return { ok: false, error: "Unknown booking tool selected." };
+  }
+  if (bookingTools.length > 0 && destinations.length === 0) {
+    return {
+      ok: false,
+      error: "Select at least one destination before enabling post booking tools.",
+    };
+  }
+
   const itineraryResult = validateItinerary(input.itinerary);
   if (!itineraryResult.ok) return itineraryResult;
 
@@ -345,6 +364,7 @@ export function validatePostInput(
       featuredImage,
       destinations,
       guideHubs,
+      bookingTools,
       ...(itineraryResult.data ? { itinerary: itineraryResult.data } : {}),
     },
   };
@@ -360,6 +380,7 @@ export function toPostJson(data: ValidatedPost): Post {
     featuredImage: data.featuredImage,
     destinations: data.destinations,
     ...(data.guideHubs.length > 0 ? { guideHubs: data.guideHubs } : {}),
+    ...(data.bookingTools.length > 0 ? { bookingTools: data.bookingTools } : {}),
     contentHtml: data.contentHtml,
     source: "cms",
     ...(data.itinerary ? { itinerary: data.itinerary } : {}),
@@ -376,5 +397,6 @@ export function toPostMeta(data: ValidatedPost): PostMeta {
     featuredImage: data.featuredImage,
     destinations: data.destinations,
     ...(data.guideHubs.length > 0 ? { guideHubs: data.guideHubs } : {}),
+    ...(data.bookingTools.length > 0 ? { bookingTools: data.bookingTools } : {}),
   };
 }
