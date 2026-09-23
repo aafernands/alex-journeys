@@ -21,6 +21,10 @@ import {
   SavedPostsList,
   type SavedPostRow,
 } from "@/components/SavedPostsList";
+import {
+  SavedHotelsList,
+  type SavedHotelRow,
+} from "@/components/account/SavedHotelsList";
 import { planATripHref } from "@/lib/trip-record";
 
 const SECTIONS = ["overview", "trips", "saved", "settings"] as const;
@@ -46,6 +50,8 @@ export type AccountDashboardProps = {
   tripsError: string | null;
   posts: SavedPostRow[];
   postsError: string | null;
+  hotels: SavedHotelRow[];
+  hotelsError: string | null;
 };
 
 function sectionFromHash(hash: string): Section {
@@ -123,6 +129,8 @@ export function AccountDashboard({
   tripsError,
   posts,
   postsError,
+  hotels,
+  hotelsError,
 }: AccountDashboardProps) {
   const [section, setSection] = useState<Section>("overview");
   const headerHeight = useSiteHeaderHeight();
@@ -151,15 +159,16 @@ export function AccountDashboard({
     : trips.length === 0
       ? "No trips saved yet. Plan one and it will wait here."
       : [trips[0]?.title, trips[0]?.destination].filter(Boolean).join(" · ");
-  const savedDetail = postsError
-    ? postsError
-    : posts.length === 0
-      ? "No stories saved yet. Tap Save on any story."
-      : posts[0]?.title || "Stories you wanted to come back to.";
+  const savedCount = posts.length + hotels.length;
+  const savedDetail = postsError || hotelsError
+    ? postsError || hotelsError || ""
+    : savedCount === 0
+      ? "No favorites yet. Save a hotel or story to keep it here."
+      : hotels[0]?.name || posts[0]?.title || "Places and stories you want to come back to.";
 
   const tabCount = (id: Section): number | null => {
     if (id === "trips") return tripsError ? null : trips.length;
-    if (id === "saved") return postsError ? null : posts.length;
+    if (id === "saved") return postsError || hotelsError ? null : savedCount;
     return null;
   };
 
@@ -279,10 +288,10 @@ export function AccountDashboard({
                 onOpen={() => select("trips")}
               />
               <SummaryCard
-                eyebrow="Saved stories"
-                value={postsError ? "—" : String(posts.length)}
+                eyebrow="Saved"
+                value={postsError || hotelsError ? "—" : String(savedCount)}
                 detail={savedDetail}
-                action="View saved"
+                action="View favorites"
                 icon={
                   <BookOpen
                     className="h-5 w-5 text-accent"
@@ -386,27 +395,53 @@ export function AccountDashboard({
             role="tabpanel"
             aria-labelledby="account-tab-saved"
             hidden={section !== "saved"}
+            className="space-y-10"
           >
-            <div className="mb-4">
-              <h2 className="font-display text-2xl font-bold text-heading">
-                Saved stories
-              </h2>
-              <p className="mt-1 max-w-xl text-sm text-muted">
-                Bookmarks from the journal. Remove any of them whenever you like.
-              </p>
-            </div>
-            {postsError ? (
-              <div className="panel p-6 md:p-8">
-                <p className="text-sm leading-relaxed text-text" role="status">
-                  {postsError}
+            <section aria-labelledby="saved-hotels-heading">
+              <div className="mb-4">
+                <h2 id="saved-hotels-heading" className="font-display text-2xl font-bold text-heading">
+                  Favorite hotels
+                </h2>
+                <p className="mt-1 max-w-xl text-sm text-muted">
+                  Hotels you saved while comparing stays.
                 </p>
-                <Link href="/blog" className="btn btn-secondary mt-6">
-                  Browse stories
-                </Link>
               </div>
-            ) : (
-              <SavedPostsList posts={posts} />
-            )}
+              {hotelsError ? (
+                <div className="panel p-6 md:p-8">
+                  <p className="text-sm leading-relaxed text-text" role="status">
+                    {hotelsError}
+                  </p>
+                  <Link href="/stays" className="btn btn-secondary mt-6">
+                    Find hotels
+                  </Link>
+                </div>
+              ) : (
+                <SavedHotelsList hotels={hotels} />
+              )}
+            </section>
+
+            <section aria-labelledby="saved-stories-heading" className="border-t border-border pt-8">
+              <div className="mb-4">
+                <h2 id="saved-stories-heading" className="font-display text-2xl font-bold text-heading">
+                  Saved stories
+                </h2>
+                <p className="mt-1 max-w-xl text-sm text-muted">
+                  Bookmarks from the journal. Remove any of them whenever you like.
+                </p>
+              </div>
+              {postsError ? (
+                <div className="panel p-6 md:p-8">
+                  <p className="text-sm leading-relaxed text-text" role="status">
+                    {postsError}
+                  </p>
+                  <Link href="/blog" className="btn btn-secondary mt-6">
+                    Browse stories
+                  </Link>
+                </div>
+              ) : (
+                <SavedPostsList posts={posts} />
+              )}
+            </section>
           </div>
 
           <div
