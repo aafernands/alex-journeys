@@ -38,7 +38,7 @@ const US_GATEWAYS: Airport[] = [
 const DEFAULT_ORIGINS = ["EWR", "LAX", "IAH"] as const;
 
 function airportByCode(code: string): Airport {
-  return US_GATEWAYS.find((airport) => airport.code === code) ?? US_GATEWAYS[0];
+  return US_GATEWAYS.find((airport) => airport.code === code) ?? US_GATEWAYS[0]!;
 }
 
 function radians(value: number): number {
@@ -62,7 +62,7 @@ function nearestGateway(latitude: number, longitude: number): Airport {
     (a, b) =>
       distanceMiles(latitude, longitude, a.lat, a.lon) -
       distanceMiles(latitude, longitude, b.lat, b.lon),
-  )[0];
+  )[0]!;
 }
 
 export function PostFlightSuggestions({ destination, placeLabel }: Props) {
