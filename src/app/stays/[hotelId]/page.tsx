@@ -118,6 +118,15 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
         listHref={listHref}
         sandbox={loaded.sandbox}
         failure={failure}
+        saveTripContext={{
+          destination: query.destination,
+          startDate: query.startDate,
+          endDate: query.endDate,
+          adults: query.adults,
+          children: query.children,
+          rooms: query.rooms,
+          tripId: query.tripId,
+        }}
         tripBar={<StayDetailSearch hotelId={hotelId} query={query} />}
       >
         <StayBooker
