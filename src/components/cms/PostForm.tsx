@@ -8,6 +8,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   POST_BOOKING_TOOLS,
@@ -36,6 +37,7 @@ export type PostFormInitial = {
   destinations: string[];
   guideHubs?: string[];
   bookingTools?: PostBookingTool[];
+  bookingDestination?: string;
   experienceWidgetHtml?: string;
   itinerary?: PostItinerary;
 };
@@ -103,6 +105,9 @@ export function PostForm({
   );
   const [selectedBookingTools, setSelectedBookingTools] = useState<PostBookingTool[]>(
     initial?.bookingTools ?? [],
+  );
+  const [bookingDestination, setBookingDestination] = useState(
+    initial?.bookingDestination ?? "",
   );
   const [experienceWidgetHtml, setExperienceWidgetHtml] = useState(
     initial?.experienceWidgetHtml ?? "",
@@ -178,6 +183,7 @@ export function PostForm({
             destinations: selectedDestinations,
             guideHubs: selectedGuideHubs,
             bookingTools: selectedBookingTools,
+            bookingDestination,
             experienceWidgetHtml,
             itinerary: itinerary.enabled ? itinerary : { enabled: false },
             update: mode === "edit" && !isDraft && !asDraft,
@@ -216,6 +222,7 @@ export function PostForm({
     },
     [
       contentHtml,
+      bookingDestination,
       date,
       excerpt,
       experienceWidgetHtml,
@@ -476,9 +483,8 @@ export function PostForm({
           <fieldset>
             <legend className="text-sm font-semibold text-heading">Book from this post</legend>
             <p className="mt-1 text-xs text-muted">
-              Add a booking box to the live article. The first selected destination above
-              will automatically prefill the destination when a reader opens Flights,
-              Stays, or Experiences.
+              Add a booking box to the live article. Enter the exact city or place readers
+              should see when they open Flights, Stays, or Experiences.
             </p>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               {POST_BOOKING_TOOLS.map((tool) => {
@@ -514,10 +520,36 @@ export function PostForm({
                 );
               })}
             </div>
-            {selectedBookingTools.length > 0 && selectedDestinations.length === 0 ? (
-              <p className="mt-2 text-xs font-semibold text-link">
-                Select a destination above before publishing so the booking links can be prefilled.
-              </p>
+            {selectedBookingTools.length > 0 ? (
+              <div className="mt-4">
+                <label
+                  htmlFor="cms-booking-destination"
+                  className="text-sm font-semibold text-heading"
+                >
+                  Booking destination *
+                </label>
+                <p className="mt-1 text-xs leading-relaxed text-muted">
+                  Separate from the country tags above. Example: Niagara Falls, New York,
+                  United States.
+                </p>
+                <input
+                  id="cms-booking-destination"
+                  value={bookingDestination}
+                  onChange={(e) => {
+                    setBookingDestination(e.target.value);
+                    markDirty();
+                  }}
+                  required
+                  maxLength={200}
+                  placeholder="Niagara Falls, New York, United States"
+                  className={fieldClass}
+                />
+                {!bookingDestination.trim() ? (
+                  <p className="mt-2 text-xs font-semibold text-link">
+                    Enter a booking destination before publishing.
+                  </p>
+                ) : null}
+              </div>
             ) : null}
 
             {selectedBookingTools.includes("experience") ? (
@@ -648,8 +680,8 @@ export function PostForm({
                       tool === "flight" ? "Flights" : tool === "hotel" ? "Hotels" : "Experiences",
                     )
                     .join(" · ")}
-                  {selectedDestinations.length > 0
-                    ? ` · prefills ${destinations.find((d) => d.slug === selectedDestinations[0])?.name ?? selectedDestinations[0]}`
+                  {bookingDestination.trim()
+                    ? ` · prefills ${bookingDestination.trim()}`
                     : " · destination required"}
                 </p>
               </div>
@@ -748,9 +780,9 @@ export function PostForm({
         >
           {pending === "draft" ? "Saving draft…" : "Save draft"}
         </button>
-        <a href="/cms/posts" className="btn btn-secondary">
+        <Link href="/cms/posts" className="btn btn-secondary">
           Back to posts
-        </a>
+        </Link>
       </div>
     <MediaPicker
       open={libraryOpen}

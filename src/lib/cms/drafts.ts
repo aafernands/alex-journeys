@@ -12,6 +12,7 @@ export type DraftPost = {
   destinations: string[];
   guideHubs?: string[];
   bookingTools?: PostBookingTool[];
+  bookingDestination?: string;
   experienceWidgetHtml?: string;
   contentHtml: string;
   itinerary?: PostItinerary;

@@ -58,6 +58,8 @@ export default async function CmsNewPostPage({ searchParams }: PageProps) {
         destinations: source.destinations,
         guideHubs: "guideHubs" in source ? (source.guideHubs ?? []) : [],
         bookingTools: "bookingTools" in source ? (source.bookingTools ?? []) : [],
+        bookingDestination:
+          "bookingDestination" in source ? (source.bookingDestination ?? "") : "",
         experienceWidgetHtml:
           "experienceWidgetHtml" in source ? (source.experienceWidgetHtml ?? "") : "",
         itinerary:

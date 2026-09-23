@@ -1,6 +1,10 @@
 import { destinationSlugs } from "@/data/destinations";
 import { getGuideHubSlugs } from "@/data/guides";
-import { POST_BOOKING_TOOLS } from "@/lib/post-types";
+import {
+  POST_BOOKING_TOOLS,
+  isBookingDestinationMissing,
+  normalizeBookingDestination,
+} from "@/lib/post-types";
 import type {
   FeaturedImage,
   Post,
@@ -32,6 +36,7 @@ export type PostInput = {
   destinations?: unknown;
   guideHubs?: unknown;
   bookingTools?: unknown;
+  bookingDestination?: unknown;
   experienceWidgetHtml?: unknown;
   itinerary?: unknown;
 };
@@ -48,6 +53,7 @@ export type ValidatedPost = {
   destinations: string[];
   guideHubs: string[];
   bookingTools: PostBookingTool[];
+  bookingDestination: string;
   experienceWidgetHtml: string;
   /** Present only when enabled with at least one day. */
   itinerary?: PostItinerary;
@@ -345,10 +351,17 @@ export function validatePostInput(
   if (bookingTools.length !== bookingToolsRaw.length) {
     return { ok: false, error: "Unknown booking tool selected." };
   }
-  if (bookingTools.length > 0 && destinations.length === 0) {
+  const bookingDestination = normalizeBookingDestination(input.bookingDestination);
+  if (bookingDestination.length > 200) {
     return {
       ok: false,
-      error: "Select at least one destination before enabling post booking tools.",
+      error: "Booking destination must be at most 200 characters.",
+    };
+  }
+  if (isBookingDestinationMissing(bookingTools, bookingDestination)) {
+    return {
+      ok: false,
+      error: "Enter a booking destination before enabling post booking tools.",
     };
   }
 
@@ -371,6 +384,7 @@ export function validatePostInput(
       destinations,
       guideHubs,
       bookingTools,
+      bookingDestination,
       experienceWidgetHtml,
       ...(itineraryResult.data ? { itinerary: itineraryResult.data } : {}),
     },
@@ -388,6 +402,7 @@ export function toPostJson(data: ValidatedPost): Post {
     destinations: data.destinations,
     ...(data.guideHubs.length > 0 ? { guideHubs: data.guideHubs } : {}),
     ...(data.bookingTools.length > 0 ? { bookingTools: data.bookingTools } : {}),
+    ...(data.bookingDestination ? { bookingDestination: data.bookingDestination } : {}),
     ...(data.experienceWidgetHtml ? { experienceWidgetHtml: data.experienceWidgetHtml } : {}),
     contentHtml: data.contentHtml,
     source: "cms",
@@ -406,5 +421,6 @@ export function toPostMeta(data: ValidatedPost): PostMeta {
     destinations: data.destinations,
     ...(data.guideHubs.length > 0 ? { guideHubs: data.guideHubs } : {}),
     ...(data.bookingTools.length > 0 ? { bookingTools: data.bookingTools } : {}),
+    ...(data.bookingDestination ? { bookingDestination: data.bookingDestination } : {}),
   };
 }

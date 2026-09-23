@@ -30,7 +30,8 @@
         "flight",
         "hotel",
         "experience"
-      ]
+      ],
+      "bookingDestination": "Niagara Falls, New York, United States"
     },
     {
       "title": "TSA Is Letting People Go to Airport Gates Without a Plane Ticket Again — Here’s How It Works",
@@ -74,7 +75,8 @@
         "hotel",
         "flight",
         "experience"
-      ]
+      ],
+      "bookingDestination": "Cancun, Mexico"
     },
     {
       "slug": "marron-bells",
@@ -162,7 +164,8 @@
         "flight",
         "hotel",
         "experience"
-      ]
+      ],
+      "bookingDestination": "Iceland"
     },
     {
       "slug": "discover-the-top-accommodation-sites-of-2025",
@@ -220,7 +223,8 @@
         "hotel",
         "flight",
         "experience"
-      ]
+      ],
+      "bookingDestination": "Rio de Janeiro, Brazil"
     },
     {
       "slug": "15-steps-to-effortlessly-plan-your-next-adventure",

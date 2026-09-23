@@ -23,8 +23,8 @@ import {
 import { publicPostPath } from "@/lib/public-paths";
 import { blogPostingJsonLd } from "@/lib/seo";
 import { site } from "@/data/content";
-import { destinationCity, getDestinationBySlug } from "@/data/destinations";
 import { cmsEditPostHref } from "@/lib/admin-edit";
+import { bookingDestinationLabel } from "@/lib/post-types";
 
 /** Pull simple TOC from h2 text in HTML when present */
 function extractToc(html: string): { id: string; label: string }[] {
@@ -64,14 +64,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
   });
 
   const editHref = cmsEditPostHref(slug);
-  const primaryDestination = post.destinations[0]
-    ? getDestinationBySlug(post.destinations[0])
-    : undefined;
-  const bookingDestination = primaryDestination
-    ? primaryDestination.city?.trim()
-      ? `${destinationCity(primaryDestination)}, ${primaryDestination.name}`
-      : primaryDestination.name
-    : "";
+  const bookingDestination = post.bookingDestination?.trim() ?? "";
 
   return (
     <main>
@@ -257,10 +250,9 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
             <PostBookingBox
               tools={post.bookingTools}
               destination={bookingDestination}
-              placeLabel={destinationCity(primaryDestination!)}
-              countryName={primaryDestination!.name}
-              image={primaryDestination!.image}
-              imageAlt={primaryDestination!.imageAlt}
+              placeLabel={bookingDestinationLabel(bookingDestination)}
+              image={post.featuredImage?.url}
+              imageAlt={post.featuredImage?.alt || post.title}
               experienceWidgetHtml={post.experienceWidgetHtml}
             />
           ) : null}

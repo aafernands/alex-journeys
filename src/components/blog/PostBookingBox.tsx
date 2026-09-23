@@ -25,7 +25,6 @@ type Props = {
   tools: PostBookingTool[];
   destination: string;
   placeLabel: string;
-  countryName: string;
   image?: string;
   imageAlt?: string;
   experienceWidgetHtml?: string;

@@ -8,6 +8,21 @@ export type FeaturedImage = {
 export const POST_BOOKING_TOOLS = ["flight", "hotel", "experience"] as const;
 export type PostBookingTool = (typeof POST_BOOKING_TOOLS)[number];
 
+export function normalizeBookingDestination(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+export function isBookingDestinationMissing(
+  tools: readonly PostBookingTool[],
+  destination: unknown,
+): boolean {
+  return tools.length > 0 && !normalizeBookingDestination(destination);
+}
+
+export function bookingDestinationLabel(destination: string): string {
+  return normalizeBookingDestination(destination).split(",")[0]?.trim() ?? "";
+}
+
 export type PostMeta = {
   slug: string;
   title: string;
@@ -25,6 +40,8 @@ export type PostMeta = {
   guideHubs?: string[];
   /** Optional booking actions rendered inside the post. */
   bookingTools?: PostBookingTool[];
+  /** Exact place used to prefill booking searches, independent of country tags. */
+  bookingDestination?: string;
 };
 
 /** Day-by-day trip timeline stored separately from contentHtml. */

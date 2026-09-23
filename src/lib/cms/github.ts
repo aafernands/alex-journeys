@@ -262,6 +262,7 @@ export async function fetchDraftFromGithub(
   destinations: string[];
   guideHubs?: string[];
   bookingTools?: Post["bookingTools"];
+  bookingDestination?: Post["bookingDestination"];
   experienceWidgetHtml?: Post["experienceWidgetHtml"];
   contentHtml: string;
   itinerary?: Post["itinerary"];
@@ -277,6 +278,7 @@ export async function fetchDraftFromGithub(
     destinations: string[];
     guideHubs?: string[];
     bookingTools?: Post["bookingTools"];
+    bookingDestination?: Post["bookingDestination"];
     experienceWidgetHtml?: Post["experienceWidgetHtml"];
     contentHtml: string;
     itinerary?: Post["itinerary"];
@@ -476,6 +478,9 @@ export async function publishDraft(
       : {}),
     ...(validated.bookingTools.length > 0
       ? { bookingTools: validated.bookingTools }
+      : {}),
+    ...(validated.bookingDestination
+      ? { bookingDestination: validated.bookingDestination }
       : {}),
     ...(validated.experienceWidgetHtml
       ? { experienceWidgetHtml: validated.experienceWidgetHtml }
@@ -1072,4 +1077,3 @@ export async function deleteMediaItem(
   const result = await commitFilesAtomically(files, `cms: delete media ${item.id}`);
   return { commitUrl: result.commitUrl, ...(filePath && fileSha ? { deletedFile: filePath } : {}) };
 }
-
