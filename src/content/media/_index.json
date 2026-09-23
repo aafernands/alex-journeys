@@ -1,7 +1,16 @@
 {
-  "updatedAt": "2026-09-23T20:37:32.694Z",
-  "count": 90,
+  "updatedAt": "2026-09-23T20:37:37.029Z",
+  "count": 91,
   "items": [
+    {
+      "id": "dji-mimo-20260912-142830-20260912132831-1789251071943-photo-mueke3ok",
+      "slug": "dji-mimo-20260912-142830-20260912132831-1789251071943-photo-mueke3ok",
+      "url": "/media/dji_mimo_20260912_142830_20260912132831_1789251071943_photo-mueke3ok.jpg",
+      "alt": "",
+      "source": "upload",
+      "usedBy": [],
+      "createdAt": "2026-09-23T20:37:37.029Z"
+    },
     {
       "id": "dji-mimo-20260912-143238-20260912133239-1789251071809-photo-mueke0a0",
       "slug": "dji-mimo-20260912-143238-20260912133239-1789251071809-photo-mueke0a0",
