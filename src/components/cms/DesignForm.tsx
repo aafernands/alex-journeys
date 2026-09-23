@@ -414,7 +414,7 @@ export function DesignForm({ initial }: Props) {
           </div>
           <div className="space-y-5 p-5 md:p-6">
             <p className="text-sm text-muted">
-              Full-bleed photo behind the “Inspire. Capture. Discover.” headline
+              Full-bleed photo behind the “Inspire. Capture. Discover” headline
               only. This is <strong>not</strong> the featured field-note card —
               manage that in <strong>Featured slideshow</strong> below. Pick from
               the media library or upload a new file (JPEG, PNG, WebP, GIF · max
