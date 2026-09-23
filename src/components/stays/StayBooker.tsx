@@ -12,6 +12,7 @@ import {
   parseStayGuest,
   refundableLabel,
   stayGuestFieldErrors,
+  stayNights,
   staysQueryString,
   type StayBooking,
   type StayConfirmationDetails,
@@ -407,7 +408,35 @@ export function StayBooker({
 
       {prebook ? (
         <form className="panel plan-inset plan-stack p-5" onSubmit={(event) => void bookRoom(event)}>
-          <h2 className="font-display text-xl font-bold text-heading">Guest details</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Selected room</p>
+              <h2 className="mt-1 font-display text-xl font-bold text-heading">Review your room</h2>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={busy}
+              onClick={() => {
+                setPrebook(null);
+                setFailure(null);
+                clientReference.current = "";
+              }}
+            >
+              Change room
+            </button>
+          </div>
+          {selected ? (
+            <SelectedRoomSummary
+              room={selected}
+              prebook={prebook}
+              fallbackPhoto={fallbackPhoto}
+              query={query}
+            />
+          ) : null}
+          <div className="border-t border-line pt-5">
+            <h3 className="font-display text-lg font-bold text-heading">Guest details</h3>
+          </div>
           <p className="text-sm leading-relaxed text-text">
             {prebook.roomName ? `${prebook.roomName}. ` : ""}
             {prebook.price != null
@@ -565,6 +594,115 @@ function RoomImage({ photo, className }: { photo: StayPhoto; className: string }
         img.classList.add("hidden");
       }}
     />
+  );
+}
+
+function SelectedRoomSummary({
+  room,
+  prebook,
+  fallbackPhoto,
+  query,
+}: {
+  room: StayRoomOffer;
+  prebook: StayPrebook;
+  fallbackPhoto: string;
+  query: StaysQuery;
+}) {
+  const photos = room.photos?.length ? room.photos.slice(0, 4) : fallbackPhoto
+    ? [{ url: fallbackPhoto, caption: "" }]
+    : [];
+  const nights = stayNights(query.startDate, query.endDate);
+  const total =
+    prebook.price != null
+      ? formatStayMoney({
+          amount: prebook.price,
+          currency: prebook.currency || room.price?.currency || "USD",
+        })
+      : room.price
+        ? formatStayMoney(room.price)
+        : "";
+  const occupancy = [
+    `${query.rooms} ${query.rooms === 1 ? "room" : "rooms"}`,
+    `${query.adults} ${query.adults === 1 ? "adult" : "adults"}`,
+    query.children > 0
+      ? `${query.children} ${query.children === 1 ? "child" : "children"}`
+      : "",
+    nights > 0 ? `${nights} ${nights === 1 ? "night" : "nights"}` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return (
+    <section className="overflow-hidden rounded-lg border border-line bg-surface" aria-label="Selected room details">
+      {photos.length > 0 ? (
+        <div className="grid grid-cols-4 gap-px bg-line">
+          {photos.map((photo, index) => (
+            <div
+              key={photo.url}
+              className={index === 0 ? "col-span-4 sm:col-span-2 sm:row-span-2" : "col-span-2 sm:col-span-1"}
+            >
+              <RoomImage
+                photo={photo}
+                className={index === 0 ? "h-52 w-full sm:h-full sm:min-h-48" : "h-24 w-full sm:h-24"}
+              />
+            </div>
+          ))}
+        </div>
+      ) : null}
+      <div className="plan-stack p-4 sm:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <h3 className="font-display text-xl font-bold leading-tight text-heading">
+              {prebook.roomName || room.name}
+            </h3>
+            <p className="mt-2 text-sm text-muted">{occupancy}</p>
+          </div>
+          {total ? (
+            <div className="shrink-0 sm:text-right">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Confirmed total</p>
+              <p className="mt-1 font-display text-xl font-bold text-heading">{total}</p>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {(prebook.boardName || room.boardName) ? (
+            <span className="rounded-full border border-line bg-canvas px-3 py-1 text-xs font-semibold text-text">
+              {prebook.boardName || room.boardName}
+            </span>
+          ) : null}
+          <span className="rounded-full border border-line bg-canvas px-3 py-1 text-xs font-semibold text-text">
+            {refundableLabel(prebook.refundable || room.refundable)}
+          </span>
+        </div>
+
+        {prebook.cancellation.length > 0 ? (
+          <div>
+            <p className="text-sm font-semibold text-heading">Cancellation</p>
+            <ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-text">
+              {prebook.cancellation.map((line) => (
+                <li key={line}>• {line}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {prebook.conditions.length > 0 ? (
+          <div>
+            <p className="text-sm font-semibold text-heading">Room & rate details</p>
+            <ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-text">
+              {prebook.conditions.map((line) => (
+                <li key={line}>• {line}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {prebook.remarks ? (
+          <p className="text-sm leading-relaxed text-text">{prebook.remarks}</p>
+        ) : null}
+      </div>
+    </section>
   );
 }
 
