@@ -103,6 +103,9 @@ export function StayBooker({
 
   const selected = rooms.find((room) => room.offerId === offerId) ?? null;
   const roomGroups = groupRoomOffers(rooms);
+  const selectedForReview = prebook
+    ? selected ?? findRoomForPrebook(rooms, prebook)
+    : selected;
   const busy = pending !== "";
 
   useEffect(() => {
@@ -455,7 +458,7 @@ export function StayBooker({
             )}
           </div>
           <SelectedRoomSummary
-            room={selected}
+            room={selectedForReview}
             prebook={prebook}
             fallbackPhoto={fallbackPhoto}
             query={query}
@@ -560,6 +563,34 @@ export function StayBooker({
         </form>
       ) : null}
     </div>
+  );
+}
+
+function normalizedRoomName(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/**
+ * Offer IDs can change when checkout reloads live rates. Once prebook confirms
+ * the original offer, recover the corresponding refreshed room by its room
+ * name so checkout keeps the room-specific Nuitee photos instead of falling
+ * back to the hotel hero image.
+ */
+function findRoomForPrebook(rooms: StayRoomOffer[], prebook: StayPrebook) {
+  const target = normalizedRoomName(prebook.roomName);
+  if (!target) return null;
+
+  const exact = rooms.find((room) => normalizedRoomName(room.name) === target);
+  if (exact) return exact;
+
+  return (
+    rooms.find((room) => {
+      const candidate = normalizedRoomName(room.name);
+      return candidate.length > 8 && (candidate.includes(target) || target.includes(candidate));
+    }) ?? null
   );
 }
 
