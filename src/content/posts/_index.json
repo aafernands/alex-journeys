@@ -441,19 +441,23 @@
       "destinations": []
     },
     {
-      "slug": "toronto-travel-guide",
       "title": "48 Hours in Toronto: Iconic Sights, Hidden Gems, and Dinner in the Sky",
+      "slug": "toronto-travel-guide",
       "date": "2022-04-10T08:55:00",
+      "updatedAt": "2026-09-23T20:20:03.026Z",
       "excerpt": "Planning a short getaway to Toronto? Join me on a two-day adventure through the city’s most iconic spots—from Casa Loma and Nathan Phillips Square to a memorable dinner high above the skyline at the CN Tower. Here’s how to make the most of your time in Canada’s largest city!",
       "featuredImage": {
         "url": "/media/migrated/2024-10-img-0863-1-5008158e.webp",
-        "alt": "48 Hours in Toronto: Iconic Sights, Hidden Gems, and Dinner in the Sky",
-        "width": 1280,
-        "height": 1920
+        "alt": "48 Hours in Toronto: Iconic Sights, Hidden Gems, and Dinner in the Sky"
       },
       "destinations": [
         "canada"
-      ]
+      ],
+      "bookingTools": [
+        "flight",
+        "hotel"
+      ],
+      "bookingDestination": "Toronto, Canada"
     },
     {
       "title": "10 Essential Travel Gadgets: Elevate your journey with these must-haves (2026)",
