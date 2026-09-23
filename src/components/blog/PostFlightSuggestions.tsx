@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { LocateFixed, MapPin, Plane, ShieldCheck } from "lucide-react";
-import { flightsPath, primaryAirportFor } from "@/lib/flights";
+import { LocateFixed, Plane, ShieldCheck } from "lucide-react";
+import { flightsPath } from "@/lib/flights";
 
 type Props = {
   destination: string;
@@ -35,69 +35,63 @@ const US_GATEWAYS: Airport[] = [
   { code: "SEA", city: "Seattle", region: "Pacific Northwest", lat: 47.4502, lon: -122.3088 },
 ];
 
-const DEFAULT_ORIGINS = ["EWR", "LAX", "IAH"] as const;
+const DEFAULT_CODES = ["EWR", "LAX", "IAH"];
 
-function airportByCode(code: string): Airport {
-  return US_GATEWAYS.find((airport) => airport.code === code) ?? US_GATEWAYS[0]!;
+function byCode(code: string): Airport | null {
+  return US_GATEWAYS.find((airport) => airport.code === code) ?? null;
 }
 
-function radians(value: number): number {
-  return (value * Math.PI) / 180;
+function distanceSquared(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const latScale = Math.cos((lat1 * Math.PI) / 180);
+  const x = (lon2 - lon1) * latScale;
+  const y = lat2 - lat1;
+  return x * x + y * y;
 }
 
-function distanceMiles(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const earthMiles = 3958.8;
-  const dLat = radians(lat2 - lat1);
-  const dLon = radians(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(radians(lat1)) *
-      Math.cos(radians(lat2)) *
-      Math.sin(dLon / 2) ** 2;
-  return 2 * earthMiles * Math.asin(Math.sqrt(a));
+function nearestGateway(latitude: number, longitude: number): Airport | null {
+  let best: Airport | null = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+
+  for (const airport of US_GATEWAYS) {
+    const distance = distanceSquared(latitude, longitude, airport.lat, airport.lon);
+    if (distance < bestDistance) {
+      best = airport;
+      bestDistance = distance;
+    }
+  }
+
+  return best;
 }
 
-function nearestGateway(latitude: number, longitude: number): Airport {
-  return [...US_GATEWAYS].sort(
-    (a, b) =>
-      distanceMiles(latitude, longitude, a.lat, a.lon) -
-      distanceMiles(latitude, longitude, b.lat, b.lon),
-  )[0]!;
+function defaultOrigins(): Airport[] {
+  return DEFAULT_CODES
+    .map((code) => byCode(code))
+    .filter((airport): airport is Airport => airport !== null);
 }
 
 export function PostFlightSuggestions({ destination, placeLabel }: Props) {
   const [nearest, setNearest] = useState<Airport | null>(null);
-  const [locationState, setLocationState] = useState<"idle" | "loading" | "denied" | "unavailable">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "denied" | "unavailable">("idle");
 
-  const destinationAirport = primaryAirportFor(destination);
-  const destinationCode = destinationAirport?.code ?? "";
+  const defaults = defaultOrigins();
+  const origins = nearest
+    ? [nearest, ...defaults.filter((airport) => airport.code !== nearest.code)].slice(0, 3)
+    : defaults;
 
-  const origins = useMemo(() => {
-    const defaults = DEFAULT_ORIGINS.map(airportByCode);
-    if (!nearest) return defaults;
-
-    const unique = [nearest, ...defaults].filter(
-      (airport, index, all) => all.findIndex((item) => item.code === airport.code) === index,
-    );
-    return unique.slice(0, 3);
-  }, [nearest]);
-
-  function useLocation() {
-    if (!navigator.geolocation) {
-      setLocationState("unavailable");
+  function useNearestAirport() {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setStatus("unavailable");
       return;
     }
 
-    setLocationState("loading");
+    setStatus("loading");
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setNearest(
-          nearestGateway(position.coords.latitude, position.coords.longitude),
-        );
-        setLocationState("idle");
+        setNearest(nearestGateway(position.coords.latitude, position.coords.longitude));
+        setStatus("idle");
       },
-      () => setLocationState("denied"),
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 15 * 60 * 1000 },
+      () => setStatus("denied"),
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 900000 },
     );
   }
 
@@ -112,11 +106,10 @@ export function PostFlightSuggestions({ destination, placeLabel }: Props) {
             id="post-flight-suggestions-title"
             className="mt-1 font-display text-xl font-bold text-heading sm:text-2xl"
           >
-            Start a flight search to {placeLabel}
+            Fly to {placeLabel}
           </h3>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            Pick a U.S. gateway to prefill the route. Add your dates on the next screen
-            to see live Nuitee flight options.
+            Start from a major U.S. airport, then add your dates to see live flight options.
           </p>
         </div>
         <div className="grid size-11 shrink-0 place-items-center rounded-full bg-surface text-heading">
@@ -131,7 +124,7 @@ export function PostFlightSuggestions({ destination, placeLabel }: Props) {
             href={flightsPath({ origin: airport.code, destination })}
             className="group flex items-center justify-between gap-4 rounded-xl bg-surface-soft px-4 py-3 transition hover:bg-surface"
           >
-            <div className="min-w-0">
+            <div>
               <div className="flex items-center gap-2">
                 {nearest?.code === airport.code && index === 0 ? (
                   <span className="rounded-full bg-heading px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide text-white">
@@ -141,53 +134,46 @@ export function PostFlightSuggestions({ destination, placeLabel }: Props) {
                 <span className="text-xs font-semibold text-muted">{airport.region}</span>
               </div>
               <p className="mt-1 font-display text-lg font-bold text-heading">
-                {airport.code}
-                <span className="mx-2 text-muted" aria-hidden="true">→</span>
-                {destinationCode || placeLabel}
+                {airport.code} <span className="text-muted">→</span> {placeLabel}
               </p>
-              <p className="mt-1 text-xs text-muted">
-                {airport.city} to {placeLabel}
-              </p>
+              <p className="mt-1 text-xs text-muted">{airport.city} departure</p>
             </div>
             <Plane className="size-4 shrink-0 text-heading transition group-hover:translate-x-0.5" aria-hidden="true" />
           </Link>
         ))}
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={useLocation}
-          disabled={locationState === "loading"}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-link transition hover:text-accent disabled:opacity-60"
-        >
-          <LocateFixed className="size-4" aria-hidden="true" />
-          {locationState === "loading"
-            ? "Finding your nearest airport…"
-            : nearest
-              ? "Using " + nearest.code + " near you"
-              : "Use my nearest airport"}
-        </button>
-        {locationState === "denied" ? (
-          <span className="text-xs text-muted">Location wasn’t shared. The default routes still work.</span>
-        ) : null}
-        {locationState === "unavailable" ? (
-          <span className="text-xs text-muted">Location isn’t available in this browser.</span>
-        ) : null}
-      </div>
+      <button
+        type="button"
+        onClick={useNearestAirport}
+        disabled={status === "loading"}
+        className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-link transition hover:text-accent disabled:opacity-60"
+      >
+        <LocateFixed className="size-4" aria-hidden="true" />
+        {status === "loading"
+          ? "Finding your nearest airport…"
+          : nearest
+            ? "Using " + nearest.code + " near you"
+            : "Use my nearest airport"}
+      </button>
 
-      <div className="mt-4 flex items-start gap-2 rounded-lg bg-surface-soft px-3 py-2.5 text-xs leading-relaxed text-muted">
+      {status === "denied" ? (
+        <p className="mt-2 text-xs text-muted">
+          Location wasn’t shared. The default U.S. gateways are still available.
+        </p>
+      ) : null}
+      {status === "unavailable" ? (
+        <p className="mt-2 text-xs text-muted">
+          Location isn’t available in this browser.
+        </p>
+      ) : null}
+
+      <div className="mt-4 flex items-start gap-2 text-xs leading-relaxed text-muted">
         <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
         <span>
-          Location is requested only after you tap the button and is used in your browser
-          to choose a nearby major U.S. airport.
+          Location is requested only after you tap the button and is used in your browser to choose a nearby major airport.
         </span>
       </div>
-
-      <p className="mt-3 flex items-center gap-1.5 text-xs text-muted">
-        <MapPin className="size-3.5" aria-hidden="true" />
-        These are route shortcuts, not live fares. Dates are required before prices can be shown.
-      </p>
     </section>
   );
 }
