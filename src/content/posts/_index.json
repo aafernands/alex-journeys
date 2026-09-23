@@ -1,7 +1,7 @@
 {
   "migratedAt": "2026-09-19T19:52:59.137Z",
   "source": "alexjournly.com WordPress REST API",
-  "count": 31,
+  "count": 32,
   "featuredHomepage": [
     "cancun-5-day-travel-guide",
     "discovering-iceland-a-week-in-the-land-of-fire-and-ice",
@@ -11,6 +11,27 @@
     "best-solo-travel-destinations"
   ],
   "posts": [
+    {
+      "title": "Niagara Falls in 2 Days: My Weekend on the U.S. Side",
+      "slug": "niagara-falls-us",
+      "date": "2026-09-23T12:00:00",
+      "excerpt": "A two-day Niagara Falls road trip from New Jersey with a helicopter flight, Maid of the Mist, Niagara Falls State Park, local food, and a casino night.",
+      "featuredImage": {
+        "url": "/media/photo-1745_singular_display_fullpicture-mua3y8bo.jpg",
+        "alt": "Niagara Falls in 2 Days: My Weekend on the U.S. Side"
+      },
+      "destinations": [
+        "united-states"
+      ],
+      "guideHubs": [
+        "plan-a-trip"
+      ],
+      "bookingTools": [
+        "flight",
+        "hotel",
+        "experience"
+      ]
+    },
     {
       "title": "TSA Is Letting People Go to Airport Gates Without a Plane Ticket Again — Here’s How It Works",
       "slug": "tsa",
