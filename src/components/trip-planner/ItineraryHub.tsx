@@ -1028,6 +1028,18 @@ export function ItineraryHub({
           <button type="button" className={`${plan.textBtn} text-muted sm:text-heading`} onClick={onEditTrip}>
             Edit
           </button>
+          <button
+            type="button"
+            className={`${plan.textBtn} text-muted sm:text-heading`}
+            onClick={() => {
+              setLanePin(OUTSIDE_TAB);
+              window.requestAnimationFrame(() => {
+                document.querySelector(".plan-hub-lanes")?.scrollIntoView({ block: "start" });
+              });
+            }}
+          >
+            Email booking
+          </button>
           <button type="button" className={`${plan.textBtn} text-muted`} onClick={onStartOver}>
             Start over
           </button>
@@ -1147,30 +1159,6 @@ export function ItineraryHub({
           </ul>
         </section>
       ) : null}
-
-      <section className={`${plan.soft} plan-section plan-stack-tight`} aria-label="Email booking confirmations">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className={plan.label}>Booked somewhere else?</p>
-            <h3 className={plan.h3}>Email the confirmation to your itinerary</h3>
-            <p className={`${plan.prose} mt-1 text-muted`}>
-              Forward airline, hotel, car, or experience confirmations and review them before adding anything.
-            </p>
-          </div>
-          <button
-            type="button"
-            className="btn btn-secondary shrink-0"
-            onClick={() => {
-              setLanePin(OUTSIDE_TAB);
-              window.requestAnimationFrame(() => {
-                document.querySelector(".plan-hub-lanes")?.scrollIntoView({ block: "start" });
-              });
-            }}
-          >
-            Email a booking
-          </button>
-        </div>
-      </section>
 
       {guestBackup ? (
         <aside className={`plan-hub-draft ${plan.soft} plan-section plan-stack-tight`} aria-label="Browser draft">
