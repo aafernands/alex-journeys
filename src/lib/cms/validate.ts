@@ -1,8 +1,8 @@
 import { destinationSlugs } from "@/data/destinations";
 import { getGuideHubSlugs } from "@/data/guides";
+import { POST_BOOKING_TOOLS } from "@/lib/post-types";
 import type {
   FeaturedImage,
-  POST_BOOKING_TOOLS,
   Post,
   PostBookingTool,
   PostItinerary,
