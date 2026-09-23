@@ -11,7 +11,7 @@ export const site = {
   url: "https://www.fernandesjourneys.com",
   authorName: "Alex Fernandes",
   authorPhoto: `${authorPhotoMeta.src}?v=${encodeURIComponent(authorPhotoMeta.updatedAt)}`,
-  tagline: "Inspire. Capture. Discover.",
+  tagline: "Inspire. Capture. Discover",
   email: "contact@fernandesjourneys.com",
   social: {
     instagram: "https://www.instagram.com/fernandesjourneys/",
@@ -33,7 +33,7 @@ export const about = {
 
 /** Fallback hero defaults — live homepage values come from site-design.json (CMS → Website design). */
 export const hero = {
-  tagline: "Inspire. Capture. Discover.",
+  tagline: "Inspire. Capture. Discover",
   subtitle:
     "A personal travel blog sharing places I’ve been and notes from the road — places, stories, guides, and photos from journeys already behind me.",
   ctaPrimary: "Explore places",
