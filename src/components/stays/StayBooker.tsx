@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { Check, ShieldCheck } from "lucide-react";
 import { StayConfirmation } from "@/components/stays/StayConfirmation";
 import { StayFailureNotice } from "@/components/stays/StayFailureNotice";
 import { plan } from "@/components/trip-planner/density";
@@ -47,6 +48,17 @@ const inputClass = plan.input;
 type Pending = "" | "prebook" | "book" | "rates";
 type ItineraryState = "adding" | "added" | "missing";
 
+function groupRoomOffers(rooms: StayRoomOffer[]) {
+  const groups = new Map<string, StayRoomOffer[]>();
+  for (const room of rooms) {
+    const key = room.name.trim().toLowerCase() || room.offerId;
+    const group = groups.get(key) ?? [];
+    group.push(room);
+    groups.set(key, group);
+  }
+  return Array.from(groups.values());
+}
+
 export function StayBooker({
   hotelId,
   hotelName,
@@ -81,6 +93,7 @@ export function StayBooker({
   const retryStage = useRef<"prebook" | "book" | "rates">("prebook");
 
   const selected = rooms.find((room) => room.offerId === offerId) ?? null;
+  const roomGroups = groupRoomOffers(rooms);
   const busy = pending !== "";
 
   async function readError(response: Response): Promise<{ message: string; code: string }> {
@@ -135,9 +148,10 @@ export function StayBooker({
     }
   }
 
-  async function confirmRoom() {
-    if (lock.current || !offerId) return;
+  async function confirmRoom(targetOfferId = offerId) {
+    if (lock.current || !targetOfferId) return;
     lock.current = true;
+    setOfferId(targetOfferId);
     retryStage.current = "prebook";
     setFailure(null);
     setPrebook(null);
@@ -147,7 +161,7 @@ export function StayBooker({
       const response = await fetch("/api/stays/prebook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ offerId }),
+        body: JSON.stringify({ offerId: targetOfferId }),
       });
       if (!response.ok) {
         const { message, code } = await readError(response);
@@ -332,74 +346,68 @@ export function StayBooker({
           </Link>
         </div>
       ) : (
-        <fieldset className="plan-stack" disabled={busy}>
-          <legend className="font-display text-xl font-bold text-heading">Rooms</legend>
-          <div className="plan-stack">
-            {rooms.map((room) => {
-              const checked = room.offerId === offerId;
-              return (
-                <label
-                  key={room.offerId}
-                  className={`panel plan-inset flex cursor-pointer flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between ${
-                    checked ? "border-accent" : ""
-                  }`}
-                >
-                  <span className="flex min-w-0 gap-3">
-                    <input
-                      type="radio"
-                      name="room"
-                      className="mt-1 accent-[var(--accent)]"
-                      checked={checked}
-                      onChange={() => {
-                        setOfferId(room.offerId);
-                        setPrebook(null);
-                        setFailure(null);
-                        clientReference.current = "";
-                      }}
-                    />
-                    <RoomPhotos photos={room.photos ?? []} fallback={fallbackPhoto} />
-                    <span className="min-w-0">
-                      <span className="block font-semibold text-heading">{room.name}</span>
-                      <span className="mt-1 block text-sm text-muted">
-                        {[room.boardName, refundableLabel(room.refundable)].filter(Boolean).join(" · ")}
-                      </span>
-                      {room.cancellation.map((line) => (
-                        <span key={line} className="mt-1 block text-sm leading-relaxed text-text">
-                          {line}
-                        </span>
-                      ))}
-                      {room.conditions.map((line) => (
-                        <span key={line} className="mt-1 block text-sm leading-relaxed text-text">
-                          {line}
-                        </span>
-                      ))}
-                      {room.remarks ? (
-                        <span className="mt-2 block text-sm leading-relaxed text-text">{room.remarks}</span>
-                      ) : null}
-                    </span>
-                  </span>
-                  <span className="shrink-0 font-display text-lg font-bold text-heading sm:text-right">
-                    {room.price ? formatStayMoney(room.price) : "Price on confirm"}
-                  </span>
-                </label>
-              );
-            })}
-          </div>
+        <fieldset className="space-y-5" disabled={busy}>
+          <legend className="sr-only">Available rooms</legend>
+          {roomGroups.map((group) => {
+            const room = group[0];
+            return (
+              <article key={room.offerId} className="overflow-hidden rounded-xl border border-line bg-white shadow-sm">
+                <div className="border-b border-line p-4 sm:flex sm:items-center sm:gap-4 sm:p-5">
+                  <RoomPhotos photos={room.photos ?? []} fallback={fallbackPhoto} />
+                  <div className="mt-3 min-w-0 sm:mt-0">
+                    <h3 className="font-display text-xl font-bold text-heading">{room.name}</h3>
+                    <p className="mt-1 text-sm text-muted">
+                      {group.length} {group.length === 1 ? "rate" : "rates"} available for your dates
+                    </p>
+                  </div>
+                </div>
+                <div className="divide-y divide-line">
+                  {group.map((rate) => {
+                    const checking = pending === "prebook" && rate.offerId === offerId;
+                    return (
+                      <div key={rate.offerId} className="grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:p-5">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-heading">{rate.boardName || "Room only"}</p>
+                          <p className={`mt-1 flex items-center gap-1.5 text-sm font-semibold ${rate.refundable ? "text-emerald-700" : "text-muted"}`}>
+                            {rate.refundable ? <Check className="h-4 w-4" aria-hidden="true" /> : null}
+                            {refundableLabel(rate.refundable)}
+                          </p>
+                          {rate.cancellation.map((line) => (
+                            <p key={line} className="mt-2 text-sm leading-6 text-text">{line}</p>
+                          ))}
+                          {rate.conditions.map((line) => (
+                            <p key={line} className="mt-1 text-sm leading-6 text-text">{line}</p>
+                          ))}
+                          {rate.remarks ? <p className="mt-2 text-sm leading-6 text-text">{rate.remarks}</p> : null}
+                        </div>
+                        <div className="shrink-0 sm:min-w-44 sm:text-right">
+                          <p className="text-xs text-muted">Total for your stay</p>
+                          <p className="mt-1 font-display text-2xl font-bold text-heading">
+                            {rate.price ? formatStayMoney(rate.price) : "Price on confirm"}
+                          </p>
+                          <button
+                            type="button"
+                            className="btn btn-primary mt-3 w-full sm:w-auto"
+                            disabled={busy}
+                            onClick={() => {
+                              setPrebook(null);
+                              setFailure(null);
+                              clientReference.current = "";
+                              void confirmRoom(rate.offerId);
+                            }}
+                          >
+                            {checking ? "Checking…" : "Select"}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </article>
+            );
+          })}
         </fieldset>
       )}
-
-      {selected ? (
-        <div className="plan-actions">
-          <button
-            type="button"
-            className="btn btn-ink"
-            disabled={busy}
-            onClick={() => void confirmRoom()}
-          >
-            {pending === "prebook" ? "Checking the rate…" : "Continue with this room"}
-          </button>
-        </div>
-      ) : null}
       {pending === "prebook" ? (
         <p className="text-sm text-muted" role="status">
           Checking that this rate is still open…
@@ -407,7 +415,7 @@ export function StayBooker({
       ) : null}
 
       {prebook ? (
-        <form className="panel plan-inset plan-stack p-5" onSubmit={(event) => void bookRoom(event)}>
+        <form className="space-y-5 rounded-xl border border-line bg-white p-5 shadow-sm sm:p-6" onSubmit={(event) => void bookRoom(event)}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Selected room</p>
@@ -435,7 +443,11 @@ export function StayBooker({
             />
           ) : null}
           <div className="border-t border-line pt-5">
-            <h3 className="font-display text-lg font-bold text-heading">Guest details</h3>
+            <p className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+              <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+              Rate confirmed by Nuitee
+            </p>
+            <h3 className="mt-2 font-display text-xl font-bold text-heading">Who’s checking in?</h3>
           </div>
           <p className="text-sm leading-relaxed text-text">
             {prebook.roomName ? `${prebook.roomName}. ` : ""}

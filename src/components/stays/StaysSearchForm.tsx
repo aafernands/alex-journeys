@@ -20,7 +20,7 @@ export function StaysSearchForm({ query }: Props) {
 
   return (
     <form
-      className="panel plan-inset plan-stack"
+      className="rounded-xl border border-line bg-white p-4 shadow-sm sm:p-5"
       onSubmit={(event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -49,8 +49,8 @@ export function StaysSearchForm({ query }: Props) {
         );
       }}
     >
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-        <label className="plan-stack-tight lg:col-span-2">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(14rem,2fr)_minmax(18rem,2fr)_minmax(6rem,.65fr)_minmax(6rem,.65fr)_auto] lg:items-end">
+        <label className="plan-stack-tight">
           <span className={plan.label}>Destination</span>
           <input
             name="dest"
@@ -61,7 +61,7 @@ export function StaysSearchForm({ query }: Props) {
             autoComplete="off"
           />
         </label>
-        <div className="sm:col-span-2 lg:col-span-2">
+        <div className="sm:col-span-2 lg:col-span-1">
           <DateRangeField
             id="stays-dates"
             startDate={startDate}
@@ -104,24 +104,22 @@ export function StaysSearchForm({ query }: Props) {
             className={plan.input}
           />
         </label>
-      </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <button type="submit" className="btn btn-primary" disabled={pending}>
-          {pending ? "Searching…" : "Search stays"}
+        <button type="submit" className="btn btn-primary w-full lg:w-auto" disabled={pending}>
+          {pending ? "Searching…" : "Search"}
         </button>
-        <label className={`${plan.label} flex items-center gap-2`}>
-          Children
-          <input
-            name="children"
-            type="number"
-            min={0}
-            max={8}
-            defaultValue={query.children}
-            className={`${plan.input} w-20`}
-            aria-label="Children"
-          />
-        </label>
       </div>
+      <label className={`${plan.label} mt-3 flex items-center gap-2 lg:ml-auto lg:w-fit`}>
+        Children
+        <input
+          name="children"
+          type="number"
+          min={0}
+          max={8}
+          defaultValue={query.children}
+          className={`${plan.input} w-20`}
+          aria-label="Children"
+        />
+      </label>
     </form>
   );
 }

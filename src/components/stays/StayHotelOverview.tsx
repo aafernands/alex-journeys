@@ -190,7 +190,7 @@ export function StayHotelOverview({
         </section>
 
         <div className="mx-auto max-w-6xl">
-          <section className="border-b border-line py-7 sm:py-9">
+          <section id="overview" className="scroll-mt-28 border-b border-line py-7 sm:py-9">
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div>
                 {stars > 0 ? (
@@ -234,6 +234,14 @@ export function StayHotelOverview({
             </div>
           </section>
 
+          <nav aria-label="Hotel sections" className="sticky top-0 z-20 -mx-5 flex gap-1 overflow-x-auto border-b border-line bg-bg/95 px-5 py-2 backdrop-blur sm:static sm:mx-0 sm:bg-transparent sm:px-0">
+            <a href="#overview" className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-heading hover:bg-surface">Overview</a>
+            {amenities.length > 0 ? <a href="#amenities" className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-heading hover:bg-surface">Amenities</a> : null}
+            {locationHref || fullAddress ? <a href="#location" className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-heading hover:bg-surface">Location</a> : null}
+            {reviews.categories.length > 0 ? <a href="#reviews" className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-heading hover:bg-surface">Reviews</a> : null}
+            <a href="#rooms" className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-heading hover:bg-surface">Rooms</a>
+          </nav>
+
           {hotelHighlights.length > 0 ? (
             <section className="border-b border-line py-8 sm:py-10">
               <p className="eyebrow">Why this stay stands out</p>
@@ -257,7 +265,7 @@ export function StayHotelOverview({
           ) : null}
 
           {amenities.length > 0 ? (
-            <section className="border-b border-line py-8 sm:py-10">
+            <section id="amenities" className="scroll-mt-28 border-b border-line py-8 sm:py-10">
               <h2 className="font-display text-2xl font-bold text-heading sm:text-3xl">About this property</h2>
               <div className="mt-6 grid gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
                 {amenities.map((facility) => (
@@ -286,7 +294,7 @@ export function StayHotelOverview({
           ) : null}
 
           {(fullAddress || locationHref) ? (
-            <section className="border-b border-line py-8 sm:py-10">
+            <section id="location" className="scroll-mt-28 border-b border-line py-8 sm:py-10">
               <h2 className="font-display text-2xl font-bold text-heading sm:text-3xl">Explore the area</h2>
               <div className="mt-6 grid gap-5 lg:grid-cols-[1.3fr_.7fr]">
                 <div className="relative min-h-64 overflow-hidden rounded-xl border border-line bg-surface p-6">
@@ -366,7 +374,7 @@ export function StayHotelOverview({
           ) : null}
 
           {reviews.categories.length > 0 ? (
-            <section className="border-b border-line py-8 sm:py-10">
+            <section id="reviews" className="scroll-mt-28 border-b border-line py-8 sm:py-10">
               <h2 className="font-display text-2xl font-bold text-heading sm:text-3xl">What guests mention</h2>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
                 Review themes are summarized from Nuitee guest feedback.
@@ -392,9 +400,11 @@ export function StayHotelOverview({
           ) : null}
 
           <section id="rooms" className="scroll-mt-24 py-8 sm:py-10">
-            <div className="mb-6">
-              <p className="eyebrow">Available for your dates</p>
-              <h2 className="mt-2 font-display text-2xl font-bold text-heading sm:text-3xl">Choose your room</h2>
+            <div className="mb-6 sm:flex sm:items-end sm:justify-between sm:gap-6">
+              <div>
+                <p className="eyebrow">Available for your dates</p>
+                <h2 className="mt-2 font-display text-2xl font-bold text-heading sm:text-3xl">Choose your room</h2>
+              </div>
               <p className="mt-2 text-sm text-muted">
                 Live rates and cancellation terms are provided by Nuitee.
               </p>

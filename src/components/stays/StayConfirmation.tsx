@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 import { plan } from "@/components/trip-planner/density";
 import type { StayConfirmationDetails } from "@/lib/stays";
 
@@ -33,16 +34,23 @@ export function StayConfirmation({
 }: Props) {
   const showBookingId = confirmation.bookingId !== confirmation.confirmationCode;
   return (
-    <section className="panel plan-inset plan-stack p-5 sm:p-6" aria-labelledby="stay-confirmation">
-      <p className="eyebrow">Reservation confirmed</p>
-      <h2 id="stay-confirmation" className="font-display text-2xl font-bold text-heading">
-        {confirmation.hotelName}
-      </h2>
+    <section className="space-y-6 rounded-xl border border-line bg-white p-5 shadow-sm sm:p-7" aria-labelledby="stay-confirmation">
+      <div className="flex items-start gap-4">
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-700">
+          <CheckCircle2 className="h-7 w-7" aria-hidden="true" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-emerald-700">Reservation confirmed</p>
+          <h2 id="stay-confirmation" className="mt-1 font-display text-2xl font-bold text-heading">
+            {confirmation.hotelName}
+          </h2>
+        </div>
+      </div>
       <p className="text-sm leading-relaxed text-text">
         Nuitee accepted this {confirmation.sandbox ? "sandbox " : ""}reservation
         {confirmation.status ? ` · ${confirmation.status}` : ""}.
       </p>
-      <dl className="plan-stack-tight text-sm">
+      <dl className="grid gap-4 rounded-xl bg-surface p-4 text-sm sm:grid-cols-2 sm:p-5">
         <Row label="Confirmation" value={confirmation.confirmationCode} />
         {showBookingId ? <Row label="Booking id" value={confirmation.bookingId} /> : null}
         <Row label="Dates" value={confirmation.dateLabel} />

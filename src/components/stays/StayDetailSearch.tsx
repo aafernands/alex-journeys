@@ -36,7 +36,7 @@ export function StayDetailSearch({ hotelId, query }: Props) {
   const travelers = query.adults + query.children;
 
   return (
-    <section className="border-y border-line py-3" aria-label="Hotel search">
+    <section className="rounded-xl border border-line bg-white px-4 py-3 shadow-sm" aria-label="Hotel search">
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <p className="truncate font-semibold text-heading">{query.destination}</p>

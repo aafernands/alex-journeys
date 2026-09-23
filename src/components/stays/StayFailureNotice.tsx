@@ -40,7 +40,7 @@ export function StayFailureNotice({
     );
 
   return (
-    <div className="panel plan-inset plan-stack p-5" role="alert">
+    <div className="space-y-4 rounded-xl border border-line bg-white p-5 shadow-sm" role="alert">
       <h2 className="font-display text-xl font-bold text-heading">{failure.title}</h2>
       <p className="text-sm leading-relaxed text-text">{failure.message}</p>
       <div className="flex flex-wrap gap-3">

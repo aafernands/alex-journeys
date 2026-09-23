@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { randomUUID } from "node:crypto";
+import { MapPin, Star } from "lucide-react";
 import { StayTripBar } from "@/components/stays/StayTripBar";
 import { StaysSearchForm } from "@/components/stays/StaysSearchForm";
 import { SitePage } from "@/components/pages/SitePage";
@@ -134,7 +135,7 @@ export default async function StaysPage({ searchParams }: PageProps) {
               </p>
             ) : null}
             {result?.sandbox ? (
-              <p className="text-sm text-muted">
+              <p className="rounded-lg bg-surface px-4 py-3 text-sm text-muted">
                 Sandbox results from Nuitee. A booking here is a test reservation.
               </p>
             ) : null}
@@ -147,50 +148,78 @@ export default async function StaysPage({ searchParams }: PageProps) {
               </div>
             ) : null}
             {result && result.stays.length > 0 ? (
-              <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <section aria-labelledby="hotel-results" className="max-w-6xl">
+                <div className="mb-4 flex items-end justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-muted">{result.stays.length} properties</p>
+                    <h2 id="hotel-results" className="mt-1 font-display text-2xl font-bold text-heading">
+                      Recommended stays
+                    </h2>
+                  </div>
+                  <p className="hidden text-sm text-muted sm:block">Prices shown for your selected dates</p>
+                </div>
+                <ul className="space-y-4">
                 {result.stays.map((stay) => {
                   const rating = formatStayRating(stay.rating);
-                  const meta = [
-                    stay.neighborhood,
-                    rating ? `${rating} guest rating` : "",
-                    stay.stars ? `${stay.stars}-star` : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" · ");
+                  const stars = Math.max(0, Math.min(5, Math.round(stay.stars ?? 0)));
                   return (
                     <li key={stay.id}>
-                      <article className="panel plan-inset flex h-full flex-col overflow-hidden">
+                      <article className="group overflow-hidden rounded-xl border border-line bg-white transition hover:border-border-strong hover:shadow-md md:grid md:grid-cols-[17rem_minmax(0,1fr)]">
                         {stay.photo ? (
                           // Hotel CDNs are not a fixed host list, so this stays a plain image.
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={stay.photo}
-                            alt=""
-                            className="h-44 w-full object-cover"
+                            alt={stay.name}
+                            className="h-52 w-full object-cover transition duration-300 group-hover:scale-[1.02] md:h-full md:min-h-56"
                           />
                         ) : (
-                          <div className="h-44 bg-surface" aria-hidden="true" />
+                          <div className="h-52 bg-surface md:h-full md:min-h-56" aria-hidden="true" />
                         )}
-                        <div className="flex flex-1 flex-col gap-2 p-4">
-                          <h2 className="font-display text-lg font-bold text-heading">{stay.name}</h2>
-                          {meta ? <p className="text-sm text-muted">{meta}</p> : null}
-                          <p className="mt-auto font-semibold text-heading">
-                            {stay.fromPrice
-                              ? `From ${formatStayMoney(stay.fromPrice)}`
-                              : "Price on request"}
-                          </p>
-                          <Link
-                            href={staysHotelPath(stay.id, query)}
-                            className="btn btn-primary mt-2 inline-flex self-start"
-                          >
-                            View rooms
-                          </Link>
+                        <div className="flex min-w-0 flex-col p-5">
+                          {stars > 0 ? (
+                            <div className="mb-2 flex gap-0.5 text-heading" aria-label={`${stars} star hotel`}>
+                              {Array.from({ length: stars }, (_, index) => (
+                                <Star key={index} className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                              ))}
+                            </div>
+                          ) : null}
+                          <h3 className="font-display text-xl font-bold leading-tight text-heading">{stay.name}</h3>
+                          {stay.neighborhood || stay.city ? (
+                            <p className="mt-2 flex items-center gap-1.5 text-sm text-muted">
+                              <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
+                              {[stay.neighborhood, stay.city].filter(Boolean).join(" · ")}
+                            </p>
+                          ) : null}
+                          <div className="mt-5 flex flex-1 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                            <div>
+                              {rating ? (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <span className="rounded-md bg-heading px-2 py-1 font-bold text-white">{rating}</span>
+                                  <span className="font-semibold text-heading">Guest rating</span>
+                                </div>
+                              ) : null}
+                            </div>
+                            <div className="sm:text-right">
+                              <p className="text-xs text-muted">Total for selected dates</p>
+                              <p className="mt-1 font-display text-2xl font-bold text-heading">
+                                {stay.fromPrice ? formatStayMoney(stay.fromPrice) : "Price on request"}
+                              </p>
+                              <Link
+                                href={staysHotelPath(stay.id, query)}
+                                className="btn btn-primary mt-3 w-full sm:w-auto"
+                              >
+                                View rooms
+                              </Link>
+                            </div>
+                          </div>
                         </div>
                       </article>
                     </li>
                   );
                 })}
-              </ul>
+                </ul>
+              </section>
             ) : null}
           </>
         )}
