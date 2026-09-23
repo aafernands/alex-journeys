@@ -117,9 +117,19 @@ function sameDestination(a: string, b: string) {
   return Boolean(left && right && left === right);
 }
 
-function hotelHref(hotelId: string, destination: string) {
+function hotelHref(hotelId: string, destination: string, context: SaveHotelContext) {
   const params = new URLSearchParams();
   if (destination) params.set("dest", destination);
+  const startDate = cleanDate(context.startDate);
+  const endDate = cleanDate(context.endDate);
+  if (startDate) params.set("start", startDate);
+  if (endDate) params.set("end", endDate);
+  const adults = Math.max(1, cleanCount(context.adults, 2, 30));
+  const children = cleanCount(context.children, 0, 30);
+  const rooms = Math.max(1, cleanCount(context.rooms, 1, 30));
+  params.set("adults", String(adults));
+  if (children > 0) params.set("children", String(children));
+  if (rooms > 1) params.set("rooms", String(rooms));
   return `/stays/${hotelId}${params.size ? `?${params.toString()}` : ""}`;
 }
 
@@ -304,7 +314,7 @@ export async function addSavedHotel(
   const stars = cleanNumber(input.stars);
   const savedAt = new Date().toISOString();
   const destination = cleanText(context.destination, 160) || city || neighborhood || name;
-  const href = hotelHref(hotelId, destination);
+  const href = hotelHref(hotelId, destination, context);
   const trip = await ensureTripForSavedHotel(
     uid,
     { hotelId, name, city, neighborhood, href },
