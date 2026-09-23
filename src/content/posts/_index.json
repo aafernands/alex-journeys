@@ -40,6 +40,7 @@
       "title": "Niagara Falls in 2 days: mist, tunnels, and a night under the lights",
       "slug": "niagara-falls",
       "date": "2026-09-20T12:00:00",
+      "updatedAt": "2026-09-23T18:30:38.759Z",
       "excerpt": "A short two-day loop from the Canadian side — Table Rock, the tunnels behind the falls, Clifton Hill at night, and a quieter morning across the Niagara Parkway.",
       "featuredImage": {
         "url": "/media/photo-1745_singular_display_fullpicture-mua3y8bo.jpg",
@@ -50,6 +51,11 @@
       ],
       "guideHubs": [
         "plan-a-trip"
+      ],
+      "bookingTools": [
+        "flight",
+        "hotel",
+        "experience"
       ]
     },
     {
