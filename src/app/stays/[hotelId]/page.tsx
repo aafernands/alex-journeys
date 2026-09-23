@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StayBooker } from "@/components/stays/StayBooker";
+import { StayDetailSearch } from "@/components/stays/StayDetailSearch";
 import { StayHotelOverview } from "@/components/stays/StayHotelOverview";
 import { StayTripBar } from "@/components/stays/StayTripBar";
 import { SitePage } from "@/components/pages/SitePage";
@@ -117,7 +118,7 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
         listHref={listHref}
         sandbox={loaded.sandbox}
         failure={failure}
-        tripBar={<StayTripBar query={query} />}
+        tripBar={<StayDetailSearch hotelId={hotelId} query={query} />}
       >
         <StayBooker
           hotelId={hotel.id || hotelId}

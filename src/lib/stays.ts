@@ -305,6 +305,18 @@ export function staysHotelPath(hotelId: string, query: StaysQuery): string {
   return params ? `/stays/${id}?${params}` : `/stays/${id}`;
 }
 
+/** Keep the selected hotel when only dates or occupancy change. */
+export function stayDetailSearchPath(
+  hotelId: string,
+  current: StaysQuery,
+  next: StaysQuery,
+): string {
+  const sameDestination =
+    current.destination.trim().toLowerCase() ===
+    next.destination.trim().toLowerCase();
+  return sameDestination ? staysHotelPath(hotelId, next) : staysPath(next);
+}
+
 export function staysQueryString(query: StaysQuery): string {
   const params = new URLSearchParams();
   if (query.destination) params.set("dest", query.destination);

@@ -141,17 +141,17 @@ export function StayHotelOverview({
   return (
     <main className="bg-bg pb-28 md:pb-16">
       <div className="section-shell pt-4 sm:pt-6">
-        {tripBar ? <div className="mb-5">{tripBar}</div> : null}
         {failure ? (
           <p className="mb-4 text-sm font-semibold text-link" role="alert">
             {failure}
           </p>
         ) : null}
-        <nav aria-label="Breadcrumb" className="mb-4 text-sm text-muted">
+        <nav aria-label="Breadcrumb" className="mb-3 text-sm text-muted">
           <Link href={listHref} className="text-link transition hover:text-accent">
             ← Back to stays
           </Link>
         </nav>
+        {tripBar ? <div className="mb-4">{tripBar}</div> : null}
 
         <section aria-label="Hotel photos" className="relative overflow-hidden rounded-xl bg-surface">
           {hotel.photos.length > 0 ? (
@@ -164,7 +164,7 @@ export function StayHotelOverview({
                   className="h-[48vh] min-h-80 w-full object-cover md:h-[32rem]"
                 />
               </div>
-              {hotel.photos.slice(1, 5).map((photo, index) => (
+              {hotel.photos.slice(1, 5).map((photo) => (
                 <div key={photo.url} className="hidden md:block">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
