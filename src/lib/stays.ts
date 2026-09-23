@@ -44,6 +44,8 @@ export type StayListItem = {
 export type StayPhoto = {
   url: string;
   caption: string;
+  /** Backup URL from Nuitee when the primary photo fails to load. */
+  fallbackUrl?: string;
 };
 
 export type StayHotelContent = {
@@ -74,6 +76,11 @@ export type StayRoomOffer = {
   cancellation: string[];
   /** Hotel remarks and other rate conditions. */
   conditions: string[];
+  /**
+   * Room photos from Nuitee hotel content, joined on `mappedRoomId`.
+   * Empty when that room has no imagery.
+   */
+  photos: StayPhoto[];
 };
 
 export type StayPrebook = {
@@ -634,6 +641,8 @@ function facilityName(value: unknown): string {
   return text(record?.name ?? record?.facility, 80);
 }
 
+const ROOM_PHOTO_LIMIT = 4;
+
 function photoFrom(value: unknown): StayPhoto | null {
   if (typeof value === "string") {
     const url = httpsUrl(value);
@@ -641,9 +650,150 @@ function photoFrom(value: unknown): StayPhoto | null {
   }
   const record = asRecord(value);
   if (!record) return null;
-  const url = httpsUrl(record.urlHd) || httpsUrl(record.url) || httpsUrl(record.image);
+  const url =
+    httpsUrl(record.urlHd) ||
+    httpsUrl(record.hd_url) ||
+    httpsUrl(record.url) ||
+    httpsUrl(record.image) ||
+    httpsUrl(record.failoverPhoto);
   if (!url) return null;
-  return { url, caption: text(record.caption ?? record.alt, 120) };
+  const fallbackUrl = httpsUrl(record.failoverPhoto);
+  const photo: StayPhoto = {
+    url,
+    caption: text(record.caption ?? record.imageDescription ?? record.alt, 120),
+  };
+  if (fallbackUrl && fallbackUrl !== url) photo.fallbackUrl = fallbackUrl;
+  return photo;
+}
+
+function photoRank(value: unknown): number {
+  const record = asRecord(value);
+  if (!record) return 0;
+  const main = record.mainPhoto === true || record.defaultImage === true ? 1_000 : 0;
+  return main + (numberOrNull(record.score) ?? 0);
+}
+
+function collectPhotos(record: Record<string, unknown> | null): StayPhoto[] {
+  if (!record) return [];
+  const items = [
+    ...asArray(record.photos),
+    ...asArray(record.roomPhotos),
+    ...asArray(record.images),
+  ];
+  const ranked = items
+    .map((item, index) => ({ item, index, rank: photoRank(item) }))
+    .sort((a, b) => b.rank - a.rank || a.index - b.index);
+  const photos: StayPhoto[] = [];
+  const seen = new Set<string>();
+  for (const { item } of ranked) {
+    const photo = photoFrom(item);
+    if (!photo || seen.has(photo.url)) continue;
+    seen.add(photo.url);
+    photos.push(photo);
+    if (photos.length >= ROOM_PHOTO_LIMIT) break;
+  }
+  return photos;
+}
+
+type RoomPhotoIndex = {
+  byId: Map<string, StayPhoto[]>;
+  byName: Map<string, StayPhoto[]>;
+};
+
+function roomIdKey(value: unknown): string {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    return String(Math.trunc(value));
+  }
+  const raw = text(value, 32);
+  if (!/^[1-9]\d{0,18}$/.test(raw)) return "";
+  return raw;
+}
+
+function roomNameKey(value: unknown): string {
+  return text(value, 160)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function indexRoomRecord(index: RoomPhotoIndex, record: Record<string, unknown>) {
+  const photos = collectPhotos(record);
+  if (photos.length === 0) return;
+  const id = roomIdKey(record.id ?? record.roomId);
+  if (id && !index.byId.has(id)) index.byId.set(id, photos);
+  const name = roomNameKey(record.roomName ?? record.name);
+  if (name && !index.byName.has(name)) index.byName.set(name, photos);
+}
+
+/** Hotel content `rooms[]`, plus any rooms nested on a rates payload. */
+function indexRoomPhotos(payload: unknown, index: RoomPhotoIndex) {
+  const root = asRecord(payload);
+  if (!root) return;
+  const data = asRecord(root.data);
+  const lists = [asArray(data?.rooms), asArray(root.rooms)];
+  for (const hotel of asArray(root.hotels)) {
+    const record = asRecord(hotel);
+    if (record) lists.push(asArray(record.rooms));
+  }
+  if (Array.isArray(root.data)) {
+    for (const row of root.data) {
+      const record = asRecord(row);
+      if (record) lists.push(asArray(record.rooms));
+    }
+  }
+  for (const list of lists) {
+    for (const room of list) {
+      const record = asRecord(room);
+      if (record) indexRoomRecord(index, record);
+    }
+  }
+}
+
+function mappedRoomId(
+  room: Record<string, unknown>,
+  rate: Record<string, unknown> | null,
+): string {
+  const direct = roomIdKey(
+    rate?.mappedRoomId ?? rate?.mapped_room_id ?? room.mappedRoomId ?? room.mapped_room_id,
+  );
+  if (direct) return direct;
+  for (const item of asArray(room.rates)) {
+    const extra = asRecord(item);
+    const id = roomIdKey(extra?.mappedRoomId ?? extra?.mapped_room_id);
+    if (id) return id;
+  }
+  return "";
+}
+
+function photosByName(name: string, index: RoomPhotoIndex): StayPhoto[] {
+  const key = roomNameKey(name);
+  if (!key) return [];
+  const exact = index.byName.get(key);
+  if (exact) return exact;
+  let best = "";
+  for (const candidate of index.byName.keys()) {
+    if (candidate.length < 8) continue;
+    if (!key.includes(candidate)) continue;
+    if (candidate.length > best.length) best = candidate;
+  }
+  return best ? (index.byName.get(best) ?? []) : [];
+}
+
+function offerPhotos(
+  room: Record<string, unknown>,
+  rate: Record<string, unknown> | null,
+  index: RoomPhotoIndex,
+): StayPhoto[] {
+  const id = mappedRoomId(room, rate);
+  if (id) {
+    const match = index.byId.get(id);
+    if (match?.length) return match;
+  }
+  const embedded = collectPhotos(room);
+  if (embedded.length) return embedded;
+  const fromRate = collectPhotos(rate);
+  if (fromRate.length) return fromRate;
+  return photosByName(text(rate?.name ?? room.name, 160), index);
 }
 
 export function mapHotelContent(
@@ -698,9 +848,12 @@ export function mapHotelContent(
   };
 }
 
-export function mapRoomOffers(payload: unknown): StayRoomOffer[] {
+export function mapRoomOffers(payload: unknown, hotelPayload?: unknown): StayRoomOffer[] {
   const root = asRecord(payload);
   if (!root) return [];
+  const photos: RoomPhotoIndex = { byId: new Map(), byName: new Map() };
+  indexRoomPhotos(hotelPayload, photos);
+  indexRoomPhotos(payload, photos);
   const offers: StayRoomOffer[] = [];
   const seen = new Set<string>();
   for (const row of asArray(root.data)) {
@@ -722,6 +875,7 @@ export function mapRoomOffers(payload: unknown): StayRoomOffer[] {
         remarks: plainStayText(text(rate?.remarks, 800)).slice(0, 320),
         cancellation: cancellationLines(rate, price?.currency || "USD"),
         conditions: conditionLines(rate),
+        photos: offerPhotos(room, rate, photos),
       });
     }
   }
