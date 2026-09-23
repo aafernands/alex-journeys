@@ -406,6 +406,5 @@ export function toPostMeta(data: ValidatedPost): PostMeta {
     destinations: data.destinations,
     ...(data.guideHubs.length > 0 ? { guideHubs: data.guideHubs } : {}),
     ...(data.bookingTools.length > 0 ? { bookingTools: data.bookingTools } : {}),
-    ...(data.experienceWidgetHtml ? { experienceWidgetHtml: data.experienceWidgetHtml } : {}),
   };
 }
