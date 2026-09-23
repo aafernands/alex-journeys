@@ -95,10 +95,14 @@ export function PostBookingBox({
   experienceWidgetHtml = "",
 }: Props) {
   if (tools.length === 0 || !destination.trim()) return null;
+  const experienceWidgetOnly =
+    tools.length === 1 &&
+    tools[0] === "experience" &&
+    Boolean(experienceWidgetHtml.trim());
 
   return (
     <aside
-      className="mt-12 overflow-hidden rounded-2xl border border-border bg-white shadow-[0_12px_30px_rgba(20,17,13,0.07)]"
+      className={`mt-12 overflow-hidden rounded-2xl bg-white shadow-[0_12px_30px_rgba(20,17,13,0.07)] ${experienceWidgetOnly ? "" : "border border-border"}`}
       aria-label={`Book travel for ${destination}`}
     >
       <div className="grid md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)]">
