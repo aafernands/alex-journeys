@@ -1307,6 +1307,20 @@ export function ItineraryHub({
                     >
                       Add to itinerary
                     </button>
+                    {partner.key !== flightLaneKey && partner.key !== stayLaneKey ? (
+                      <button
+                        type="button"
+                        className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
+                        onClick={() => {
+                          setLanePin(OUTSIDE_TAB);
+                          window.requestAnimationFrame(() => {
+                            document.querySelector(".plan-hub-lanes")?.scrollIntoView({ block: "start" });
+                          });
+                        }}
+                      >
+                        Import confirmation
+                      </button>
+                    ) : null}
                   </div>
                 )}
                 {adding ? (
@@ -1594,17 +1608,20 @@ export function ItineraryHub({
       </section>
       </PlanFold>
 
-      <section className="plan-section border-t border-border pt-5" aria-label="Add a booking from email">
-        <div className="flex items-center justify-between gap-4">
+      <section
+        className="plan-section rounded-xl border border-border bg-white p-4 sm:p-5"
+        aria-label="Import an outside booking"
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <p className={plan.label}>Booked outside Fernandes Journeys?</p>
+            <p className={plan.label}>Booked somewhere else?</p>
             <p className={`${plan.caption} mt-1 text-muted`}>
-              Forward the confirmation email to import it into this itinerary.
+              Import flights, stays, cars, experiences, insurance, eSIMs, and other confirmations into this trip.
             </p>
           </div>
           <button
             type="button"
-            className={`${plan.textBtn} shrink-0 font-semibold text-accent hover:underline`}
+            className="btn btn-secondary shrink-0"
             onClick={() => {
               setLanePin(OUTSIDE_TAB);
               window.requestAnimationFrame(() => {
@@ -1612,7 +1629,7 @@ export function ItineraryHub({
               });
             }}
           >
-            Forward confirmation
+            Import booking
           </button>
         </div>
       </section>
