@@ -1354,6 +1354,12 @@ export function ItineraryHub({
               nextSort={nextSort}
               onAddItem={addItem}
               onRemember={onRememberGuestDraft}
+              onClose={() => {
+                setLanePin(nextLaneKey ?? partners[0]?.key ?? "auto");
+                window.requestAnimationFrame(() => {
+                  document.querySelector(".plan-hub-lanes")?.scrollIntoView({ block: "start" });
+                });
+              }}
             />
           ) : null}
         </div>
