@@ -1952,7 +1952,8 @@ body:has(main.plan-flow) a[href="#newsletter"] {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.15rem;
+  gap: 0.75rem;
+  padding-bottom: 0.9rem;
   border-bottom: 1px solid var(--border);
 }
 
@@ -1960,13 +1961,25 @@ body:has(main.plan-flow) a[href="#newsletter"] {
   position: relative;
   display: flex;
   flex: 1 1 auto;
-  gap: 0.15rem;
-  border-bottom: 1px solid var(--border);
+  align-items: stretch;
+  gap: 0.625rem;
+  border-bottom: 0;
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
-  scroll-padding-inline: 0.25rem;
+  padding: 0.35rem 0.15rem 0.55rem;
+  scroll-padding-inline: 0.75rem;
   scrollbar-width: thin;
+  scrollbar-color: var(--sand) transparent;
+}
+
+.plan-lane-tabs::-webkit-scrollbar {
+  height: 6px;
+}
+
+.plan-lane-tabs::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--sand);
 }
 
 .plan-lane-tab {
@@ -1975,24 +1988,30 @@ body:has(main.plan-flow) a[href="#newsletter"] {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 0.15rem;
-  min-height: 2.75rem;
+  gap: 0.35rem;
+  min-width: 6.75rem;
+  min-height: 4.5rem;
   max-width: 100%;
-  border: 0;
-  box-shadow: inset 0 -2px 0 transparent;
-  background: transparent;
-  padding: 0.4rem 0.8rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--bg);
+  padding: 0.8rem 1.15rem 0.75rem;
   color: var(--text);
   text-align: left;
   cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .plan-lane-tab-label {
-  font-size: 0.9375rem;
+  max-width: 8.5rem;
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-size: 1rem;
   font-weight: 600;
-  line-height: 1.2;
-  color: var(--text);
-  white-space: nowrap;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--heading);
+  text-wrap: balance;
+  white-space: normal;
 }
 
 .plan-lane-tab-cue {
@@ -2000,12 +2019,16 @@ body:has(main.plan-flow) a[href="#newsletter"] {
   align-items: center;
   gap: 0.35rem;
   min-width: 0;
+  max-width: 100%;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--white) 72%, var(--surface));
+  padding: 0.15rem 0.5rem 0.15rem 0.4rem;
 }
 
 .plan-lane-tab-meta {
-  font-size: var(--plan-fs-caption);
+  font-size: 0.75rem;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.25;
   color: var(--muted);
   white-space: nowrap;
 }
@@ -2031,36 +2054,107 @@ body:has(main.plan-flow) a[href="#newsletter"] {
 }
 
 .plan-lane-tab[aria-selected="true"] {
-  box-shadow: inset 0 -2px 0 var(--accent);
+  border-color: var(--heading);
+  background: var(--heading);
+  color: var(--bg);
 }
 
 .plan-lane-tab[aria-selected="true"] .plan-lane-tab-label {
-  color: var(--heading);
+  color: var(--bg);
   font-weight: 700;
 }
 
-.plan-lane-tab-next .plan-lane-tab-meta,
+.plan-lane-tab[aria-selected="true"] .plan-lane-tab-cue {
+  background: color-mix(in srgb, var(--bg) 16%, transparent);
+}
+
 .plan-lane-tab[aria-selected="true"] .plan-lane-tab-meta {
+  color: color-mix(in srgb, var(--bg) 88%, transparent);
+}
+
+.plan-lane-tab-next:not([aria-selected="true"]) .plan-lane-tab-meta {
   color: var(--accent-deep);
+}
+
+.plan-lane-tab:hover {
+  border-color: var(--border-strong);
 }
 
 .plan-lane-tab:hover .plan-lane-tab-label {
   color: var(--heading);
 }
 
+.plan-lane-tab[aria-selected="true"]:hover {
+  border-color: var(--heading);
+  background: var(--heading);
+}
+
+.plan-lane-tab[aria-selected="true"]:hover .plan-lane-tab-label {
+  color: var(--bg);
+}
+
 .plan-lane-tab:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: -2px;
+  outline-offset: 2px;
 }
 
 .plan-lane-tab-aside {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.85rem;
   width: 100%;
-  border-left: 0;
-  background: var(--bg);
+  min-height: 3.5rem;
+  border-style: solid;
+  border-color: var(--border-strong);
+  background: transparent;
+  padding: 0.7rem 1.05rem;
+}
+
+.plan-lane-tab-aside .plan-lane-tab-label {
+  max-width: none;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.plan-lane-tab-aside .plan-lane-tab-meta {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.plan-lane-tab-aside:hover {
+  border-color: var(--heading);
+  background: var(--surface-soft);
+}
+
+.plan-lane-tab-aside:hover .plan-lane-tab-label {
+  color: var(--heading);
+}
+
+.plan-lane-tab-aside[aria-selected="true"] {
+  border-color: var(--heading);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--heading);
+  color: var(--heading);
+}
+
+.plan-lane-tab-aside[aria-selected="true"] .plan-lane-tab-label {
+  color: var(--heading);
+  font-weight: 700;
+}
+
+.plan-lane-tab-aside[aria-selected="true"] .plan-lane-tab-meta {
+  color: var(--accent-deep);
+}
+
+.plan-lane-tab-aside[aria-selected="true"]:hover {
+  border-color: var(--heading);
+  background: var(--white);
+}
+
+.plan-lane-tab-aside[aria-selected="true"]:hover .plan-lane-tab-label {
+  color: var(--heading);
 }
 
 .plan-lane-panel[hidden] {
@@ -2080,15 +2174,16 @@ body:has(main.plan-flow) a[href="#newsletter"] {
 
 @media (min-width: 640px) {
   .plan-lane-tabs-bar {
-    gap: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.85rem;
   }
 
   .plan-lane-tab-aside {
     width: auto;
-    align-self: flex-start;
-    background: transparent;
-    padding-left: 0.8rem;
-    padding-right: 0.8rem;
+    flex: 0 0 auto;
+    align-self: center;
+    max-width: 16rem;
   }
 
   .plan-lane-panel.plan-lane:not([hidden]) {
