@@ -2,6 +2,7 @@ import { ViatorWidgets } from "@/components/blog/ViatorWidgets";
 import { rewriteHtmlExternalLinks } from "@/lib/outbound";
 import { wrapHtmlImagesWithPinterestPins } from "@/lib/pinterest";
 import { absoluteUrl } from "@/lib/seo";
+import { sanitizeCmsHtml } from "@/lib/cms/sanitize-html";
 
 type Props = {
   html: string;
@@ -28,7 +29,7 @@ function withHeadingIds(html: string): string {
 
 /** Renders cleaned WordPress HTML with prose styles and outbound rewrites. */
 export function PostContent({ html, pagePath, shareDescription }: Props) {
-  let prepared = rewriteHtmlExternalLinks(withHeadingIds(html));
+  let prepared = rewriteHtmlExternalLinks(withHeadingIds(sanitizeCmsHtml(html)));
   if (pagePath) {
     prepared = wrapHtmlImagesWithPinterestPins(prepared, {
       pageUrl: absoluteUrl(pagePath),

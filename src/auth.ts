@@ -178,19 +178,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.authProvider = account.provider;
       }
 
-      // Client `useSession().update({ name, email, image })` after profile /
-      // email-change so the UI reflects Firestore without a full re-login.
+      // Client `useSession().update({ name, image })` keeps display details
+      // current without allowing client input to influence admin identity.
       if (trigger === "update" && session && typeof session === "object") {
         const patch = session as {
           name?: string | null;
-          email?: string | null;
           image?: string | null;
         };
         if (patch.name !== undefined) {
           token.name = patch.name;
-        }
-        if (patch.email !== undefined && typeof patch.email === "string") {
-          token.email = patch.email.trim().toLowerCase();
         }
         if (patch.image !== undefined) {
           token.picture = patch.image;

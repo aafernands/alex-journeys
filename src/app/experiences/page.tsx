@@ -47,7 +47,7 @@ export async function generateMetadata({
     : "Experiences";
   const description = query.destination
     ? `Tours and things to do in ${query.destination}.`
-    : "Tours and activities for the trip you’re planning!";
+    : "Tours and activities for the trip you’re planning.";
   return {
     title,
     description,
@@ -80,7 +80,7 @@ export default async function ExperiencesPage({ searchParams }: PageProps) {
       description={
         place
           ? "Tours and things to do for this stop, from Viator."
-          : "Tours and activities for the trip you’re planning!"
+          : "Tours and activities for the trip you’re planning."
       }
       narrow={false}
       tone="default"

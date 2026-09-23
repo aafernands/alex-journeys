@@ -1,5 +1,6 @@
 import type { SitePage } from "@/lib/pages";
 import { sanitizeSlug } from "@/lib/cms/validate";
+import { sanitizeCmsHtml } from "@/lib/cms/sanitize-html";
 
 export type PageInput = {
   title?: unknown;
@@ -59,7 +60,7 @@ export function validatePageInput(
   if (contentHtml.trim().length === 0) {
     // Soft default so hub intros can publish with title/description only
   }
-  const html = contentHtml.trim() ? contentHtml : "<p></p>";
+  const html = contentHtml.trim() ? sanitizeCmsHtml(contentHtml) : "<p></p>";
 
   let sections: Record<string, unknown> | undefined;
   if (input.sections !== undefined && input.sections !== null) {

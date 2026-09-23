@@ -8,6 +8,7 @@ import type {
   PostItineraryDay,
   PostMeta,
 } from "@/lib/post-types";
+import { sanitizeCmsHtml } from "@/lib/cms/sanitize-html";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const ALLOWED_DESTINATIONS = new Set(destinationSlugs);
@@ -282,10 +283,7 @@ export function validatePostInput(
     return { ok: false, error: "Excerpt is required (max 600 characters)." };
   }
 
-  // Stored verbatim. Empty Viator divs (data-vi-partner-id / data-vi-widget-ref)
-  // and a pasted https://www.viator.com/orion/partner/widget.js script are
-  // intentional — the partner script fills the cards. Do not sanitize them away.
-  const contentHtml = asString(input.contentHtml);
+  const contentHtml = sanitizeCmsHtml(asString(input.contentHtml));
   if (!contentHtml) {
     return { ok: false, error: "Content HTML is required." };
   }
