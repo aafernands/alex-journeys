@@ -34,7 +34,7 @@ export function PostExperienceAffiliateWidget({ html, placeLabel }: Props) {
       </div>
 
       <div
-        className="mt-5 overflow-hidden rounded-xl border border-border bg-white p-2 sm:p-3"
+        className="mt-5 overflow-hidden rounded-xl bg-white p-2 sm:p-3"
         dangerouslySetInnerHTML={{ __html: safe }}
       />
       <ViatorWidgets html={safe} />
