@@ -15,6 +15,8 @@ export type SavedHotelRow = {
   stars: number | null;
   savedAt: string;
   href: string;
+  tripId: string;
+  tripHref: string;
 };
 
 export function SavedHotelsList({ hotels }: { hotels: SavedHotelRow[] }) {
@@ -110,9 +112,16 @@ export function SavedHotelsList({ hotels }: { hotels: SavedHotelRow[] }) {
                   ) : null}
                 </div>
                 <div className="mt-4 flex items-center justify-between gap-3">
-                  <Link href={hotel.href} className="text-sm font-semibold text-link hover:text-accent">
-                    View hotel
-                  </Link>
+                  <div className="flex items-center gap-3">
+                    <Link href={hotel.href} className="text-sm font-semibold text-link hover:text-accent">
+                      View hotel
+                    </Link>
+                    {hotel.tripHref ? (
+                      <Link href={hotel.tripHref} className="text-sm font-semibold text-link hover:text-accent">
+                        View trip
+                      </Link>
+                    ) : null}
+                  </div>
                   <button
                     type="button"
                     onClick={() => void remove(hotel.hotelId)}

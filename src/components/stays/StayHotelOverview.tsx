@@ -37,6 +37,15 @@ type Props = {
   failure?: string;
   listHref: string;
   sandbox: boolean;
+  saveTripContext?: {
+    destination: string;
+    startDate: string;
+    endDate: string;
+    adults: number;
+    children: number;
+    rooms: number;
+    tripId: string;
+  };
 };
 
 function FacilityIcon({ label, className = "h-5 w-5" }: { label: string; className?: string }) {
@@ -137,6 +146,7 @@ export function StayHotelOverview({
   failure,
   listHref,
   sandbox,
+  saveTripContext,
 }: Props) {
   const score = reviewScore(hotel, reviews);
   const scoreText = formatStayRating(score);
@@ -202,6 +212,7 @@ export function StayHotelOverview({
 
               <div className="flex flex-col items-start gap-3 lg:items-end">
                 <SaveHotelButton
+                  tripContext={saveTripContext}
                   hotel={{
                     hotelId: hotel.id,
                     name: hotel.name,
