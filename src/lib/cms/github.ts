@@ -261,6 +261,7 @@ export async function fetchDraftFromGithub(
   featuredImage: Post["featuredImage"];
   destinations: string[];
   guideHubs?: string[];
+  bookingTools?: Post["bookingTools"];
   contentHtml: string;
   itinerary?: Post["itinerary"];
   source?: unknown;
@@ -274,6 +275,7 @@ export async function fetchDraftFromGithub(
     featuredImage: Post["featuredImage"];
     destinations: string[];
     guideHubs?: string[];
+    bookingTools?: Post["bookingTools"];
     contentHtml: string;
     itinerary?: Post["itinerary"];
     source?: unknown;
@@ -469,6 +471,9 @@ export async function publishDraft(
     destinations: validated.destinations,
     ...(validated.guideHubs.length > 0
       ? { guideHubs: validated.guideHubs }
+      : {}),
+    ...(validated.bookingTools.length > 0
+      ? { bookingTools: validated.bookingTools }
       : {}),
     contentHtml: validated.contentHtml,
     source: "cms" as const,
