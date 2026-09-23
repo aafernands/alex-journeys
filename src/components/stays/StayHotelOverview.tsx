@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { StayPhotoGallery } from "@/components/stays/StayPhotoGallery";
 import Link from "next/link";
 import {
   Accessibility,
@@ -8,7 +9,6 @@ import {
   Clock3,
   Coffee,
   Dumbbell,
-  Images,
   MapPin,
   ShieldCheck,
   Snowflake,
@@ -74,6 +74,16 @@ function mapHref(hotel: StayHotelContent) {
   return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : "";
 }
 
+function mapEmbedHref(hotel: StayHotelContent) {
+  const query =
+    hotel.latitude != null && hotel.longitude != null
+      ? `${hotel.latitude},${hotel.longitude}`
+      : [hotel.address, hotel.city, hotel.country].filter(Boolean).join(", ");
+  return query
+    ? `https://www.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed`
+    : "";
+}
+
 function topFacilities(facilities: string[]) {
   const priority = [
     /beach|ocean/i,
@@ -133,6 +143,7 @@ export function StayHotelOverview({
   const amenities = topFacilities(hotel.facilities);
   const hotelHighlights = highlights(hotel, reviews);
   const locationHref = mapHref(hotel);
+  const mapEmbed = mapEmbedHref(hotel);
   const fromPrice = rooms.find((room) => room.price)?.price ?? null;
   const fromPriceLabel = fromPrice ? formatStayMoney(fromPrice) : "";
   const stars = Math.max(0, Math.min(5, Math.round(hotel.stars ?? 0)));
@@ -153,41 +164,7 @@ export function StayHotelOverview({
         </nav>
         {tripBar ? <div className="mb-4">{tripBar}</div> : null}
 
-        <section aria-label="Hotel photos" className="relative overflow-hidden rounded-xl bg-surface">
-          {hotel.photos.length > 0 ? (
-            <div className="grid gap-1 md:grid-cols-4 md:grid-rows-2">
-              <div className="md:col-span-2 md:row-span-2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={hotel.photos[0].url}
-                  alt={hotel.photos[0].caption || hotel.name}
-                  className="h-[48vh] min-h-80 w-full object-cover md:h-[32rem]"
-                />
-              </div>
-              {hotel.photos.slice(1, 5).map((photo) => (
-                <div key={photo.url} className="hidden md:block">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={photo.url}
-                    alt={photo.caption || ""}
-                    className="h-full min-h-0 w-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid h-72 place-items-center text-muted">
-              <Images className="mb-2 h-8 w-8" aria-hidden="true" />
-              <span>No hotel photos available</span>
-            </div>
-          )}
-          {hotel.photos.length > 1 ? (
-            <span className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-full bg-heading/90 px-3 py-2 text-sm font-semibold text-white shadow-sm">
-              <Images className="h-4 w-4" aria-hidden="true" />
-              {hotel.photos.length} photos
-            </span>
-          ) : null}
-        </section>
+        <StayPhotoGallery photos={hotel.photos} hotelName={hotel.name} />
 
         <div className="mx-auto max-w-6xl">
           <section id="overview" className="scroll-mt-28 border-b border-line py-7 sm:py-9">
@@ -205,13 +182,13 @@ export function StayHotelOverview({
                 </h1>
                 <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text">
                   {scoreText ? (
-                    <span className="inline-flex items-center gap-2">
+                    <a href="#reviews" className="inline-flex items-center gap-2 rounded-lg transition hover:bg-surface-soft">
                       <span className="rounded-md bg-heading px-2 py-1 font-bold text-white">{scoreText}</span>
                       <span>
                         <strong>{ratingLabel(score)}</strong>
                         {totalReviews > 0 ? ` · ${totalReviews.toLocaleString()} reviews` : ""}
                       </span>
-                    </span>
+                    </a>
                   ) : null}
                   {hotel.neighborhood || hotel.city ? (
                     <span className="inline-flex items-center gap-1.5 text-muted">
@@ -296,26 +273,24 @@ export function StayHotelOverview({
           {(fullAddress || locationHref) ? (
             <section id="location" className="scroll-mt-28 border-b border-line py-8 sm:py-10">
               <h2 className="font-display text-2xl font-bold text-heading sm:text-3xl">Explore the area</h2>
-              <div className="mt-6 grid gap-5 lg:grid-cols-[1.3fr_.7fr]">
-                <div className="relative min-h-64 overflow-hidden rounded-xl border border-line bg-surface p-6">
-                  <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(var(--line)_1px,transparent_1px),linear-gradient(90deg,var(--line)_1px,transparent_1px)] [background-size:32px_32px]" />
-                  <div className="relative grid min-h-52 place-items-center text-center">
-                    <div>
-                      <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-heading text-white shadow-sm">
-                        <MapPin className="h-7 w-7" aria-hidden="true" />
-                      </div>
-                      <p className="mt-4 font-semibold text-heading">{hotel.neighborhood || hotel.city || hotel.name}</p>
-                      {hotel.latitude != null && hotel.longitude != null ? (
-                        <p className="mt-1 text-xs text-muted">
-                          {hotel.latitude.toFixed(4)}, {hotel.longitude.toFixed(4)}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
+              <div className="mt-6 grid gap-5 lg:grid-cols-[1.45fr_.55fr]">
+                <div className="min-h-72 overflow-hidden rounded-xl border border-line bg-surface">
+                  {mapEmbed ? (
+                    <iframe
+                      title={`Map showing ${hotel.name}`}
+                      src={mapEmbed}
+                      className="h-80 w-full border-0 sm:h-96"
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  ) : (
+                    <div className="grid h-80 place-items-center text-muted">Map unavailable</div>
+                  )}
                 </div>
                 <div className="rounded-xl border border-line bg-white p-5 sm:p-6">
                   <MapPin className="h-6 w-6 text-heading" aria-hidden="true" />
                   <h3 className="mt-4 font-display text-xl font-bold text-heading">Location</h3>
+                  <p className="mt-2 font-semibold text-heading">{hotel.neighborhood || hotel.city || hotel.name}</p>
                   {fullAddress ? <p className="mt-2 text-sm leading-relaxed text-text">{fullAddress}</p> : null}
                   {locationHref ? (
                     <a
@@ -324,7 +299,7 @@ export function StayHotelOverview({
                       rel="noopener noreferrer"
                       className="mt-5 inline-flex items-center gap-1 font-semibold text-link"
                     >
-                      View on map <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                      Open in Google Maps <ChevronRight className="h-4 w-4" aria-hidden="true" />
                     </a>
                   ) : null}
                 </div>
@@ -373,29 +348,111 @@ export function StayHotelOverview({
             </section>
           ) : null}
 
-          {reviews.categories.length > 0 ? (
+          {(reviews.categories.length > 0 || reviews.reviews.length > 0) ? (
             <section id="reviews" className="scroll-mt-28 border-b border-line py-8 sm:py-10">
-              <h2 className="font-display text-2xl font-bold text-heading sm:text-3xl">What guests mention</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-                Review themes are summarized from Nuitee guest feedback.
-              </p>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {reviews.categories.slice(0, 6).map((category) => (
-                  <div key={category.name} className="rounded-xl border border-line bg-white p-5">
-                    <div className="flex items-center justify-between gap-3">
-                      <h3 className="font-semibold text-heading">{category.name}</h3>
-                      {category.rating != null ? (
-                        <span className="rounded-md bg-surface px-2 py-1 text-xs font-bold text-heading">
-                          {category.rating.toFixed(1)}/10
-                        </span>
-                      ) : null}
-                    </div>
-                    {category.description ? (
-                      <p className="mt-3 text-sm leading-6 text-text">{category.description}</p>
-                    ) : null}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 className="font-display text-2xl font-bold text-heading sm:text-3xl">What guests mention</h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                    Category scores summarize Nuitee guest feedback. Open the guest reviews below to read the original comments.
+                  </p>
+                </div>
+                {reviews.average != null ? (
+                  <div className="shrink-0 sm:text-right">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Guest score</p>
+                    <p className="mt-1 font-display text-3xl font-bold text-heading">{reviews.average.toFixed(1)}/10</p>
                   </div>
-                ))}
+                ) : null}
               </div>
+
+              {reviews.categories.length > 0 ? (
+                <div className="mt-7 grid gap-x-8 gap-y-5 md:grid-cols-2">
+                  {reviews.categories.slice(0, 8).map((category) => {
+                    const rating = category.rating == null ? null : Math.max(0, Math.min(10, category.rating));
+                    return (
+                      <div key={category.name}>
+                        <div className="flex items-center justify-between gap-3 text-sm">
+                          <h3 className="font-semibold text-heading">{category.name}</h3>
+                          {rating != null ? <span className="font-bold text-heading">{rating.toFixed(1)}</span> : null}
+                        </div>
+                        {rating != null ? (
+                          <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface" aria-label={`${category.name} ${rating.toFixed(1)} out of 10`}>
+                            <div className="h-full rounded-full bg-heading" style={{ width: `${rating * 10}%` }} />
+                          </div>
+                        ) : null}
+                        {category.description ? (
+                          <p className="mt-2 text-sm leading-6 text-muted">{category.description}</p>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+
+              {reviews.reviews.length > 0 ? (
+                <div className="mt-9">
+                  <div className="flex items-end justify-between gap-4">
+                    <div>
+                      <p className="eyebrow">Verified guest feedback</p>
+                      <h3 className="mt-1 font-display text-xl font-bold text-heading sm:text-2xl">Guest reviews</h3>
+                    </div>
+                    <span className="text-sm text-muted">{reviews.count.toLocaleString()} available</span>
+                  </div>
+
+                  <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                    {reviews.reviews.slice(0, 4).map((review, index) => (
+                      <article key={`${review.name}-${review.date}-${index}`} className="rounded-xl border border-line bg-white p-5">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <h4 className="font-semibold text-heading">{review.name || "Guest"}</h4>
+                            <p className="mt-1 text-xs text-muted">
+                              {[review.travelerType, review.country, review.date].filter(Boolean).join(" · ")}
+                            </p>
+                          </div>
+                          {review.score != null ? (
+                            <span className="rounded-md bg-heading px-2 py-1 text-sm font-bold text-white">
+                              {review.score.toFixed(1)}
+                            </span>
+                          ) : null}
+                        </div>
+                        {review.headline ? <p className="mt-4 font-semibold text-heading">{review.headline}</p> : null}
+                        {review.pros ? <p className="mt-3 text-sm leading-6 text-text"><strong>Liked:</strong> {review.pros}</p> : null}
+                        {review.cons ? <p className="mt-2 text-sm leading-6 text-text"><strong>Could improve:</strong> {review.cons}</p> : null}
+                      </article>
+                    ))}
+                  </div>
+
+                  {reviews.reviews.length > 4 ? (
+                    <details className="mt-5">
+                      <summary className="cursor-pointer font-semibold text-link">
+                        Read more guest reviews
+                      </summary>
+                      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                        {reviews.reviews.slice(4).map((review, index) => (
+                          <article key={`more-${review.name}-${review.date}-${index}`} className="rounded-xl border border-line bg-white p-5">
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <h4 className="font-semibold text-heading">{review.name || "Guest"}</h4>
+                                <p className="mt-1 text-xs text-muted">
+                                  {[review.travelerType, review.country, review.date].filter(Boolean).join(" · ")}
+                                </p>
+                              </div>
+                              {review.score != null ? (
+                                <span className="rounded-md bg-heading px-2 py-1 text-sm font-bold text-white">
+                                  {review.score.toFixed(1)}
+                                </span>
+                              ) : null}
+                            </div>
+                            {review.headline ? <p className="mt-4 font-semibold text-heading">{review.headline}</p> : null}
+                            {review.pros ? <p className="mt-3 text-sm leading-6 text-text"><strong>Liked:</strong> {review.pros}</p> : null}
+                            {review.cons ? <p className="mt-2 text-sm leading-6 text-text"><strong>Could improve:</strong> {review.cons}</p> : null}
+                          </article>
+                        ))}
+                      </div>
+                    </details>
+                  ) : null}
+                </div>
+              ) : null}
             </section>
           ) : null}
 
