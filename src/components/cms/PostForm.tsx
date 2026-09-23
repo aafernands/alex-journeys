@@ -9,7 +9,11 @@ import {
   type FormEvent,
 } from "react";
 import { useRouter } from "next/navigation";
-import type { PostItinerary } from "@/lib/post-types";
+import {
+  POST_BOOKING_TOOLS,
+  type PostBookingTool,
+  type PostItinerary,
+} from "@/lib/post-types";
 import { formatPostDate } from "@/lib/dates";
 import {
   ItineraryEditor,
@@ -31,6 +35,7 @@ export type PostFormInitial = {
   featuredImageAlt: string;
   destinations: string[];
   guideHubs?: string[];
+  bookingTools?: PostBookingTool[];
   itinerary?: PostItinerary;
 };
 
@@ -94,6 +99,9 @@ export function PostForm({
   );
   const [selectedGuideHubs, setSelectedGuideHubs] = useState<string[]>(
     initial?.guideHubs ?? [],
+  );
+  const [selectedBookingTools, setSelectedBookingTools] = useState<PostBookingTool[]>(
+    initial?.bookingTools ?? [],
   );
   const [itinerary, setItinerary] = useState<PostItinerary>(() =>
     itineraryFromInitial(initial?.itinerary),
@@ -165,6 +173,7 @@ export function PostForm({
             featuredImageAlt: featuredImageAlt || title,
             destinations: selectedDestinations,
             guideHubs: selectedGuideHubs,
+            bookingTools: selectedBookingTools,
             itinerary: itinerary.enabled ? itinerary : { enabled: false },
             update: mode === "edit" && !isDraft && !asDraft,
             draft: asDraft,
@@ -211,6 +220,7 @@ export function PostForm({
       itinerary,
       mode,
       router,
+      selectedBookingTools,
       selectedDestinations,
       selectedGuideHubs,
       title,
@@ -458,6 +468,54 @@ export function PostForm({
           </fieldset>
 
           <fieldset>
+            <legend className="text-sm font-semibold text-heading">Book from this post</legend>
+            <p className="mt-1 text-xs text-muted">
+              Add a booking box to the live article. The first selected destination above
+              will automatically prefill the destination when a reader opens Flights,
+              Stays, or Experiences.
+            </p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              {POST_BOOKING_TOOLS.map((tool) => {
+                const on = selectedBookingTools.includes(tool);
+                const label =
+                  tool === "flight"
+                    ? "Flights"
+                    : tool === "hotel"
+                      ? "Hotels"
+                      : "Experiences";
+                return (
+                  <label
+                    key={tool}
+                    className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-3 text-sm transition ${
+                      on
+                        ? "border-accent bg-accent/10 text-heading"
+                        : "border-border bg-white text-text hover:border-border-strong"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="size-4 rounded border-border text-accent focus:ring-accent/25"
+                      checked={on}
+                      onChange={() => {
+                        markDirty();
+                        setSelectedBookingTools((prev) =>
+                          on ? prev.filter((item) => item !== tool) : [...prev, tool],
+                        );
+                      }}
+                    />
+                    <span className="font-semibold">{label}</span>
+                  </label>
+                );
+              })}
+            </div>
+            {selectedBookingTools.length > 0 && selectedDestinations.length === 0 ? (
+              <p className="mt-2 text-xs font-semibold text-link">
+                Select a destination above before publishing so the booking links can be prefilled.
+              </p>
+            ) : null}
+          </fieldset>
+
+          <fieldset>
             <legend className="text-sm font-semibold text-heading">Guides</legend>
             <p className="mt-1 text-xs text-muted">
               Optionally list this post under a Guides hub (in addition to any
@@ -541,6 +599,23 @@ export function PostForm({
                   contentHtml || "<p class='text-muted'>Start writing…</p>",
               }}
             />
+            {selectedBookingTools.length > 0 ? (
+              <div className="mt-4 border-t border-border pt-4">
+                <p className="text-xs font-bold uppercase tracking-wide text-muted">
+                  Booking box
+                </p>
+                <p className="mt-1 text-sm text-text">
+                  {selectedBookingTools
+                    .map((tool) =>
+                      tool === "flight" ? "Flights" : tool === "hotel" ? "Hotels" : "Experiences",
+                    )
+                    .join(" · ")}
+                  {selectedDestinations.length > 0
+                    ? ` · prefills ${destinations.find((d) => d.slug === selectedDestinations[0])?.name ?? selectedDestinations[0]}`
+                    : " · destination required"}
+                </p>
+              </div>
+            ) : null}
             {itinerary.enabled && itinerary.days.length > 0 ? (
               <div className="mt-4 border-t border-border pt-4">
                 <p className="text-xs font-bold uppercase tracking-wide text-muted">
