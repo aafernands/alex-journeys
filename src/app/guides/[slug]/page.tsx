@@ -187,6 +187,22 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
       ]}
     >
       {plannerConfig ? (
+        <div className="plan-hotel-intro">
+          <p className="eyebrow">Build the trip in one place</p>
+          <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-display text-2xl font-bold text-heading sm:text-3xl">
+                Plan, book, and keep everything together
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                Choose the basics first. Your flights, stay, bookings, day-by-day plan, and notes stay connected to the same itinerary.
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {plannerConfig ? (
         <TripPlanner
           config={plannerConfig}
           partners={plannerPartners}
