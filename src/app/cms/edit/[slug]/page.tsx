@@ -39,6 +39,7 @@ async function loadDraft(slug: string): Promise<DraftPost | null> {
         destinations: fromGh.destinations ?? [],
         guideHubs: fromGh.guideHubs,
         bookingTools: fromGh.bookingTools,
+        experienceWidgetHtml: fromGh.experienceWidgetHtml,
         contentHtml: fromGh.contentHtml ?? "",
         itinerary: fromGh.itinerary,
         source: fromGh.source,
@@ -124,6 +125,8 @@ export default async function CmsEditPostPage({ params, searchParams }: PageProp
           destinations: source.destinations,
           guideHubs: "guideHubs" in source ? (source.guideHubs ?? []) : [],
           bookingTools: "bookingTools" in source ? (source.bookingTools ?? []) : [],
+          experienceWidgetHtml:
+            "experienceWidgetHtml" in source ? (source.experienceWidgetHtml ?? "") : "",
           itinerary:
             "itinerary" in source ? (source.itinerary ?? undefined) : undefined,
         }}
