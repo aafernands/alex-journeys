@@ -454,14 +454,12 @@ export function StayBooker({
               </button>
             )}
           </div>
-          {selected ? (
-            <SelectedRoomSummary
-              room={selected}
-              prebook={prebook}
-              fallbackPhoto={fallbackPhoto}
-              query={query}
-            />
-          ) : null}
+          <SelectedRoomSummary
+            room={selected}
+            prebook={prebook}
+            fallbackPhoto={fallbackPhoto}
+            query={query}
+          />
           <div className="border-t border-line pt-5">
             <p className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
               <ShieldCheck className="h-4 w-4" aria-hidden="true" />
@@ -635,12 +633,12 @@ function SelectedRoomSummary({
   fallbackPhoto,
   query,
 }: {
-  room: StayRoomOffer;
+  room: StayRoomOffer | null;
   prebook: StayPrebook;
   fallbackPhoto: string;
   query: StaysQuery;
 }) {
-  const photos = room.photos?.length ? room.photos.slice(0, 4) : fallbackPhoto
+  const photos = room?.photos?.length ? room.photos.slice(0, 4) : fallbackPhoto
     ? [{ url: fallbackPhoto, caption: "" }]
     : [];
   const nights = stayNights(query.startDate, query.endDate);
@@ -648,9 +646,9 @@ function SelectedRoomSummary({
     prebook.price != null
       ? formatStayMoney({
           amount: prebook.price,
-          currency: prebook.currency || room.price?.currency || "USD",
+          currency: prebook.currency || room?.price?.currency || "USD",
         })
-      : room.price
+      : room?.price
         ? formatStayMoney(room.price)
         : "";
   const occupancy = [
@@ -685,7 +683,7 @@ function SelectedRoomSummary({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <h3 className="font-display text-xl font-bold leading-tight text-heading">
-              {prebook.roomName || room.name}
+              {prebook.roomName || room?.name || "Selected room"}
             </h3>
             <p className="mt-2 text-sm text-muted">{occupancy}</p>
           </div>
@@ -698,13 +696,13 @@ function SelectedRoomSummary({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {(prebook.boardName || room.boardName) ? (
+          {(prebook.boardName || room?.boardName) ? (
             <span className="rounded-full border border-line bg-canvas px-3 py-1 text-xs font-semibold text-text">
-              {prebook.boardName || room.boardName}
+              {prebook.boardName || room?.boardName}
             </span>
           ) : null}
           <span className="rounded-full border border-line bg-canvas px-3 py-1 text-xs font-semibold text-text">
-            {refundableLabel(prebook.refundable || room.refundable)}
+            {refundableLabel(prebook.refundable || room?.refundable || "unknown")}
           </span>
         </div>
 

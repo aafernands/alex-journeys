@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { StayPhotoGallery } from "@/components/stays/StayPhotoGallery";
+import { SaveHotelButton } from "@/components/stays/SaveHotelButton";
 import Link from "next/link";
 import {
   Accessibility,
@@ -199,15 +200,28 @@ export function StayHotelOverview({
                 </div>
               </div>
 
-              {fromPriceLabel ? (
-                <div className="hidden text-right md:block">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Rooms from</p>
-                  <p className="mt-1 font-display text-2xl font-bold text-heading">{fromPriceLabel}</p>
-                  <a href="#rooms" className="btn btn-primary mt-3 inline-flex">
-                    Select a room
-                  </a>
-                </div>
-              ) : null}
+              <div className="flex flex-col items-start gap-3 lg:items-end">
+                <SaveHotelButton
+                  hotel={{
+                    hotelId: hotel.id,
+                    name: hotel.name,
+                    city: hotel.city,
+                    neighborhood: hotel.neighborhood,
+                    photo: hotel.photos[0]?.url ?? "",
+                    rating: score,
+                    stars: hotel.stars,
+                  }}
+                />
+                {fromPriceLabel ? (
+                  <div className="hidden text-right md:block">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Rooms from</p>
+                    <p className="mt-1 font-display text-2xl font-bold text-heading">{fromPriceLabel}</p>
+                    <a href="#rooms" className="btn btn-primary mt-3 inline-flex">
+                      Select a room
+                    </a>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </section>
 

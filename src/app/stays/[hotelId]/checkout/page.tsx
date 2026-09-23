@@ -89,11 +89,6 @@ export default async function StayCheckoutPage({ params, searchParams }: PagePro
     );
   }
 
-  const selected = loaded.rooms.find((room) => room.offerId === offerId);
-  if (!selected) {
-    redirect(`${hotelHref}#rooms`);
-  }
-
   return (
     <main className="bg-bg pb-20">
       <div className="section-shell pt-5 sm:pt-7">
