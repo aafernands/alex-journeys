@@ -317,6 +317,19 @@ export function staysHotelPath(hotelId: string, query: StaysQuery): string {
   return params ? `/stays/${id}?${params}` : `/stays/${id}`;
 }
 
+export function staysCheckoutPath(
+  hotelId: string,
+  offerId: string,
+  query: StaysQuery,
+): string {
+  const id = hotelId.trim();
+  const offer = offerId.trim();
+  if (!isStayHotelId(id) || !isStayOfferId(offer)) return staysHotelPath(id, query);
+  const params = new URLSearchParams(staysQueryString(query));
+  params.set("offer", offer);
+  return `/stays/${id}/checkout?${params.toString()}`;
+}
+
 /** Keep the selected hotel when only dates or occupancy change. */
 export function stayDetailSearchPath(
   hotelId: string,
