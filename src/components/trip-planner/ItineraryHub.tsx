@@ -706,37 +706,40 @@ function LaneCta({
 
 function destinationHero(destination: string): {
   image: string;
-  photographer: string;
-  photographerUrl: string;
+  credit: string;
+  creditUrl: string;
 } {
   const place = destination.split(",")[0]?.trim().toLowerCase() ?? "";
-  const known: Record<string, { image: string; photographer: string; photographerUrl: string }> = {
+  const commonsFile = (filename: string) =>
+    `https://commons.wikimedia.org/wiki/Special:Redirect/file/${encodeURIComponent(filename)}?width=1800`;
+
+  const known: Record<string, { image: string; credit: string; creditUrl: string }> = {
     "las vegas": {
-      image: "https://images.unsplash.com/photo-1718227756483-c11c3d4eee42?auto=format&fit=crop&q=80&w=1800",
-      photographer: "Wesley Tingey",
-      photographerUrl: "https://unsplash.com/@wesleyphotography?utm_source=fernandes_journeys&utm_medium=referral",
+      image: commonsFile("Las Vegas skyline.jpg"),
+      credit: "Antoine Taveneaux / Wikimedia Commons",
+      creditUrl: "https://commons.wikimedia.org/wiki/File:Las_Vegas_skyline.jpg",
     },
     miami: {
-      image: "https://images.unsplash.com/photo-1605107140735-3640719d3404?auto=format&fit=crop&q=80&w=1800",
-      photographer: "Arnaud Civray",
-      photographerUrl: "https://unsplash.com/@arnsc?utm_source=fernandes_journeys&utm_medium=referral",
+      image: commonsFile("Miami, Florida skyline.jpg"),
+      credit: "Wilfredor / Wikimedia Commons",
+      creditUrl: "https://commons.wikimedia.org/wiki/File:Miami,_Florida_skyline.jpg",
     },
     "miami beach": {
-      image: "https://images.unsplash.com/photo-1605107140735-3640719d3404?auto=format&fit=crop&q=80&w=1800",
-      photographer: "Arnaud Civray",
-      photographerUrl: "https://unsplash.com/@arnsc?utm_source=fernandes_journeys&utm_medium=referral",
+      image: commonsFile("Miami skyline (1).jpg"),
+      credit: "Marc Averette / Wikimedia Commons",
+      creditUrl: "https://commons.wikimedia.org/wiki/File:Miami_skyline_(1).jpg",
     },
     "los angeles": {
-      image: "https://images.unsplash.com/photo-1619678562883-7f77b7c68d3c?auto=format&fit=crop&q=80&w=1800",
-      photographer: "Jesus Curiel",
-      photographerUrl: "https://unsplash.com/?utm_source=fernandes_journeys&utm_medium=referral",
+      image: commonsFile("Los Angeles - Skyline.jpg"),
+      credit: "Jon Sullivan / Wikimedia Commons",
+      creditUrl: "https://commons.wikimedia.org/wiki/File:Los_Angeles_-_Skyline.jpg",
     },
   };
 
   return known[place] ?? {
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&q=80&w=1800",
-    photographer: "Unsplash",
-    photographerUrl: "https://unsplash.com/?utm_source=fernandes_journeys&utm_medium=referral",
+    image: "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
+    credit: "Fernandes Journeys",
+    creditUrl: "/destinations",
   };
 }
 
@@ -986,24 +989,14 @@ export function ItineraryHub({
                 : ""}
             </p>
           </div>
-          <span className="plan-trip-hero-credit">
-            Photo by{" "}
-            <a
-              href={hero.photographerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {hero.photographer}
-            </a>{" "}
-            on{" "}
-            <a
-              href="https://unsplash.com/?utm_source=fernandes_journeys&utm_medium=referral"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Unsplash
-            </a>
-          </span>
+          <a
+            href={hero.creditUrl}
+            target={hero.creditUrl.startsWith("/") ? undefined : "_blank"}
+            rel={hero.creditUrl.startsWith("/") ? undefined : "noopener noreferrer"}
+            className="plan-trip-hero-credit"
+          >
+            {hero.credit}
+          </a>
         </div>
         <p className={`${plan.prose} text-muted plan-desktop-only`}>{subhead}</p>
         <div className="plan-inline-actions plan-hub-actions">
