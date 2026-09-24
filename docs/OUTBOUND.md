@@ -1,6 +1,6 @@
 # Outbound interstitial (`/out`)
 
-When a reader clicks a link that leaves **fernandesjourneys.com**, they briefly land on a branded departure page, then continue to the destination (~4 seconds). Metaphor: leaving the journal — warm paper UI, destination hostname, honest copy (affiliate line only when the link is marked affiliate).
+When a reader clicks a link that leaves **alexjourneys.com**, they briefly land on a branded departure page, then continue to the destination (~4 seconds). Metaphor: leaving the journal — warm paper UI, destination hostname, honest copy (affiliate line only when the link is marked affiliate).
 
 ## URL shape
 
