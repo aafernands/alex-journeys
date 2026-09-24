@@ -58,7 +58,7 @@ export function MobileNavDrawer({
 
   return (
     <div
-      className="mobile-nav-drawer-shell fixed inset-x-0 top-0 bottom-0 z-[200] md:hidden"
+      className="mobile-nav-drawer-shell fixed inset-x-0 top-0 bottom-0 z-[200] xl:hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Site menu"

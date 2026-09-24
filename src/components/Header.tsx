@@ -121,7 +121,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
         return;
       }
       e.preventDefault();
-      const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+      const isDesktop = window.matchMedia("(min-width: 1280px)").matches;
       if (isDesktop) {
         desktopSearchRef.current?.focus();
       } else {
@@ -171,11 +171,11 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           </div>
         </div>
 
-        <div className="section-shell relative grid h-[4.75rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 sm:h-[5.5rem] md:flex md:h-24 md:justify-start md:gap-4 lg:gap-6">
+        <div className="section-shell relative grid h-[4.75rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 sm:h-[5.5rem] xl:flex xl:h-24 xl:justify-start xl:gap-4 2xl:gap-6">
           {/* Mobile: search (left) */}
           <button
             type="button"
-            className="relative z-10 inline-flex h-11 w-11 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft md:hidden"
+            className="relative z-10 inline-flex h-11 w-11 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft xl:hidden"
             aria-expanded={mobileSearchOpen}
             aria-controls="mobile-search-panel"
             onClick={() => {
@@ -214,20 +214,20 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           </button>
 
           {/* Logo: centered in the middle column on mobile, left on desktop */}
-          <div className="z-10 flex min-w-0 items-center justify-center md:shrink-0 md:justify-start">
+          <div className="z-10 flex min-w-0 items-center justify-center xl:shrink-0 xl:justify-start">
             <BrandLogo
-              className="h-[2.8125rem] w-auto max-w-full object-contain sm:h-[3.75rem] md:h-10 md:max-w-none"
+              className="h-[2.8125rem] w-auto max-w-full object-contain sm:h-[3.75rem] lg:h-16 xl:h-10 xl:max-w-none"
               width={400}
               height={110}
               priority
-              scaleOriginClassName="origin-center md:origin-left"
+              scaleOriginClassName="origin-center xl:origin-left"
               onClick={closeAll}
             />
           </div>
 
           {/* Desktop: primary nav */}
           <nav
-            className="hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-3 xl:gap-6 md:flex"
+            className="hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-3 xl:flex 2xl:gap-6"
             aria-label="Primary"
           >
             <div className="relative shrink-0" ref={destWrapRef}>
@@ -346,7 +346,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           </nav>
 
           {/* Desktop: right actions */}
-          <div className="hidden shrink-0 items-center gap-2 lg:gap-3 md:flex">
+          <div className="hidden shrink-0 items-center gap-2 xl:flex 2xl:gap-3">
             <SearchInput
               ref={desktopSearchRef}
               variant="header"
@@ -370,7 +370,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           </div>
 
           {/* Mobile: Sign in and the account photo live in the drawer, not this row. */}
-          <div className="relative z-10 flex shrink-0 items-center md:hidden">
+          <div className="relative z-10 flex shrink-0 items-center xl:hidden">
             <button
               type="button"
               className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
@@ -406,7 +406,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
         {mobileSearchOpen && (
           <div
             id="mobile-search-panel"
-            className="border-t border-border bg-white px-5 py-3 md:hidden"
+            className="border-t border-border bg-white px-5 py-3 xl:hidden"
           >
             <SearchInput
               ref={mobileSearchRef}
