@@ -45,7 +45,7 @@ export const tripPlannerTools: AffiliateTool[] = [
   {
     title: "Affordable Car Rentals",
     partner: "Rentcars.com",
-    href: "https://rentcars.com/en/?requestorid=9563&utm_source=fernandesjourneys.com&utm_medium=afiliado-link&utm_campaign=rent-car",
+    href: "https://rentcars.com/en/?requestorid=9563&utm_source=alexjourneys.com&utm_medium=afiliado-link&utm_campaign=rent-car",
     description: "Road-trip wheels without sticker shock.",
     icon: "car",
   },
