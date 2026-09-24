@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import {
   Chevron,
   MobileTopicSection,
@@ -15,7 +16,6 @@ import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
 import { SearchInput } from "@/components/search/SearchInput";
 import { ThemeAppearanceControl } from "@/components/ThemeToggle";
 import { site } from "@/data/content";
-import siteDesignJson from "@/data/site-design.json";
 import { destinationsTree } from "@/data/destinations";
 import { guidesNav } from "@/data/guides";
 import Link from "next/link";
@@ -42,8 +42,6 @@ const midButtonClass =
 const leafLinkClass =
   "block py-1.5 text-sm leading-snug text-text transition hover:text-accent";
 
-const drawerFavicon =
-  siteDesignJson.branding?.favicon?.trim() || "/favicon.ico";
 
 /**
  * Mobile hamburger drawer: oversized editorial hub list.
@@ -79,20 +77,16 @@ export function MobileNavDrawer({
         aria-label="Mobile"
       >
         <div className="flex shrink-0 items-center gap-2 border-b border-border py-3 pr-2 pl-0">
-          <Link
-            href="/"
-            aria-label="Alex Journeys home"
-            onClick={onClose}
-            className="m-0 inline-flex h-10 w-10 shrink-0 items-center justify-center p-0"
-          >
-            <img
-              src={drawerFavicon}
-              alt=""
-              width={40}
-              height={40}
-              className="m-0 block h-10 w-10 object-contain p-0"
+          <div className="m-0 flex w-[5.25rem] shrink-0 items-center justify-start overflow-visible p-0">
+            <BrandLogo
+              className="m-0 h-7 w-auto max-w-none object-contain p-0"
+              width={112}
+              height={32}
+              priority
+              applyScale={false}
+              onClick={onClose}
             />
-          </Link>
+          </div>
           <SearchInput
             variant="drawer"
             id="mobile-drawer-search"
