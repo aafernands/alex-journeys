@@ -3,7 +3,7 @@
 Alex Fernandes’s personal travel journal — destinations from past trips, trip notes, and photos from the road. User-facing brand **Alex Journeys**.
 
 **Live:** [www.alexjourneys.com](https://www.alexjourneys.com)
-**Repo:** [github.com/aafernands/fernandes-journeys](https://github.com/aafernands/fernandes-journeys)
+**Repo:** [github.com/aafernands/alex-journeys](https://github.com/aafernands/alex-journeys)
 
 ## Stack
 
