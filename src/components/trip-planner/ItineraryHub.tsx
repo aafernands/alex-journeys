@@ -883,6 +883,14 @@ export function ItineraryHub({
   const [lanePin, setLanePin] = useState<string>(
     focusFlight ? flightLaneKey : focusStay ? stayLaneKey : "auto",
   );
+  useEffect(() => {
+    if (!focusFlight && !focusStay) return;
+    const frame = window.requestAnimationFrame(() => {
+      updateView("bookings");
+      setLanePin(focusFlight ? flightLaneKey : stayLaneKey);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [focusFlight, focusStay, flightLaneKey, stayLaneKey]);
   const outsideSelected = lanePin === OUTSIDE_TAB;
   const pinnedLane =
     !outsideSelected &&
