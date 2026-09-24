@@ -2,7 +2,9 @@
   "updatedAt": "2026-09-24T01:45:04.870Z",
   "branding": {
     "logoOnLight": "/brand/logo-on-light.png",
-    "logoOnDark": "/brand/logo-on-dark.png"
+    "logoOnDark": "/brand/logo-on-dark.png",
+    "logoScalePercent": 50,
+    "favicon": "/favicon.ico"
   },
   "hero": {
     "image": "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",

@@ -41,6 +41,7 @@ export function DesignForm({ initial }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const logoLightFileRef = useRef<HTMLInputElement>(null);
   const logoDarkFileRef = useRef<HTMLInputElement>(null);
+  const faviconFileRef = useRef<HTMLInputElement>(null);
 
   const [hero, setHero] = useState(initial.hero);
   const [featuredSlideshow, setFeaturedSlideshow] = useState(
@@ -73,6 +74,10 @@ export function DesignForm({ initial }: Props) {
   const [localLogoOnDarkPreview, setLocalLogoOnDarkPreview] = useState<
     string | null
   >(null);
+  const [pendingFavicon, setPendingFavicon] = useState<File | null>(null);
+  const [localFaviconPreview, setLocalFaviconPreview] = useState<string | null>(
+    null,
+  );
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{
@@ -83,6 +88,7 @@ export function DesignForm({ initial }: Props) {
   const previewSrc = localPreview || hero.image;
   const logoOnLightPreview = localLogoOnLightPreview || branding.logoOnLight;
   const logoOnDarkPreview = localLogoOnDarkPreview || branding.logoOnDark;
+  const faviconPreview = localFaviconPreview || branding.favicon;
 
   function patchBranding<K extends keyof typeof branding>(
     key: K,
@@ -162,6 +168,19 @@ export function DesignForm({ initial }: Props) {
               logoOnDarkFilename = pendingLogoOnDark.name;
             }
 
+            let faviconDataUrl: string | undefined;
+            let faviconFilename: string | undefined;
+            if (pendingFavicon) {
+              const errMsg = assertImageFile(pendingFavicon);
+              if (errMsg) {
+                setError(`Favicon: ${errMsg}`);
+                setPending(false);
+                return;
+              }
+              faviconDataUrl = await readFileAsDataUrl(pendingFavicon);
+              faviconFilename = pendingFavicon.name;
+            }
+
             const design: SiteDesign = {
               updatedAt: initial.updatedAt,
               branding,
@@ -183,6 +202,8 @@ export function DesignForm({ initial }: Props) {
                 logoOnLightFilename,
                 logoOnDarkDataUrl,
                 logoOnDarkFilename,
+                faviconDataUrl,
+                faviconFilename,
               }),
             });
             const data = (await res.json()) as {
@@ -214,6 +235,9 @@ export function DesignForm({ initial }: Props) {
             setLocalLogoOnDarkPreview(null);
             if (logoLightFileRef.current) logoLightFileRef.current.value = "";
             if (logoDarkFileRef.current) logoDarkFileRef.current.value = "";
+            setPendingFavicon(null);
+            setLocalFaviconPreview(null);
+            if (faviconFileRef.current) faviconFileRef.current.value = "";
             setSuccess({
               commitUrl: data.commitUrl || "#",
               note:
@@ -401,6 +425,116 @@ export function DesignForm({ initial }: Props) {
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-surface-soft/40 p-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-center gap-4">
+                  <div className="flex size-16 shrink-0 items-center justify-center rounded-lg border border-border bg-white p-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={faviconPreview}
+                      alt="Favicon preview"
+                      className="max-h-full max-w-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.opacity = "0.3";
+                      }}
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-heading">Favicon</p>
+                    <p className="mt-0.5 text-xs text-muted">
+                      Browser tab icon. Square PNG is recommended.
+                    </p>
+                    {pendingFavicon ? (
+                      <p className="mt-1 truncate text-xs text-muted">
+                        Will upload on save: {pendingFavicon.name}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+                <label className="btn btn-secondary cursor-pointer text-sm">
+                  Upload favicon
+                  <input
+                    ref={faviconFileRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif,image/*"
+                    className="sr-only"
+                    onChange={(e) => {
+                      setError(null);
+                      setSuccess(null);
+                      const file = e.target.files?.[0];
+                      if (!file) {
+                        setPendingFavicon(null);
+                        setLocalFaviconPreview(null);
+                        return;
+                      }
+                      setPendingFavicon(file);
+                      setLocalFaviconPreview(URL.createObjectURL(file));
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-white p-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div className="min-w-0 flex-1">
+                  <label
+                    htmlFor="design-logo-scale"
+                    className="text-sm font-semibold text-heading"
+                  >
+                    Website logo size
+                  </label>
+                  <p className="mt-1 text-xs text-muted">
+                    Applies sitewide to the header, footer, mobile navigation, and other brand-logo placements.
+                  </p>
+                  <input
+                    id="design-logo-scale"
+                    type="range"
+                    min="25"
+                    max="150"
+                    step="5"
+                    value={branding.logoScalePercent}
+                    onChange={(e) =>
+                      patchBranding("logoScalePercent", Number(e.target.value))
+                    }
+                    className="mt-3 w-full"
+                  />
+                </div>
+                <div className="w-28 shrink-0">
+                  <label
+                    htmlFor="design-logo-scale-number"
+                    className="text-xs font-semibold text-muted"
+                  >
+                    Percent
+                  </label>
+                  <div className="mt-1 flex items-center gap-2">
+                    <input
+                      id="design-logo-scale-number"
+                      type="number"
+                      min="25"
+                      max="150"
+                      step="5"
+                      value={branding.logoScalePercent}
+                      onChange={(e) => {
+                        const value = Number(e.target.value);
+                        if (Number.isFinite(value)) {
+                          patchBranding(
+                            "logoScalePercent",
+                            Math.min(150, Math.max(25, value)),
+                          );
+                        }
+                      }}
+                      className={fieldClass}
+                    />
+                    <span className="text-sm text-muted">%</span>
+                  </div>
+                </div>
+              </div>
+              <p className="mt-3 text-xs text-muted">
+                Current size: {branding.logoScalePercent}%. 100% is the previous default.
+              </p>
             </div>
           </div>
         </section>

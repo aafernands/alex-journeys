@@ -126,6 +126,10 @@ export type BrandingDesign = {
   logoOnLight: string;
   /** White / light mark for dark backgrounds */
   logoOnDark: string;
+  /** Sitewide visual logo scale as a percentage of the component's normal size. */
+  logoScalePercent: number;
+  /** Browser favicon path or URL. */
+  favicon: string;
 };
 
 export type SiteDesign = {
@@ -264,6 +268,8 @@ export const DEFAULT_SITE_DESIGN: SiteDesign = {
   branding: {
     logoOnLight: "/brand/logo-fernandes-journeys.png",
     logoOnDark: "/brand/logo-fernandes-journeys-white.png",
+    logoScalePercent: 50,
+    favicon: "/favicon.ico",
   },
   homeSections: structuredClone(DEFAULT_HOME_SECTIONS),
   hero: structuredClone(DEFAULT_HERO),
@@ -301,7 +307,13 @@ function normalizeBranding(
     fallback.logoOnLight;
   const logoOnDark =
     asString(o.logoOnDark, fallback.logoOnDark).trim() || fallback.logoOnDark;
-  return { logoOnLight, logoOnDark };
+  const rawScale = Number(o.logoScalePercent);
+  const logoScalePercent = Number.isFinite(rawScale)
+    ? Math.min(150, Math.max(25, Math.round(rawScale)))
+    : fallback.logoScalePercent;
+  const favicon =
+    asString(o.favicon, fallback.favicon).trim() || fallback.favicon;
+  return { logoOnLight, logoOnDark, logoScalePercent, favicon };
 }
 
 function asBool(value: unknown, fallback: boolean): boolean {
@@ -844,6 +856,8 @@ export function validateSiteDesignInput(raw: unknown): SiteDesignValidation {
       branding: {
         logoOnLight: branding.logoOnLight.trim(),
         logoOnDark: branding.logoOnDark.trim(),
+        logoScalePercent: branding.logoScalePercent,
+        favicon: branding.favicon.trim() || "/favicon.ico",
       },
       hero: {
         ...hero,

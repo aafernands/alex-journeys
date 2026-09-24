@@ -117,6 +117,8 @@ export async function PUT(request: Request) {
     logoOnLightFilename?: unknown;
     logoOnDarkDataUrl?: unknown;
     logoOnDarkFilename?: unknown;
+    faviconDataUrl?: unknown;
+    faviconFilename?: unknown;
   };
 
   const validated = validateSiteDesignInput(payload.design);
@@ -151,12 +153,22 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: darkParsed.error }, { status: 400 });
   }
 
+  const faviconParsed = parseOptionalUpload(
+    payload.faviconDataUrl,
+    payload.faviconFilename,
+    "Favicon",
+  );
+  if (!faviconParsed.ok) {
+    return NextResponse.json({ error: faviconParsed.error }, { status: 400 });
+  }
+
   try {
     const result = await updateSiteDesign({
       design: validated.design,
       imageUpload: heroParsed.upload,
       logoOnLightUpload: lightParsed.upload,
       logoOnDarkUpload: darkParsed.upload,
+      faviconUpload: faviconParsed.upload,
     });
     return NextResponse.json({
       ok: true,

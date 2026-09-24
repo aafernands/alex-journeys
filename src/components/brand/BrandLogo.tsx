@@ -42,6 +42,7 @@ export function BrandLogo({
   const { branding } = getSiteDesign();
   const logoOnLight = branding.logoOnLight;
   const logoOnDark = branding.logoOnDark;
+  const logoScale = branding.logoScalePercent / 100;
 
   const mark =
     variant === "on-dark" ? (
@@ -80,6 +81,10 @@ export function BrandLogo({
     <Link
       href={href}
       className="inline-flex max-w-full items-center opacity-95 transition hover:opacity-100"
+      style={{
+        transform: `scale(${logoScale})`,
+        transformOrigin: variant === "on-dark" ? "left center" : "center",
+      }}
       aria-label={`${site.name} home`}
       onClick={onClick}
     >
