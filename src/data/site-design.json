@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-09-24T02:00:19.693Z",
+  "updatedAt": "2026-09-24T02:06:14.425Z",
   "branding": {
     "logoOnLight": "/brand/logo-on-light.png",
     "logoOnDark": "/brand/logo-on-dark.png",
-    "logoScalePercent": 65,
+    "logoScalePercent": 55,
     "favicon": "/brand/favicon.png"
   },
   "hero": {
