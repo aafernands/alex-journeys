@@ -674,6 +674,8 @@ export async function updateSiteDesign(options: {
   logoOnLightUpload?: DesignImageUpload;
   /** Optional logo for dark backgrounds (white mark) */
   logoOnDarkUpload?: DesignImageUpload;
+  /** Optional browser favicon */
+  faviconUpload?: DesignImageUpload;
 }): Promise<{ commitUrl: string; design: SiteDesign }> {
   let design = options.design;
   const files: AtomicFile[] = [];
@@ -714,6 +716,33 @@ export async function updateSiteDesign(options: {
 
   if (options.logoOnDarkUpload) {
     await addBrandUpload(options.logoOnDarkUpload, "logoOnDark");
+  }
+
+  if (options.faviconUpload) {
+    const upload = options.faviconUpload;
+    const contentType = upload.contentType.trim().toLowerCase().split(";")[0] || "";
+    const ext = MEDIA_UPLOAD_TYPES[contentType];
+    if (!ext) throw new Error("Unsupported favicon type. Use JPEG, PNG, WebP, or GIF.");
+    const base64 = upload.base64.replace(/\s/g, "");
+    const decodedBytes = Buffer.from(base64, "base64");
+    if (!base64 || decodedBytes.length === 0) throw new Error("Could not decode favicon data.");
+    if (decodedBytes.length > MAX_MEDIA_UPLOAD_BYTES) {
+      throw new Error(
+        `Favicon too large (${(decodedBytes.length / (1024 * 1024)).toFixed(1)}MB). Max is about ${MAX_MEDIA_UPLOAD_LABEL}.`,
+      );
+    }
+    const basename = `favicon${ext}`;
+    const imagePath = `${AUTHOR_PHOTO_DIR}/${basename}`;
+    files.push({
+      path: imagePath,
+      content: base64,
+      encoding: "base64",
+      expectedSha: await getFileSha(imagePath),
+    });
+    design = {
+      ...design,
+      branding: { ...design.branding, favicon: `/brand/${basename}` },
+    };
   }
 
   if (options.imageUpload) {
