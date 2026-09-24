@@ -12,10 +12,10 @@ import {
 } from "@/components/icons/SocialIcons";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { SearchInput } from "@/components/search/SearchInput";
 import { ThemeAppearanceControl } from "@/components/ThemeToggle";
 import { site } from "@/data/content";
-import siteDesignJson from "@/data/site-design.json";
 import { destinationsTree } from "@/data/destinations";
 import { guidesNav } from "@/data/guides";
 import Link from "next/link";
@@ -41,9 +41,6 @@ const midButtonClass =
   "font-display flex w-full items-center justify-between gap-3 py-2 text-left text-xl font-semibold leading-snug tracking-tight text-heading transition hover:text-accent";
 const leafLinkClass =
   "block py-1.5 text-sm leading-snug text-text transition hover:text-accent";
-
-const drawerFavicon =
-  siteDesignJson.branding?.favicon?.trim() || "/favicon.ico";
 
 /**
  * Mobile hamburger drawer: oversized editorial hub list.
@@ -79,20 +76,16 @@ export function MobileNavDrawer({
         aria-label="Mobile"
       >
         <div className="flex shrink-0 items-center gap-2 border-b border-border py-3 pr-2 pl-0">
-          <Link
-            href="/"
-            aria-label="Alex Journeys home"
-            onClick={onClose}
-            className="m-0 inline-flex h-10 w-10 shrink-0 items-center justify-center p-0"
-          >
-            <img
-              src={drawerFavicon}
-              alt=""
-              width={40}
-              height={40}
-              className="m-0 block h-10 w-10 object-contain p-0"
+          <div className="flex w-[4.75rem] shrink-0 items-center justify-start overflow-hidden">
+            <BrandLogo
+              href="/"
+              onClick={onClose}
+              applyScale={false}
+              width={320}
+              height={88}
+              className="block h-auto max-h-8 w-auto max-w-[4.75rem] object-contain"
             />
-          </Link>
+          </div>
           <SearchInput
             variant="drawer"
             id="mobile-drawer-search"
