@@ -75,12 +75,12 @@ export function MobileNavDrawer({
         className="absolute inset-0 flex w-full flex-col bg-bg shadow-xl"
         aria-label="Mobile"
       >
-        <div className="flex shrink-0 items-center gap-2.5 border-b border-border px-3 py-3">
-          <div className="flex shrink-0 items-center">
+        <div className="flex shrink-0 items-center gap-2 border-b border-border px-2.5 py-3">
+          <div className="flex w-[6.25rem] shrink-0 items-center justify-start overflow-visible">
             <BrandLogo
-              className="h-8 w-auto"
-              width={150}
-              height={42}
+              className="h-7 w-auto"
+              width={118}
+              height={33}
               priority
               onClick={onClose}
             />
