@@ -18,8 +18,11 @@ describe("header chrome", () => {
     assert.match(drawer, /variant="drawer-cta"/);
     assert.match(drawer, /variant="drawer"/);
     assert.match(drawer, /mobile-drawer-search/);
-    assert.match(drawer, /drawerFavicon/);
-    assert.match(drawer, /siteDesignJson\.branding\?\.favicon/);
+    assert.match(drawer, /drawerLogoOnLight/);
+    assert.match(drawer, /drawerLogoOnDark/);
+    assert.match(drawer, /dark:hidden/);
+    assert.match(drawer, /dark:block/);
+    assert.match(drawer, /w-\\[5\\.75rem\\]/);
     assert.match(drawer, /pl-0/);
     assert.match(drawer, /inset-0 flex w-full/);
   });
