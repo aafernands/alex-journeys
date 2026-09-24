@@ -23,6 +23,8 @@ type Props = {
   href?: string;
   /** Apply the CMS-wide logo scale. Disable for tightly constrained chrome slots. */
   applyScale?: boolean;
+  /** Tailwind transform-origin classes for the CMS scale. */
+  scaleOriginClassName?: string;
   onClick?: () => void;
 };
 
@@ -40,6 +42,7 @@ export function BrandLogo({
   linked = true,
   href = site.url,
   applyScale = true,
+  scaleOriginClassName,
   onClick,
 }: Props) {
   const { branding } = getSiteDesign();
@@ -83,15 +86,13 @@ export function BrandLogo({
   return (
     <Link
       href={href}
-      className="inline-flex max-w-full items-center opacity-95 transition hover:opacity-100"
-      style={
+      className={`inline-flex max-w-full items-center opacity-95 transition hover:opacity-100 ${
         applyScale
-          ? {
-              transform: `scale(${logoScale})`,
-              transformOrigin: variant === "on-dark" ? "left center" : "center",
-            }
-          : undefined
-      }
+          ? scaleOriginClassName ??
+            (variant === "on-dark" ? "origin-left" : "origin-center")
+          : ""
+      }`}
+      style={applyScale ? { transform: `scale(${logoScale})` } : undefined}
       aria-label={`${site.name} home`}
       onClick={onClick}
     >

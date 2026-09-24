@@ -214,12 +214,13 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           </button>
 
           {/* Logo: centered in the middle column on mobile, left on desktop */}
-          <div className="z-10 flex min-w-0 items-center justify-center md:shrink-0">
+          <div className="z-10 flex min-w-0 items-center justify-center md:shrink-0 md:justify-start">
             <BrandLogo
-              className="h-[2.8125rem] w-auto max-w-full object-contain sm:h-[3.75rem] md:h-20 md:max-w-none"
+              className="h-[2.8125rem] w-auto max-w-full object-contain sm:h-[3.75rem] md:h-10 md:max-w-none"
               width={400}
               height={110}
               priority
+              scaleOriginClassName="origin-center md:origin-left"
               onClick={closeAll}
             />
           </div>
