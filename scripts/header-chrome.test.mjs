@@ -18,8 +18,9 @@ describe("header chrome", () => {
     assert.match(drawer, /variant="drawer-cta"/);
     assert.match(drawer, /variant="drawer"/);
     assert.match(drawer, /mobile-drawer-search/);
-    assert.match(drawer, /drawerFavicon/);
-    assert.match(drawer, /siteDesignJson\.branding\?\.favicon/);
+    assert.match(drawer, /applyScale=\{false\}/);
+    assert.match(drawer, /h-7 w-auto max-w-none/);
+    assert.match(drawer, /w-\\[5\\.25rem\\]/);
     assert.match(drawer, /pl-0/);
     assert.match(drawer, /inset-0 flex w-full/);
   });
