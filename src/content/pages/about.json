@@ -2,8 +2,8 @@
   "slug": "about",
   "title": "Hi, I’m Alex",
   "label": "About",
-  "description": "I’m Alex Fernandes — traveler, photographer, and the voice behind Fernandes Journeys. Based in New Jersey, I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
-  "contentHtml": "<p>Expect trip notes, destination pages, and favorites from the road — not an agency, not a booking service. Just a personal trip journal with room to breathe.</p>\n<p>Fernandes Journeys is my personal trip journal — one traveler, one set of stories.</p>",
+  "description": "I’m Alex Fernandes — traveler, photographer, and the voice behind Alex Journeys. Based in New Jersey, I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
+  "contentHtml": "<p>Expect trip notes, destination pages, and favorites from the road — not an agency, not a booking service. Just a personal trip journal with room to breathe.</p>\n<p>Alex Journeys is my personal trip journal — one traveler, one set of stories.</p>",
   "sections": {
     "nextStep": {
       "eyebrow": "Next step",

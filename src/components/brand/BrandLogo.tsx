@@ -19,7 +19,7 @@ type Props = {
    * Set false only if a parent already wraps an anchor.
    */
   linked?: boolean;
-  /** Override destination; defaults to https://www.fernandesjourneys.com */
+  /** Override destination; defaults to https://www.alexjourneys.com */
   href?: string;
   onClick?: () => void;
 };

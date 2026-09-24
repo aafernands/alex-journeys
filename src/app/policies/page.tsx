@@ -7,7 +7,7 @@ import { getPageBySlug } from "@/lib/pages";
 export const metadata: Metadata = {
   title: "Policies & Disclosures",
   description:
-    "Hub for Fernandes Journeys legal pages: Privacy Policy, Terms of Use, and Affiliate & monetization disclosure.",
+    "Hub for Alex Journeys legal pages: Privacy Policy, Terms of Use, and Affiliate & monetization disclosure.",
   alternates: { canonical: "/policies" },
 };
 

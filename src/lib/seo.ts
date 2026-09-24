@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { site as contentSite } from "@/data/content";
 import { getSiteDesign } from "@/lib/site-design";
 
-const DEFAULT_SITE_URL = "https://www.fernandesjourneys.com";
+const DEFAULT_SITE_URL = "https://www.alexjourneys.com";
 
 /** Prefer CMS branding.logoOnLight; falls back if design JSON is incomplete. */
 function designLogoOnLight(): string {
@@ -12,7 +12,7 @@ function designLogoOnLight(): string {
   } catch {
     // ignore — use hardcoded default below
   }
-  return "/brand/logo-fernandes-journeys.png";
+  return "/brand/logo-on-light.png";
 }
 
 function normalizeSiteUrl(raw: string): string {
@@ -25,7 +25,7 @@ export const siteConfig = {
     process.env.NEXT_PUBLIC_SITE_URL?.trim() || DEFAULT_SITE_URL,
   ),
   description:
-    "Fernandes Journeys is a personal travel journal — destinations from past trips, trip notes, and photos from the road. Written by Alex Fernandes.",
+    "Alex Journeys is a personal travel journal — destinations from past trips, trip notes, and photos from the road. Written by Alex Fernandes.",
   shortDescription:
     "Personal travel journal — destinations from past trips and notes from the road.",
   author: contentSite.authorName,
@@ -37,13 +37,13 @@ export const siteConfig = {
   youtube: contentSite.social.youtube,
   pinterest: contentSite.social.pinterest,
   /** Default share image — brand logo under public/brand */
-  ogImage: "/brand/logo-alex-journly.png",
+  ogImage: "/brand/logo-on-light.png",
   /** Organization JSON-LD logo — prefers CMS branding.logoOnLight. */
   logo: designLogoOnLight(),
   authorPhoto: contentSite.authorPhoto,
   keywords: [
     "travel journal",
-    "Fernandes Journeys",
+    "Alex Journeys",
     "Alex Fernandes",
     "travel blog",
     "trip notes",

@@ -6,7 +6,7 @@ import { getPageBySlug } from "@/lib/pages";
 export const metadata: Metadata = {
   title: "Terms of Use",
   description:
-    "Terms and conditions for using Fernandes Journeys — personal use, no travel agency, acceptable use, accounts, and liability limits.",
+    "Terms and conditions for using Alex Journeys — personal use, no travel agency, acceptable use, accounts, and liability limits.",
   alternates: { canonical: "/terms" },
 };
 

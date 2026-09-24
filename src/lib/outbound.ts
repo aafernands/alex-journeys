@@ -1,5 +1,5 @@
 /**
- * Outbound interstitial helpers — pause before leaving fernandesjourneys.com.
+ * Outbound interstitial helpers — pause before leaving alexjourneys.com.
  * URL shape: /out?to=<urlencoded https url>[&aff=1]
  */
 

@@ -6,7 +6,7 @@ import { getPageBySlug } from "@/lib/pages";
 export const metadata: Metadata = {
   title: "Affiliate & Monetization Disclosure",
   description:
-    "FTC affiliate disclosure for Fernandes Journeys — commissions, partner examples, /tools outbound links, and that opinions are Alex’s own.",
+    "FTC affiliate disclosure for Alex Journeys — commissions, partner examples, /tools outbound links, and that opinions are Alex’s own.",
   alternates: { canonical: "/affiliate-disclosure" },
 };
 

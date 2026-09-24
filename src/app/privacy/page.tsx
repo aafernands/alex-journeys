@@ -6,7 +6,7 @@ import { getPageBySlug } from "@/lib/pages";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "How Fernandes Journeys collects and uses information — public browsing, reader accounts, Turnstile, Resend, Mailchimp, cookies, and your rights.",
+    "How Alex Journeys collects and uses information — public browsing, reader accounts, Turnstile, Resend, Mailchimp, cookies, and your rights.",
   alternates: { canonical: "/privacy" },
 };
 

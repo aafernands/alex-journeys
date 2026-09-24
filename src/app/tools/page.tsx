@@ -42,7 +42,7 @@ export default function ToolsPage() {
         <p className="mt-1 text-sm leading-relaxed text-text">
           {asString(
             disclosure.body,
-            "These are affiliate or partner links. If you book or buy through one, Fernandes Journeys may earn a commission at no extra cost to you. The opinions are Alex’s own.",
+            "These are affiliate or partner links. If you book or buy through one, Alex Journeys may earn a commission at no extra cost to you. The opinions are Alex’s own.",
           )}{" "}
           <Link href="/affiliate-disclosure" className="text-link hover:text-accent">
             Read the full disclosure

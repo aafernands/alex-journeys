@@ -50,10 +50,10 @@ export default function AppPurposePage() {
           </dt>
           <dd>
             <a
-              href="https://www.fernandesjourneys.com"
+              href="https://www.alexjourneys.com"
               className="text-link transition hover:text-accent"
             >
-              https://www.fernandesjourneys.com
+              https://www.alexjourneys.com
             </a>
           </dd>
 
@@ -65,7 +65,7 @@ export default function AppPurposePage() {
               href="/privacy"
               className="text-link transition hover:text-accent"
             >
-              https://www.fernandesjourneys.com/privacy
+              https://www.alexjourneys.com/privacy
             </Link>
           </dd>
 
@@ -77,7 +77,7 @@ export default function AppPurposePage() {
               href="/terms"
               className="text-link transition hover:text-accent"
             >
-              https://www.fernandesjourneys.com/terms
+              https://www.alexjourneys.com/terms
             </Link>
           </dd>
 
@@ -89,7 +89,7 @@ export default function AppPurposePage() {
               href="/affiliate-disclosure"
               className="text-link transition hover:text-accent"
             >
-              https://www.fernandesjourneys.com/affiliate-disclosure
+              https://www.alexjourneys.com/affiliate-disclosure
             </Link>
           </dd>
 

@@ -1,8 +1,8 @@
 {
   "slug": "app",
-  "title": "About Fernandes Journeys & Google Sign-In",
+  "title": "About Alex Journeys & Google Sign-In",
   "label": "Google OAuth app",
-  "description": "Public information about the Fernandes Journeys website and why it uses Google Sign-In.",
+  "description": "Public information about the Alex Journeys website and why it uses Google Sign-In.",
   "contentHtml": "<p><strong>What it is:</strong> A personal travel journal — destinations from past trips, trip notes, and photos from the road. Public stories are readable without signing in.</p>\n<p><strong>Why Google Sign-In:</strong> Google Sign-In is <strong>not</strong> a consumer social login product on this site. It is used only so (1) readers may optionally save posts to an account, and (2) authorized admins can sign in to the private content management system at <code>/cms</code> to publish and edit travel stories. Most visitors never need to sign in.</p>",
   "sections": {
     "visitorAside": {

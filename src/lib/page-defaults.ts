@@ -10,9 +10,9 @@ export const PAGE_DEFAULTS: Record<string, SitePage> = {
     title: "Hi, I’m Alex",
     label: "About",
     description:
-      "I’m Alex Fernandes — traveler, photographer, and the voice behind Fernandes Journeys. Based in New Jersey, I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
+      "I’m Alex Fernandes — traveler, photographer, and the voice behind Alex Journeys. Based in New Jersey, I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
     contentHtml:
-      "<p>Expect trip notes, destination pages, and favorites from the road — not an agency, not a booking service. Just a personal trip journal with room to breathe.</p>\n<p>Fernandes Journeys is my personal trip journal — one traveler, one set of stories.</p>",
+      "<p>Expect trip notes, destination pages, and favorites from the road — not an agency, not a booking service. Just a personal trip journal with room to breathe.</p>\n<p>Alex Journeys is my personal trip journal — one traveler, one set of stories.</p>",
     sections: {
       nextStep: {
         eyebrow: "Next step",
@@ -107,9 +107,9 @@ export const PAGE_DEFAULTS: Record<string, SitePage> = {
     title: "Media kit",
     label: "For brands",
     description:
-      "A simple overview of Fernandes Journeys — who I am, where the audience is, and how we can work together.",
+      "A simple overview of Alex Journeys — who I am, where the audience is, and how we can work together.",
     contentHtml:
-      "<p>I’m Alex Fernandes — traveler and photographer behind Fernandes Journeys. Based in New Jersey, I document trips I’ve already taken: the routes, neighborhoods, and small details I’d tell a friend over coffee.</p>\n<p>The journal covers places across Iceland, Canada, the US, Mexico, and Brazil, with longer stories, practical guides, and photo-led moments that travel well on Instagram and YouTube.</p>\n<p>Brands work with me directly — no agency middle layer. If a destination, product, or tool fits how I actually travel, I’m open to featuring it honestly.</p>",
+      "<p>I’m Alex Fernandes — traveler and photographer behind Alex Journeys. Based in New Jersey, I document trips I’ve already taken: the routes, neighborhoods, and small details I’d tell a friend over coffee.</p>\n<p>The journal covers places across Iceland, Canada, the US, Mexico, and Brazil, with longer stories, practical guides, and photo-led moments that travel well on Instagram and YouTube.</p>\n<p>Brands work with me directly — no agency middle layer. If a destination, product, or tool fits how I actually travel, I’m open to featuring it honestly.</p>",
     sections: {
       hero: {
         role: "Traveler · Creator · Journal",
@@ -159,10 +159,10 @@ export const PAGE_DEFAULTS: Record<string, SitePage> = {
   },
   app: {
     slug: "app",
-    title: "About Fernandes Journeys & Google Sign-In",
+    title: "About Alex Journeys & Google Sign-In",
     label: "Google OAuth app",
     description:
-      "Public information about the Fernandes Journeys website and why it uses Google Sign-In.",
+      "Public information about the Alex Journeys website and why it uses Google Sign-In.",
     contentHtml:
       "<p><strong>What it is:</strong> A personal travel journal — destinations from past trips, trip notes, and photos from the road. Public stories are readable without signing in.</p>\n<p><strong>Why Google Sign-In:</strong> Google Sign-In is <strong>not</strong> a consumer social login product on this site. It is used only so (1) readers may optionally save posts to an account, and (2) authorized admins can sign in to the private content management system at <code>/cms</code> to publish and edit travel stories. Most visitors never need to sign in.</p>",
     sections: {
@@ -191,7 +191,7 @@ export const PAGE_DEFAULTS: Record<string, SitePage> = {
     sections: {
       disclosure: {
         title: "Affiliate & partner links",
-        body: "These are affiliate or partner links. If you book or buy through one, Fernandes Journeys may earn a commission at no extra cost to you. The opinions are Alex’s own.",
+        body: "These are affiliate or partner links. If you book or buy through one, Alex Journeys may earn a commission at no extra cost to you. The opinions are Alex’s own.",
       },
     },
   },
@@ -208,7 +208,7 @@ export const PAGE_DEFAULTS: Record<string, SitePage> = {
     title: "Stories",
     label: "Journal",
     description:
-      "Trip notes, destination guides, and travel tips from Fernandes Journeys.",
+      "Trip notes, destination guides, and travel tips from Alex Journeys.",
     contentHtml: "<p></p>",
     sections: {
       introTemplate:

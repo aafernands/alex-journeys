@@ -1,4 +1,4 @@
-const DEFAULT_SITE_URL = "https://www.fernandesjourneys.com";
+const DEFAULT_SITE_URL = "https://www.alexjourneys.com";
 
 function siteOrigin(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL?.trim() || DEFAULT_SITE_URL).replace(
