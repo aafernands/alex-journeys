@@ -39,8 +39,8 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Fernandes Journeys — Travel Journal",
-    template: "%s · Fernandes Journeys",
+    default: "Alex Journeys — Travel Journal",
+    template: "%s · Alex Journeys",
   },
   description: siteConfig.description,
   applicationName: siteConfig.name,
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     url: siteConfig.url,
     siteName: siteConfig.name,
     locale: siteConfig.locale,
-    title: "Fernandes Journeys — Travel Journal",
+    title: "Alex Journeys — Travel Journal",
     description: siteConfig.shortDescription,
     images: [
       {
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fernandes Journeys — Travel Journal",
+    title: "Alex Journeys — Travel Journal",
     description: siteConfig.shortDescription,
     images: [siteConfig.ogImage],
   },
