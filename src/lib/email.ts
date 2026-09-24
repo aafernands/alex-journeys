@@ -5,7 +5,7 @@
  * - RESEND_API_KEY (required to send)
  * - EMAIL_FROM optional — default uses Resend’s onboarding address for testing.
  *   Production should use a verified domain, e.g.
- *   `Fernandes Journeys <contact@fernandesjourneys.com>`.
+ *   `Alex Journeys <contact@fernandesjourneys.com>`.
  *
  * With the default `onboarding@resend.dev` sender, Resend only delivers to the
  * email address on the Resend account until a custom domain is verified.
@@ -28,7 +28,7 @@ export class EmailSendError extends Error {
 }
 
 /** Resend’s shared testing sender — valid per current Resend docs. */
-const DEFAULT_FROM = "Fernandes Journeys <onboarding@resend.dev>";
+const DEFAULT_FROM = "Alex Journeys <onboarding@resend.dev>";
 
 export function isEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY?.trim());
@@ -127,6 +127,6 @@ export function publicSiteOrigin(): string {
   const raw =
     process.env.AUTH_URL?.trim() ||
     process.env.NEXTAUTH_URL?.trim() ||
-    "https://www.fernandesjourneys.com";
+    "https://www.alexjourneys.com";
   return raw.replace(/\/$/, "");
 }
