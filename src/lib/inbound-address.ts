@@ -10,10 +10,10 @@
  *
  * Addresses already saved — including legacy 32-hex local-parts — stay as they
  * are. The webhook matches both shapes. The host comes from
- * INBOUND_EMAIL_DOMAIN (default inbound.fernandesjourneys.com).
+ * INBOUND_EMAIL_DOMAIN (default inbound.alexjourneys.com).
  */
 
-const DEFAULT_DOMAIN = "inbound.fernandesjourneys.com";
+const DEFAULT_DOMAIN = "inbound.alexjourneys.com";
 
 /** Stem when the display name has no letters or digits to keep. */
 export const INBOUND_NAME_FALLBACK = "trip";

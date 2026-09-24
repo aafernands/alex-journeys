@@ -39,16 +39,16 @@ Set these on Vercel (Production and Preview). The build still succeeds when they
 | --- | --- | --- |
 | `RESEND_API_KEY` | To read the email body | Already used to send auth mail. Use a **full-access** key. A send-only key can still verify webhooks, but the body fetch fails and parsing falls back to the subject. |
 | `RESEND_WEBHOOK_SECRET` | To accept real mail | Signing secret from the Resend webhook (`whsec_…`). Unsigned posts to `/api/inbound/email` are rejected. |
-| `INBOUND_EMAIL_DOMAIN` | Recommended | Host on the copied address. Default if unset: `inbound.fernandesjourneys.com`. Must match the receiving domain below. |
+| `INBOUND_EMAIL_DOMAIN` | Recommended | Host on the copied address. Default if unset: `inbound.alexjourneys.com`. Must match the receiving domain below. |
 | `INBOUND_SAMPLE_SECRET` | Only for the harness | Long random string. If unset, `POST /api/inbound/email/sample` returns **404**. |
 
 Do not commit the secrets.
 
 ## DNS and Resend (Alex)
 
-Do **not** put this MX on the root domain `fernandesjourneys.com`. That domain already receives mail. Resend delivers only to the MX with the lowest priority number, so a root MX would either steal all mail or never see it.
+Do **not** put this MX on the root domain `alexjourneys.com`. That domain already receives mail. Resend delivers only to the MX with the lowest priority number, so a root MX would either steal all mail or never see it.
 
-1. Resend → **Domains** → **Add domain** → `inbound.fernandesjourneys.com`.
+1. Resend → **Domains** → **Add domain** → `inbound.alexjourneys.com`.
 2. Add the DKIM (and any SPF) records Resend shows for that subdomain. Wait until the domain is verified.
 3. On that domain, turn **Receiving** on.
 4. At the DNS host (Cloudflare for this site), add the MX Resend shows. Copy the mail server from the dialog — it is region-specific. The usual value is:
@@ -57,17 +57,17 @@ Do **not** put this MX on the root domain `fernandesjourneys.com`. That domain a
    | --- | --- | --- | --- |
    | MX | `inbound` | `inbound-smtp.us-east-1.amazonaws.com` | `10` |
 
-   Name `inbound` on `fernandesjourneys.com` is `inbound.fernandesjourneys.com`. Priority **10** must be the only / lowest MX on that subdomain. TTL Auto is fine.
+   Name `inbound` on `alexjourneys.com` is `inbound.alexjourneys.com`. Priority **10** must be the only / lowest MX on that subdomain. TTL Auto is fine.
 5. In Resend, click **I’ve added the record** and wait until receiving shows verified.
 6. Resend → **Webhooks** → **Add** →
-   - Endpoint: `https://www.fernandesjourneys.com/api/inbound/email`
+   - Endpoint: `https://www.alexjourneys.com/api/inbound/email`
    - Event: `email.received`
    - Copy the signing secret into `RESEND_WEBHOOK_SECRET`.
-7. Set `INBOUND_EMAIL_DOMAIN=inbound.fernandesjourneys.com` and redeploy.
+7. Set `INBOUND_EMAIL_DOMAIN=inbound.alexjourneys.com` and redeploy.
 
 Preview deploys can use the same webhook only if you point a second webhook at the preview URL. Real forwards should hit production. Use the sample harness on a preview when DNS is not ready.
 
-Address shape for a **new** mailbox (and for **Get a new address**): `{slug}-{NN}@inbound.fernandesjourneys.com`, for example `alex-24@inbound.fernandesjourneys.com`.
+Address shape for a **new** mailbox (and for **Get a new address**): `{slug}-{NN}@inbound.alexjourneys.com`, for example `alex-24@inbound.alexjourneys.com`.
 
 - `slug` is the reader’s first name: lowercase ASCII letters, digits, and hyphens (`José María` → `jose`, `Mary-Jane` → `mary-jane`). A signed-in reader whose display name is blank or has no letters or digits gets the stem `trip` (`trip-17@…`). Guests still see **Sign in to get a forward address** and do not receive one.
 - `NN` is an unused two-digit suffix (`00`–`99`), chosen at random so the first address is not always `-00`. The route document is the uniqueness check. An address already stored — including one that was replaced, turned off, or left behind when a trip was deleted — is never assigned again.
@@ -93,7 +93,7 @@ Example metadata payload (what Resend posts):
   "data": {
     "email_id": "56761188-7520-42d8-8898-ff6fc54ce618",
     "from": "united@example.com",
-    "to": ["alex-24@inbound.fernandesjourneys.com"],
+    "to": ["alex-24@inbound.alexjourneys.com"],
     "cc": [],
     "bcc": [],
     "received_for": [],
@@ -134,7 +134,7 @@ Hotel-shaped body you can send the same way (change `messageId` each time you wa
 
 ```json
 {
-  "to": "alex-24@inbound.fernandesjourneys.com",
+  "to": "alex-24@inbound.alexjourneys.com",
   "subject": "Reservation confirmed — Alfama apartment",
   "text": "Check-in: Monday, April 12, 2027\nCheck-out: April 19, 2027\nConfirmation code: HMAB12CD\nhttps://www.airbnb.com/trips/HMAB12CD\n",
   "messageId": "sample-airbnb-hmab12cd"
