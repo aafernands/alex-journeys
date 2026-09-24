@@ -5,7 +5,7 @@
  * - RESEND_API_KEY (required to send)
  * - EMAIL_FROM optional — default uses Resend’s onboarding address for testing.
  *   Production should use a verified domain, e.g.
- *   `Alex Journeys <contact@fernandesjourneys.com>`.
+ *   `Alex Journeys <contact@alexjourneys.com>`.
  *
  * With the default `onboarding@resend.dev` sender, Resend only delivers to the
  * email address on the Resend account until a custom domain is verified.
