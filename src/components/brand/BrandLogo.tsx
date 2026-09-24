@@ -21,6 +21,8 @@ type Props = {
   linked?: boolean;
   /** Override destination; defaults to https://www.alexjourneys.com */
   href?: string;
+  /** Apply the CMS-wide logo scale. Disable for tightly constrained chrome slots. */
+  applyScale?: boolean;
   onClick?: () => void;
 };
 
@@ -37,6 +39,7 @@ export function BrandLogo({
   variant = "auto",
   linked = true,
   href = site.url,
+  applyScale = true,
   onClick,
 }: Props) {
   const { branding } = getSiteDesign();
@@ -81,10 +84,14 @@ export function BrandLogo({
     <Link
       href={href}
       className="inline-flex max-w-full items-center opacity-95 transition hover:opacity-100"
-      style={{
-        transform: `scale(${logoScale})`,
-        transformOrigin: variant === "on-dark" ? "left center" : "center",
-      }}
+      style={
+        applyScale
+          ? {
+              transform: `scale(${logoScale})`,
+              transformOrigin: variant === "on-dark" ? "left center" : "center",
+            }
+          : undefined
+      }
       aria-label={`${site.name} home`}
       onClick={onClick}
     >
