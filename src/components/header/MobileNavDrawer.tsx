@@ -1,6 +1,5 @@
 "use client";
 
-import { BrandLogo } from "@/components/brand/BrandLogo";
 import {
   Chevron,
   MobileTopicSection,
@@ -16,6 +15,7 @@ import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
 import { SearchInput } from "@/components/search/SearchInput";
 import { ThemeAppearanceControl } from "@/components/ThemeToggle";
 import { site } from "@/data/content";
+import siteDesignJson from "@/data/site-design.json";
 import { destinationsTree } from "@/data/destinations";
 import { guidesNav } from "@/data/guides";
 import Link from "next/link";
@@ -41,6 +41,9 @@ const midButtonClass =
   "font-display flex w-full items-center justify-between gap-3 py-2 text-left text-xl font-semibold leading-snug tracking-tight text-heading transition hover:text-accent";
 const leafLinkClass =
   "block py-1.5 text-sm leading-snug text-text transition hover:text-accent";
+
+const drawerFavicon =
+  siteDesignJson.branding?.favicon?.trim() || "/favicon.ico";
 
 /**
  * Mobile hamburger drawer: oversized editorial hub list.
@@ -75,16 +78,21 @@ export function MobileNavDrawer({
         className="absolute inset-0 flex w-full flex-col bg-bg shadow-xl"
         aria-label="Mobile"
       >
-        <div className="flex shrink-0 items-center gap-2 border-b border-border px-2.5 py-3">
-          <div className="flex w-[6.25rem] shrink-0 items-center justify-start overflow-visible">
-            <BrandLogo
-              className="h-7 w-auto"
-              width={118}
-              height={33}
-              priority
-              onClick={onClose}
+        <div className="flex shrink-0 items-center gap-2 border-b border-border py-3 pr-2 pl-0">
+          <Link
+            href="/"
+            aria-label="Alex Journeys home"
+            onClick={onClose}
+            className="m-0 inline-flex h-10 w-10 shrink-0 items-center justify-center p-0"
+          >
+            <img
+              src={drawerFavicon}
+              alt=""
+              width={40}
+              height={40}
+              className="m-0 block h-10 w-10 object-contain p-0"
             />
-          </div>
+          </Link>
           <SearchInput
             variant="drawer"
             id="mobile-drawer-search"
