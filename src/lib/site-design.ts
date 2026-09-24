@@ -266,8 +266,8 @@ function defaultFeaturedSlideshow(hero: HeroDesign): FeaturedSlideshow {
 export const DEFAULT_SITE_DESIGN: SiteDesign = {
   updatedAt: "2026-09-20T00:00:00.000Z",
   branding: {
-    logoOnLight: "/brand/logo-fernandes-journeys.png",
-    logoOnDark: "/brand/logo-fernandes-journeys-white.png",
+    logoOnLight: "/brand/logo-on-light.png",
+    logoOnDark: "/brand/logo-on-dark.png",
     logoScalePercent: 50,
     favicon: "/favicon.ico",
   },
