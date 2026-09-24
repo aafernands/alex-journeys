@@ -9,6 +9,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { isReaderAuthConfigured } from "@/auth";
 import { getGoogleSiteVerification } from "@/lib/analytics";
 import { getLatestPost } from "@/lib/posts";
+import { getSiteDesign } from "@/lib/site-design";
 import {
   absoluteUrl,
   organizationJsonLd,
@@ -19,6 +20,7 @@ import "./globals.css";
 
 const googleSiteVerification = getGoogleSiteVerification();
 const adsenseClientId = "ca-pub-6769938844993028";
+const siteDesign = getSiteDesign();
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -78,7 +80,7 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: siteDesign.branding.favicon || "/favicon.ico",
   },
   other: {
     "google-adsense-account": adsenseClientId,
