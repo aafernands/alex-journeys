@@ -21,17 +21,17 @@ export function generateMetadata(): Metadata {
 const platforms = [
   {
     name: "Instagram",
-    handle: "@fernandesjourneys",
+    handle: "@alexjrnys",
     href: site.social.instagram,
   },
   {
     name: "YouTube",
-    handle: "@fernandesjourneys",
+    handle: "@alexjrnys",
     href: site.social.youtube,
   },
   {
     name: "Blog",
-    handle: "Fernandes Journeys",
+    handle: "Alex Journeys",
     href: "/",
   },
 ];
@@ -101,7 +101,7 @@ export default function MediaKitPage() {
           />
         </div>
         <div>
-          <p className="eyebrow">Fernandes Journeys</p>
+          <p className="eyebrow">Alex Journeys</p>
           <h2
             id="mk-hero"
             className="font-display mt-2 text-title text-heading"
@@ -119,7 +119,7 @@ export default function MediaKitPage() {
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <a
-              href={`mailto:${site.email}?subject=Partnership%20inquiry%20—%20Fernandes%20Journeys`}
+              href={`mailto:${site.email}?subject=Partnership%20inquiry%20—%20Alex%20Journeys`}
               className="btn btn-primary btn-block sm:w-auto"
             >
               {asString(hero.primaryCta, "Email for partnerships")}
@@ -290,7 +290,7 @@ export default function MediaKitPage() {
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <a
-            href={`mailto:${site.email}?subject=Partnership%20inquiry%20—%20Fernandes%20Journeys`}
+            href={`mailto:${site.email}?subject=Partnership%20inquiry%20—%20Alex%20Journeys`}
             className="btn btn-primary btn-block sm:w-auto"
           >
             {site.email}
