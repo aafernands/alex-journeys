@@ -26,7 +26,7 @@ import {
   verifyResendWebhook,
 } from "../src/lib/inbound-webhook.ts";
 
-const DOMAIN = "inbound.fernandesjourneys.com";
+const DOMAIN = "inbound.alexjourneys.com";
 const TOKEN = "ab".repeat(16);
 
 function unitedText() {
