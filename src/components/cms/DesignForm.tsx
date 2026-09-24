@@ -402,6 +402,66 @@ export function DesignForm({ initial }: Props) {
                 </div>
               </div>
             </div>
+
+            <div className="rounded-xl border border-border bg-white p-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div className="min-w-0 flex-1">
+                  <label
+                    htmlFor="design-logo-scale"
+                    className="text-sm font-semibold text-heading"
+                  >
+                    Website logo size
+                  </label>
+                  <p className="mt-1 text-xs text-muted">
+                    Applies sitewide to the header, footer, mobile navigation, and other brand-logo placements.
+                  </p>
+                  <input
+                    id="design-logo-scale"
+                    type="range"
+                    min="25"
+                    max="150"
+                    step="5"
+                    value={branding.logoScalePercent}
+                    onChange={(e) =>
+                      patchBranding("logoScalePercent", Number(e.target.value))
+                    }
+                    className="mt-3 w-full"
+                  />
+                </div>
+                <div className="w-28 shrink-0">
+                  <label
+                    htmlFor="design-logo-scale-number"
+                    className="text-xs font-semibold text-muted"
+                  >
+                    Percent
+                  </label>
+                  <div className="mt-1 flex items-center gap-2">
+                    <input
+                      id="design-logo-scale-number"
+                      type="number"
+                      min="25"
+                      max="150"
+                      step="5"
+                      value={branding.logoScalePercent}
+                      onChange={(e) => {
+                        const value = Number(e.target.value);
+                        if (Number.isFinite(value)) {
+                          patchBranding(
+                            "logoScalePercent",
+                            Math.min(150, Math.max(25, value)),
+                          );
+                        }
+                      }}
+                      className={fieldClass}
+                    />
+                    <span className="text-sm text-muted">%</span>
+                  </div>
+                </div>
+              </div>
+              <p className="mt-3 text-xs text-muted">
+                Current size: {branding.logoScalePercent}%. 100% is the previous default.
+              </p>
+            </div>
           </div>
         </section>
 
