@@ -4,7 +4,7 @@ import { ForgotPasswordForm } from "@/components/ForgotPasswordForm";
 
 export const metadata: Metadata = {
   title: "Forgot password",
-  description: "Reset your Fernandes Journeys reader password.",
+  description: "Reset your Alex Journeys reader password.",
   robots: { index: false, follow: false },
   alternates: { canonical: "/forgot-password" },
 };
