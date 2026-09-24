@@ -50,7 +50,7 @@ function response(body, status = 200) {
 
 function setupGithubFetch(sequence) {
   process.env.CMS_GITHUB_TOKEN = "test-token";
-  process.env.CMS_GITHUB_REPO = "aafernands/fernandes-journeys";
+  process.env.CMS_GITHUB_REPO = "aafernands/alex-journeys";
   process.env.CMS_GITHUB_BRANCH = "main";
   let index = 0;
   global.fetch = async () => {
