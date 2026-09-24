@@ -21,6 +21,8 @@ import "./globals.css";
 const googleSiteVerification = getGoogleSiteVerification();
 const adsenseClientId = "ca-pub-6769938844993028";
 const siteDesign = getSiteDesign();
+const faviconBase = siteDesign.branding.favicon || "/favicon.ico";
+const faviconHref = `${faviconBase}${faviconBase.includes("?") ? "&" : "?"}v=${encodeURIComponent(siteDesign.updatedAt)}`;
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -80,7 +82,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: siteDesign.branding.favicon || "/favicon.ico",
+    icon: faviconHref,
+    shortcut: faviconHref,
+    apple: faviconHref,
   },
   other: {
     "google-adsense-account": adsenseClientId,
