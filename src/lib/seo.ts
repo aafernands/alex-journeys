@@ -12,7 +12,7 @@ function designLogoOnLight(): string {
   } catch {
     // ignore — use hardcoded default below
   }
-  return "/brand/logo-fernandes-journeys.png";
+  return "/brand/logo-on-light.png";
 }
 
 function normalizeSiteUrl(raw: string): string {
@@ -37,7 +37,7 @@ export const siteConfig = {
   youtube: contentSite.social.youtube,
   pinterest: contentSite.social.pinterest,
   /** Default share image — brand logo under public/brand */
-  ogImage: "/brand/logo-alex-journly.png",
+  ogImage: "/brand/logo-on-light.png",
   /** Organization JSON-LD logo — prefers CMS branding.logoOnLight. */
   logo: designLogoOnLight(),
   authorPhoto: contentSite.authorPhoto,
