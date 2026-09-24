@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { journalNotesForDestination, type JournalNote, type JournalPlace } from "@/lib/trip-journal";
+import {
+  journalNotesForDestination,
+  type JournalNote,
+  type JournalPlace,
+} from "@/lib/trip-journal";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { NavIcon } from "@/components/icons/NavIcon";
 import type { TripSaveMode } from "@/components/trip-planner/useTripSync";
@@ -46,6 +50,8 @@ import { STAY_LANE_HASH } from "@/lib/stays-itinerary";
 import { plan } from "@/components/trip-planner/density";
 import { ForwardBookings } from "@/components/trip-planner/ForwardBookings";
 import { PlanFold, PlanHint } from "@/components/trip-planner/PlanFold";
+import { bookingProgress } from "@/lib/trip-workspace";
+import { TripEntryDialog } from "@/components/trip-planner/TripEntryDialog";
 import { WeekView } from "@/components/trip-planner/WeekView";
 
 type Props = {
@@ -76,33 +82,6 @@ type Props = {
   onRestoreBackup: () => void;
   onRememberGuestDraft: () => void;
 };
-
-function ItineraryAuthLinks({
-  tripId,
-  onRemember,
-}: {
-  tripId: string | null;
-  onRemember: () => void;
-}) {
-  return (
-    <div className="plan-actions plan-actions-inline plan-follow">
-      <Link
-        href={planATripLoginHref(tripId, "signin")}
-        className="btn btn-ink"
-        onClick={onRemember}
-      >
-        Sign in
-      </Link>
-      <Link
-        href={planATripLoginHref(tripId, "signup")}
-        className="btn btn-secondary"
-        onClick={onRemember}
-      >
-        Create account
-      </Link>
-    </div>
-  );
-}
 
 function laneIcon(partner: TripPlannerPartner): string {
   if (partner.showWhen === "flights") return "plane";
@@ -142,7 +121,7 @@ function StatusChips({
                 : "border-border bg-white text-text hover:border-border-strong"
             }`}
           >
-            {TRIP_STATUS_LABEL[status]}
+            {status === "todo" ? "Planned" : TRIP_STATUS_LABEL[status]}
           </button>
         );
       })}
@@ -154,20 +133,18 @@ function laneName(partner: TripPlannerPartner): string {
   if (partner.showWhen === "flights") return "Flights";
   if (partner.showWhen === "hotel") return "Stay";
   if (partner.showWhen === "car") return "Car";
+  if (partner.key === "world-nomads") return "Insurance";
+  if (partner.key === "saily") return "eSIM";
+  if (partner.key === "viator") return "Experiences";
   return partner.label;
 }
 
 function laneProgress(items: TripItem[]): "open" | "booked" | "skipped" {
-  if (items.length === 0 || items.some((item) => item.status === "todo")) return "open";
+  if (items.length === 0 || items.some((item) => item.status === "todo"))
+    return "open";
   if (items.some((item) => item.status === "booked")) return "booked";
   return "skipped";
 }
-
-const LANE_PROGRESS_LABEL = {
-  open: "still open",
-  booked: "booked",
-  skipped: "skipped",
-} as const;
 
 /** Sentinel lane pin for the forward-email panel. Not a partner key. */
 const OUTSIDE_TAB = "outside";
@@ -178,7 +155,8 @@ function lanePanelId(
   flightLaneKey: string,
   stayLaneKey: string,
 ): string {
-  if (partner.key === flightLaneKey && isFlightLanePartner(partner)) return FLIGHT_LANE_HASH;
+  if (partner.key === flightLaneKey && isFlightLanePartner(partner))
+    return FLIGHT_LANE_HASH;
   if (
     partner.key === stayLaneKey &&
     (partner.key === "booking" || partner.showWhen === "hotel")
@@ -186,18 +164,6 @@ function lanePanelId(
     return STAY_LANE_HASH;
   }
   return `${headingId}-lane-${partner.key}`;
-}
-
-function laneTabCue(items: TripItem[], isNext: boolean): string {
-  const progress = laneProgress(items);
-  const count = items.length;
-  if (isNext && progress === "open") return count > 0 ? `${count} · next` : "Next";
-  if (count > 0) {
-    const word =
-      progress === "booked" ? "booked" : progress === "skipped" ? "skipped" : "open";
-    return `${count} ${word}`;
-  }
-  return progress === "booked" ? "Booked" : progress === "skipped" ? "Skipped" : "Open";
 }
 
 function newestBookedStayId(items: TripItem[]): string | undefined {
@@ -223,7 +189,8 @@ function ItemUrl({ url, compact = false }: { url: string; compact?: boolean }) {
       className={`${plan.textBtn} truncate text-link hover:text-accent`}
     >
       {onSite
-        ? flightItemLinkLabel(url) || (url.startsWith("/stays") ? "View stay" : "View")
+        ? flightItemLinkLabel(url) ||
+          (url.startsWith("/stays") ? "View stay" : "View")
         : compact
           ? url.replace(/^https?:\/\//, "")
           : "Open link"}
@@ -235,7 +202,8 @@ function ItemUrl({ url, compact = false }: { url: string; compact?: boolean }) {
 function itemWhen(item: TripItem, days: TripDay[]): string {
   const dayCount = days.length;
   const index = scheduledDayIndex(item, dayCount);
-  const day = index == null ? null : days.find((entry) => entry.index === index);
+  const day =
+    index == null ? null : days.find((entry) => entry.index === index);
   return [
     day ? `${day.label} · ${day.detail}` : null,
     item.time ?? null,
@@ -252,6 +220,7 @@ function BookingItemForm({
   existing,
   days,
   framed,
+  initialDay,
   onSave,
   onCancel,
 }: {
@@ -261,6 +230,7 @@ function BookingItemForm({
   existing?: TripItem;
   days: TripDay[];
   framed?: boolean;
+  initialDay?: number;
   onSave: (item: TripItem) => void;
   onCancel: () => void;
 }) {
@@ -268,14 +238,18 @@ function BookingItemForm({
   const [pasteNote, setPasteNote] = useState<string | null>(null);
   const [url, setUrl] = useState(existing?.url ?? "");
   const [title, setTitle] = useState(existing?.title ?? "");
-  const [confirmation, setConfirmation] = useState(existing?.confirmation ?? "");
+  const [confirmation, setConfirmation] = useState(
+    existing?.confirmation ?? "",
+  );
   const [dayIndex, setDayIndex] = useState(() => {
-    if (!existing) return "";
+    if (!existing) return initialDay ? String(initialDay) : "";
     const index = scheduledDayIndex(existing, days.length);
     return index == null ? "" : String(index);
   });
   const [time, setTime] = useState(existing?.time ?? "");
-  const [status, setStatus] = useState<TripItemStatus>(existing?.status ?? "todo");
+  const [status, setStatus] = useState<TripItemStatus>(
+    existing?.status ?? "todo",
+  );
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [error, setError] = useState<string | null>(null);
 
@@ -309,7 +283,9 @@ function BookingItemForm({
         event.preventDefault();
         const trimmedUrl = url.trim();
         if (trimmedUrl && !isTripItemUrl(trimmedUrl)) {
-          setError("Use a full http:// or https:// link, or a link on this site.");
+          setError(
+            "Use a full http:// or https:// link, or a link on this site.",
+          );
           return;
         }
         if (
@@ -358,37 +334,50 @@ function BookingItemForm({
         );
       }}
     >
-      <label className="plan-field">
-        <span className={plan.label}>
-          Paste booking details{" "}
-          <span className="font-normal normal-case tracking-normal">(optional)</span>
-        </span>
-        <textarea
-          className={plan.input}
-          rows={3}
-          placeholder="Paste a confirmation email or summary"
-          value={paste}
-          onChange={(event) => {
-            setPaste(event.target.value);
-            setPasteNote(null);
-          }}
-        />
-      </label>
-      <p className={`${plan.prose} text-muted plan-desktop-only`}>
-        Looks for a link, a confirmation code, a time, and a trip day in the text
-        you paste. It does not open or scrape booking sites.
-      </p>
-      <PlanHint label="What paste reads" mobileOnly>
-        Looks for a link, a confirmation code, a time, and a trip day in the text
-        you paste. It does not open or scrape booking sites.
-      </PlanHint>
-      <button type="button" className="btn btn-secondary" onClick={fillFromPaste}>
-        Fill from paste
-      </button>
-      {pasteNote ? (
-        <p className={`${plan.body} text-text`} role="status">
-          {pasteNote}
-        </p>
+      {type !== "note" ? (
+        <details className="plan-paste-details">
+          <summary className={plan.textBtn}>
+            Paste a confirmation (optional)
+          </summary>
+          <label className="plan-field">
+            <span className={plan.label}>
+              Paste booking details{" "}
+              <span className="font-normal normal-case tracking-normal">
+                (optional)
+              </span>
+            </span>
+            <textarea
+              className={plan.input}
+              rows={3}
+              placeholder="Paste a confirmation email or summary"
+              value={paste}
+              onChange={(event) => {
+                setPaste(event.target.value);
+                setPasteNote(null);
+              }}
+            />
+          </label>
+          <p className={`${plan.prose} text-muted plan-desktop-only`}>
+            Looks for a link, a confirmation code, a time, and a trip day in the
+            text you paste. It does not open or scrape booking sites.
+          </p>
+          <PlanHint label="What paste reads" mobileOnly>
+            Looks for a link, a confirmation code, a time, and a trip day in the
+            text you paste. It does not open or scrape booking sites.
+          </PlanHint>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={fillFromPaste}
+          >
+            Fill from paste
+          </button>
+          {pasteNote ? (
+            <p className={`${plan.body} text-text`} role="status">
+              {pasteNote}
+            </p>
+          ) : null}
+        </details>
       ) : null}
       <label className="plan-field">
         <span className={plan.label}>Title</span>
@@ -411,18 +400,22 @@ function BookingItemForm({
           }}
         />
       </label>
-      <label className="plan-field">
-        <span className={plan.label}>
-          Confirmation #{" "}
-          <span className="font-normal normal-case tracking-normal">(optional)</span>
-        </span>
-        <input
-          className={plan.input}
-          maxLength={40}
-          value={confirmation}
-          onChange={(event) => setConfirmation(event.target.value)}
-        />
-      </label>
+      {type !== "note" ? (
+        <label className="plan-field">
+          <span className={plan.label}>
+            Confirmation #{" "}
+            <span className="font-normal normal-case tracking-normal">
+              (optional)
+            </span>
+          </span>
+          <input
+            className={plan.input}
+            maxLength={40}
+            value={confirmation}
+            onChange={(event) => setConfirmation(event.target.value)}
+          />
+        </label>
+      ) : null}
       <div className="plan-grid-2">
         <label className="plan-field">
           <span className={plan.label}>Day</span>
@@ -443,7 +436,9 @@ function BookingItemForm({
         <label className="plan-field">
           <span className={plan.label}>
             Time{" "}
-            <span className="font-normal normal-case tracking-normal">(optional)</span>
+            <span className="font-normal normal-case tracking-normal">
+              (optional)
+            </span>
           </span>
           <input
             className={plan.input}
@@ -453,17 +448,22 @@ function BookingItemForm({
           />
         </label>
       </div>
-      <div className="plan-stack-tight">
-        <p className={plan.label}>Status</p>
-        <StatusChips
-          value={status}
-          label="Booking status"
-          onChange={setStatus}
-        />
-      </div>
+      {type !== "note" ? (
+        <div className="plan-stack-tight">
+          <p className={plan.label}>Status</p>
+          <StatusChips
+            value={status}
+            label="Booking status"
+            onChange={setStatus}
+          />
+        </div>
+      ) : null}
       <label className="plan-field">
         <span className={plan.label}>
-          Notes <span className="font-normal normal-case tracking-normal">(optional)</span>
+          Notes{" "}
+          <span className="font-normal normal-case tracking-normal">
+            (optional)
+          </span>
         </span>
         <textarea
           className={plan.input}
@@ -526,7 +526,7 @@ function ItemCard({
             className={`${plan.textBtn} text-accent hover:underline`}
             onClick={onEdit}
           >
-            Edit
+            Edit details
           </button>
           <button
             type="button"
@@ -582,14 +582,19 @@ function TimelineEntry({
         <div className="min-w-0 plan-stack-tight">
           <div className="flex flex-wrap items-center gap-2">
             {item.time ? (
-              <span className={`${plan.badge} border border-accent/25 bg-accent/10 text-accent`}>
+              <span
+                className={`${plan.badge} border border-accent/25 bg-accent/10 text-accent`}
+              >
                 {item.time}
               </span>
             ) : null}
             <p className={plan.h4}>{item.title}</p>
           </div>
           <p className={plan.label}>
-            {[TRIP_STATUS_LABEL[item.status], item.confirmation ? `Conf. ${item.confirmation}` : null]
+            {[
+              TRIP_STATUS_LABEL[item.status],
+              item.confirmation ? `Conf. ${item.confirmation}` : null,
+            ]
               .filter(Boolean)
               .join(" · ")}
           </p>
@@ -604,7 +609,7 @@ function TimelineEntry({
             className={`${plan.textBtn} text-accent hover:underline`}
             onClick={onEdit}
           >
-            Edit
+            Edit details
           </button>
           <button
             type="button"
@@ -635,14 +640,18 @@ function JournalNotes({
   return (
     <section className="plan-block" aria-labelledby={`${headingId}-journal`}>
       <h3 id={`${headingId}-journal`} className={`${plan.h3} max-sm:hidden`}>
-        Notes from trips I’ve already walked
+        From Alex’s journal
       </h3>
       {matches.length === 0 ? (
         <>
-          <p className={`${plan.caption} text-muted sm:hidden`}>No notes for {place} yet.</p>
-          <p className={`${plan.prose} plan-follow text-muted plan-desktop-only`}>
-            No journal notes for {place} yet. When a story from that trip is on the
-            site, it will show up here.
+          <p className={`${plan.caption} text-muted sm:hidden`}>
+            No notes for {place} yet.
+          </p>
+          <p
+            className={`${plan.prose} plan-follow text-muted plan-desktop-only`}
+          >
+            No journal notes for {place} yet. When a story from that trip is on
+            the site, it will show up here.
           </p>
         </>
       ) : (
@@ -655,11 +664,15 @@ function JournalNotes({
               >
                 <span className={plan.h4}>{note.title}</span>
                 {note.excerpt ? (
-                  <span className={`${plan.body} plan-follow line-clamp-3 text-text`}>
+                  <span
+                    className={`${plan.body} plan-follow line-clamp-3 text-text`}
+                  >
                     {note.excerpt}
                   </span>
                 ) : null}
-                <span className={`${plan.caption} plan-follow font-semibold text-link`}>
+                <span
+                  className={`${plan.caption} plan-follow font-semibold text-link`}
+                >
                   Read story
                 </span>
               </Link>
@@ -685,7 +698,9 @@ function LaneCta({
   className: string;
 }) {
   const inApp =
-    partner.key === "viator" || partner.key === "booking" || isFlightLanePartner(partner);
+    partner.key === "viator" ||
+    partner.key === "booking" ||
+    isFlightLanePartner(partner);
   const href =
     partner.key === "booking"
       ? hotelLaneHref(state, flexibleOn, tripId)
@@ -713,34 +728,44 @@ function destinationHero(destination: string): {
   const commonsFile = (filename: string) =>
     `https://commons.wikimedia.org/wiki/Special:Redirect/file/${encodeURIComponent(filename)}?width=1800`;
 
-  const known: Record<string, { image: string; credit: string; creditUrl: string }> = {
+  const known: Record<
+    string,
+    { image: string; credit: string; creditUrl: string }
+  > = {
     "las vegas": {
       image: commonsFile("Las Vegas skyline.jpg"),
       credit: "Antoine Taveneaux / Wikimedia Commons",
-      creditUrl: "https://commons.wikimedia.org/wiki/File:Las_Vegas_skyline.jpg",
+      creditUrl:
+        "https://commons.wikimedia.org/wiki/File:Las_Vegas_skyline.jpg",
     },
     miami: {
       image: commonsFile("Miami, Florida skyline.jpg"),
       credit: "Wilfredor / Wikimedia Commons",
-      creditUrl: "https://commons.wikimedia.org/wiki/File:Miami,_Florida_skyline.jpg",
+      creditUrl:
+        "https://commons.wikimedia.org/wiki/File:Miami,_Florida_skyline.jpg",
     },
     "miami beach": {
       image: commonsFile("Miami skyline (1).jpg"),
       credit: "Marc Averette / Wikimedia Commons",
-      creditUrl: "https://commons.wikimedia.org/wiki/File:Miami_skyline_(1).jpg",
+      creditUrl:
+        "https://commons.wikimedia.org/wiki/File:Miami_skyline_(1).jpg",
     },
     "los angeles": {
       image: commonsFile("Los Angeles - Skyline.jpg"),
       credit: "Jon Sullivan / Wikimedia Commons",
-      creditUrl: "https://commons.wikimedia.org/wiki/File:Los_Angeles_-_Skyline.jpg",
+      creditUrl:
+        "https://commons.wikimedia.org/wiki/File:Los_Angeles_-_Skyline.jpg",
     },
   };
 
-  return known[place] ?? {
-    image: "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
-    credit: "Alex Journeys",
-    creditUrl: "/destinations",
-  };
+  return (
+    known[place] ?? {
+      image:
+        "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
+      credit: "Alex Journeys",
+      creditUrl: "/destinations",
+    }
+  );
 }
 
 export function ItineraryHub({
@@ -772,9 +797,83 @@ export function ItineraryHub({
   onRememberGuestDraft,
 }: Props) {
   const [copied, setCopied] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [view, updateView] = useState<"overview" | "itinerary" | "bookings">(
+    focusStay || focusFlight ? "bookings" : "overview",
+  );
+  const viewKey = `aj.trip-workspace:${tripId ?? state.destination}:${state.startDate || state.month}`;
+  function setView(next: "overview" | "itinerary" | "bookings") {
+    updateView(next);
+    try {
+      sessionStorage.setItem(viewKey, next);
+    } catch {
+      /* In-memory navigation still works. */
+    }
+  }
+  useEffect(() => {
+    let frame = 0;
+    let restoreFrame = 0;
+    try {
+      const saved = sessionStorage.getItem(viewKey);
+      const scroll = Number(sessionStorage.getItem(`${viewKey}:scroll`));
+      const returningToBooking =
+        focusStay ||
+        focusFlight ||
+        [FLIGHT_LANE_HASH, STAY_LANE_HASH].includes(
+          window.location.hash.slice(1),
+        );
+      if (
+        !returningToBooking &&
+        (saved === "overview" || saved === "itinerary" || saved === "bookings")
+      ) {
+        frame = requestAnimationFrame(() => {
+          updateView(saved);
+          restoreFrame = requestAnimationFrame(() => {
+            if (Number.isFinite(scroll) && scroll > 0)
+              window.scrollTo(0, scroll);
+          });
+        });
+      }
+    } catch {
+      /* Session storage is optional. */
+    }
+    const rememberScroll = () => {
+      try {
+        sessionStorage.setItem(`${viewKey}:scroll`, String(window.scrollY));
+      } catch {
+        /* Ignore unavailable storage. */
+      }
+    };
+    window.addEventListener("pagehide", rememberScroll);
+    return () => {
+      rememberScroll();
+      cancelAnimationFrame(frame);
+      cancelAnimationFrame(restoreFrame);
+      window.removeEventListener("pagehide", rememberScroll);
+    };
+  }, [viewKey, focusStay, focusFlight]);
+  const [quickEntry, setQuickEntry] = useState<{
+    type: TripItemType;
+    day?: number;
+    laneKey?: string;
+  } | null>(null);
+  const [addMenu, setAddMenu] = useState(false);
+  const nextPartner = partners.find((partner) => {
+    if (partner.showWhen === "extra") return false;
+    const entries = itemsForLane(items, partner);
+    return (
+      entries.length === 0 || entries.some((item) => item.status === "todo")
+    );
+  });
+  function openBookings(key?: string) {
+    setView("bookings");
+    if (key) setLanePin(key);
+  }
+
   const nextLaneKey =
-    partners.find((partner) => laneProgress(itemsForLane(items, partner)) === "open")
-      ?.key ?? null;
+    partners.find(
+      (partner) => laneProgress(itemsForLane(items, partner)) === "open",
+    )?.key ?? null;
   const flightLaneKey =
     partners.find((partner) => isFlightLanePartner(partner))?.key ?? "expedia";
   const stayLaneKey =
@@ -784,6 +883,14 @@ export function ItineraryHub({
   const [lanePin, setLanePin] = useState<string>(
     focusFlight ? flightLaneKey : focusStay ? stayLaneKey : "auto",
   );
+  useEffect(() => {
+    if (!focusFlight && !focusStay) return;
+    const frame = window.requestAnimationFrame(() => {
+      updateView("bookings");
+      setLanePin(focusFlight ? flightLaneKey : stayLaneKey);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [focusFlight, focusStay, flightLaneKey, stayLaneKey]);
   const outsideSelected = lanePin === OUTSIDE_TAB;
   const pinnedLane =
     !outsideSelected &&
@@ -806,15 +913,14 @@ export function ItineraryHub({
   const travelers = travelerSummary(state);
   const days = tripDays(state, flexibleOn);
   const sorted = [...items].sort(
-    (a, b) => a.sortOrder - b.sortOrder || a.updatedAt.localeCompare(b.updatedAt),
+    (a, b) =>
+      a.sortOrder - b.sortOrder || a.updatedAt.localeCompare(b.updatedAt),
   );
-  const nextSort = sorted.reduce((max, item) => Math.max(max, item.sortOrder), -1) + 1;
+  const nextSort =
+    sorted.reduce((max, item) => Math.max(max, item.sortOrder), -1) + 1;
   const unscheduled = sorted.filter(
     (item) => scheduledDayIndex(item, days.length) == null,
   );
-  const stillOpen = partners.filter(
-    (partner) => laneProgress(itemsForLane(items, partner)) === "open",
-  ).length;
   const hero = destinationHero(state.destination);
 
   function renderTimeline(list: TripItem[]) {
@@ -830,7 +936,7 @@ export function ItineraryHub({
                 editor.place === "day" &&
                 editor.id === item.id
               }
-              onEdit={() => setEditor({ kind: "edit", id: item.id, place: "day" })}
+              onEdit={() => setEditingId(item.id)}
               onRemove={() => removeItem(item.id)}
               onSave={replaceItem}
               onCancel={() => setEditor(null)}
@@ -870,7 +976,9 @@ export function ItineraryHub({
 
   function assignDay(id: string, dayIndex: number | null) {
     const nextIndex =
-      dayIndex != null && dayIndex >= 1 && dayIndex <= days.length ? dayIndex : null;
+      dayIndex != null && dayIndex >= 1 && dayIndex <= days.length
+        ? dayIndex
+        : null;
     onItemsChange(
       items.map((item) => {
         if (item.id !== id) return item;
@@ -887,7 +995,9 @@ export function ItineraryHub({
   useEffect(() => {
     function laneKeyForHash(hash: string): string | null {
       if (hash === FLIGHT_LANE_HASH) {
-        return partners.find((partner) => isFlightLanePartner(partner))?.key ?? null;
+        return (
+          partners.find((partner) => isFlightLanePartner(partner))?.key ?? null
+        );
       }
       if (hash === STAY_LANE_HASH) {
         return (
@@ -905,8 +1015,11 @@ export function ItineraryHub({
       if (!force && appliedHash.current === hash) return;
       appliedHash.current = hash;
       setLanePin(key);
+      updateView("bookings");
       window.requestAnimationFrame(() => {
-        document.querySelector(".plan-hub-lanes")?.scrollIntoView({ block: "start" });
+        document
+          .querySelector(".plan-hub-lanes")
+          ?.scrollIntoView({ block: "start" });
       });
     }
     applyHash(false);
@@ -919,15 +1032,20 @@ export function ItineraryHub({
     if (!selectedLaneKey) return;
     const tab = document.getElementById(`${headingId}-tab-${selectedLaneKey}`);
     const scroller = tab?.parentElement;
-    if (!(tab instanceof HTMLElement) || !(scroller instanceof HTMLElement)) return;
+    if (!(tab instanceof HTMLElement) || !(scroller instanceof HTMLElement))
+      return;
     const tabStart = tab.offsetLeft;
     const tabEnd = tabStart + tab.offsetWidth;
     const viewEnd = scroller.scrollLeft + scroller.clientWidth;
     if (tabStart < scroller.scrollLeft) scroller.scrollLeft = tabStart;
-    else if (tabEnd > viewEnd) scroller.scrollLeft = tabEnd - scroller.clientWidth;
+    else if (tabEnd > viewEnd)
+      scroller.scrollLeft = tabEnd - scroller.clientWidth;
   }, [headingId, selectedLaneKey]);
 
-  function onLaneTabKeyDown(event: { key: string; preventDefault: () => void }, current: string) {
+  function onLaneTabKeyDown(
+    event: { key: string; preventDefault: () => void },
+    current: string,
+  ) {
     const order = [...partners.map((partner) => partner.key), OUTSIDE_TAB];
     const index = order.indexOf(current);
     if (index < 0) return;
@@ -947,7 +1065,10 @@ export function ItineraryHub({
     const next = order[nextIndex];
     if (!next) return;
     setLanePin(next);
-    const tabId = next === OUTSIDE_TAB ? `${headingId}-outside-tab` : `${headingId}-tab-${next}`;
+    const tabId =
+      next === OUTSIDE_TAB
+        ? `${headingId}-outside-tab`
+        : `${headingId}-tab-${next}`;
     window.requestAnimationFrame(() => {
       document.getElementById(tabId)?.focus();
     });
@@ -968,8 +1089,11 @@ export function ItineraryHub({
               : null;
 
   return (
-    <div className="plan-hub">
+    <div className="plan-hub plan-workspace" data-view={view}>
       <div className="plan-hub-lead plan-stack-tight">
+        <Link href="/account#trips" className={plan.textBtn}>
+          ← My trips
+        </Link>
         <div
           className="plan-trip-hero"
           style={{ backgroundImage: `url("${hero.image}")` }}
@@ -978,27 +1102,28 @@ export function ItineraryHub({
           <div className="plan-trip-hero-content">
             <p className="plan-trip-hero-kicker">Your trip</p>
             <h2 id={headingId} className="plan-trip-hero-title">
-              {state.destination.trim() || config.steps.next.heading}
+              {tripTitle ||
+                state.destination.trim() ||
+                config.steps.next.heading}
             </h2>
             <p className="plan-trip-hero-meta">
               {[dates, travelers].filter(Boolean).join(" · ")}
-              {partners.length > 0
-                ? stillOpen > 0
-                  ? ` · ${stillOpen} still to book`
-                  : " · All booked"
-                : ""}
             </p>
           </div>
           <a
             href={hero.creditUrl}
             target={hero.creditUrl.startsWith("/") ? undefined : "_blank"}
-            rel={hero.creditUrl.startsWith("/") ? undefined : "noopener noreferrer"}
+            rel={
+              hero.creditUrl.startsWith("/") ? undefined : "noopener noreferrer"
+            }
             className="plan-trip-hero-credit"
           >
             {hero.credit}
           </a>
         </div>
-        <p className={`${plan.prose} text-muted plan-desktop-only`}>{subhead}</p>
+        <p className={`${plan.prose} text-muted plan-desktop-only`}>
+          {subhead}
+        </p>
         <div className="plan-inline-actions plan-hub-actions">
           <button
             type="button"
@@ -1023,154 +1148,462 @@ export function ItineraryHub({
               window.setTimeout(() => setCopied(false), 2500);
             }}
           >
-            Copy link
+            Share a copy
           </button>
-          <button type="button" className={`${plan.textBtn} text-muted sm:text-heading`} onClick={onEditTrip}>
-            Edit
+          <button
+            type="button"
+            className={`${plan.textBtn} text-muted sm:text-heading`}
+            onClick={onEditTrip}
+          >
+            Edit details
           </button>
-          <button type="button" className={`${plan.textBtn} text-muted`} onClick={onStartOver}>
-            Start over
-          </button>
+          <details className="plan-trip-menu">
+            <summary className={plan.textBtn}>More options</summary>
+            <button
+              type="button"
+              className={plan.textBtn}
+              onClick={onStartOver}
+            >
+              Start a new trip
+            </button>
+          </details>
         </div>
       </div>
       <div className="plan-hub-save">
-      {copied ? (
-        <p className={`${plan.caption} plan-follow font-semibold text-heading`} role="status">
-          <span className="plan-mobile-only">Link copied.</span>
-          <span className="plan-desktop-only">
-            Link copied. Anyone with it can open this itinerary.
-          </span>
-        </p>
-      ) : null}
+        {copied ? (
+          <p
+            className={`${plan.caption} plan-follow font-semibold text-heading`}
+            role="status"
+          >
+            <span className="plan-mobile-only">Link copied.</span>
+            <span className="plan-desktop-only">
+              Link copied. Anyone with it can open this snapshot. Later edits
+              are not shared.
+            </span>
+          </p>
+        ) : null}
 
-      {saveMode === "local" ? (
-        <>
-          <div className="plan-mobile-only">
+        {saveMode === "local" ? (
+          <div className="plan-local-save">
+            <p className={plan.caption}>Saved on this device</p>
             <Link
               href={planATripLoginHref(tripId, "signin")}
-              className={`${plan.textBtn} text-accent`}
+              className={plan.textBtn}
               onClick={onRememberGuestDraft}
             >
-              Sign in to save
+              Sign in to sync across devices
             </Link>
           </div>
-          <aside className={`${plan.soft} plan-section plan-stack-tight plan-desktop-only`} aria-label="Save itinerary">
-            <p className={`${plan.prose} text-text`}>
-              {tripId
-                ? "You’re signed out. This itinerary stays in this browser. Sign in to keep saving it to your account."
-                : config.checklistHint}
-            </p>
-            {tripId ? null : (
-              <p className={`${plan.prose} text-text`}>
-                Sign in or create an account and you’ll come back to this itinerary.
-              </p>
-            )}
-            <ItineraryAuthLinks tripId={tripId} onRemember={onRememberGuestDraft} />
-          </aside>
-        </>
-      ) : null}
+        ) : null}
 
-      {saveMode === "offer" ? (
-        <aside className={`${plan.soft} plan-section plan-stack-tight`} aria-label="Save itinerary to your account">
-          <p className={`${plan.prose} text-text`}>
-            Save this browser itinerary to your account so you can open it later?
-          </p>
-          <div className="plan-actions plan-actions-inline">
-            <button type="button" className="btn btn-ink" onClick={onSaveToAccount}>
-              Save itinerary
-            </button>
-            <button type="button" className="btn btn-secondary" onClick={onDeclineMerge}>
-              Keep it on this device
+        {saveMode === "offer" ? (
+          <aside
+            className={`${plan.soft} plan-section plan-stack-tight`}
+            aria-label="Save itinerary to your account"
+          >
+            <p className={`${plan.prose} text-text`}>
+              Save this browser itinerary to your account so you can open it
+              later?
+            </p>
+            <div className="plan-actions plan-actions-inline">
+              <button
+                type="button"
+                className="btn btn-ink"
+                onClick={onSaveToAccount}
+              >
+                Save itinerary
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={onDeclineMerge}
+              >
+                Keep it on this device
+              </button>
+            </div>
+          </aside>
+        ) : null}
+
+        {saveMode === "declined" ? (
+          <div className="plan-toolbar plan-section">
+            <p className={`${plan.body} text-muted`}>
+              This itinerary stays in this browser.
+            </p>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onSaveToAccount}
+            >
+              Save to your account
             </button>
           </div>
-        </aside>
-      ) : null}
+        ) : null}
 
-      {saveMode === "declined" ? (
-        <div className="plan-toolbar plan-section">
-          <p className={`${plan.body} text-muted`}>This itinerary stays in this browser.</p>
-          <button type="button" className="btn btn-secondary" onClick={onSaveToAccount}>
-            Save to your account
-          </button>
-        </div>
-      ) : null}
-
-      {saveCopy ? (
-        <p className={`${plan.caption} plan-follow font-semibold text-heading`} role="status">
-          {saveCopy}
-          {saveMode === "saved" ? (
-            <>
-              {" "}
-              <Link href="/account#trips" className="text-link hover:text-accent">
-                View in My trips
-              </Link>
-            </>
-          ) : null}
-        </p>
-      ) : null}
-      {saveMode === "unavailable" || saveMode === "error" ? (
-        <div className="plan-actions plan-actions-inline plan-follow">
-          <button type="button" className="btn btn-secondary" onClick={onRetrySave}>
-            Try saving again
-          </button>
-        </div>
-      ) : null}
+        {saveCopy ? (
+          <p
+            className={`${plan.caption} plan-follow font-semibold text-heading`}
+            role="status"
+          >
+            {saveCopy}
+            {saveMode === "saved" ? (
+              <>
+                {" "}
+                <Link
+                  href="/account#trips"
+                  className="text-link hover:text-accent"
+                >
+                  View in My trips
+                </Link>
+              </>
+            ) : null}
+          </p>
+        ) : null}
+        {saveMode === "unavailable" || saveMode === "error" ? (
+          <div className="plan-actions plan-actions-inline plan-follow">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onRetrySave}
+            >
+              Try saving again
+            </button>
+          </div>
+        ) : null}
       </div>
 
-      {partners.length > 0 ? (
-        <section className="plan-hub-index plan-section plan-desktop-only" aria-labelledby={`${headingId}-left`}>
-          <h3 id={`${headingId}-left`} className={plan.label}>
-            What’s left to book
-          </h3>
-          <ul className="plan-status">
-            {partners.map((partner) => {
-              const progress = laneProgress(itemsForLane(items, partner));
-              const current = selectedLaneKey === partner.key;
-              return (
-                <li key={partner.key}>
+      <div className="plan-workspace-toolbar">
+        <div
+          className="plan-workspace-tabs"
+          role="tablist"
+          aria-label="Trip workspace"
+        >
+          {(["overview", "itinerary", "bookings"] as const).map(
+            (tab, index, tabs) => (
+              <button
+                key={tab}
+                id={`${headingId}-workspace-${tab}`}
+                type="button"
+                role="tab"
+                aria-selected={view === tab}
+                aria-controls={`${headingId}-view-${tab}`}
+                tabIndex={view === tab ? 0 : -1}
+                onClick={() => setView(tab)}
+                onKeyDown={(event) => {
+                  const next =
+                    event.key === "ArrowRight"
+                      ? tabs[(index + 1) % tabs.length]
+                      : event.key === "ArrowLeft"
+                        ? tabs[(index + tabs.length - 1) % tabs.length]
+                        : event.key === "Home"
+                          ? tabs[0]
+                          : event.key === "End"
+                            ? tabs[tabs.length - 1]
+                            : null;
+                  if (!next) return;
+                  event.preventDefault();
+                  setView(next);
+                  document
+                    .getElementById(`${headingId}-workspace-${next}`)
+                    ?.focus();
+                }}
+              >
+                {tab === "overview"
+                  ? "Overview"
+                  : tab === "itinerary"
+                    ? "Itinerary"
+                    : "Bookings"}
+              </button>
+            ),
+          )}
+        </div>
+        <div className="plan-add-menu">
+          <button
+            type="button"
+            className="btn btn-ink"
+            id={`${headingId}-add-trigger`}
+            aria-expanded={addMenu}
+            aria-controls={`${headingId}-add-options`}
+            onClick={() => setAddMenu(!addMenu)}
+          >
+            + Add to trip
+          </button>
+          {addMenu ? (
+            <div id={`${headingId}-add-options`} className="plan-add-options">
+              {(
+                [
+                  ["activity", "Activity"],
+                  ["note", "Note"],
+                  ["other", "Booking"],
+                ] as const
+              ).map(([type, label]) => (
+                <button
+                  type="button"
+                  key={type}
+                  onClick={() => {
+                    setQuickEntry({ type });
+                    setAddMenu(false);
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  openBookings(OUTSIDE_TAB);
+                  setAddMenu(false);
+                }}
+              >
+                Import a booking
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </div>
+      <section
+        id={`${headingId}-view-overview`}
+        role="tabpanel"
+        aria-labelledby={`${headingId}-workspace-overview`}
+        hidden={view !== "overview"}
+        className="plan-overview"
+      >
+        <div className="plan-overview-main">
+          <div className="plan-next-action">
+            <p className="eyebrow text-accent">Your next step</p>
+            <h3 className={plan.h2}>
+              {nextPartner
+                ? itemsForLane(items, nextPartner).length
+                  ? "Review your plans"
+                  : nextPartner.showWhen === "hotel"
+                    ? "Find somewhere to stay"
+                    : nextPartner.showWhen === "flights"
+                      ? "Find your way there"
+                      : "Find a car for your trip"
+                : "Make room for the memorable"}
+            </h3>
+            <p className={`${plan.body} text-muted`}>
+              {nextPartner
+                ? "Keep your options and confirmations together. Only confirmed reservations count as booked."
+                : "Add an activity, a place to explore, or a note for later."}
+            </p>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() =>
+                nextPartner
+                  ? openBookings(nextPartner.key)
+                  : setQuickEntry({ type: "activity" })
+              }
+            >
+              {nextPartner
+                ? `Explore ${nextPartner.showWhen === "hotel" ? "stays" : laneName(nextPartner).toLowerCase()}`
+                : "Add an activity"}
+            </button>
+          </div>
+          <div className="plan-overview-preview">
+            <div className="plan-toolbar">
+              <h3 className={plan.h3}>Your itinerary at a glance</h3>
+              <button
+                type="button"
+                className={plan.textBtn}
+                onClick={() => setView("itinerary")}
+              >
+                View all days
+              </button>
+            </div>
+            {days.slice(0, 3).map((day) => (
+              <div key={day.index} className="plan-preview-day">
+                <div>
+                  <span className="eyebrow text-accent">{day.label}</span>
+                  <p className={plan.caption}>{day.detail}</p>
+                </div>
+                <div>
+                  {sorted
+                    .filter(
+                      (item) =>
+                        scheduledDayIndex(item, days.length) === day.index,
+                    )
+                    .map((item) => (
+                      <p key={item.id} className={plan.body}>
+                        {item.time ? `${item.time} ? ` : ""}
+                        {item.title}
+                      </p>
+                    ))}
+                  {!sorted.some(
+                    (item) =>
+                      scheduledDayIndex(item, days.length) === day.index,
+                  ) ? (
+                    <p className={`${plan.body} text-muted`}>
+                      A day to make your own.
+                    </p>
+                  ) : null}
                   <button
                     type="button"
-                    className="plan-status-jump"
-                    aria-current={current ? "true" : undefined}
-                    onClick={() => setLanePin(partner.key)}
+                    className={plan.textBtn}
+                    onClick={() =>
+                      setQuickEntry({ type: "activity", day: day.index })
+                    }
                   >
-                    <span className={`${plan.caption} font-semibold text-heading`}>
-                      {laneName(partner)}
-                    </span>
-                    <span className={`${plan.caption} text-muted`}>
-                      {LANE_PROGRESS_LABEL[progress]}
+                    + Add a plan
+                  </button>
+                </div>
+              </div>
+            ))}
+            {!days.length ? (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={onEditTrip}
+              >
+                Add trip dates
+              </button>
+            ) : null}
+            {unscheduled.length > 0 ? (
+              <button
+                type="button"
+                className={plan.textBtn}
+                onClick={() => setView("itinerary")}
+              >
+                {unscheduled.length} unscheduled{" "}
+                {unscheduled.length === 1 ? "item" : "items"} to organize
+              </button>
+            ) : null}
+          </div>
+        </div>
+        <aside className="plan-overview-side">
+          <div className="plan-checklist">
+            <h3 className={plan.h3}>Booking checklist</h3>
+            {partners.some((partner) => partner.showWhen !== "extra") ? (
+              partners
+                .filter((partner) => partner.showWhen !== "extra")
+                .map((partner) => (
+                  <button
+                    type="button"
+                    key={partner.key}
+                    onClick={() => openBookings(partner.key)}
+                  >
+                    <span>{laneName(partner)}</span>
+                    <span className="text-muted">
+                      {bookingProgress(itemsForLane(items, partner))}
                     </span>
                   </button>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ) : null}
+                ))
+            ) : (
+              <p className={plan.body}>
+                No searches selected. Add existing bookings or choose what you
+                need in trip details.
+              </p>
+            )}
+            <button type="button" className={plan.textBtn} onClick={onEditTrip}>
+              Edit what you need
+            </button>
+          </div>
+          <JournalNotes
+            headingId={headingId}
+            destination={state.destination}
+            notes={journalNotes}
+            places={journalPlaceIndex}
+          />
+        </aside>
+      </section>
 
       {guestBackup ? (
-        <aside className={`plan-hub-draft ${plan.soft} plan-section plan-stack-tight`} aria-label="Browser draft">
+        <aside
+          className={`plan-hub-draft ${plan.soft} plan-section plan-stack-tight`}
+          aria-label="Browser draft"
+        >
           <p className={`${plan.prose} text-text`}>
-            You also have an unsaved itinerary for {guestBackup.state.destination.trim()} in
-            this browser.
+            You also have an unsaved itinerary for{" "}
+            {guestBackup.state.destination.trim()} in this browser.
           </p>
           <div className="plan-actions plan-actions-inline">
-            <button type="button" className="btn btn-secondary" onClick={onRestoreBackup}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onRestoreBackup}
+            >
               Restore that draft
             </button>
           </div>
         </aside>
       ) : null}
 
-      <section className="plan-hub-lanes plan-section scroll-mt-24" aria-label="Book this trip">
-        <div className="plan-lane-tabs-bar" role="tablist" aria-label="Booking lanes" aria-orientation="horizontal">
+      <section
+        id={`${headingId}-view-bookings`}
+        role="tabpanel"
+        aria-labelledby={`${headingId}-workspace-bookings`}
+        hidden={view !== "bookings"}
+        className="plan-hub-lanes plan-section scroll-mt-24"
+      >
+        <div className="plan-toolbar plan-bookings-heading">
+          <div>
+            <h3 className={plan.h3}>Keep every booking together</h3>
+            <p className={`${plan.body} text-muted`}>
+              Search for something new or add a reservation you already have.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setQuickEntry({ type: "other" })}
+          >
+            Add manually
+          </button>
+        </div>
+        {sorted.some(
+          (item) =>
+            item.type !== "note" &&
+            !partners.some((partner) =>
+              itemsForLane(items, partner).some(
+                (entry) => entry.id === item.id,
+              ),
+            ),
+        ) ? (
+          <section className="plan-unassigned-bookings">
+            <h3 className={plan.h3}>Added to this trip</h3>
+            <ul className="plan-stack-tight">
+              {sorted
+                .filter(
+                  (item) =>
+                    item.type !== "note" &&
+                    !partners.some((partner) =>
+                      itemsForLane(items, partner).some(
+                        (entry) => entry.id === item.id,
+                      ),
+                    ),
+                )
+                .map((item) => (
+                  <li key={item.id}>
+                    <ItemCard
+                      item={item}
+                      days={days}
+                      onStatus={(status) => updateItem(item.id, { status })}
+                      onEdit={() => setEditingId(item.id)}
+                      onRemove={() => removeItem(item.id)}
+                    />
+                  </li>
+                ))}
+            </ul>
+          </section>
+        ) : null}
+        <div
+          className="plan-lane-tabs-bar"
+          role="tablist"
+          aria-label="Booking lanes"
+          aria-orientation="horizontal"
+        >
           <div className="plan-lane-tabs" role="presentation">
             {partners.map((partner) => {
               const laneItems = itemsForLane(items, partner);
               const selected = selectedLaneKey === partner.key;
               const isNext = partner.key === nextLaneKey;
               const progress = laneProgress(laneItems);
-              const panelId = lanePanelId(headingId, partner, flightLaneKey, stayLaneKey);
+              const panelId = lanePanelId(
+                headingId,
+                partner,
+                flightLaneKey,
+                stayLaneKey,
+              );
               return (
                 <button
                   key={partner.key}
@@ -1184,7 +1617,9 @@ export function ItineraryHub({
                   onClick={() => setLanePin(partner.key)}
                   onKeyDown={(event) => onLaneTabKeyDown(event, partner.key)}
                 >
-                  <span className="plan-lane-tab-label">{laneName(partner)}</span>
+                  <span className="plan-lane-tab-label">
+                    {laneName(partner)}
+                  </span>
                 </button>
               );
             })}
@@ -1199,16 +1634,22 @@ export function ItineraryHub({
               onClick={() => setLanePin(OUTSIDE_TAB)}
               onKeyDown={(event) => onLaneTabKeyDown(event, OUTSIDE_TAB)}
             >
-              <span className="plan-lane-tab-label">Email bookings</span>
+              <span className="plan-lane-tab-label">Import a booking</span>
             </button>
           </div>
         </div>
 
         {partners.map((partner) => {
           const laneItems = itemsForLane(items, partner);
-          const adding = editor?.kind === "add-lane" && editor.laneKey === partner.key;
+          const adding =
+            editor?.kind === "add-lane" && editor.laneKey === partner.key;
           const selected = selectedLaneKey === partner.key;
-          const panelId = lanePanelId(headingId, partner, flightLaneKey, stayLaneKey);
+          const panelId = lanePanelId(
+            headingId,
+            partner,
+            flightLaneKey,
+            stayLaneKey,
+          );
           return (
             <div
               key={partner.key}
@@ -1227,7 +1668,9 @@ export function ItineraryHub({
                     <div className="min-w-0 plan-stack-tight">
                       <h3 className={plan.h3}>{partner.label}</h3>
                       {partner.blurb ? (
-                        <p className={`${plan.body} text-muted`}>{partner.blurb}</p>
+                        <p className={`${plan.body} text-muted`}>
+                          {partner.blurb}
+                        </p>
                       ) : null}
                     </div>
                   </div>
@@ -1282,10 +1725,10 @@ export function ItineraryHub({
                               item={item}
                               days={days}
                               highlighted={highlighted}
-                              onStatus={(status) => updateItem(item.id, { status })}
-                              onEdit={() =>
-                                setEditor({ kind: "edit", id: item.id, place: "lane" })
+                              onStatus={(status) =>
+                                updateItem(item.id, { status })
                               }
+                              onEdit={() => setEditingId(item.id)}
                               onRemove={() => removeItem(item.id)}
                             />
                           )}
@@ -1302,19 +1745,25 @@ export function ItineraryHub({
                       className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
                       onClick={() => {
                         setLanePin(partner.key);
-                        setEditor({ kind: "add-lane", laneKey: partner.key });
+                        setQuickEntry({
+                          type: itemTypeForPartner(partner),
+                          laneKey: partner.key,
+                        });
                       }}
                     >
                       Add to itinerary
                     </button>
-                    {partner.key !== flightLaneKey && partner.key !== stayLaneKey ? (
+                    {partner.key !== flightLaneKey &&
+                    partner.key !== stayLaneKey ? (
                       <button
                         type="button"
                         className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
                         onClick={() => {
                           setLanePin(OUTSIDE_TAB);
                           window.requestAnimationFrame(() => {
-                            document.querySelector(".plan-hub-lanes")?.scrollIntoView({ block: "start" });
+                            document
+                              .querySelector(".plan-hub-lanes")
+                              ?.scrollIntoView({ block: "start" });
                           });
                         }}
                       >
@@ -1357,7 +1806,9 @@ export function ItineraryHub({
               onClose={() => {
                 setLanePin(nextLaneKey ?? partners[0]?.key ?? "auto");
                 window.requestAnimationFrame(() => {
-                  document.querySelector(".plan-hub-lanes")?.scrollIntoView({ block: "start" });
+                  document
+                    .querySelector(".plan-hub-lanes")
+                    ?.scrollIntoView({ block: "start" });
                 });
               }}
             />
@@ -1365,290 +1816,405 @@ export function ItineraryHub({
         </div>
       </section>
 
-      <div className="plan-hub-days">
-      <PlanFold
-        id={`${headingId}-days`}
-        title="Itinerary"
-        meta={
-          days.length > 0
-            ? `${sorted.length} ${sorted.length === 1 ? "item" : "items"}`
-            : "Add dates"
-        }
-        defaultOpen={nextLaneKey == null}
+      <div
+        id={`${headingId}-view-itinerary`}
+        role="tabpanel"
+        aria-labelledby={`${headingId}-workspace-itinerary`}
+        hidden={view !== "itinerary"}
+        className="plan-hub-days"
       >
-      <section aria-labelledby={`${headingId}-list`}>
-        <div className="plan-toolbar">
-          <h3 id={`${headingId}-list`} className={`${plan.h3} max-sm:hidden`}>
-            Day-by-day schedule
-          </h3>
-          <div className="plan-inline-actions" role="tablist" aria-label="Itinerary layout">
-            {(
-              [
-                { id: "timeline", label: "Timeline" },
-                { id: "week", label: "Week" },
-              ] as const
-            ).map((tab) => {
-              const active = layout === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  id={`${headingId}-${tab.id}-tab`}
-                  aria-selected={active}
-                  aria-controls={`${headingId}-${tab.id}-panel`}
-                  className={`${plan.chip} ${
-                    active
-                      ? "border-ink bg-ink text-on-solid"
-                      : "border-border bg-white text-text hover:border-border-strong hover:bg-surface-soft"
-                  }`}
-                  onClick={() => setLayout(tab.id)}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        {sorted.length === 0 ? (
-          <p className={`${plan.prose} plan-follow text-muted plan-desktop-only`}>
-            Nothing saved yet. Search a partner, then add the booking you want to keep.
-          </p>
-        ) : null}
-        {days.length === 0 ? (
-          <p className={`${plan.caption} plan-follow text-muted`}>
-            Add dates to split this trip into days.
-          </p>
-        ) : null}
-        {layout === "timeline" ? (
-        <div
-          role="tabpanel"
-          id={`${headingId}-timeline-panel`}
-          aria-labelledby={`${headingId}-timeline-tab`}
+        <PlanFold
+          id={`${headingId}-days`}
+          title="Itinerary"
+          meta={
+            days.length > 0
+              ? `${sorted.length} ${sorted.length === 1 ? "item" : "items"}`
+              : "Add dates"
+          }
+          defaultOpen
         >
-        {days.length > 0 ? (
-          <div className={`${plan.soft} plan-section`}>
-            <nav aria-label="Jump to a day" className="flex gap-2 overflow-x-auto pb-1">
-              {days.map((day) => {
-                const count = sorted.filter(
-                  (item) => scheduledDayIndex(item, days.length) === day.index,
-                ).length;
-                return (
-                  <a
-                    key={day.index}
-                    href={`#${headingId}-day-${day.index}`}
-                    className="plan-control inline-flex min-h-11 shrink-0 flex-col justify-center border border-border bg-white px-4 py-2"
-                  >
-                    <span className={`${plan.caption} font-semibold whitespace-nowrap text-heading`}>
-                      {day.label}
-                      {count > 0 ? (
-                        <span className="ml-1.5 text-accent">{count}</span>
-                      ) : null}
-                    </span>
-                    {day.detail ? (
-                      <span className={`${plan.caption} whitespace-nowrap text-muted`}>{day.detail}</span>
-                    ) : null}
-                  </a>
-                );
-              })}
-              <a
-                href={`#${headingId}-unscheduled`}
-                className="plan-control inline-flex min-h-11 shrink-0 flex-col justify-center border border-border bg-white px-4 py-2"
+          <section aria-labelledby={`${headingId}-list`}>
+            <div className="plan-toolbar">
+              <h3
+                id={`${headingId}-list`}
+                className={`${plan.h3} max-sm:hidden`}
               >
-                <span className={`${plan.caption} font-semibold whitespace-nowrap text-heading`}>
-                  Unscheduled
-                  {unscheduled.length > 0 ? (
-                    <span className="ml-1.5 text-accent">{unscheduled.length}</span>
-                  ) : null}
-                </span>
-                <span className={`${plan.caption} whitespace-nowrap text-muted`}>No day yet</span>
-              </a>
-            </nav>
-            <div className="plan-section relative">
+                Day-by-day schedule
+              </h3>
               <div
-                className="absolute bottom-2 left-[0.95rem] top-2 w-px bg-border"
-                aria-hidden="true"
-              />
-              <ol>
-              {days.map((day) => {
-                const dayItems = sorted
-                  .filter((item) => scheduledDayIndex(item, days.length) === day.index)
-                  .sort(compareScheduledItems);
-                return (
-                  <li
-                    key={day.index}
-                    id={`${headingId}-day-${day.index}`}
-                    className="plan-day relative flex scroll-mt-24 gap-3"
-                  >
-                    <span
-                      className={`${plan.caption} relative z-[1] flex size-8 shrink-0 items-center justify-center rounded-full border border-accent/40 bg-white font-semibold text-accent`}
-                      aria-hidden="true"
+                className="plan-inline-actions"
+                role="tablist"
+                aria-label="Itinerary layout"
+              >
+                {(
+                  [
+                    { id: "timeline", label: "Timeline" },
+                    { id: "week", label: "Week" },
+                  ] as const
+                ).map((tab) => {
+                  const active = layout === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      role="tab"
+                      id={`${headingId}-${tab.id}-tab`}
+                      aria-selected={active}
+                      aria-controls={`${headingId}-${tab.id}-panel`}
+                      className={`${plan.chip} ${
+                        active
+                          ? "border-ink bg-ink text-on-solid"
+                          : "border-border bg-white text-text hover:border-border-strong hover:bg-surface-soft"
+                      }`}
+                      onClick={() => setLayout(tab.id)}
                     >
-                      {day.index}
-                    </span>
-                    <div className={`${plan.inset} plan-day-card min-w-0 flex-1 border border-border bg-white`}>
-                      {day.detail ? (
-                        <p className={`${plan.caption} font-semibold text-muted`}>
-                          {day.detail}
-                        </p>
-                      ) : null}
-                      <h4 className={plan.h4}>
-                        {day.label}
-                      </h4>
-                      {dayItems.length === 0 ? (
-                        <p className={`${plan.caption} text-muted plan-desktop-only`}>
-                          Nothing on this day yet.
-                        </p>
-                      ) : (
-                        renderTimeline(dayItems)
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
-              </ol>
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ) : null}
-
-        <section
-            id={`${headingId}-unscheduled`}
-            className={`${plan.soft} plan-section scroll-mt-24`}
-            aria-labelledby={`${headingId}-unscheduled-title`}
-          >
-            <h4
-              id={`${headingId}-unscheduled-title`}
-              className={plan.h4}
-            >
-              Unscheduled
-            </h4>
-            {unscheduled.length === 0 ? (
-              <p className={`${plan.body} plan-follow text-muted plan-desktop-only`}>
-                Bookings without a day land here. Choose a day when you add one.
+            {sorted.length === 0 ? (
+              <p
+                className={`${plan.prose} plan-follow text-muted plan-desktop-only`}
+              >
+                Your days are ready. Add a booking, activity, or note to start
+                shaping your trip.
               </p>
+            ) : null}
+            {days.length === 0 ? (
+              <p className={`${plan.caption} plan-follow text-muted`}>
+                Add dates to split this trip into days.
+              </p>
+            ) : null}
+            {layout === "timeline" ? (
+              <div
+                role="tabpanel"
+                id={`${headingId}-timeline-panel`}
+                aria-labelledby={`${headingId}-timeline-tab`}
+              >
+                {days.length > 0 ? (
+                  <div className={`${plan.soft} plan-section`}>
+                    <nav
+                      aria-label="Jump to a day"
+                      className="flex gap-2 overflow-x-auto pb-1"
+                    >
+                      {days.map((day) => {
+                        const count = sorted.filter(
+                          (item) =>
+                            scheduledDayIndex(item, days.length) === day.index,
+                        ).length;
+                        return (
+                          <a
+                            key={day.index}
+                            href={`#${headingId}-day-${day.index}`}
+                            className="plan-control inline-flex min-h-11 shrink-0 flex-col justify-center border border-border bg-white px-4 py-2"
+                          >
+                            <span
+                              className={`${plan.caption} font-semibold whitespace-nowrap text-heading`}
+                            >
+                              {day.label}
+                              {count > 0 ? (
+                                <span className="ml-1.5 text-accent">
+                                  {count}
+                                </span>
+                              ) : null}
+                            </span>
+                            {day.detail ? (
+                              <span
+                                className={`${plan.caption} whitespace-nowrap text-muted`}
+                              >
+                                {day.detail}
+                              </span>
+                            ) : null}
+                          </a>
+                        );
+                      })}
+                      <a
+                        href={`#${headingId}-unscheduled`}
+                        className="plan-control inline-flex min-h-11 shrink-0 flex-col justify-center border border-border bg-white px-4 py-2"
+                      >
+                        <span
+                          className={`${plan.caption} font-semibold whitespace-nowrap text-heading`}
+                        >
+                          Unscheduled
+                          {unscheduled.length > 0 ? (
+                            <span className="ml-1.5 text-accent">
+                              {unscheduled.length}
+                            </span>
+                          ) : null}
+                        </span>
+                        <span
+                          className={`${plan.caption} whitespace-nowrap text-muted`}
+                        >
+                          No day yet
+                        </span>
+                      </a>
+                    </nav>
+                    <div className="plan-section relative">
+                      <div
+                        className="absolute bottom-2 left-[0.95rem] top-2 w-px bg-border"
+                        aria-hidden="true"
+                      />
+                      <ol>
+                        {days.map((day) => {
+                          const dayItems = sorted
+                            .filter(
+                              (item) =>
+                                scheduledDayIndex(item, days.length) ===
+                                day.index,
+                            )
+                            .sort(compareScheduledItems);
+                          return (
+                            <li
+                              key={day.index}
+                              id={`${headingId}-day-${day.index}`}
+                              className="plan-day relative flex scroll-mt-24 gap-3"
+                            >
+                              <span
+                                className={`${plan.caption} relative z-[1] flex size-8 shrink-0 items-center justify-center rounded-full border border-accent/40 bg-white font-semibold text-accent`}
+                                aria-hidden="true"
+                              >
+                                {day.index}
+                              </span>
+                              <div
+                                className={`${plan.inset} plan-day-card min-w-0 flex-1 border border-border bg-white`}
+                              >
+                                {day.detail ? (
+                                  <p
+                                    className={`${plan.caption} font-semibold text-muted`}
+                                  >
+                                    {day.detail}
+                                  </p>
+                                ) : null}
+                                <h4 className={plan.h4}>{day.label}</h4>
+                                {dayItems.length === 0 ? (
+                                  <p
+                                    className={`${plan.caption} text-muted plan-desktop-only`}
+                                  >
+                                    Nothing on this day yet.
+                                  </p>
+                                ) : (
+                                  renderTimeline(dayItems)
+                                )}
+                                <button
+                                  type="button"
+                                  className={`${plan.textBtn} plan-follow`}
+                                  onClick={() =>
+                                    setQuickEntry({
+                                      type: "activity",
+                                      day: day.index,
+                                    })
+                                  }
+                                >
+                                  + Add a plan
+                                </button>
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    </div>
+                  </div>
+                ) : null}
+
+                <section
+                  id={`${headingId}-unscheduled`}
+                  className={`${plan.soft} plan-section scroll-mt-24`}
+                  aria-labelledby={`${headingId}-unscheduled-title`}
+                >
+                  <h4 id={`${headingId}-unscheduled-title`} className={plan.h4}>
+                    Unscheduled
+                  </h4>
+                  {unscheduled.length === 0 ? (
+                    <p
+                      className={`${plan.body} plan-follow text-muted plan-desktop-only`}
+                    >
+                      Bookings without a day land here. Choose a day when you
+                      add one.
+                    </p>
+                  ) : (
+                    renderTimeline(unscheduled)
+                  )}
+                </section>
+              </div>
             ) : (
-              renderTimeline(unscheduled)
+              <div
+                role="tabpanel"
+                id={`${headingId}-week-panel`}
+                aria-labelledby={`${headingId}-week-tab`}
+              >
+                {editor?.kind === "edit" && editor.place === "day" ? (
+                  <div className="plan-follow">
+                    {sorted
+                      .filter((item) => item.id === editor.id)
+                      .map((item) => (
+                        <BookingItemForm
+                          key={item.id}
+                          framed
+                          type={item.type}
+                          existing={item}
+                          days={days}
+                          sortOrder={item.sortOrder}
+                          onSave={replaceItem}
+                          onCancel={() => setEditor(null)}
+                        />
+                      ))}
+                  </div>
+                ) : null}
+                <WeekView
+                  headingId={headingId}
+                  days={days}
+                  items={sorted}
+                  onAssignDay={assignDay}
+                  onEdit={setEditingId}
+                />
+              </div>
+            )}
+
+            {editor?.kind === "add-note" ? (
+              <BookingItemForm
+                type="note"
+                sortOrder={nextSort}
+                days={days}
+                onCancel={() => setEditor(null)}
+                onSave={addItem}
+              />
+            ) : (
+              <button
+                type="button"
+                className={`${plan.textBtn} plan-follow self-start text-accent hover:underline`}
+                onClick={() => setQuickEntry({ type: "note" })}
+              >
+                Add a note
+              </button>
             )}
           </section>
-        </div>
-        ) : (
-          <div
-            role="tabpanel"
-            id={`${headingId}-week-panel`}
-            aria-labelledby={`${headingId}-week-tab`}
-          >
-            {editor?.kind === "edit" && editor.place === "day" ? (
-              <div className="plan-follow">
-                {sorted
-                  .filter((item) => item.id === editor.id)
-                  .map((item) => (
-                    <BookingItemForm
-                      key={item.id}
-                      framed
-                      type={item.type}
-                      existing={item}
-                      days={days}
-                      sortOrder={item.sortOrder}
-                      onSave={replaceItem}
-                      onCancel={() => setEditor(null)}
-                    />
-                  ))}
-              </div>
-            ) : null}
-            <WeekView
-              headingId={headingId}
-              days={days}
-              items={sorted}
-              onAssignDay={assignDay}
-              onEdit={(id) => setEditor({ kind: "edit", id, place: "day" })}
-            />
-          </div>
-        )}
+        </PlanFold>
+      </div>
 
-        {editor?.kind === "add-note" ? (
+      <div className="plan-hub-more" hidden={view === "bookings"}>
+        <PlanFold
+          id={`${headingId}-packing-fold`}
+          title="Packing list"
+          meta={
+            packingNotes.trim()
+              ? `${packingNotes.trim().split("\n").filter(Boolean).length} ${packingNotes.trim().split("\n").filter(Boolean).length === 1 ? "item" : "items"}`
+              : "Optional"
+          }
+        >
+          <section
+            className="plan-stack-tight"
+            aria-labelledby={`${headingId}-packing`}
+          >
+            <h3
+              id={`${headingId}-packing`}
+              className={`${plan.h3} max-sm:hidden`}
+            >
+              Packing list
+            </h3>
+            <p className={`${plan.prose} text-muted plan-desktop-only`}>
+              Keep the essentials for this trip in one simple list.
+            </p>
+            <textarea
+              className={plan.input}
+              aria-label="Packing list"
+              rows={5}
+              maxLength={4000}
+              placeholder={"Passport\nWalking shoes\nPhone charger"}
+              value={packingNotes}
+              onChange={(event) =>
+                onPackingNotesChange(event.target.value.slice(0, 4000))
+              }
+            />
+          </section>
+        </PlanFold>
+
+        <p className={`${plan.caption} px-1 pt-3 text-muted`}>
+          {config.disclosure}{" "}
+          <Link
+            href="/affiliate-disclosure"
+            className="text-link hover:text-accent"
+          >
+            Affiliate disclosure
+          </Link>
+          .
+        </p>
+      </div>
+
+      {editingId && items.find((item) => item.id === editingId) ? (
+        <TripEntryDialog
+          fallbackFocusId={`${headingId}-add-trigger`}
+          title="Edit trip item"
+          onClose={() => setEditingId(null)}
+        >
+          {items
+            .filter((item) => item.id === editingId)
+            .map((item) => (
+              <BookingItemForm
+                key={item.id}
+                type={item.type}
+                existing={item}
+                laneKey={item.laneKey}
+                sortOrder={item.sortOrder}
+                days={days}
+                onCancel={() => setEditingId(null)}
+                onSave={(next) => {
+                  replaceItem(next);
+                  setEditingId(null);
+                }}
+              />
+            ))}
+        </TripEntryDialog>
+      ) : null}
+      {quickEntry ? (
+        <TripEntryDialog
+          fallbackFocusId={`${headingId}-add-trigger`}
+          title={
+            quickEntry.type === "note"
+              ? "Add a note"
+              : quickEntry.type === "activity"
+                ? "Add an activity"
+                : "Add a booking"
+          }
+          onClose={() => setQuickEntry(null)}
+        >
+          {!quickEntry.laneKey &&
+          !["activity", "note"].includes(quickEntry.type) ? (
+            <label className="plan-field">
+              <span className={plan.label}>Booking type</span>
+              <select
+                className={plan.input}
+                value={quickEntry.type}
+                onChange={(event) =>
+                  setQuickEntry({
+                    ...quickEntry,
+                    type: event.target.value as TripItemType,
+                  })
+                }
+              >
+                <option value="other">Other booking</option>
+                <option value="flight">Flight</option>
+                <option value="hotel">Stay</option>
+                <option value="car">Car</option>
+              </select>
+            </label>
+          ) : null}
           <BookingItemForm
-            type="note"
+            key={quickEntry.day ?? 0}
+            type={quickEntry.type}
+            laneKey={quickEntry.laneKey}
+            initialDay={quickEntry.day}
             sortOrder={nextSort}
             days={days}
-            onCancel={() => setEditor(null)}
-            onSave={addItem}
-          />
-        ) : (
-          <button
-            type="button"
-            className={`${plan.textBtn} plan-follow self-start text-accent hover:underline`}
-            onClick={() => setEditor({ kind: "add-note" })}
-          >
-            Add a note
-          </button>
-        )}
-      </section>
-      </PlanFold>
-      </div>
-
-      <div className="plan-hub-more">
-      <PlanFold
-        id={`${headingId}-packing-fold`}
-        title="Packing list"
-        meta={
-          packingNotes.trim()
-            ? `${packingNotes.trim().split("\n").filter(Boolean).length} ${packingNotes.trim().split("\n").filter(Boolean).length === 1 ? "item" : "items"}`
-            : "Optional"
-        }
-      >
-      <section className="plan-stack-tight" aria-labelledby={`${headingId}-packing`}>
-        <h3 id={`${headingId}-packing`} className={`${plan.h3} max-sm:hidden`}>
-          Packing list
-        </h3>
-        <p className={`${plan.prose} text-muted plan-desktop-only`}>
-          Keep the essentials for this trip in one simple list.
-        </p>
-        <textarea
-          className={plan.input}
-          rows={5}
-          maxLength={4000}
-          placeholder={"Passport\nWalking shoes\nPhone charger"}
-          value={packingNotes}
-          onChange={(event) => onPackingNotesChange(event.target.value.slice(0, 4000))}
-        />
-      </section>
-      </PlanFold>
-
-      <section
-        className="plan-section rounded-xl border border-border bg-white p-4 sm:p-5"
-        aria-label="Import an outside booking"
-      >
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className={plan.label}>Booked somewhere else?</p>
-            <p className={`${plan.caption} mt-1 text-muted`}>
-              Import flights, stays, cars, experiences, insurance, eSIMs, and other confirmations into this trip.
-            </p>
-          </div>
-          <button
-            type="button"
-            className="btn btn-secondary shrink-0"
-            onClick={() => {
-              setLanePin(OUTSIDE_TAB);
-              window.requestAnimationFrame(() => {
-                document.querySelector(".plan-hub-lanes")?.scrollIntoView({ block: "start" });
-              });
+            onCancel={() => setQuickEntry(null)}
+            onSave={(item) => {
+              addItem(item);
+              setQuickEntry(null);
             }}
-          >
-            Import booking
-          </button>
-        </div>
-      </section>
-
-      <p className={`${plan.caption} px-1 pt-3 text-muted`}>
-        {config.disclosure}{" "}
-        <Link href="/affiliate-disclosure" className="text-link hover:text-accent">
-          Affiliate disclosure
-        </Link>
-        .
-      </p>
-      </div>
-
+          />
+        </TripEntryDialog>
+      ) : null}
     </div>
   );
 }

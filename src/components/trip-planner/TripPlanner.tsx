@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import { DateRangeField } from "@/components/trip-planner/DateRangeField";
 import { plan as tripDensity } from "@/components/trip-planner/density";
@@ -8,15 +15,10 @@ import { ItineraryHub } from "@/components/trip-planner/ItineraryHub";
 import { PlaceCombobox } from "@/components/trip-planner/PlaceCombobox";
 import { useTripSync } from "@/components/trip-planner/useTripSync";
 import {
-  dateSummary,
   effectiveCategories,
   initialPlannerState,
   nextStepsSubhead,
-  reviewRows,
-  travelerSummary,
   TRIP_CATEGORIES,
-  validateCategories,
-  validateDetails,
   visiblePartners,
   type FieldErrors,
   type PlannerState,
@@ -25,6 +27,7 @@ import {
   type TripPlannerPartner,
   type TripType,
 } from "@/lib/trip-planner-model";
+import { validateTripSetup } from "@/lib/trip-workspace";
 import {
   clearGuestSaveFlags,
   clearGuestBackup,
@@ -66,8 +69,7 @@ type Props = {
   focusFlight?: boolean;
 };
 
-const STEPS = [1, 2, 3, 4] as const;
-type Step = (typeof STEPS)[number];
+type Step = 1 | 2 | 3 | 4;
 
 function Chip({
   pressed,
@@ -155,63 +157,12 @@ function describedBy(id: string, error?: string): string | undefined {
   return error ? `${id}-error` : undefined;
 }
 
-function StepMeter({ step, className }: { step: number; className?: string }) {
-  return (
-    <div className={className}>
-      <div
-        className="flex gap-2"
-        role="progressbar"
-        aria-valuemin={1}
-        aria-valuemax={3}
-        aria-valuenow={step}
-        aria-label={`Step ${step} of 3`}
-      >
-        {STEPS.filter((n) => n < 4).map((n) => (
-          <span
-            key={n}
-            className={`h-1 flex-1 rounded-full ${n <= step ? "bg-accent" : "bg-sand"}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function StepHeading({
-  id,
-  title,
-  step,
-  lead,
-  status,
-}: {
-  id: string;
-  title: string;
-  step: Step;
-  lead?: string;
-  status?: string;
-}) {
-  return (
-    <div className="plan-stack-tight">
-      <h2 id={id} className={tripDensity.h2}>
-        {lead ? <span className="plan-mobile-only">{lead}</span> : null}
-        <span className={lead ? "plan-desktop-only" : undefined}>{title}</span>
-      </h2>
-      {lead && status ? (
-        <p className={`${tripDensity.caption} text-muted plan-mobile-only`}>
-          {status} · Step {step} of 3
-        </p>
-      ) : null}
-      {lead ? (
-        <p className="plan-step-title font-display text-heading plan-mobile-only">{title}</p>
-      ) : null}
-      <StepMeter step={step} className="plan-mobile-only" />
-    </div>
-  );
-}
-
 function PlannerShell() {
   return (
-    <section className="plan-trip plan-trip-hotel plan-block max-w-6xl" aria-hidden="true">
+    <section
+      className="plan-trip plan-trip-hotel plan-block max-w-6xl"
+      aria-hidden="true"
+    >
       <div className="h-1 rounded-full bg-sand" />
       <div className={`${tripDensity.panel} plan-section h-48`} />
     </section>
@@ -238,7 +189,6 @@ export function TripPlanner({
     ? EMPTY_PLAN
     : (storedPlan ?? EMPTY_PLAN);
   const { step, state } = plan;
-  const [categoryError, setCategoryError] = useState<string | null>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
 
   const cats = effectiveCategories(state);
@@ -257,7 +207,9 @@ export function TripPlanner({
     const hash = window.location.hash;
     if (!hash.startsWith(prefix)) return;
     sharedHashApplied.current = true;
-    const shared = decodeSharedPlan(decodeURIComponent(hash.slice(prefix.length)));
+    const shared = decodeSharedPlan(
+      decodeURIComponent(hash.slice(prefix.length)),
+    );
     if (!shared) return;
     writeActivePlan(shared);
     window.history.replaceState(
@@ -320,7 +272,6 @@ export function TripPlanner({
   }
 
   function toggleCategory(cat: TripCategory) {
-    setCategoryError(null);
     if (state.unsure) {
       savePlan({
         step,
@@ -344,27 +295,27 @@ export function TripPlanner({
     });
   }
 
-  function toggleUnsure() {
-    setCategoryError(null);
-    savePlan({ step, state: { ...state, unsure: !state.unsure } });
-  }
-
-  function goDetails() {
-    const message = validateCategories(state);
-    setCategoryError(message);
-    if (message) return;
-    setErrors({});
-    setStep(2);
-  }
-
-  function goReview() {
-    const nextErrors = validateDetails(state, flexibleOn);
+  function createTrip() {
+    const nextErrors = validateTripSetup(state, flexibleOn);
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) return;
-    setStep(3);
+    if (Object.keys(nextErrors).length > 0) {
+      requestAnimationFrame(() =>
+        document
+          .querySelector<HTMLElement>('.plan-setup [aria-invalid="true"]')
+          ?.focus(),
+      );
+      return;
+    }
+    setStep(4);
   }
 
   function startOver() {
+    if (
+      !window.confirm(
+        "Start a new trip? This replaces the draft on this device. Trips already saved to your account remain available in My trips.",
+      )
+    )
+      return;
     sync.dismissUrlTrip();
     clearGuestBackup();
     clearGuestSaveFlags();
@@ -377,24 +328,19 @@ export function TripPlanner({
       title: "",
       titleCustom: false,
     });
-    setCategoryError(null);
     setErrors({});
   }
 
-  const rows = reviewRows(state, flexibleOn);
   const steps = visiblePartners(partners, state, config.extras);
   const subhead = nextStepsSubhead(config.steps.next.helper, state, flexibleOn);
-  const tripName = state.destination.trim();
-  const tripStatus = [
-    dateSummary(state, flexibleOn) || "Dates not set",
-    travelerSummary(state),
-  ].join(" · ");
-
   if (isPendingPlan(storedPlan)) {
     return <PlannerShell />;
   }
 
-  if (urlTripId && (sync.authLoading || (sync.signedIn && sync.remote === "loading"))) {
+  if (
+    urlTripId &&
+    (sync.authLoading || (sync.signedIn && sync.remote === "loading"))
+  ) {
     return <PlannerShell />;
   }
 
@@ -408,12 +354,12 @@ export function TripPlanner({
   ) {
     const hasLocalDraft = Boolean(plan.state.destination.trim());
     return (
-      <section className="plan-trip plan-trip-hotel plan-block max-w-6xl" aria-labelledby={`${baseId}-heading`}>
+      <section
+        className="plan-trip plan-trip-hotel plan-block max-w-6xl"
+        aria-labelledby={`${baseId}-heading`}
+      >
         <div className={tripDensity.panel}>
-          <h2
-            id={`${baseId}-heading`}
-            className={tripDensity.h2}
-          >
+          <h2 id={`${baseId}-heading`} className={tripDensity.h2}>
             {config.steps.next.heading}
           </h2>
           <p className={`${tripDensity.prose} plan-follow text-text`}>
@@ -421,7 +367,10 @@ export function TripPlanner({
             after you continue.
           </p>
           <div className="plan-actions">
-            <Link href={planATripLoginHref(urlTripId, "signin")} className="btn btn-ink">
+            <Link
+              href={planATripLoginHref(urlTripId, "signin")}
+              className="btn btn-ink"
+            >
               Sign in
             </Link>
             <Link
@@ -443,12 +392,12 @@ export function TripPlanner({
 
   if (urlTripId && sync.signedIn && sync.remote === "missing") {
     return (
-      <section className="plan-trip plan-trip-hotel plan-block max-w-6xl" aria-labelledby={`${baseId}-heading`}>
+      <section
+        className="plan-trip plan-trip-hotel plan-block max-w-6xl"
+        aria-labelledby={`${baseId}-heading`}
+      >
         <div className={tripDensity.panel}>
-          <h2
-            id={`${baseId}-heading`}
-            className={tripDensity.h2}
-          >
+          <h2 id={`${baseId}-heading`} className={tripDensity.h2}>
             That trip isn’t on this account.
           </h2>
           <button
@@ -470,17 +419,20 @@ export function TripPlanner({
     plan.tripId !== urlTripId
   ) {
     return (
-      <section className="plan-trip plan-trip-hotel plan-block max-w-6xl" aria-labelledby={`${baseId}-heading`}>
+      <section
+        className="plan-trip plan-trip-hotel plan-block max-w-6xl"
+        aria-labelledby={`${baseId}-heading`}
+      >
         <div className={tripDensity.panel}>
-          <h2
-            id={`${baseId}-heading`}
-            className={tripDensity.h2}
-          >
+          <h2 id={`${baseId}-heading`} className={tripDensity.h2}>
             {sync.remote === "unavailable"
               ? "Saved trips aren’t available right now"
               : "Couldn’t open that trip"}
           </h2>
-          <p className={`${tripDensity.prose} plan-follow text-text`} role="status">
+          <p
+            className={`${tripDensity.prose} plan-follow text-text`}
+            role="status"
+          >
             {sync.remote === "unavailable"
               ? TRIPS_ACCOUNT_UNAVAILABLE
               : "Something went wrong opening that trip. You can still plan in this browser."}
@@ -498,77 +450,34 @@ export function TripPlanner({
   }
 
   return (
-    <section aria-labelledby={`${baseId}-heading`} className="plan-trip plan-trip-hotel plan-block max-w-6xl">
-      {step < 4 ? (
-        <div className="plan-desktop-only">
-          <p className={`${tripDensity.caption} font-semibold text-muted`}>
-            Step {step} of 3
-          </p>
-          <StepMeter step={step} className="mt-2" />
-        </div>
-      ) : null}
-
-      <div className={`${tripDensity.panel} plan-section`}>
-        {step === 1 ? (
-          <>
-            <StepHeading
-              id={`${baseId}-heading`}
-              title={config.steps.categories.heading}
-              step={1}
-            />
-            <p className={`${tripDensity.prose} plan-follow text-muted plan-desktop-only`}>
-              {config.steps.categories.helper}
-            </p>
-            <div
-              className="plan-section flex flex-wrap gap-2"
-              role="group"
-              aria-label={config.steps.categories.heading}
-            >
-              {TRIP_CATEGORIES.map((cat) => (
-                <Chip
-                  key={cat}
-                  pressed={cats.includes(cat)}
-                  onClick={() => toggleCategory(cat)}
-                >
-                  {config.chips[cat]}
-                </Chip>
-              ))}
-              <Chip pressed={state.unsure} dashed onClick={toggleUnsure}>
-                {config.chips.unsure}
-              </Chip>
-            </div>
-            {categoryError ? (
-              <p className={`${tripDensity.error} plan-follow`} role="alert">
-                {categoryError}
-              </p>
-            ) : null}
-            <div className="plan-actions plan-actions-end plan-sticky plan-sticky-solo">
-              <button type="button" className="btn btn-primary" onClick={goDetails}>
-                {config.continueLabel}
-              </button>
-            </div>
-          </>
-        ) : null}
-
-        {step === 2 ? (
+    <section
+      aria-labelledby={`${baseId}-heading`}
+      className="plan-trip plan-trip-hotel plan-block max-w-6xl"
+    >
+      <div
+        className={`${tripDensity.panel} plan-section ${step < 4 ? "plan-setup" : "plan-workspace-shell"}`}
+      >
+        {step < 4 ? (
           <form
             noValidate
             onSubmit={(event) => {
               event.preventDefault();
-              goReview();
+              createTrip();
             }}
           >
-            <StepHeading
-              id={`${baseId}-heading`}
-              title={config.steps.details.heading}
-              step={2}
-              lead={tripName || undefined}
-              status={tripName ? tripStatus : undefined}
-            />
-            <p className={`${tripDensity.prose} plan-follow text-muted plan-desktop-only`}>
-              {config.steps.details.helper}
-            </p>
-
+            <div className="plan-setup-heading">
+              <p className="eyebrow text-accent">
+                A little planning. A great journey.
+              </p>
+              <h2 id={`${baseId}-heading`} className={tripDensity.h2}>
+                {plan.items.length || plan.tripId
+                  ? "Edit your trip"
+                  : "Where to next?"}
+              </h2>
+              <p className={`${tripDensity.prose} text-muted`}>
+                Start with the basics. Build the rest as you go.
+              </p>
+            </div>
             <div className="plan-form">
               <Field
                 label="Where are you going?"
@@ -638,7 +547,9 @@ export function TripPlanner({
                           `${baseId}-month`,
                           errors.month,
                         )}
-                        onChange={(event) => patch({ month: event.target.value })}
+                        onChange={(event) =>
+                          patch({ month: event.target.value })
+                        }
                       />
                     </Field>
                     <Field
@@ -716,6 +627,27 @@ export function TripPlanner({
                 </Field>
               </div>
 
+              <fieldset className="plan-setup-needs">
+                <legend className={tripDensity.label}>
+                  What do you need?{" "}
+                  <span className="font-normal text-muted">Optional</span>
+                </legend>
+                <div className="flex flex-wrap gap-2">
+                  {TRIP_CATEGORIES.map((cat) => (
+                    <Chip
+                      key={cat}
+                      pressed={cats.includes(cat)}
+                      onClick={() => toggleCategory(cat)}
+                    >
+                      {config.chips[cat]}
+                    </Chip>
+                  ))}
+                </div>
+                <p className={`${tripDensity.caption} text-muted`}>
+                  Already booked everything? You can add confirmations straight
+                  to your itinerary.
+                </p>
+              </fieldset>
               {cats.includes("flights") ? (
                 <>
                   <Field
@@ -749,7 +681,9 @@ export function TripPlanner({
                         <Pill
                           key={value}
                           pressed={state.tripType === value}
-                          onClick={() => patch({ tripType: value satisfies TripType })}
+                          onClick={() =>
+                            patch({ tripType: value satisfies TripType })
+                          }
                         >
                           {label}
                         </Pill>
@@ -770,10 +704,13 @@ export function TripPlanner({
                     type="number"
                     min={1}
                     inputMode="numeric"
-                        className={`${tripDensity.input} plan-input-short`}
+                    className={`${tripDensity.input} plan-input-short`}
                     value={state.rooms}
                     aria-invalid={Boolean(errors.rooms)}
-                    aria-describedby={describedBy(`${baseId}-rooms`, errors.rooms)}
+                    aria-describedby={describedBy(
+                      `${baseId}-rooms`,
+                      errors.rooms,
+                    )}
                     onChange={(event) =>
                       patch({ rooms: event.target.valueAsNumber })
                     }
@@ -851,120 +788,58 @@ export function TripPlanner({
             </div>
 
             <div className="plan-actions plan-sticky">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setStep(1)}
-              >
-                {config.backLabel}
-              </button>
+              {plan.items.length > 0 || plan.tripId ? (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setStep(4)}
+                >
+                  Back to trip
+                </button>
+              ) : null}
               <button type="submit" className="btn btn-primary">
-                {config.continueLabel}
+                {plan.items.length || plan.tripId
+                  ? "Save trip details"
+                  : "Create my trip"}
               </button>
+              <span className={`${tripDensity.caption} text-muted`}>
+                Saved on this device as you go
+              </span>
             </div>
           </form>
         ) : null}
 
-        {step === 3 ? (
-          <>
-            <StepHeading
-              id={`${baseId}-heading`}
-              title={config.steps.review.heading}
-              step={3}
-              lead={tripName || undefined}
-              status={tripName ? tripStatus : undefined}
-            />
-            <p className={`${tripDensity.prose} plan-follow text-muted plan-desktop-only`}>
-              {config.steps.review.helper}
-            </p>
-            <dl className="plan-section">
-              {rows.map((row) => (
-                <div key={row.label} className="plan-review-row">
-                  <dt className={`${tripDensity.caption} font-semibold text-muted`}>
-                    {row.label}
-                  </dt>
-                  <dd className={`${tripDensity.body} font-semibold text-heading sm:text-right`}>
-                    {row.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-            <div className="plan-actions plan-sticky">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setStep(2)}
-              >
-                {config.editLabel}
-              </button>
-              <button
-                type="button"
-                className="btn btn-ink"
-                onClick={() => setStep(4)}
-              >
-                {config.getStepsLabel}
-              </button>
-            </div>
-          </>
-        ) : null}
-
         {step === 4 ? (
-          steps.length > 0 ? (
-            <ItineraryHub
-              headingId={`${baseId}-heading`}
-              config={config}
-              partners={steps}
-              state={state}
-              items={plan.items}
-              flexibleOn={flexibleOn}
-              subhead={subhead}
-              tripId={plan.tripId}
-              focusStay={focusStay}
-              focusFlight={focusFlight}
-              tripTitle={plan.titleCustom ? plan.title : undefined}
-              saveMode={sync.mode}
-              saveDetail={sync.saveDetail}
-              guestBackup={sync.guestBackup}
-              journalNotes={journalNotes}
-              journalPlaceIndex={journalPlaceIndex}
-              packingNotes={plan.packingNotes}
-              onItemsChange={(items) => savePlan({ step, state, items })}
-              onPackingNotesChange={(packingNotes) =>
-                savePlan({ step, state, packingNotes })
-              }
-              onEditTrip={() => setStep(2)}
-              onStartOver={startOver}
-              onSaveToAccount={sync.saveToAccount}
-              onDeclineMerge={sync.declineMerge}
-              onRetrySave={sync.retrySave}
-              onRestoreBackup={sync.restoreGuestBackup}
-              onRememberGuestDraft={sync.rememberGuestDraft}
-            />
-          ) : (
-            <>
-              <h2
-                id={`${baseId}-heading`}
-                className={tripDensity.h2}
-              >
-                {config.steps.next.heading}
-              </h2>
-              <p className={`${tripDensity.prose} plan-section text-muted`}>
-                No booking lanes are turned on for this trip yet.
-              </p>
-              <div className="plan-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setStep(2)}
-                >
-                  {config.editDetailsLabel}
-                </button>
-                <button type="button" className="btn btn-secondary" onClick={startOver}>
-                  {config.startOverLabel}
-                </button>
-              </div>
-            </>
-          )
+          <ItineraryHub
+            headingId={`${baseId}-heading`}
+            config={config}
+            partners={steps}
+            state={state}
+            items={plan.items}
+            flexibleOn={flexibleOn}
+            subhead={subhead}
+            tripId={plan.tripId}
+            focusStay={focusStay}
+            focusFlight={focusFlight}
+            tripTitle={plan.titleCustom ? plan.title : undefined}
+            saveMode={sync.mode}
+            saveDetail={sync.saveDetail}
+            guestBackup={sync.guestBackup}
+            journalNotes={journalNotes}
+            journalPlaceIndex={journalPlaceIndex}
+            packingNotes={plan.packingNotes}
+            onItemsChange={(items) => savePlan({ step, state, items })}
+            onPackingNotesChange={(packingNotes) =>
+              savePlan({ step, state, packingNotes })
+            }
+            onEditTrip={() => setStep(2)}
+            onStartOver={startOver}
+            onSaveToAccount={sync.saveToAccount}
+            onDeclineMerge={sync.declineMerge}
+            onRetrySave={sync.retrySave}
+            onRestoreBackup={sync.restoreGuestBackup}
+            onRememberGuestDraft={sync.rememberGuestDraft}
+          />
         ) : null}
       </div>
     </section>
