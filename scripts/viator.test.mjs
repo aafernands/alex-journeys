@@ -63,7 +63,7 @@ describe("viator embeds", () => {
   it("does not wrap a widget div when pinning images", () => {
     const html = `${viatorWidgetDiv(REF)}<p><img src="/media/falls.jpg" alt="Falls" width="640" height="480" /></p>`;
     const wrapped = wrapHtmlImagesWithPinterestPins(html, {
-      pageUrl: "https://www.fernandesjourneys.com/toronto-travel-guide",
+      pageUrl: "https://www.alexjourneys.com/toronto-travel-guide",
       description: "Toronto",
     });
     assert.equal(widgetRefs(wrapped).join(","), REF);

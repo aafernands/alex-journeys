@@ -2,7 +2,7 @@
   "name": "fernandes-journeys",
   "version": "0.1.0",
   "private": true,
-  "description": "Fernandes Journeys — Alex’s travel blog for personal travel blog — destinations from past trips.",
+  "description": "Alex Journeys — Alex’s travel blog for personal travel blog — destinations from past trips.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

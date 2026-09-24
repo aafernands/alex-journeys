@@ -562,7 +562,7 @@ export function PostForm({
                 </label>
                 <p className="mt-1 text-xs leading-relaxed text-muted">
                   Paste the affiliate widget embed code here. Viator widget markup is supported.
-                  Script tags are removed for security; Fernandes Journeys loads the approved
+                  Script tags are removed for security; Alex Journeys loads the approved
                   Viator widget script itself.
                 </p>
                 <textarea

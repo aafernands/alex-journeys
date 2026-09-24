@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Flight booked",
-    description: "Confirmation for a flight booked on Fernandes Journeys.",
+    description: "Confirmation for a flight booked on Alex Journeys.",
     robots: { index: false, follow: false },
     alternates: { canonical: "/flights" },
   };

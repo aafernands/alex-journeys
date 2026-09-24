@@ -40,7 +40,7 @@ export function PostExperienceAffiliateWidget({ html, placeLabel }: Props) {
       <ViatorWidgets html={safe} />
 
       <p className="mt-3 text-xs leading-relaxed text-muted">
-        Affiliate experience widget. If you book through it, Fernandes Journeys may earn
+        Affiliate experience widget. If you book through it, Alex Journeys may earn
         a commission at no extra cost to you.
       </p>
     </section>

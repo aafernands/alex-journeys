@@ -133,7 +133,7 @@ export function CmsShell({
         <div>
           <p className="eyebrow text-accent">CMS</p>
           <p className="font-display text-lg font-bold text-heading">
-            Fernandes Journeys
+            Alex Journeys
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -166,7 +166,7 @@ export function CmsShell({
             <div>
               <p className="eyebrow text-accent">In-site CMS</p>
               <p className="font-display mt-1 text-lg font-bold text-heading">
-                Fernandes Journeys
+                Alex Journeys
               </p>
             </div>
             {nav}

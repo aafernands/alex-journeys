@@ -13,7 +13,7 @@ import { ReaderLoginForm } from "@/components/ReaderLoginForm";
 export const metadata: Metadata = {
   title: "Sign in",
   description:
-    "Sign in to Fernandes Journeys to save stories and trip plans.",
+    "Sign in to Alex Journeys to save stories and trip plans.",
   robots: { index: false, follow: false },
   alternates: { canonical: "/login" },
 };

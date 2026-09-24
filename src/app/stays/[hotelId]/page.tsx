@@ -32,7 +32,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const title = query.destination ? `Stay in ${query.destination}` : "Stay";
   return {
     title,
-    description: "Room rates and sandbox booking on Fernandes Journeys.",
+    description: "Room rates and sandbox booking on Alex Journeys.",
     robots: { index: false, follow: false },
     alternates: {
       canonical: isStayHotelId(hotelId) ? `/stays/${hotelId}` : "/stays",

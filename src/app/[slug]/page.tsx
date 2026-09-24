@@ -70,7 +70,7 @@ export async function generateMetadata({
       title: dest.name,
       description:
         dest.blurb ||
-        `Notes from my trip to ${dest.name} — Fernandes Journeys.`,
+        `Notes from my trip to ${dest.name} — Alex Journeys.`,
       alternates: { canonical: path },
       openGraph: {
         title: dest.name,

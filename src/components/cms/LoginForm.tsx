@@ -61,7 +61,7 @@ export function LoginForm({
 
   return (
     <div className="panel p-6 md:p-8">
-      <p className="eyebrow text-accent">Fernandes Journeys</p>
+      <p className="eyebrow text-accent">Alex Journeys</p>
       <h1 className="font-display mt-2 text-2xl font-bold text-heading md:text-3xl">
         CMS login
       </h1>

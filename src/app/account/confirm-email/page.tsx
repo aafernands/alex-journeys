@@ -4,7 +4,7 @@ import { ConfirmEmailClient } from "@/components/ConfirmEmailClient";
 
 export const metadata: Metadata = {
   title: "Confirm email",
-  description: "Confirm your new Fernandes Journeys account email.",
+  description: "Confirm your new Alex Journeys account email.",
   robots: { index: false, follow: false },
   alternates: { canonical: "/account/confirm-email" },
 };

@@ -10,7 +10,7 @@ const STATIC_PAGES: Omit<SearchItem, "haystack" | "id">[] = [
     slug: "about",
     href: "/about",
     excerpt:
-      "Meet Alex Fernandes — the traveler behind Fernandes Journeys, a personal trip journal of places already visited.",
+      "Meet Alex Fernandes — the traveler behind Alex Journeys, a personal trip journal of places already visited.",
   },
   {
     type: "page",
@@ -18,7 +18,7 @@ const STATIC_PAGES: Omit<SearchItem, "haystack" | "id">[] = [
     slug: "start-here",
     href: "/start-here",
     excerpt:
-      "New to Fernandes Journeys? Plan a trip and book flights and stays, or start with Places, Stories, and Guides. Gear and apps are affiliate picks, not the booking desk.",
+      "New to Alex Journeys? Plan a trip and book flights and stays, or start with Places, Stories, and Guides. Gear and apps are affiliate picks, not the booking desk.",
   },
   {
     type: "page",

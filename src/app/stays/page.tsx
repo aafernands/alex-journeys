@@ -30,7 +30,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const query = parseStaysSearchParams(await searchParams);
   const title = query.destination ? `Stays in ${query.destination}` : "Stays";
   const description = query.destination
-    ? `Hotels in ${query.destination}, searched and booked on Fernandes Journeys.`
+    ? `Hotels in ${query.destination}, searched and booked on Alex Journeys.`
     : "Search hotels for the trip you’re planning.";
   return {
     title,

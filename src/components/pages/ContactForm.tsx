@@ -57,7 +57,7 @@ export function ContactForm({ labels }: Props) {
         const email = String(fd.get("email") || "").trim();
         const message = String(fd.get("message") || "").trim();
         const subject = encodeURIComponent(
-          `Fernandes Journeys contact from ${first}${last ? ` ${last}` : ""}`,
+          `Alex Journeys contact from ${first}${last ? ` ${last}` : ""}`,
         );
         const body = encodeURIComponent(
           `${message}\n\n—\nFrom: ${first} ${last}\nEmail: ${email}`,

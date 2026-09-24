@@ -292,7 +292,7 @@ export function CurrencyQuickFact({ currencyLabel }: Props) {
                   ))}
                 </ul>
                 <p className="mt-2 text-[0.7rem] text-muted">
-                  Saved in your Fernandes Journeys travel tools on this device.
+                  Saved in your Alex Journeys travel tools on this device.
                 </p>
               </div>
             ) : null}

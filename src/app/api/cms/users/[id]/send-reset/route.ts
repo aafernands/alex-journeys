@@ -93,13 +93,13 @@ export async function POST(_request: Request, ctx: Ctx) {
 
     const html = `
       <p>Hi${user.name ? ` ${escapeHtml(user.name)}` : ""},</p>
-      <p>We received a request to reset your Fernandes Journeys password.</p>
+      <p>We received a request to reset your Alex Journeys password.</p>
       <p><a href="${resetUrl}">Reset your password</a></p>
       <p>This link expires in 1 hour. If you did not request a reset, you can ignore this email.</p>
       <p style="color:#888;font-size:12px;">Or paste this URL:<br/>${escapeHtml(resetUrl)}</p>
     `;
     const text = [
-      `Reset your Fernandes Journeys password:`,
+      `Reset your Alex Journeys password:`,
       resetUrl,
       "",
       "This link expires in 1 hour. If you did not request a reset, ignore this email.",
@@ -107,7 +107,7 @@ export async function POST(_request: Request, ctx: Ctx) {
 
     await sendEmail({
       to: user.email,
-      subject: "Reset your Fernandes Journeys password",
+      subject: "Reset your Alex Journeys password",
       html,
       text,
     });

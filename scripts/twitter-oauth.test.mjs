@@ -42,14 +42,14 @@ describe("twitterAuthorization", () => {
 
   it("keeps client_id, redirect_uri, state, and PKCE on the X authorize URL", async () => {
     const response = await Auth(
-      new Request("https://www.fernandesjourneys.com/api/auth/signin/twitter", {
+      new Request("https://www.alexjourneys.com/api/auth/signin/twitter", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           "X-Auth-Return-Redirect": "1",
         },
         body: new URLSearchParams({
-          callbackUrl: "https://www.fernandesjourneys.com/account",
+          callbackUrl: "https://www.alexjourneys.com/account",
         }),
       }),
       {
@@ -81,7 +81,7 @@ describe("twitterAuthorization", () => {
     assert.equal(url.searchParams.get("response_type"), "code");
     assert.equal(
       url.searchParams.get("redirect_uri"),
-      "https://www.fernandesjourneys.com/api/auth/callback/twitter",
+      "https://www.alexjourneys.com/api/auth/callback/twitter",
     );
     assert.ok(url.searchParams.get("state"));
     assert.ok(url.searchParams.get("code_challenge"));
@@ -99,7 +99,7 @@ describe("X OAuth 2 endpoints", () => {
   it("keeps the Auth.js token and userinfo URLs when only authorization is overridden", () => {
     const { provider } = parseProviders({
       providerId: "twitter",
-      url: new URL("https://www.fernandesjourneys.com/api/auth"),
+      url: new URL("https://www.alexjourneys.com/api/auth"),
       config: {
         providers: [
           Twitter({
@@ -125,7 +125,7 @@ describe("X OAuth 2 endpoints", () => {
   it("parses an X profile that has no email", async () => {
     const { provider } = parseProviders({
       providerId: "twitter",
-      url: new URL("https://www.fernandesjourneys.com/api/auth"),
+      url: new URL("https://www.alexjourneys.com/api/auth"),
       config: {
         providers: [
           Twitter({
@@ -163,7 +163,7 @@ describe("X OAuth 2 endpoints", () => {
   });
 });
 
-const ORIGIN = "https://www.fernandesjourneys.com";
+const ORIGIN = "https://www.alexjourneys.com";
 const CLIENT_ID = "client-id-123";
 const CLIENT_SECRET = "client-secret-456";
 
@@ -538,15 +538,15 @@ describe("auth cookies", () => {
     const cookies = authCookies({
       NODE_ENV: "production",
       VERCEL_ENV: "production",
-      AUTH_URL: "https://www.fernandesjourneys.com",
+      AUTH_URL: "https://www.alexjourneys.com",
     });
-    assert.equal(cookies.state.options.domain, ".fernandesjourneys.com");
+    assert.equal(cookies.state.options.domain, ".alexjourneys.com");
     assert.equal(cookies.state.options.secure, true);
     assert.equal(cookies.state.options.sameSite, "lax");
     assert.equal(cookies.state.options.path, "/");
     assert.equal(
       cookies.pkceCodeVerifier.options.domain,
-      ".fernandesjourneys.com",
+      ".alexjourneys.com",
     );
     assert.equal(cookies.pkceCodeVerifier.options.httpOnly, true);
     assert.equal("csrfToken" in cookies, false);
@@ -560,23 +560,23 @@ describe("auth cookies", () => {
     );
     assert.equal(
       authCookies({
-        AUTH_URL: "https://fernandesjourneys.com",
+        AUTH_URL: "https://alexjourneys.com",
         VERCEL_ENV: "production",
       }).state.options.domain,
-      ".fernandesjourneys.com",
+      ".alexjourneys.com",
     );
   });
 
-  it("sets Domain=.fernandesjourneys.com on the state and PKCE cookies Auth.js sends", async () => {
+  it("sets Domain=.alexjourneys.com on the state and PKCE cookies Auth.js sends", async () => {
     const response = await Auth(
-      new Request("https://www.fernandesjourneys.com/api/auth/signin/twitter", {
+      new Request("https://www.alexjourneys.com/api/auth/signin/twitter", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           "X-Auth-Return-Redirect": "1",
         },
         body: new URLSearchParams({
-          callbackUrl: "https://www.fernandesjourneys.com/account",
+          callbackUrl: "https://www.alexjourneys.com/account",
         }),
       }),
       {
@@ -592,7 +592,7 @@ describe("auth cookies", () => {
         skipCSRFCheck,
         basePath: "/api/auth",
         cookies: authCookies({
-          AUTH_URL: "https://www.fernandesjourneys.com",
+          AUTH_URL: "https://www.alexjourneys.com",
           VERCEL_ENV: "production",
         }),
       },
@@ -601,11 +601,11 @@ describe("auth cookies", () => {
     const state = setCookies.find((cookie) => cookie.includes("authjs.state"));
     const pkce = setCookies.find((cookie) => cookie.includes("pkce.code_verifier"));
     const csrf = setCookies.find((cookie) => cookie.includes("csrf-token"));
-    assert.match(state, /Domain=\.fernandesjourneys\.com/i);
+    assert.match(state, /Domain=\.alexjourneys\.com/i);
     assert.match(state, /Secure/i);
     assert.match(state, /SameSite=Lax/i);
     assert.match(state, /Path=\//i);
-    assert.match(pkce, /Domain=\.fernandesjourneys\.com/i);
+    assert.match(pkce, /Domain=\.alexjourneys\.com/i);
     assert.match(pkce, /HttpOnly/i);
     if (csrf) {
       assert.equal(/Domain=/i.test(csrf), false);
@@ -627,9 +627,9 @@ describe("InvalidCheck login redirect", () => {
     const response = new Response(null, {
       status: 302,
       headers: {
-        location: "https://www.fernandesjourneys.com/login?error=Configuration",
+        location: "https://www.alexjourneys.com/login?error=Configuration",
         "set-cookie":
-          "__Secure-authjs.state=; Max-Age=0; Path=/; Domain=.fernandesjourneys.com; Secure; HttpOnly; SameSite=Lax",
+          "__Secure-authjs.state=; Max-Age=0; Path=/; Domain=.alexjourneys.com; Secure; HttpOnly; SameSite=Lax",
       },
     });
     const rewritten = rewriteAuthFailureRedirect(response, "InvalidCheck");
@@ -638,7 +638,7 @@ describe("InvalidCheck login redirect", () => {
     assert.equal(location.searchParams.get("error"), "InvalidCheck");
     assert.match(
       rewritten.headers.get("set-cookie"),
-      /Domain=\.fernandesjourneys\.com/i,
+      /Domain=\.alexjourneys\.com/i,
     );
     const kept = rewriteAuthFailureRedirect(response, null);
     assert.match(kept.headers.get("location"), /error=Configuration$/);

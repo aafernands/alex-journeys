@@ -18,7 +18,7 @@ const MESSAGES: Record<string, string> = {
   AccessDenied: "Sign-in was denied. Your account may be disabled.",
   OAuthProfileParseError: USERS_ME_BLOCKED,
   InvalidCheck:
-    "X sign-in lost the browser state cookie on the way back from x.com, so this attempt could not be verified. Stay on www.fernandesjourneys.com, use a normal window (not private browsing), and try Continue with X again.",
+    "X sign-in lost the browser state cookie on the way back from x.com, so this attempt could not be verified. Stay on www.alexjourneys.com, use a normal window (not private browsing), and try Continue with X again.",
   OAuthCallback: OAUTH_CALLBACK,
   OAuthCallbackError: OAUTH_CALLBACK,
   Callback: OAUTH_CALLBACK,

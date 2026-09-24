@@ -277,7 +277,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
               </p>
               <p className="mt-2 text-sm leading-relaxed text-text">
                 Explorer passionate about travel and discovery. This journal —
-                Fernandes Journeys — is where I write down places I&apos;ve been
+                Alex Journeys — is where I write down places I&apos;ve been
                 so I don&apos;t forget the light, the food, and the roads in
                 between.
               </p>

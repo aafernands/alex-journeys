@@ -1,8 +1,8 @@
-# Fernandes Journeys — Travel Blog
+# Alex Journeys — Travel Blog
 
-Alex Fernandes’s personal travel journal — destinations from past trips, trip notes, and photos from the road. User-facing brand **Fernandes Journeys** (logo PNG may still show the old alex journly wordmark until replaced).
+Alex Fernandes’s personal travel journal — destinations from past trips, trip notes, and photos from the road. User-facing brand **Alex Journeys**.
 
-**Live:** [fernandes-journeys.vercel.app](https://fernandes-journeys.vercel.app)  
+**Live:** [www.alexjourneys.com](https://www.alexjourneys.com)
 **Repo:** [github.com/aafernands/fernandes-journeys](https://github.com/aafernands/fernandes-journeys)
 
 ## Stack
@@ -85,7 +85,7 @@ Google Analytics 4 (gtag) loads only when `NEXT_PUBLIC_GA_MEASUREMENT_ID` (or al
 
 ## Stays (Nuitee / LiteAPI)
 
-`/stays` searches and books hotels on Fernandes Journeys through Nuitee Connect. The browser never sees the key.
+`/stays` searches and books hotels on Alex Journeys through Nuitee Connect. The browser never sees the key.
 
 Set `LITEAPI_API_KEY` on Vercel Preview and Production (sandbox keys start with `sand_`; `NUITEE_API_KEY` is accepted as an alias). Until that variable is set, `/stays` shows a “Stays not configured” state. Sandbox bookings use Nuitee’s simulated account card (`ACC_CREDIT_CARD`) and are not guest charges. A production key can search, and refuses checkout until a live card flow exists.
 

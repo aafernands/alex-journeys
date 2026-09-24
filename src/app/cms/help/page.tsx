@@ -16,7 +16,7 @@ export default async function CmsHelpPage() {
         <p className="eyebrow text-accent">Guide</p>
         <h1 className="font-display mt-2 text-display text-heading">Help</h1>
         <p className="mt-3 text-sm text-muted md:text-base">
-          Short publish checklist for Fernandes Journeys. Full setup notes live
+          Short publish checklist for Alex Journeys. Full setup notes live
           in{" "}
           <code className="rounded bg-surface-soft px-1.5 py-0.5 text-xs">
             docs/CMS.md

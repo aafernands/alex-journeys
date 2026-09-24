@@ -64,7 +64,7 @@ export function rewriteAuthFailureRedirect(
   if (!location) return response;
   let url: URL;
   try {
-    url = new URL(location, "https://www.fernandesjourneys.com");
+    url = new URL(location, "https://www.alexjourneys.com");
   } catch {
     return response;
   }

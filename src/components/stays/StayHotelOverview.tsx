@@ -498,7 +498,7 @@ export function StayHotelOverview({
             </div>
             {sandbox ? (
               <p className="mb-4 text-sm text-muted">
-                Sandbox rate. Booking finishes on Fernandes Journeys through Nuitee and is not a live charge.
+                Sandbox rate. Booking finishes on Alex Journeys through Nuitee and is not a live charge.
               </p>
             ) : null}
             {children}

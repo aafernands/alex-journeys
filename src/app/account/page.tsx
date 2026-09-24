@@ -36,7 +36,7 @@ import { listTrips, TripsUnavailableError } from "@/lib/trips";
 export const metadata: Metadata = {
   title: "Account",
   description:
-    "Your Fernandes Journeys journal — trips you’re planning and stories you’ve saved.",
+    "Your Alex Journeys journal — trips you’re planning and stories you’ve saved.",
   robots: { index: false, follow: false },
   alternates: { canonical: "/account" },
 };
@@ -191,7 +191,7 @@ export default async function AccountPage() {
       <header className="border-b border-border bg-white">
         <div className="section-shell py-8 md:py-10">
           <div className={`mx-auto ${signedIn ? "max-w-5xl" : "max-w-xl"}`}>
-            <p className="eyebrow">Fernandes Journeys</p>
+            <p className="eyebrow">Alex Journeys</p>
             <h1 className="font-display text-display mt-2 text-heading">
               Your journal
             </h1>

@@ -96,13 +96,13 @@ export async function POST(request: Request) {
 
     const verifyHtml = `
       <p>Hi${result.user.name ? ` ${escapeHtml(result.user.name)}` : ""},</p>
-      <p>Confirm your new email address for Fernandes Journeys.</p>
+      <p>Confirm your new email address for Alex Journeys.</p>
       <p><a href="${confirmUrl}">Confirm email change</a></p>
       <p>This link expires in 1 hour. If you did not request this, you can ignore this email.</p>
       <p style="color:#888;font-size:12px;">Or paste this URL:<br/>${escapeHtml(confirmUrl)}</p>
     `;
     const verifyText = [
-      "Confirm your new email address for Fernandes Journeys:",
+      "Confirm your new email address for Alex Journeys:",
       confirmUrl,
       "",
       "This link expires in 1 hour. If you did not request this, ignore this email.",
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
 
     await sendEmail({
       to: result.newEmail,
-      subject: "Confirm your new Fernandes Journeys email",
+      subject: "Confirm your new Alex Journeys email",
       html: verifyHtml,
       text: verifyText,
     });
@@ -120,17 +120,17 @@ export async function POST(request: Request) {
       try {
         const notifyHtml = `
           <p>Hi${result.user.name ? ` ${escapeHtml(result.user.name)}` : ""},</p>
-          <p>A request was made to change your Fernandes Journeys account email to <strong>${escapeHtml(result.newEmail)}</strong>.</p>
+          <p>A request was made to change your Alex Journeys account email to <strong>${escapeHtml(result.newEmail)}</strong>.</p>
           <p>If this was you, check the new inbox and click the confirmation link. If you did not request this change, you can ignore this email — your current address stays active until the new one is confirmed.</p>
         `;
         const notifyText = [
-          `A request was made to change your Fernandes Journeys account email to ${result.newEmail}.`,
+          `A request was made to change your Alex Journeys account email to ${result.newEmail}.`,
           "",
           "If this was you, check the new inbox and confirm. If not, ignore this email — nothing changes until confirmation.",
         ].join("\n");
         await sendEmail({
           to: result.oldEmail,
-          subject: "Email change requested on Fernandes Journeys",
+          subject: "Email change requested on Alex Journeys",
           html: notifyHtml,
           text: notifyText,
         });

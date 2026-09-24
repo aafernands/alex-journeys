@@ -39,7 +39,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
       : "Flights";
   const description =
     query.origin && query.destination
-      ? `Flights from ${query.origin} to ${query.destination}, searched and booked on Fernandes Journeys.`
+      ? `Flights from ${query.origin} to ${query.destination}, searched and booked on Alex Journeys.`
       : "Search flights for the trip you’re planning.";
   return {
     title,

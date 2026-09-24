@@ -127,7 +127,7 @@ export function ReaderLoginForm({
   if (!anyAuth) {
     return (
       <div className="panel p-6 md:p-8">
-        <p className="eyebrow text-accent">Fernandes Journeys</p>
+        <p className="eyebrow text-accent">Alex Journeys</p>
         <h1 className="font-display mt-2 text-2xl font-bold text-heading md:text-3xl">
           Sign-in isn’t available yet
         </h1>
@@ -213,7 +213,7 @@ export function ReaderLoginForm({
 
   return (
     <div className="panel p-6 md:p-8">
-      <p className="eyebrow text-accent">Fernandes Journeys</p>
+      <p className="eyebrow text-accent">Alex Journeys</p>
       <h1 className="font-display mt-2 text-2xl font-bold text-heading md:text-3xl">
         {mode === "signin" ? "Welcome back" : "Create your account"}
       </h1>

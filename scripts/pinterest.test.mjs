@@ -11,7 +11,7 @@ describe("toAbsoluteMediaUrl", () => {
   it("resolves site-relative media paths against the site origin", () => {
     assert.equal(
       toAbsoluteMediaUrl("/media/falls.jpg"),
-      "https://www.fernandesjourneys.com/media/falls.jpg",
+      "https://www.alexjourneys.com/media/falls.jpg",
     );
   });
 
@@ -33,7 +33,7 @@ describe("toAbsoluteMediaUrl", () => {
 describe("buildPinterestShareUrl", () => {
   it("encodes url, media, and description", () => {
     const href = buildPinterestShareUrl({
-      pageUrl: "https://www.fernandesjourneys.com/niagara-falls",
+      pageUrl: "https://www.alexjourneys.com/niagara-falls",
       mediaUrl: "/media/photo.jpg",
       description: "Niagara Falls & mist",
     });
@@ -45,7 +45,7 @@ describe("buildPinterestShareUrl", () => {
       href.includes(
         "url=" +
           encodeURIComponent(
-            "https://www.fernandesjourneys.com/niagara-falls",
+            "https://www.alexjourneys.com/niagara-falls",
           ),
       ),
     );
@@ -53,7 +53,7 @@ describe("buildPinterestShareUrl", () => {
       href.includes(
         "media=" +
           encodeURIComponent(
-            "https://www.fernandesjourneys.com/media/photo.jpg",
+            "https://www.alexjourneys.com/media/photo.jpg",
           ),
       ),
     );
@@ -69,7 +69,7 @@ describe("isPinnableImageSrc", () => {
   });
 
   it("rejects brand logos and author photos", () => {
-    assert.equal(isPinnableImageSrc("/brand/logo-alex-journly.png"), false);
+    assert.equal(isPinnableImageSrc("/brand/logo-on-light.png"), false);
     assert.equal(isPinnableImageSrc("/brand/alex-fernandes.jpg"), false);
   });
 
@@ -82,7 +82,7 @@ describe("isPinnableImageSrc", () => {
 });
 
 describe("wrapHtmlImagesWithPinterestPins", () => {
-  const pageUrl = "https://www.fernandesjourneys.com/iceland";
+  const pageUrl = "https://www.alexjourneys.com/iceland";
 
   it("wraps content images with a Pin control using alt text", () => {
     const html =
@@ -99,7 +99,7 @@ describe("wrapHtmlImagesWithPinterestPins", () => {
     assert.match(
       out,
       new RegExp(
-        encodeURIComponent("https://www.fernandesjourneys.com/media/blue-lagoon.jpg"),
+        encodeURIComponent("https://www.alexjourneys.com/media/blue-lagoon.jpg"),
       ),
     );
     assert.match(out, new RegExp(encodeURIComponent("Blue Lagoon steam")));
@@ -108,7 +108,7 @@ describe("wrapHtmlImagesWithPinterestPins", () => {
 
   it("skips logos and already-wrapped images", () => {
     const html =
-      '<img src="/brand/logo-alex-journly.png" alt="Fernandes Journeys" width="180" height="54" />';
+      '<img src="/brand/logo-on-light.png" alt="Alex Journeys" width="180" height="54" />';
     const out = wrapHtmlImagesWithPinterestPins(html, { pageUrl });
     assert.equal(out, html);
 

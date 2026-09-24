@@ -28,7 +28,7 @@ function first(value: string | string[] | undefined): string {
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Flight",
-    description: "Fare details and sandbox booking on Fernandes Journeys.",
+    description: "Fare details and sandbox booking on Alex Journeys.",
     robots: { index: false, follow: false },
     alternates: { canonical: "/flights" },
   };
@@ -99,7 +99,7 @@ export default async function FlightBookPage({ searchParams }: PageProps) {
     <SitePage
       label="Plan a trip"
       title={loaded ? `${loaded.offer.airline} ${loaded.offer.originCode}–${loaded.offer.destinationCode}` : "Flight"}
-      description="Fare details and booking on Fernandes Journeys."
+      description="Fare details and booking on Alex Journeys."
       narrow={false}
       tone="default"
       compact
@@ -114,7 +114,7 @@ export default async function FlightBookPage({ searchParams }: PageProps) {
         <FlightTripBar query={query} />
         {loaded?.sandbox ? (
           <p className="text-sm text-muted">
-            Sandbox fare. Booking finishes on Fernandes Journeys through Nuitee and is not a live charge.
+            Sandbox fare. Booking finishes on Alex Journeys through Nuitee and is not a live charge.
           </p>
         ) : null}
         {failure ? (

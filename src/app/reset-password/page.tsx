@@ -5,7 +5,7 @@ import { ResetPasswordForm } from "@/components/ResetPasswordForm";
 
 export const metadata: Metadata = {
   title: "Reset password",
-  description: "Choose a new Fernandes Journeys reader password.",
+  description: "Choose a new Alex Journeys reader password.",
   robots: { index: false, follow: false },
   alternates: { canonical: "/reset-password" },
 };

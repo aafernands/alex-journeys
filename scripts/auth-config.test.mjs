@@ -156,7 +156,7 @@ describe("readerLoginErrorMessage", () => {
     assert.match(readerLoginErrorMessage("Configuration"), /AUTH_SECRET/);
     assert.match(readerLoginErrorMessage("AccessDenied"), /disabled/);
     assert.match(readerLoginErrorMessage("Verification"), /no longer valid/);
-    assert.match(readerLoginErrorMessage("InvalidCheck"), /www\.fernandesjourneys\.com/);
+    assert.match(readerLoginErrorMessage("InvalidCheck"), /www\.alexjourneys\.com/);
     assert.match(readerLoginErrorMessage("InvalidCheck"), /\(InvalidCheck\)$/);
   });
 
@@ -171,7 +171,7 @@ describe("readerLoginErrorMessage", () => {
     assert.match(check, /state cookie/i);
     assert.match(check, /x\.com/);
     assert.match(check, /private/i);
-    assert.match(check, /www\.fernandesjourneys\.com/);
+    assert.match(check, /www\.alexjourneys\.com/);
     assert.match(check, /\(InvalidCheck\)$/);
   });
 

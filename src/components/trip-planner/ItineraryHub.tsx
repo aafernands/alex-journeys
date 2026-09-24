@@ -738,7 +738,7 @@ function destinationHero(destination: string): {
 
   return known[place] ?? {
     image: "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
-    credit: "Fernandes Journeys",
+    credit: "Alex Journeys",
     creditUrl: "/destinations",
   };
 }
