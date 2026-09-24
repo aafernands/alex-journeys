@@ -174,7 +174,7 @@ export const DEFAULT_CONFIG: TripPlannerConfig = {
 const EXPEDIA = "https://expedia.com/affiliates/nyc/plan_trip";
 const BOOKING = "https://tidd.ly/4kgHAYw";
 const RENTCARS =
-  "https://rentcars.com/en/?requestorid=9563&utm_source=fernandesjourneys.com&utm_medium=afiliado-link&utm_campaign=rent-car";
+  "https://rentcars.com/en/?requestorid=9563&utm_source=alexjourneys.com&utm_medium=afiliado-link&utm_campaign=rent-car";
 const WORLD_NOMADS =
   "https://www.tkqlhce.com/click-101054501-15417474?sid=find_insurance&url=https%3A%2F%2Fwww.worldnomads.com%2Ftravel-insurance";
 const SAILY = "https://go.saily.site/aff_c?offer_id=101&aff_id=9600";
