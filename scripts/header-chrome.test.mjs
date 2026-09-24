@@ -18,9 +18,10 @@ describe("header chrome", () => {
     assert.match(drawer, /variant="drawer-cta"/);
     assert.match(drawer, /variant="drawer"/);
     assert.match(drawer, /mobile-drawer-search/);
-    assert.match(drawer, /h-7 w-auto/);
+    assert.match(drawer, /drawerFavicon/);
+    assert.match(drawer, /siteDesignJson\.branding\?\.favicon/);
+    assert.match(drawer, /pl-0/);
     assert.match(drawer, /inset-0 flex w-full/);
-    assert.match(drawer, /w-\\[6\\.25rem\\]/);
   });
 
   it("uses a smaller desktop avatar", () => {
