@@ -1093,7 +1093,7 @@ html.dark .places-world-map.leaflet-container {
 }
 
 /* ——— Plan a Trip density ———
-   Size, spacing, and nested radius only. Colors and font families stay on FJ tokens.
+   Size, spacing, and nested radius only. Colors and font families stay on Alex Journeys tokens.
    Outer radius 28px − card padding 20px = 8px nested; inset padding 16px clamps the next radius to 4px. */
 .plan-trip {
   --plan-fs-body: 1rem; /* 16 */
