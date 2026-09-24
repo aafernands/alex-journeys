@@ -1,5 +1,5 @@
 /**
- * Site copy for Fernandes Journeys (author: Alex Fernandes).
+ * Site copy for Alex Journeys (author: Alex Fernandes).
  * Blog posts live in src/content/posts/ (migrated from alexjournly.com).
  * Homepage featured stories are selected in posts/_index.json.
  */
@@ -7,17 +7,17 @@
 import authorPhotoMeta from "@/data/author-photo.json";
 
 export const site = {
-  name: "Fernandes Journeys",
-  url: "https://www.fernandesjourneys.com",
+  name: "Alex Journeys",
+  url: "https://www.alexjourneys.com",
   authorName: "Alex Fernandes",
   authorPhoto: `${authorPhotoMeta.src}?v=${encodeURIComponent(authorPhotoMeta.updatedAt)}`,
   tagline: "Inspire. Capture. Discover.",
   email: "contact@fernandesjourneys.com",
   social: {
-    instagram: "https://www.instagram.com/fernandesjourneys/",
-    youtube: "https://www.youtube.com/@fernandesjourneys",
-    pinterest: "https://www.pinterest.com/fernandesjourneys/",
-    coffee: "https://www.buymeacoffee.com/fernandesjourneys",
+    instagram: "https://www.instagram.com/alexjrnys/",
+    youtube: "https://www.youtube.com/@alexjrnys",
+    pinterest: "https://www.pinterest.com/alexjrnys/",
+    coffee: "https://www.buymeacoffee.com/alexjrnys",
     newsletter: "#newsletter",
   },
 };
@@ -25,9 +25,9 @@ export const site = {
 export const about = {
   headline: "Hi, I’m Alex",
   paragraphs: [
-    "I’m Alex Fernandes — traveler, photographer, and the voice behind Fernandes Journeys. Based in New Jersey, I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
+    "I’m Alex Fernandes — traveler, photographer, and the voice behind Alex Journeys. Based in New Jersey, I share destinations from trips I’ve already taken: the routes, the neighborhoods, and the small details I’d tell a friend over coffee.",
     "Expect trip notes, destination pages, and favorites from the road — not an agency, not a booking service. Just a personal trip journal with room to breathe.",
-    "Fernandes Journeys is my personal trip journal — one traveler, one set of stories.",
+    "Alex Journeys is my personal trip journal — one traveler, one set of stories.",
   ],
 };
 
