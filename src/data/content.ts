@@ -17,7 +17,7 @@ export const site = {
     instagram: "https://www.instagram.com/alexjrnys/",
     youtube: "https://www.youtube.com/@alexjrnys",
     pinterest: "https://www.pinterest.com/alexjrnys/",
-    coffee: "https://www.buymeacoffee.com/alexjrnys",
+    coffee: "https://www.buymeacoffee.com/alexjourneys",
     newsletter: "#newsletter",
   },
 };
