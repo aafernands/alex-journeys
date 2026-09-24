@@ -42,8 +42,10 @@ const midButtonClass =
 const leafLinkClass =
   "block py-1.5 text-sm leading-snug text-text transition hover:text-accent";
 
-const drawerFavicon =
-  siteDesignJson.branding?.favicon?.trim() || "/favicon.ico";
+const drawerLogoOnLight =
+  siteDesignJson.branding?.logoOnLight?.trim() || "/brand/logo-on-light.png";
+const drawerLogoOnDark =
+  siteDesignJson.branding?.logoOnDark?.trim() || "/brand/logo-on-dark.png";
 
 /**
  * Mobile hamburger drawer: oversized editorial hub list.
@@ -83,14 +85,21 @@ export function MobileNavDrawer({
             href="/"
             aria-label="Alex Journeys home"
             onClick={onClose}
-            className="m-0 inline-flex h-10 w-10 shrink-0 items-center justify-center p-0"
+            className="m-0 inline-flex w-[5.75rem] shrink-0 items-center justify-start p-0"
           >
             <img
-              src={drawerFavicon}
-              alt=""
-              width={40}
-              height={40}
-              className="m-0 block h-10 w-10 object-contain p-0"
+              src={drawerLogoOnLight}
+              alt="Alex Journeys"
+              width={92}
+              height={28}
+              className="m-0 block h-auto max-h-8 w-auto max-w-full object-contain p-0 dark:hidden"
+            />
+            <img
+              src={drawerLogoOnDark}
+              alt="Alex Journeys"
+              width={92}
+              height={28}
+              className="m-0 hidden h-auto max-h-8 w-auto max-w-full object-contain p-0 dark:block"
             />
           </Link>
           <SearchInput
