@@ -8,7 +8,7 @@
  * vercel.app host would be rejected by the browser.
  */
 
-const PRODUCTION_COOKIE_DOMAIN = ".fernandesjourneys.com";
+const PRODUCTION_COOKIE_DOMAIN = ".alexjourneys.com";
 
 type Env = Record<string, string | undefined>;
 
@@ -26,8 +26,8 @@ export function authCookieDomain(env: Env = process.env): string | undefined {
     try {
       const host = new URL(raw).hostname.toLowerCase();
       if (
-        host === "fernandesjourneys.com" ||
-        host === "www.fernandesjourneys.com"
+        host === "alexjourneys.com" ||
+        host === "www.alexjourneys.com"
       ) {
         return PRODUCTION_COOKIE_DOMAIN;
       }
