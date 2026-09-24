@@ -128,7 +128,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   // Allow build without AUTH_SECRET; production runtime must set it for auth.
   secret: process.env.AUTH_SECRET || "build-placeholder-not-for-production",
   trustHost: true,
-  // www and apex share state + PKCE (Domain=.fernandesjourneys.com, Secure,
+  // www and apex share state + PKCE (Domain=.alexjourneys.com, Secure,
   // SameSite=Lax, Path=/). CSRF stays host-only (__Host-). Force __Secure-
   // cookie names so a callback seen as http still looks up the same state cookie.
   ...(sharedAuthCookies

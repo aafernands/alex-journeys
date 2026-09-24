@@ -25,7 +25,7 @@ import {
   type AtomicFile,
 } from "@/lib/cms/github-atomic";
 
-const DEFAULT_REPO = "aafernands/fernandes-journeys";
+const DEFAULT_REPO = "aafernands/alex-journeys";
 const DEFAULT_BRANCH = "main";
 const POSTS_PATH = "src/content/posts";
 const PAGES_PATH = "src/content/pages";

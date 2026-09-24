@@ -30,14 +30,14 @@ Admins sign in with Google and/or GitHub. Only emails listed in **`CMS_ADMIN_EMA
 | Variable | Required | Notes |
 | --- | --- | --- |
 | `AUTH_SECRET` | Yes for OAuth | Random secret for signing session cookies. Generate with `openssl rand -base64 32`. |
-| `AUTH_URL` | Set on Production | `https://www.fernandesjourneys.com` (no path). Auth.js uses it for the OAuth callback host. Remove `NEXTAUTH_URL` if it disagrees. `AUTH_TRUST_HOST=true` does not override a wrong value. www vs apex, and the X `users/me` 403: [`docs/X-SIGN-IN.md`](./X-SIGN-IN.md). |
+| `AUTH_URL` | Set on Production | `https://www.alexjourneys.com` (no path). Auth.js uses it for the OAuth callback host. Remove `NEXTAUTH_URL` if it disagrees. `AUTH_TRUST_HOST=true` does not override a wrong value. www vs apex, and the X `users/me` 403: [`docs/X-SIGN-IN.md`](./X-SIGN-IN.md). |
 | `AUTH_TRUST_HOST` | Recommended on Vercel | Set to `true` so Auth.js trusts the `Host` / `X-Forwarded-Host` headers. |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | For Google | OAuth 2.0 client from Google Cloud Console. |
 | `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | For GitHub | OAuth App credentials. |
 | `AUTH_TWITTER_ID` / `AUTH_TWITTER_SECRET` | For reader X sign-in only | OAuth 2.0 Client ID and Client Secret from the X Developer Portal. Does **not** unlock `/cms`. See [`docs/X-SIGN-IN.md`](./X-SIGN-IN.md). |
-| `CMS_ADMIN_EMAILS` | Yes for OAuth | Comma-separated allowlist, e.g. `fernandesjourneys@gmail.com` (must include this address on Vercel for Admin console to appear in the header menu). |
+| `CMS_ADMIN_EMAILS` | Yes for OAuth | Comma-separated allowlist, e.g. `admin@alexjourneys.com` (must include this address on Vercel for Admin console to appear in the header menu). |
 
-Redirect URIs: `https://www.fernandesjourneys.com/api/auth/callback/{google\|github}` and local `http://localhost:3000/api/auth/callback/...`.
+Redirect URIs: `https://www.alexjourneys.com/api/auth/callback/{google\|github}` and local `http://localhost:3000/api/auth/callback/...`.
 
 X (Twitter) is a **public reader** provider only. It is not shown on the CMS login, and an X session never sets `isAdmin`. Checklist: [`docs/X-SIGN-IN.md`](./X-SIGN-IN.md).
 
@@ -47,12 +47,12 @@ Set **`CMS_PASSCODE`** for a passcode fallback. Login shows **Or use passcode** 
 
 ### 3. GitHub token (for publishing)
 
-Fine-grained PAT with **Contents: Read and write** on `aafernands/fernandes-journeys`.
+Fine-grained PAT with **Contents: Read and write** on `aafernands/alex-journeys`.
 
 | Variable | Required | Default |
 | --- | --- | --- |
 | `CMS_GITHUB_TOKEN` | Yes (or `GITHUB_TOKEN`) | — |
-| `CMS_GITHUB_REPO` | No | `aafernands/fernandes-journeys` |
+| `CMS_GITHUB_REPO` | No | `aafernands/alex-journeys` |
 | `CMS_GITHUB_BRANCH` | No | `main` |
 
 Never commit secrets. Never put them in client code. The dashboard only shows configured / missing — never values.
@@ -129,7 +129,7 @@ Post editor: featured image **Choose from library**; rich text **Image** opens t
 
 | Control | Notes |
 | --- | --- |
-| Brand logos | **Logo on light** (black mark) and **Logo on dark** (white mark). Library pick or upload → `public/brand/logo-on-light.*` / `logo-on-dark.*`. Defaults: `/brand/logo-fernandes-journeys.png` and `/brand/logo-fernandes-journeys-white.png`. Header uses both (theme); footer always uses the white mark. JSON-LD organization logo uses the black mark. |
+| Brand logos | **Logo on light** (black mark) and **Logo on dark** (white mark). Library pick or upload → `public/brand/logo-on-light.*` / `logo-on-dark.*`. Defaults: `/brand/logo-on-light.png` and `/brand/logo-on-dark.png`. Header uses both (theme); footer always uses the white mark. JSON-LD organization logo uses the black mark. |
 | Hero image | Full-bleed headline photo only. Library or upload → `public/media/hero-…` |
 | Alt + location label | Small location label on the hero photo |
 | Eyebrow, tagline, subtitle | Copy over the hero photo |
@@ -143,7 +143,7 @@ Theme tokens (fonts/colors) UI is intentionally out of scope for now — stub no
 
 ## Security notes
 
-- OAuth: Google is open to **public readers**; CMS still requires `CMS_ADMIN_EMAILS` (`session.user.isAdmin`) or passcode. Reader sessions alone never unlock `/cms`. The header **Admin console** item is shown only when `session.user.isAdmin` is true — ensure `CMS_ADMIN_EMAILS` includes `fernandesjourneys@gmail.com` on Vercel.
+- OAuth: Google is open to **public readers**; CMS still requires `CMS_ADMIN_EMAILS` (`session.user.isAdmin`) or passcode. Reader sessions alone never unlock `/cms`. The header **Admin console** item is shown only when `session.user.isAdmin` is true — ensure `CMS_ADMIN_EMAILS` includes `admin@alexjourneys.com` on Vercel.
 - Passcode: server-only check; httpOnly cookie, HMAC-signed; never logged.
 - `isCmsAuthenticated()` = OAuth admin **or** passcode session.
 - Slugs sanitized (kebab-case); path traversal rejected.
@@ -154,6 +154,6 @@ Public reader save/bookmarks: see [`READER-SAVED-POSTS.md`](./READER-SAVED-POSTS
 ## How Alex publishes
 
 1. Env vars on Vercel (Auth.js + allowlist, optional passcode, GitHub token).
-2. Go to `https://www.fernandesjourneys.com/cms` → sign in.
+2. Go to `https://www.alexjourneys.com/cms` → sign in.
 3. Dashboard → check publish readiness → **New post**, Posts/Pages/Destinations/Media, or **Website design** for brand logos and the homepage hero.
 4. Publish → wait for Vercel → open the live URL.

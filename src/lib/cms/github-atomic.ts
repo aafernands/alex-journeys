@@ -5,7 +5,7 @@ export type AtomicFile = {
   expectedSha?: string | null;
 };
 
-const DEFAULT_REPO = "aafernands/fernandes-journeys";
+const DEFAULT_REPO = "aafernands/alex-journeys";
 const DEFAULT_BRANCH = "main";
 
 function getToken(): string | undefined {

@@ -57,7 +57,7 @@ emailManagedLocally, nameManagedLocally, imageManagedLocally
 | `createdAt` | ISO timestamp |
 
 Raw token: 32 bytes `crypto.randomBytes` → URL-safe `base64url`.  
-Reset link: `{AUTH_URL \|\| https://www.fernandesjourneys.com}/reset-password?token={raw}`.
+Reset link: `{AUTH_URL \|\| https://www.alexjourneys.com}/reset-password?token={raw}`.
 
 On successful reset: `passwordHash` updated (bcrypt), token marked `usedAt`, and other outstanding tokens for that `userId` are invalidated.
 
@@ -125,16 +125,16 @@ Optional: `POST /api/auth/change-email/cancel` clears pending tokens for the sig
 | Variable | Notes |
 | --- | --- |
 | `AUTH_SECRET` | Required for all Auth.js |
-| `AUTH_URL` | Production: `https://www.fernandesjourneys.com` (no path). Used for reset links and for the OAuth callback host. A wrong host (apex vs www) drops the X session after Authorize. Details: [X-SIGN-IN.md](./X-SIGN-IN.md). |
+| `AUTH_URL` | Production: `https://www.alexjourneys.com` (no path). Used for reset links and for the OAuth callback host. A wrong host (apex vs www) drops the X session after Authorize. Details: [X-SIGN-IN.md](./X-SIGN-IN.md). |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google button on `/login` |
 | `AUTH_TWITTER_ID` / `AUTH_TWITTER_SECRET` | **Continue with X** on `/login` when both are set. OAuth 2.0 Client ID + Client Secret (not the OAuth 1.0 API key). Does not unlock CMS. `GET /2/users/me` needs `tweet.read` (a 403 is not a bad secret). A missing state cookie is `InvalidCheck`. Full checklist: [X-SIGN-IN.md](./X-SIGN-IN.md). |
 | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Required for email/password + user profiles + reset tokens |
 | `FIREBASE_FIRESTORE_DATABASE_ID` | Optional named DB |
 | `RESEND_API_KEY` | **Required to send** reset + email-change emails via Resend HTTP API. The same key reads inbound booking mail when it has full access. See [TRIPS-INBOUND.md](./TRIPS-INBOUND.md). |
 | `RESEND_WEBHOOK_SECRET` | Signing secret for `POST /api/inbound/email` (`email.received`). |
-| `INBOUND_EMAIL_DOMAIN` | Optional. Default `inbound.fernandesjourneys.com`. |
+| `INBOUND_EMAIL_DOMAIN` | Optional. Default `inbound.alexjourneys.com`. |
 | `INBOUND_SAMPLE_SECRET` | Optional. Unlocks the inbound sample harness. |
-| `EMAIL_FROM` | Optional. Default for testing: `Fernandes Journeys <onboarding@resend.dev>` (Resend’s shared sender). With that default, Resend **only sends to the Resend account owner email** until you verify a domain and set `EMAIL_FROM` to an address on it (e.g. `Fernandes Journeys <contact@fernandesjourneys.com>`). |
+| `EMAIL_FROM` | Optional. Default for testing: `Alex Journeys <onboarding@resend.dev>` (Resend’s shared sender). With that default, Resend **only sends to the Resend account owner email** until you verify a domain and set `EMAIL_FROM` to an address on it (e.g. `Alex Journeys <contact@alexjourneys.com>`). |
 | `CMS_ADMIN_EMAILS` / `CMS_PASSCODE` | CMS only (unchanged). Admin matching is by email string — after an email change, update the allowlist if needed. |
 
 Email/password is enabled when `AUTH_SECRET` **and** Firebase are set. Build still succeeds without them (and without Resend).

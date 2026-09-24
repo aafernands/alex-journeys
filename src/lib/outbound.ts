@@ -6,8 +6,8 @@
 import { siteConfig } from "@/lib/seo";
 
 const OWN_HOST_FALLBACKS = [
-  "fernandesjourneys.com",
-  "www.fernandesjourneys.com",
+  "alexjourneys.com",
+  "www.alexjourneys.com",
 ] as const;
 
 export const OUTBOUND_DELAY_MS = 4000;

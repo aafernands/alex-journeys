@@ -18,8 +18,8 @@ Prefer setting **both** on Vercel Production (and Preview if you test there).
 1. Open [Cloudflare Dashboard → Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile).
 2. **Add widget** → mode **Managed** (default green check).
 3. Domains (hostname allowlist):
-   - `fernandesjourneys.com`
-   - `www.fernandesjourneys.com`
+   - `alexjourneys.com`
+   - `www.alexjourneys.com`
    - `*.vercel.app` (or your exact Vercel project host)
    - `localhost` (for local testing)
 4. Copy the **Site Key** and **Secret Key**.

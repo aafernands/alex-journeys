@@ -1,5 +1,5 @@
 /**
- * Past-trip destinations for Fernandes Journeys.
+ * Past-trip destinations for Alex Journeys.
  * Related blog posts are linked via destinations[] on each post.
  * Nested menu: Europe → Iceland; Americas → Canada, US, Mexico, Brazil.
  *

@@ -19,7 +19,7 @@ import {
 /** Matches the widget name Alex should use in Viator Widgets Hub. */
 export const EXPERIENCES_CAMPAIGN = "plan-experiences";
 
-/** MCID already used on Fernandes Journeys Viator links. */
+/** MCID already used on Alex Journeys Viator links. */
 export const VIATOR_LINK_MCID = "42383";
 
 /**
