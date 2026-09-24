@@ -1,6 +1,6 @@
 # Google Analytics 4 & Search Console
 
-Fernandes Journeys loads **GA4 via gtag.js** only when a measurement ID is configured at build time. Unset or empty env vars inject **no** analytics scripts.
+Alex Journeys loads **GA4 via gtag.js** only when a measurement ID is configured at build time. Unset or empty env vars inject **no** analytics scripts.
 
 The privacy policy already describes anonymous/aggregated analytics *when enabled*.
 
@@ -20,15 +20,15 @@ These are **public** client values (they appear in the page HTML). They are not 
 
 1. Open [Google Analytics](https://analytics.google.com/) and sign in with the site owner Google account.
 2. **Admin** (gear) → **Create** → **Property** (or use an existing property).
-3. Name it (for example `Fernandes Journeys`), set timezone and currency, continue.
+3. Name it (for example `Alex Journeys`), set timezone and currency, continue.
 4. Skip optional business details if you want.
-5. **Data collection** → **Web** → enter `https://www.fernandesjourneys.com`.
+5. **Data collection** → **Web** → enter `https://www.alexjourneys.com`.
 6. Copy the **Measurement ID** (`G-` followed by letters/digits).
 7. In the property, confirm **Admin → Data streams → Web → Enhanced measurement** is on, including **Page changes based on browser history events**, so App Router client navigations count as pageviews.
 
 ## Add the ID on Vercel Production
 
-1. Vercel → project **fernandes-journeys** → **Settings → Environment Variables**.
+1. Vercel → project **alex-journeys** → **Settings → Environment Variables**.
 2. Add `NEXT_PUBLIC_GA_MEASUREMENT_ID` = `G-XXXXXXXX`.
 3. Scope it to **Production** (and Preview only if you want test traffic in the same property — usually skip Preview).
 4. **Redeploy** Production (env vars are inlined at **build** time; saving the variable alone is not enough).  
@@ -56,7 +56,7 @@ When unset, that component returns `null` — no gtag URL, no `dataLayer` bootst
 
 ## Search Console HTML-tag verification
 
-1. Open [Google Search Console](https://search.google.com/search-console) → add the `www.fernandesjourneys.com` (or domain) property.
+1. Open [Google Search Console](https://search.google.com/search-console) → add the `www.alexjourneys.com` (or domain) property.
 2. Choose **HTML tag** verification (not DNS, not a file upload).
 3. Google shows a meta tag like:
 
