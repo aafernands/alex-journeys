@@ -16,7 +16,10 @@ describe("header chrome", () => {
     assert.match(header, /md:h-24/);
     const drawer = source("../src/components/header/MobileNavDrawer.tsx");
     assert.match(drawer, /variant="drawer-cta"/);
-    assert.match(drawer, /h-12\.5/);
+    assert.match(drawer, /variant="drawer"/);
+    assert.match(drawer, /mobile-drawer-search/);
+    assert.match(drawer, /h-8 w-auto/);
+    assert.match(drawer, /inset-0 flex w-full/);
   });
 
   it("uses a smaller desktop avatar", () => {

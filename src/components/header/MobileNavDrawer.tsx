@@ -13,6 +13,7 @@ import {
 } from "@/components/icons/SocialIcons";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
+import { SearchInput } from "@/components/search/SearchInput";
 import { ThemeAppearanceControl } from "@/components/ThemeToggle";
 import { site } from "@/data/content";
 import { destinationsTree } from "@/data/destinations";
@@ -71,20 +72,28 @@ export function MobileNavDrawer({
 
       <nav
         id="mobile-nav"
-        className="absolute inset-y-0 left-0 flex w-[calc(100%-0.75rem)] max-w-[28rem] flex-col bg-bg shadow-xl"
+        className="absolute inset-0 flex w-full flex-col bg-bg shadow-xl"
         aria-label="Mobile"
       >
-        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
-          <BrandLogo
-            className="h-12.5 w-auto"
-            width={220}
-            height={61}
-            priority
-            onClick={onClose}
+        <div className="flex shrink-0 items-center gap-2.5 border-b border-border px-3 py-3">
+          <div className="flex shrink-0 items-center">
+            <BrandLogo
+              className="h-8 w-auto"
+              width={150}
+              height={42}
+              priority
+              onClick={onClose}
+            />
+          </div>
+          <SearchInput
+            variant="drawer"
+            id="mobile-drawer-search"
+            className="min-w-0 flex-1"
+            onNavigate={onClose}
           />
           <button
             type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
             aria-label="Close menu"
             onClick={onClose}
           >
