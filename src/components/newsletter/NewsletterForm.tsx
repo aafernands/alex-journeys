@@ -92,7 +92,7 @@ export function NewsletterForm({ className }: Props) {
           className="mt-1 size-4 shrink-0 rounded border-hero-type/30 accent-accent"
         />
         <span>
-          By entering your email, you agree to receive Fernandes Journeys emails
+          By entering your email, you agree to receive Alex Journeys emails
           and agree to our{" "}
           <Link
             href="/terms"
