@@ -3368,9 +3368,9 @@ body:has(main.plan-flow) .plan-sticky {
 .plan-trip .plan-workspace { display: flex; flex-direction: column; gap: 1.25rem; }
 .plan-workspace > * { order: 0; min-width: 0; }
 .plan-workspace [hidden] { display: none !important; }
-.plan-workspace .plan-hub-lead { padding: 0; border: 0; }
-.plan-workspace .plan-trip-hero { min-height: 22rem; border-radius: 1.25rem; }
-.plan-workspace .plan-trip-hero-content { min-height: 22rem; padding: 2rem 2rem 3rem; }
+.plan-workspace .plan-hub-lead { padding: 0; border: 0; gap: 0; }
+.plan-workspace .plan-trip-hero { min-height: 24rem; border-radius: 0; }
+.plan-workspace .plan-trip-hero-content { min-height: 24rem; padding: 2rem 2rem 3rem; }
 .plan-workspace .plan-hub-actions { padding-inline: .25rem; }
 .plan-workspace .plan-hub-save { margin: 0; padding: .75rem 1rem; border: 1px solid var(--border); border-radius: .85rem; background: var(--white); }
 .plan-workspace .plan-hub-save:empty { display: none; }
@@ -3438,6 +3438,8 @@ body:has(main.plan-flow) .plan-sticky {
 #planner:has(.plan-workspace) > .mb-5 { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 main.plan-flow { padding-top: 0; }
 main.plan-flow > .section-band { padding-top: 1rem; }
+/* Open trip: the destination photo sits flush under the site header. */
+main.plan-flow:has(.plan-workspace) > .section-band { padding-top: 0; }
 main.plan-flow .plan-hotel-planner-section { padding-top: 0; }
 main.plan-flow .plan-trip:has(.plan-workspace),
 main.plan-flow .plan-workspace-shell { margin-top: 0; }
@@ -3460,19 +3462,76 @@ dialog.home-screen-prompt::backdrop { background: rgb(31 26 20 / .4); }
   }
 }
 .plan-trip-hero-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
-.plan-trip-hero-actions { position: absolute; top: 1rem; right: 1rem; display: flex; gap: .5rem; z-index: 2; }
-.plan-hero-action { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid rgba(255,255,255,.45); border-radius: .75rem; color: white; background: rgba(15,23,28,.8); cursor: pointer; list-style: none; }
-.plan-hero-action:hover, .plan-trip-menu[open] > .plan-hero-action { background: rgba(15,23,28,.98); }
+.plan-trip-hero-bar { position: absolute; top: 0; right: 0; left: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: 1rem 2rem 0; }
+.plan-trip-hero-back { display: flex; align-items: center; min-width: 0; }
+.plan-trip-hero-actions { position: static; display: flex; align-items: center; gap: .4rem; margin-left: auto; flex-shrink: 0; }
+.plan-trip-hero-bar .plan-trip-menu { display: flex; align-items: center; }
+.plan-hero-action { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex-shrink: 0; border: 1px solid rgba(255,255,255,.45); border-radius: .75rem; color: white; background: rgba(15,23,28,.8); cursor: pointer; list-style: none; }
+.plan-hero-back { display: inline-flex; align-items: center; gap: .15rem; min-height: 44px; max-width: 100%; padding: 0 .8rem 0 .6rem; border: 1px solid rgba(255,255,255,.45); border-radius: .75rem; color: white; background: rgba(15,23,28,.8); font-size: .875rem; font-weight: 600; line-height: 1; text-decoration: none; white-space: nowrap; }
+.plan-hero-action:hover, .plan-hero-back:hover, .plan-hero-back:visited, .plan-trip-menu[open] > .plan-hero-action { background: rgba(15,23,28,.98); color: white; }
 .plan-hero-action::-webkit-details-marker { display: none; }
-.plan-workspace .plan-hero-action:focus-visible { outline: 2px solid white; outline-offset: 3px; }
+.plan-workspace .plan-hero-action:focus-visible, .plan-workspace .plan-hero-back:focus-visible { outline: 2px solid white; outline-offset: 3px; }
 .plan-trip-hero-actions .plan-trip-menu > button { margin-top: .5rem; color: var(--heading); text-align: left; }
 .plan-workspace .plan-trip-hero:has(.plan-trip-hero-actions) .plan-trip-hero-content { padding-top: 5rem; }
 .plan-workspace .plan-hub-lead > p { display: none; }
 .plan-workspace .plan-trip-hero-title { font-size: clamp(1.9rem, 4vw, 2.8rem); }
+
+/* Full-bleed destination photo. The type and controls stay in the content column. */
+.plan-workspace .plan-hub-lead { container-type: inline-size; }
+.plan-workspace .plan-trip-hero {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  overflow: hidden;
+  border-radius: 0;
+}
+@supports (width: 1lvw) {
+  .plan-workspace .plan-trip-hero {
+    width: 100lvw;
+    max-width: 100lvw;
+    margin-left: calc(50% - 50lvw);
+    margin-right: calc(50% - 50lvw);
+  }
+}
+.plan-workspace .plan-trip-hero-shade {
+  background:
+    linear-gradient(180deg, rgba(15, 23, 28, 0.55) 0%, rgba(15, 23, 28, 0.12) 6.5rem, rgba(15, 23, 28, 0) 11rem),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.05) 28%, rgba(0, 0, 0, 0.72) 100%);
+}
+.plan-workspace .plan-trip-hero-frame {
+  position: relative;
+  width: 100%;
+  min-height: 24rem;
+}
+@supports (width: 1cqw) {
+  .plan-workspace .plan-trip-hero-frame {
+    width: 100cqw;
+    max-width: 100vw;
+    margin-left: max(0px, calc(50vw - 50cqw));
+  }
+}
+@supports (width: 1lvw) {
+  .plan-workspace .plan-trip-hero-frame {
+    max-width: 100lvw;
+    margin-left: max(0px, calc(50lvw - 50cqw));
+  }
+}
+html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
+
 @media (max-width: 639px) {
   .plan-workspace > * { order: 0 !important; }
-  .plan-workspace .plan-trip-hero { min-height: 17rem; }
-  .plan-workspace .plan-trip-hero-content { min-height: 17rem; padding: 1.25rem 1.25rem 3rem; }
+  .plan-workspace .plan-trip-hero,
+  .plan-workspace .plan-trip-hero-frame,
+  .plan-workspace .plan-trip-hero-content { min-height: 20rem; }
+  .plan-workspace .plan-trip-hero-content { padding: 1.25rem 1.25rem 3rem; }
+  .plan-workspace .plan-trip-hero-bar {
+    padding:
+      .75rem
+      max(1.25rem, calc(env(safe-area-inset-right, 0px) - 1.25rem))
+      0
+      max(1.25rem, calc(env(safe-area-inset-left, 0px) - 1.25rem));
+  }
   .plan-workspace .plan-trip-hero-title { font-size: 1.9rem; }
   .plan-workspace-toolbar { flex-wrap: wrap; gap: .75rem; }
   .plan-workspace-tabs { width: 100%; }
@@ -3484,6 +3543,15 @@ dialog.home-screen-prompt::backdrop { background: rgb(31 26 20 / .4); }
   .plan-workspace .plan-hub-days, .plan-workspace .plan-hub-lanes { padding: 1rem; }
   .plan-preview-day { grid-template-columns: 4.5rem 1fr; gap: .75rem; }
   .plan-entry-dialog { width: 100%; max-width: 100%; max-height: 94dvh; margin: auto 0 0; border-radius: 1.25rem 1.25rem 0 0; padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+}
+
+/* Landscape phones: keep the photo prominent without covering the trip. */
+@media (max-height: 520px) {
+  .plan-workspace .plan-trip-hero,
+  .plan-workspace .plan-trip-hero-frame,
+  .plan-workspace .plan-trip-hero-content {
+    min-height: 14rem;
+  }
 }
 
 /* Open-trip section tabs: fixed bottom bar on phones and small tablets.
