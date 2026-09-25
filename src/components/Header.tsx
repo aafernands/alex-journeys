@@ -421,7 +421,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
       {mounted
         ? createPortal(
             <>
-              <MobileBottomNav />
+              {!mobileOpen && <MobileBottomNav />}
               <MobileNavDrawer
                 open={mobileOpen}
                 onClose={closeAll}

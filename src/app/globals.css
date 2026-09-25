@@ -128,11 +128,6 @@ body.mobile-bottom-nav-visible {
   scroll-padding-bottom: var(--mobile-nav-clearance);
 }
 
-/* Leave room above the bottom bar for the drawer when the bar is showing. */
-body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
-  bottom: calc(var(--mobile-nav-bar) + env(safe-area-inset-bottom, 0px));
-}
-
 /* Admin public chrome — below mobile nav / drawers, above page content. */
 .admin-bar {
   position: fixed;
@@ -152,9 +147,6 @@ body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
     padding-bottom: 0;
   }
 
-  body.mobile-bottom-nav-visible .mobile-nav-drawer-shell {
-    bottom: 0;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
