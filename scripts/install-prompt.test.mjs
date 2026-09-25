@@ -7,6 +7,7 @@ import {
   buildInstallGuide,
   dismissUntilValue,
   installButtonLabel,
+  installCanBeOffered,
   installInstructions,
   installVisibility,
   isInstallPromptPage,
@@ -77,6 +78,27 @@ test("iOS guide follows the Share button and sends in-app browsers to Safari", (
   assert.equal(instagram.inAppName, "Instagram");
   assert.match(instagram.inAppMessage ?? "", /Safari/);
   assert.equal(instagram.steps.length, 3);
+});
+
+test("home screen offer stays hidden when the browser has no install path", () => {
+  const chrome = buildInstallGuide(
+    "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36",
+    5,
+  );
+  assert.equal(installCanBeOffered(chrome), true);
+
+  const iphone = buildInstallGuide(
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1",
+    5,
+  );
+  assert.equal(installCanBeOffered(iphone), true);
+
+  const firefox = buildInstallGuide(
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0",
+    0,
+  );
+  assert.equal(installCanBeOffered(firefox), false);
+  assert.equal(firefox.native, false);
 });
 
 test("Chromium can open the native dialog and the button label matches the device", () => {

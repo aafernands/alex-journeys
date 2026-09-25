@@ -9,6 +9,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
+import { AccountPreferences } from "@/components/account/AccountPreferences";
 import { AccountAuthActions } from "@/components/AccountAuthActions";
 import {
   MyTripsList,
@@ -484,6 +485,8 @@ export function AccountDashboard({
                 emailConfigured={emailConfigured}
               />
             </section>
+
+            <AccountPreferences />
 
             {hasPassword ? (
               <section className="panel p-6 md:p-8" aria-labelledby="settings-password">

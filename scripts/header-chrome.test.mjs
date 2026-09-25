@@ -25,7 +25,8 @@ describe("header chrome", () => {
     const prompt = source("../src/components/ReaderLoginPrompt.tsx");
     assert.match(prompt, /<DrawerLoginDialog/);
     assert.ok(drawer.indexOf('aria-label="Social"') > drawer.indexOf('aria-label="Primary"'));
-    assert.ok(drawer.indexOf('aria-label="Social"') < drawer.indexOf('<ThemeAppearanceControl'));
+    assert.doesNotMatch(drawer, /ThemeAppearanceControl|AddToHomeScreenButton|Device settings/);
+    assert.match(drawer, /aria-label="Sign in"/);
     assert.match(drawer, /<BrandLogo/);
     assert.match(drawer, /applyScale=\{false\}/);
     assert.match(drawer, /inset-0 flex w-full/);
