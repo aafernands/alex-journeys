@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, LayoutDashboard, LogOut, Shield } from "lucide-react";
+import { ChevronRight, Download, LayoutDashboard, LogOut, Shield } from "lucide-react";
+import { useInstallOffer } from "@/components/AddToHomeScreenButton";
+import { requestInstallPrompt } from "@/lib/install-prompt";
 import { signOut, useSession } from "next-auth/react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
@@ -49,6 +51,7 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuId = useId();
+  const offerInstall = useInstallOffer();
 
   const close = useCallback(() => setOpen(false), []);
 
@@ -218,6 +221,25 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
               />
               Admin console
             </Link>
+          ) : null}
+
+          {!isDrawer && offerInstall ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={itemClass}
+              onClick={() => {
+                requestInstallPrompt();
+                onItemNavigate();
+              }}
+            >
+              <Download
+                className="h-4 w-4 shrink-0 text-accent"
+                strokeWidth={2}
+                aria-hidden="true"
+              />
+              Add to home screen
+            </button>
           ) : null}
 
           <div className="my-1 border-t border-border" />
