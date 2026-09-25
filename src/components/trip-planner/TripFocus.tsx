@@ -9,17 +9,12 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname } from "next/navigation";
-import {
-  isFocusedTripChrome,
-  isStoredTripWorkspace,
-} from "@/lib/trip-focus";
+import { isFocusedTripChrome } from "@/lib/trip-focus";
 
 type TripFocusValue = {
   /** Hide discovery chrome: bottom tabs and the travel-alerts ticker. */
   focused: boolean;
   setWorkspaceFocused: (focused: boolean) => void;
-  /** Setup/edit (step before the itinerary) keeps the tab bar. */
-  setSuppressFocus: (suppress: boolean) => void;
 };
 
 const TripFocusContext = createContext<TripFocusValue | null>(null);
@@ -32,8 +27,7 @@ function applyTripFocusClass(focused: boolean) {
 export function TripFocusProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? "";
   const [workspaceFocused, setWorkspaceFocused] = useState(false);
-  const [suppressFocus, setSuppressFocus] = useState(false);
-  // Server render only knows the pathname. Search and localStorage are applied
+  // Server render knows the pathname. Search (for /out?from=trip) is applied
   // before paint so hydration matches, then the class and flag catch up.
   const [focused, setFocused] = useState(() =>
     isFocusedTripChrome(pathname, ""),
@@ -41,17 +35,14 @@ export function TripFocusProvider({ children }: { children: ReactNode }) {
 
   useLayoutEffect(() => {
     const next =
-      !suppressFocus &&
-      (workspaceFocused ||
-        isFocusedTripChrome(window.location.pathname, window.location.search) ||
-        (normalizePlanPath(window.location.pathname) &&
-          isStoredTripWorkspace()));
+      workspaceFocused ||
+      isFocusedTripChrome(window.location.pathname, window.location.search);
     applyTripFocusClass(next);
     setFocused(next);
-  }, [pathname, suppressFocus, workspaceFocused]);
+  }, [pathname, workspaceFocused]);
 
   const value = useMemo(
-    () => ({ focused, setWorkspaceFocused, setSuppressFocus }),
+    () => ({ focused, setWorkspaceFocused }),
     [focused],
   );
 
@@ -60,20 +51,11 @@ export function TripFocusProvider({ children }: { children: ReactNode }) {
   );
 }
 
-function normalizePlanPath(pathname: string): boolean {
-  const path =
-    pathname.length > 1 && pathname.endsWith("/")
-      ? pathname.slice(0, -1)
-      : pathname;
-  return path === "/guides/plan-a-trip";
-}
-
 export function useTripFocus(): TripFocusValue {
   return (
     useContext(TripFocusContext) ?? {
       focused: false,
       setWorkspaceFocused: () => undefined,
-      setSuppressFocus: () => undefined,
     }
   );
 }
@@ -88,12 +70,3 @@ export function TripWorkspaceFocus() {
   return null;
 }
 
-/** Trip setup and “edit details” stay on the discovery tab bar. */
-export function TripDiscoveryChrome() {
-  const { setSuppressFocus } = useTripFocus();
-  useLayoutEffect(() => {
-    setSuppressFocus(true);
-    return () => setSuppressFocus(false);
-  }, [setSuppressFocus]);
-  return null;
-}

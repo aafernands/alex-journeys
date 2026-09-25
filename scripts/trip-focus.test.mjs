@@ -28,12 +28,16 @@ describe("focused booking routes", () => {
     }
   });
 
-  it("focuses saved trips and trip partner handoffs", () => {
+  it("focuses every planner state and trip partner handoffs", () => {
+    assert.equal(isFocusedTripChrome("/guides/plan-a-trip", ""), true);
     assert.equal(
       isFocusedTripChrome("/guides/plan-a-trip", "?trip=abc123"),
       true,
     );
-    assert.equal(isFocusedTripChrome("/guides/plan-a-trip", ""), false);
+    assert.equal(
+      isFocusedTripChrome("/guides/plan-a-trip/", ""),
+      true,
+    );
     assert.equal(
       isFocusedTripChrome("/out", "?to=https%3A%2F%2Frentcars.com&aff=1&from=trip"),
       true,
@@ -41,9 +45,11 @@ describe("focused booking routes", () => {
     assert.equal(isFocusedTripChrome("/out", "?to=https%3A%2F%2Fexample.com"), false);
     assert.equal(isFocusedTripChrome("/account", ""), false);
     assert.equal(isFocusedTripChrome("/blog", ""), false);
-    assert.match(TRIP_FOCUS_BOOT, /plan-a-trip\.active\.v1/);
+    assert.equal(isFocusedTripChrome("/", ""), false);
+    assert.match(TRIP_FOCUS_BOOT, /plan-a-trip/);
     assert.match(TRIP_FOCUS_BOOT, /experiences/);
     assert.match(TRIP_FOCUS_BOOT, /from/);
+    assert.doesNotMatch(TRIP_FOCUS_BOOT, /active\.v1/);
   });
 
   it("leaves discovery pages on the tab bar", () => {
@@ -58,6 +64,9 @@ describe("focused booking routes", () => {
       "/flightsheet",
     ]) {
       assert.equal(isFocusedBookingPath(path), false, path);
+    }
+    for (const path of ["/", "/blog", "/blog/a-note", "/destinations", "/account"]) {
+      assert.equal(isFocusedTripChrome(path, ""), false, path);
     }
   });
 });
@@ -75,8 +84,12 @@ describe("focused trip chrome wiring", () => {
     assert.ok(planner.indexOf("<TripWorkspaceFocus />") < planner.indexOf("<ItineraryHub"));
     assert.match(planner, /plan-workspace-shell/);
     const css = source("../src/app/globals.css");
-    assert.match(planner, /TripDiscoveryChrome/);
+    assert.doesNotMatch(planner, /TripDiscoveryChrome/);
+    assert.match(planner, /plan-sticky-note/);
+    assert.match(planner, /Create my trip/);
     assert.match(css, /html\.trip-focus \.site-alerts/);
+    assert.match(css, /main\.plan-flow\) \.site-alerts/);
+    assert.match(css, /plan-sticky-note/);
     assert.match(css, /body\.trip-focus \.site-alerts/);
     assert.match(css, /body\.trip-focus \.mobile-bottom-nav/);
     const layout = source("../src/app/layout.tsx");

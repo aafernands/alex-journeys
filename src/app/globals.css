@@ -151,6 +151,18 @@ body.trip-focus .mobile-bottom-nav-pad {
   padding-bottom: 0 !important;
 }
 
+/* The whole planner page is inside the trip, including blank setup. */
+body:has(main.plan-flow) {
+  --mobile-nav-clearance: 0px;
+}
+body:has(main.plan-flow) .mobile-bottom-nav,
+body:has(main.plan-flow) .site-alerts {
+  display: none !important;
+}
+body:has(main.plan-flow) .mobile-bottom-nav-pad {
+  padding-bottom: 0 !important;
+}
+
 /* In-page mobile actions sit on the home indicator once the tab bar is gone. */
 .safe-bottom-bar {
   padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
@@ -173,6 +185,16 @@ body.trip-focus .mobile-bottom-nav-pad {
 @media (max-width: 1279px) {
   body.mobile-bottom-nav-visible .admin-bar {
     bottom: var(--mobile-nav-clearance);
+  }
+
+  body.trip-focus:has(.plan-sticky) .admin-bar,
+  body:has(main.plan-flow) .admin-bar {
+    bottom: calc(8.25rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.trip-focus:has(.plan-sticky-pair) .admin-bar,
+  body:has(main.plan-flow):has(.plan-sticky-pair) .admin-bar {
+    bottom: calc(11.75rem + env(safe-area-inset-bottom, 0px));
   }
 }
 
@@ -2375,8 +2397,18 @@ body.mobile-bottom-nav-visible .plan-sticky {
 }
 
 body.trip-focus .plan-sticky,
-body:has(.plan-workspace-shell) .plan-sticky {
+body:has(.plan-workspace-shell) .plan-sticky,
+body:has(main.plan-flow) .plan-sticky {
   bottom: 0;
+}
+
+.plan-sticky-note {
+  flex: 1 0 100%;
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.35;
 }
 
 .plan-sticky-page {
@@ -2409,13 +2441,41 @@ body:has(.plan-workspace-shell) .plan-sticky {
 
   body.trip-focus .plan-trip:has(.plan-sticky),
   body.trip-focus .plan-sticky-host:has(.plan-sticky),
-  body:has(.plan-workspace-shell) .plan-trip:has(.plan-sticky) {
-    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  body:has(.plan-workspace-shell) .plan-trip:has(.plan-sticky),
+  body:has(main.plan-flow) .plan-trip:has(.plan-sticky),
+  body:has(main.plan-flow) .plan-sticky-host:has(.plan-sticky) {
+    padding-bottom: calc(8rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.trip-focus .plan-trip:has(.plan-sticky-pair),
+  body.trip-focus .plan-trip:has(.plan-sticky > .btn ~ .btn),
+  body.trip-focus .plan-trip:has(.plan-sticky > .btn ~ a.btn),
+  body.trip-focus .plan-trip:has(.plan-sticky > a.btn ~ .btn),
+  body.trip-focus .plan-trip:has(.plan-sticky > a.btn ~ a.btn),
+  body.trip-focus .plan-sticky-host:has(.plan-sticky > .btn ~ .btn),
+  body.trip-focus .plan-sticky-host:has(.plan-sticky > .btn ~ a.btn),
+  body.trip-focus .plan-sticky-host:has(.plan-sticky > a.btn ~ .btn),
+  body.trip-focus .plan-sticky-host:has(.plan-sticky > a.btn ~ a.btn),
+  body:has(main.plan-flow) .plan-trip:has(.plan-sticky-pair) {
+    padding-bottom: calc(11.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .plan-sticky {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .plan-sticky > .btn,
+  .plan-sticky > a.btn {
+    width: 100%;
   }
 
   .plan-sticky-solo > .btn,
   .plan-sticky-solo > a.btn {
-    flex: 1;
+    flex: 1 1 auto;
+    width: 100%;
   }
 
   .plan-fold-panel .panel-soft {
@@ -2586,8 +2646,14 @@ body:has(.plan-workspace-shell) .plan-sticky {
   }
 
   body.trip-focus .plan-trip-hotel:has(.plan-sticky),
-  body:has(.plan-workspace-shell) .plan-trip-hotel:has(.plan-sticky) {
-    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  body:has(.plan-workspace-shell) .plan-trip-hotel:has(.plan-sticky),
+  body:has(main.plan-flow) .plan-trip-hotel:has(.plan-sticky) {
+    padding-bottom: calc(8rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.trip-focus .plan-trip-hotel:has(.plan-sticky-pair),
+  body:has(main.plan-flow) .plan-trip-hotel:has(.plan-sticky-pair) {
+    padding-bottom: calc(11.5rem + env(safe-area-inset-bottom, 0px));
   }
 
   .plan-trip-hotel > .plan-panel {
