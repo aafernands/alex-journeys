@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getAllDestinations } from "@/data/destinations";
 import { getGuideHubSlugs } from "@/data/guides";
+import { isPostIndexable } from "@/lib/post-seo";
 import { getAllPosts } from "@/lib/posts";
 import { siteConfig } from "@/lib/seo";
 
@@ -39,6 +40,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   for (const post of getAllPosts()) {
+    if (!isPostIndexable(post)) continue;
     entries.push({
       url: `${siteConfig.url}/${post.slug}`,
       lastModified: new Date(post.updatedAt ?? (post.date || now)),

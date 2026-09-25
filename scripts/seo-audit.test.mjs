@@ -3,7 +3,10 @@ import fs from "node:fs";
 import { describe, it } from "node:test";
 import { postSlugRedirects } from "../src/data/post-slug-redirects.ts";
 import {
+  isPostIndexable,
+  noindexRobots,
   optionalSeoFields,
+  readNoindex,
   readSeoFields,
   resolvedSeoDescription,
   resolvedSeoTitle,
@@ -288,6 +291,27 @@ describe("readSeoFields", () => {
       optionalSeoFields({ seoTitle: "", seoDescription: "", focusKeyword: "" }),
       {},
     );
+    assert.equal(readNoindex(true), true);
+    assert.equal(readNoindex("true"), true);
+    assert.equal(readNoindex(false), false);
+    assert.equal(readNoindex("false"), false);
+    assert.deepEqual(
+      optionalSeoFields({
+        seoTitle: "",
+        seoDescription: "",
+        focusKeyword: "",
+        noindex: true,
+      }),
+      { noindex: true },
+    );
+    assert.deepEqual(noindexRobots(), {
+      index: false,
+      follow: true,
+      googleBot: { index: false, follow: true },
+    });
+    assert.equal(isPostIndexable({}), true);
+    assert.equal(isPostIndexable({ noindex: false }), true);
+    assert.equal(isPostIndexable({ noindex: true }), false);
   });
 
   it("allows titles past the checklist target and rejects extreme length", () => {

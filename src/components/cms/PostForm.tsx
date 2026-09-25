@@ -45,6 +45,7 @@ export type PostFormInitial = {
   seoTitle?: string;
   seoDescription?: string;
   focusKeyword?: string;
+  noindex?: boolean;
 };
 
 type Props = {
@@ -127,6 +128,7 @@ export function PostForm({
     initial?.seoDescription ?? "",
   );
   const [focusKeyword, setFocusKeyword] = useState(initial?.focusKeyword ?? "");
+  const [noindex, setNoindex] = useState(initial?.noindex === true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{
     commitUrl: string;
@@ -201,6 +203,7 @@ export function PostForm({
             seoTitle,
             seoDescription,
             focusKeyword,
+            noindex,
             update: mode === "edit" && !isDraft && !asDraft,
             draft: asDraft,
           }),
@@ -242,6 +245,7 @@ export function PostForm({
       excerpt,
       experienceWidgetHtml,
       focusKeyword,
+      noindex,
       featuredImageAlt,
       featuredImageUrl,
       finalSlug,
@@ -739,6 +743,8 @@ export function PostForm({
         seoTitle={seoTitle}
         seoDescription={seoDescription}
         focusKeyword={focusKeyword}
+        noindex={noindex}
+        onNoindex={setNoindex}
         contentHtml={contentHtml}
         featuredImageUrl={featuredImageUrl}
         featuredImageAlt={featuredImageAlt}

@@ -66,6 +66,7 @@ export default async function CmsNewPostPage({ searchParams }: PageProps) {
         seoTitle: "seoTitle" in source ? (source.seoTitle ?? "") : "",
         seoDescription: "seoDescription" in source ? (source.seoDescription ?? "") : "",
         focusKeyword: "focusKeyword" in source ? (source.focusKeyword ?? "") : "",
+        noindex: "noindex" in source ? source.noindex === true : false,
         itinerary:
           "itinerary" in source ? (source.itinerary ?? undefined) : undefined,
       };

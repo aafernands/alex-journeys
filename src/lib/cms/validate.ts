@@ -15,7 +15,7 @@ import type {
   PostMeta,
 } from "@/lib/post-types";
 import { sanitizeCmsHtml } from "@/lib/cms/sanitize-html";
-import { optionalSeoFields, readSeoFields } from "@/lib/post-seo";
+import { optionalSeoFields, readNoindex, readSeoFields } from "@/lib/post-seo";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const ALLOWED_DESTINATIONS = new Set(destinationSlugs);
@@ -43,6 +43,7 @@ export type PostInput = {
   seoTitle?: unknown;
   seoDescription?: unknown;
   focusKeyword?: unknown;
+  noindex?: unknown;
 };
 
 export type ValidatedPost = {
@@ -64,6 +65,7 @@ export type ValidatedPost = {
   seoTitle: string;
   seoDescription: string;
   focusKeyword: string;
+  noindex: boolean;
 };
 
 function asString(value: unknown): string {
@@ -382,6 +384,7 @@ export function validatePostInput(
   const seo = readSeoFields(input);
   if (!seo.ok) return seo;
   const { seoTitle, seoDescription, focusKeyword } = seo;
+  const noindex = readNoindex(input.noindex);
 
   return {
     ok: true,
@@ -400,6 +403,7 @@ export function validatePostInput(
       seoTitle,
       seoDescription,
       focusKeyword,
+      noindex,
       ...(itineraryResult.data ? { itinerary: itineraryResult.data } : {}),
     },
   };

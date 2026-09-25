@@ -107,6 +107,7 @@ export async function generateMetadata({
       type: "article",
       publishedTime: post.date,
       modifiedTime: post.updatedAt ?? post.date,
+      noindex: post.noindex === true,
     });
   }
 

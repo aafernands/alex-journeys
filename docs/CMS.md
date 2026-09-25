@@ -62,7 +62,7 @@ Never commit secrets. Never put them in client code. The dashboard only shows co
 
 ### Posts (stories)
 
-1. **New post** → title (slug auto), date, excerpt (card copy; fallback meta description), featured image preview, destinations (Place pages), optional **Guides → Plan a trip**, rich text story Content, optional **Trip timeline** (structured day-by-day itinerary — separate from Content HTML; renders as a public timeline), then the **SEO** panel: search title, meta description, optional focus keyword, Google-style preview, and a live checklist. Empty SEO fields fall back to the title and excerpt. Checklist warnings do not block publish. Scores for every story live at `/cms/seo`.
+1. **New post** → title (slug auto), date, excerpt (card copy; fallback meta description), featured image preview, destinations (Place pages), optional **Guides → Plan a trip**, rich text story Content, optional **Trip timeline** (structured day-by-day itinerary — separate from Content HTML; renders as a public timeline), then the **SEO** panel: search title, meta description, optional focus keyword, **Hide from Google (noindex)**, Google-style preview, and a live checklist. Empty SEO fields fall back to the title and excerpt. Noindex sets the public robots tag to `noindex` and drops the post from `sitemap.xml`. Checklist warnings do not block publish. Scores for every story live at `/cms/seo`.
 2. **Save draft** → `src/content/drafts/{slug}.json`.
 3. **Publish** → `src/content/posts/{slug}.json` + `_index.json`; matching draft is removed when present.
 4. Vercel redeploys → live at `/{slug}`.

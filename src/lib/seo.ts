@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { site as contentSite } from "@/data/content";
 import { getSiteDesign } from "@/lib/site-design";
+import { noindexRobots } from "@/lib/post-seo";
 import { getSiteUrl } from "@/lib/site-url";
 
 /** Prefer CMS branding.logoOnLight; falls back if design JSON is incomplete. */
@@ -66,6 +67,7 @@ export function buildPageMetadata({
   type = "website",
   publishedTime,
   modifiedTime,
+  noindex = false,
 }: {
   title: string;
   description?: string;
@@ -75,6 +77,7 @@ export function buildPageMetadata({
   type?: "website" | "article";
   publishedTime?: string;
   modifiedTime?: string;
+  noindex?: boolean;
 }): Metadata {
   const desc = description ?? siteConfig.description;
   const url = absoluteUrl(path);
@@ -102,6 +105,7 @@ export function buildPageMetadata({
       description: desc,
       images: [ogImage],
     },
+    ...(noindex ? { robots: noindexRobots() } : {}),
   };
 }
 

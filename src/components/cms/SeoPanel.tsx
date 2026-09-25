@@ -29,6 +29,7 @@ type Props = {
   seoTitle: string;
   seoDescription: string;
   focusKeyword: string;
+  noindex: boolean;
   contentHtml: string;
   featuredImageUrl: string;
   featuredImageAlt: string;
@@ -37,6 +38,7 @@ type Props = {
   onSeoTitle: (value: string) => void;
   onSeoDescription: (value: string) => void;
   onFocusKeyword: (value: string) => void;
+  onNoindex: (value: boolean) => void;
   onDirty: () => void;
 };
 
@@ -74,6 +76,7 @@ export function SeoPanel({
   seoTitle,
   seoDescription,
   focusKeyword,
+  noindex,
   contentHtml,
   featuredImageUrl,
   featuredImageAlt,
@@ -82,6 +85,7 @@ export function SeoPanel({
   onSeoTitle,
   onSeoDescription,
   onFocusKeyword,
+  onNoindex,
   onDirty,
 }: Props) {
   const effectiveTitle = seoTitle.trim() || title.trim();
@@ -124,7 +128,10 @@ export function SeoPanel({
   const slugLabel = slug.trim() || "post-slug";
 
   return (
-    <section className="space-y-5 rounded-xl border border-border bg-surface-soft p-5 md:p-6">
+    <section
+      id="cms-seo-panel"
+      className="space-y-5 rounded-xl border border-border bg-surface-soft p-5 md:p-6"
+    >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 className="font-display text-lg font-bold text-heading">SEO</h2>
@@ -238,7 +245,31 @@ export function SeoPanel({
         </p>
       </div>
 
-      <div>
+      <div className="rounded-lg border border-border bg-white px-4 py-3">
+        <label htmlFor="cms-seo-noindex" className="flex items-start gap-3">
+          <input
+            id="cms-seo-noindex"
+            type="checkbox"
+            checked={noindex}
+            onChange={(event) => {
+              onNoindex(event.target.checked);
+              onDirty();
+            }}
+            className="mt-0.5 h-4 w-4 rounded border-border accent-[var(--accent)]"
+          />
+          <span>
+            <span className="text-sm font-semibold text-heading">
+              Hide from Google (noindex)
+            </span>
+            <span className="mt-1 block text-xs leading-relaxed text-muted">
+              Adds a noindex robots tag on this post and leaves it out of
+              sitemap.xml. The page stays on the site.
+            </span>
+          </span>
+        </label>
+      </div>
+
+      <div id="cms-seo-preview">
         <p className="text-xs font-bold uppercase tracking-wide text-muted">
           Search preview
         </p>
@@ -265,10 +296,15 @@ export function SeoPanel({
           <p className="mt-1 line-clamp-3 text-sm leading-snug text-[#4d5156]">
             {effectiveDescription || "Meta description preview."}
           </p>
+          {noindex ? (
+            <p className="mt-2 text-xs font-semibold text-accent-deep">
+              Hidden from Google — this URL is noindex and omitted from the sitemap.
+            </p>
+          ) : null}
         </div>
       </div>
 
-      <div>
+      <div id="cms-seo-checklist">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h3 className="text-sm font-semibold text-heading">Checklist</h3>
           <p className="text-xs text-muted">
