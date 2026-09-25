@@ -77,14 +77,13 @@ export function StayDetailSearch({ hotelId, query, initiallyEditing = false }: P
             if (startIssue || endIssue) return;
 
             const next: StaysQuery = {
+              ...query,
               destination: value("dest"),
               startDate,
               endDate,
               adults: Number(value("adults")),
               children: Number(value("children")),
               rooms: Number(value("rooms")),
-              sessionId: query.sessionId,
-              tripId: query.tripId,
             };
             setPending(true);
             router.push(stayDetailSearchPath(hotelId, query, next));

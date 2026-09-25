@@ -13,6 +13,21 @@ import {
   liteApiKeyInfo,
 } from "@/lib/liteapi";
 import {
+  EMPTY_STAY_CATALOG,
+  facilityIdsFor,
+  loadStayCatalog,
+  type StayCatalog,
+} from "@/lib/stay-catalog";
+import {
+  applyStayFilters,
+  hasLiteApiStayFilters,
+  starRatingQueryValues,
+  stayPriceBounds,
+  type StayAmenityOption,
+  type StayPriceBounds,
+  type StaySort,
+} from "@/lib/stay-filters";
+import {
   isStayHotelId,
   isStayOfferId,
   isStayPrebookId,
@@ -38,6 +53,12 @@ export type StaySearchResult = {
   sandbox: boolean;
   placeName: string;
   stays: StayListItem[];
+  /** Stays returned before the local price and guest-rating pass. */
+  windowCount: number;
+  priceBounds: StayPriceBounds | null;
+  amenities: StayAmenityOption[];
+  /** True when LiteAPI hotel types can split hotels from homes. */
+  propertyTypes: boolean;
 };
 
 export type StayHotelResult = {
@@ -164,12 +185,40 @@ function ratesBody(query: StaysQuery, extra: Record<string, unknown>) {
     currency: "USD",
     guestNationality: "US",
     occupancies: stayOccupancies(query),
-    timeout: 6,
-    limit: 24,
+    timeout: 8,
+    limit: 80,
     sessionId: query.sessionId || undefined,
-    sort: [{ field: "price", direction: "ascending" }],
     ...extra,
   };
+}
+
+function liteApiSort(sort: StaySort): Array<{ field: string; direction: string }> {
+  if (sort === "price_asc") return [{ field: "price", direction: "ascending" }];
+  if (sort === "price_desc") return [{ field: "price", direction: "descending" }];
+  // Guest rating and star rating are not LiteAPI sort fields.
+  return [{ field: "top_picks", direction: "descending" }];
+}
+
+function liteApiListFilters(query: StaysQuery, catalog: StayCatalog): Record<string, unknown> {
+  const filters = query.filters;
+  const body: Record<string, unknown> = {
+    sort: liteApiSort(filters.sort),
+    maxRatesPerHotel: 1,
+  };
+  if (filters.stars.length) body.starRating = starRatingQueryValues(filters.stars);
+  if (filters.freeCancellation) body.refundableRatesOnly = true;
+  const facilityIds = facilityIdsFor(catalog, filters.amenities);
+  if (facilityIds.length) {
+    body.facilities = facilityIds;
+    body.strictFacilityFiltering = true;
+  }
+  if (filters.kind === "hotel" && catalog.propertyTypes) {
+    body.hotelTypeIds = catalog.hotelTypeIds;
+  }
+  if (filters.kind === "home" && catalog.propertyTypes) {
+    body.hotelTypeIds = catalog.homeTypeIds;
+  }
+  return body;
 }
 
 async function placeIdFor(destination: string): Promise<{ placeId: string; label: string } | null> {
@@ -205,8 +254,36 @@ async function postRates(query: StaysQuery, extra: Record<string, unknown>): Pro
     path: "/hotels/rates",
     method: "POST",
     body: ratesBody(query, extra),
-    timeoutMs: 12_000,
+    timeoutMs: 16_000,
   });
+}
+
+async function listStayRates(
+  query: StaysQuery,
+  place: { placeId: string; label: string } | null,
+  catalog: StayCatalog,
+): Promise<StayListItem[]> {
+  const extra = liteApiListFilters(query, catalog);
+  let stays: StayListItem[] = [];
+  if (place) {
+    stays = mapStaySearch(
+      await postRates(query, {
+        ...extra,
+        placeId: place.placeId,
+      }),
+    );
+  }
+  // A narrowed search that comes back empty should stay empty.
+  // The unfiltered fallback is only for a place id that yields nothing.
+  if (stays.length === 0 && !hasLiteApiStayFilters(query.filters)) {
+    stays = mapStaySearch(
+      await postRates(query, {
+        ...extra,
+        aiSearch: `hotels in ${query.destination}`,
+      }),
+    );
+  }
+  return stays;
 }
 
 export async function searchStays(query: StaysQuery): Promise<StaySearchResult> {
@@ -217,27 +294,25 @@ export async function searchStays(query: StaysQuery): Promise<StaySearchResult> 
     throw new LiteApiError("Stays aren’t configured.", 503, "not_configured");
   }
 
+  const catalogPromise = loadStayCatalog();
   const place = await placeIdFor(query.destination);
-  let payload: unknown = null;
-  if (place) {
-    payload = await postRates(query, {
-      placeId: place.placeId,
-      maxRatesPerHotel: 1,
-    });
-  }
-  let stays = mapStaySearch(payload);
-  if (stays.length === 0) {
-    payload = await postRates(query, {
-      aiSearch: `hotels in ${query.destination}`,
-      maxRatesPerHotel: 1,
-    });
-    stays = mapStaySearch(payload);
-  }
+  const catalogForRequest =
+    query.filters.amenities.length > 0 || query.filters.kind !== "any"
+      ? await catalogPromise
+      : EMPTY_STAY_CATALOG;
+  const stays = await listStayRates(query, place, catalogForRequest);
 
+  const catalog = await catalogPromise;
+  const windowCount = stays.length;
+  const priceBounds = stayPriceBounds(stays);
   return {
     sandbox: info.sandbox,
     placeName: place?.label || query.destination,
-    stays,
+    stays: applyStayFilters(stays, query.filters),
+    windowCount,
+    priceBounds,
+    amenities: catalog.amenities,
+    propertyTypes: catalog.propertyTypes,
   };
 }
 
