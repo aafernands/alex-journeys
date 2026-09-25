@@ -2066,10 +2066,7 @@ export function ItineraryHub({
         >
           <section aria-labelledby={`${headingId}-list`}>
             <div className="plan-toolbar">
-              <h3
-                id={`${headingId}-list`}
-                className={`${plan.h3} max-sm:hidden`}
-              >
+              <h3 id={`${headingId}-list`} className={plan.h3}>
                 Day-by-day schedule
               </h3>
               <div

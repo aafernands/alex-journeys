@@ -1187,6 +1187,18 @@ html.dark .places-world-map.leaflet-container {
   line-height: 1.3;
 }
 
+/* Section titles wrap inside narrow cards instead of being clipped. */
+.plan-h2,
+.plan-h3,
+.plan-h4,
+.plan-setup-heading h2,
+.plan-trip-hero-title {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .plan-body {
   font-size: var(--plan-fs-body);
   line-height: var(--plan-lh-body);
