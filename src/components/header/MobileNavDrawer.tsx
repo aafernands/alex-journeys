@@ -11,7 +11,10 @@ import {
   SocialYouTubeIcon,
 } from "@/components/icons/SocialIcons";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
-import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
+import { SearchInput } from "@/components/search/SearchInput";
+import { DrawerLoginDialog } from "./DrawerLoginDialog";
+import { UserRound, X } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { ThemeAppearanceControl } from "@/components/ThemeToggle";
 import { site } from "@/data/content";
@@ -45,12 +48,10 @@ const leafLinkClass =
  * Mobile hamburger drawer: oversized editorial hub list.
  * Places and Guides restore nested expanders (no leading icons).
  */
-export function MobileNavDrawer({
-  open,
-  onClose,
-  googleConfigured = false,
-}: Props) {
+export function MobileNavDrawer({ open, onClose }: Props) {
   const [placesOpen, setPlacesOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const { status } = useSession();
   const [openContinent, setOpenContinent] = useState<string | null>(null);
 
   if (!open) return null;
@@ -74,82 +75,54 @@ export function MobileNavDrawer({
         className="absolute inset-0 flex w-full flex-col bg-bg shadow-xl"
         aria-label="Mobile"
       >
-        <div className="flex shrink-0 items-center gap-1 border-b border-border px-3 py-3">
-          <div className="flex w-[clamp(7rem,30vw,11rem)] shrink-0 items-center justify-start">
-            <BrandLogo
-              href="/"
+        <div className="shrink-0 border-b border-border px-4 py-3">
+          <div className="grid grid-cols-[44px_1fr_44px] items-center gap-3">
+            <button
+              type="button"
+              className="drawer-header-icon"
+              aria-label="Close menu"
               onClick={onClose}
-              applyScale={false}
-              width={320}
-              height={88}
-              className="block h-auto w-full object-contain"
-            />
-          </div>
-          <ul
-            className="ml-auto flex shrink-0 items-center"
-            aria-label="Social"
-          >
-            <li>
-              <OutboundLink
-                href={site.social.instagram}
-                className="inline-flex h-11 w-8 sm:w-10 items-center justify-center text-heading transition hover:text-accent"
-                aria-label="Instagram"
-                onClick={onClose}
-              >
-                <SocialInstagramIcon />
-              </OutboundLink>
-            </li>
-            <li>
-              <OutboundLink
-                href={site.social.youtube}
-                className="inline-flex h-11 w-8 sm:w-10 items-center justify-center text-heading transition hover:text-accent"
-                aria-label="YouTube"
-                onClick={onClose}
-              >
-                <SocialYouTubeIcon />
-              </OutboundLink>
-            </li>
-            <li>
-              <OutboundLink
-                href={site.social.pinterest}
-                className="inline-flex h-11 w-8 sm:w-10 items-center justify-center text-heading transition hover:text-accent"
-                aria-label="Pinterest"
-                onClick={onClose}
-              >
-                <SocialPinterestIcon />
-              </OutboundLink>
-            </li>
-            <li>
-              <OutboundLink
-                href={site.social.coffee}
-                className="inline-flex h-11 w-8 sm:w-10 items-center justify-center text-accent transition hover:text-accent-deep"
-                aria-label="Buy me a coffee"
-                onClick={onClose}
-              >
-                <SocialCoffeeIcon />
-              </OutboundLink>
-            </li>
-          </ul>
-          <button
-            type="button"
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
-            aria-label="Close menu"
-            onClick={onClose}
-          >
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
             >
-              <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
-            </svg>
-          </button>
+              <X size={23} aria-hidden="true" />
+            </button>
+            <div className="mx-auto w-full max-w-[12rem]">
+              <BrandLogo
+                href="/"
+                onClick={onClose}
+                applyScale={false}
+                width={320}
+                height={88}
+                className="block h-auto w-full object-contain"
+              />
+            </div>
+            {status === "authenticated" ? (
+              <Link
+                href="/account"
+                className="drawer-header-icon"
+                aria-label="Your account"
+                onClick={onClose}
+              >
+                <UserRound size={22} aria-hidden="true" />
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className="drawer-header-icon"
+                aria-label="Sign in"
+                aria-haspopup="dialog"
+                onClick={() => setLoginOpen(true)}
+              >
+                <UserRound size={22} aria-hidden="true" />
+              </button>
+            )}
+          </div>
+          <SearchInput
+            variant="drawer"
+            id="mobile-drawer-search"
+            className="mt-3 w-full"
+            onNavigate={onClose}
+          />
         </div>
-
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pt-4">
           <ul className="flex flex-col" aria-label="Primary">
             <li>
@@ -257,20 +230,73 @@ export function MobileNavDrawer({
             </li>
           </ul>
 
-          <div className="mt-auto space-y-3 border-t border-border pt-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
-            {googleConfigured ? (
-              <div className="border-b border-border pb-4">
-                <ReaderAuthButtons
-                  variant="drawer-cta"
-                  googleConfigured={googleConfigured}
-                  onNavigate={onClose}
-                />
-              </div>
-            ) : null}
-            <ThemeAppearanceControl />
-          </div>
+          <section
+            className="mt-8 pb-6 text-center"
+            aria-label="Follow Alex Journeys"
+          >
+            <p className="mb-3 text-xs font-bold uppercase tracking-[.18em] text-muted">
+              Follow the journey
+            </p>
+            <ul
+              className="flex items-center justify-center gap-3"
+              aria-label="Social"
+            >
+              <li>
+                <OutboundLink
+                  href={site.social.instagram}
+                  className="inline-flex h-11 w-11 items-center justify-center text-heading transition hover:text-accent"
+                  aria-label="Instagram"
+                  onClick={onClose}
+                >
+                  <SocialInstagramIcon />
+                </OutboundLink>
+              </li>
+              <li>
+                <OutboundLink
+                  href={site.social.youtube}
+                  className="inline-flex h-11 w-11 items-center justify-center text-heading transition hover:text-accent"
+                  aria-label="YouTube"
+                  onClick={onClose}
+                >
+                  <SocialYouTubeIcon />
+                </OutboundLink>
+              </li>
+              <li>
+                <OutboundLink
+                  href={site.social.pinterest}
+                  className="inline-flex h-11 w-11 items-center justify-center text-heading transition hover:text-accent"
+                  aria-label="Pinterest"
+                  onClick={onClose}
+                >
+                  <SocialPinterestIcon />
+                </OutboundLink>
+              </li>
+              <li>
+                <OutboundLink
+                  href={site.social.coffee}
+                  className="inline-flex h-11 w-11 items-center justify-center text-accent transition hover:text-accent-deep"
+                  aria-label="Buy me a coffee"
+                  onClick={onClose}
+                >
+                  <SocialCoffeeIcon />
+                </OutboundLink>
+              </li>
+            </ul>
+          </section>
+        </div>
+        <div className="shrink-0 border-t border-border bg-bg px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
+          <ThemeAppearanceControl />
         </div>
       </nav>
+      {loginOpen ? (
+        <DrawerLoginDialog
+          onClose={() => setLoginOpen(false)}
+          onAuthenticated={() => {
+            setLoginOpen(false);
+            onClose();
+          }}
+        />
+      ) : null}
     </div>
   );
 }

@@ -17,6 +17,8 @@ type Props = {
   googleConfigured: boolean;
   twitterConfigured: boolean;
   credentialsConfigured: boolean;
+  returnTo?: string;
+  onAuthenticated?: () => void;
 };
 
 type OauthProvider = "google" | "twitter";
@@ -82,12 +84,14 @@ export function ReaderLoginForm({
   googleConfigured,
   twitterConfigured,
   credentialsConfigured,
+  returnTo,
+  onAuthenticated,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = useMemo(
-    () => safeCallbackUrl(searchParams.get("callbackUrl")),
-    [searchParams],
+    () => safeCallbackUrl(returnTo ?? searchParams.get("callbackUrl")),
+    [returnTo, searchParams],
   );
   const returningToItinerary = callbackUrl.startsWith("/guides/plan-a-trip");
   const authError = searchParams.get("error");
@@ -205,6 +209,7 @@ export function ReaderLoginForm({
 
       router.push(callbackUrl);
       router.refresh();
+      onAuthenticated?.();
     } catch {
       setError("Network error. Try again.");
       setPending(false);

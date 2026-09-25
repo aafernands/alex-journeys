@@ -19,11 +19,10 @@ describe("header chrome", () => {
     assert.match(header, /xl:hidden/);
     assert.doesNotMatch(header, /md:flex/);
     const drawer = source("../src/components/header/MobileNavDrawer.tsx");
-    assert.match(drawer, /variant="drawer-cta"/);
-    assert.doesNotMatch(drawer, /SearchInput|mobile-drawer-search/);
-    assert.ok(drawer.indexOf('aria-label="Social"') < drawer.indexOf('aria-label="Primary"'));
-    assert.ok(drawer.indexOf('<ReaderAuthButtons') > drawer.indexOf('aria-label="Primary"'));
-    assert.ok(drawer.indexOf('<ReaderAuthButtons') < drawer.indexOf('<ThemeAppearanceControl'));
+    assert.match(drawer, /mobile-drawer-search/);
+    assert.match(drawer, /<DrawerLoginDialog/);
+    assert.ok(drawer.indexOf('aria-label="Social"') > drawer.indexOf('aria-label="Primary"'));
+    assert.ok(drawer.indexOf('aria-label="Social"') < drawer.indexOf('<ThemeAppearanceControl'));
     assert.match(drawer, /<BrandLogo/);
     assert.match(drawer, /applyScale=\{false\}/);
     assert.match(drawer, /inset-0 flex w-full/);

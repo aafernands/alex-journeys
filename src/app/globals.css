@@ -2655,6 +2655,13 @@ body.mobile-bottom-nav-visible .plan-sticky {
   isolation: isolate;
 }
 
+.drawer-header-icon { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: .75rem; color: var(--heading); }
+.drawer-header-icon:hover { background: var(--surface-soft); }
+.drawer-login-dialog { position: fixed; inset: 0; margin: auto; width: min(28rem, calc(100% - 1.5rem)); max-height: calc(100dvh - 2rem); overflow-y: auto; padding: 2.75rem 0 0; border: 1px solid var(--border); border-radius: 1.25rem; background: var(--white); color: var(--heading); }
+.drawer-login-dialog::backdrop { background: rgb(0 0 0 / .65); backdrop-filter: blur(3px); }
+.drawer-login-close { position: absolute; top: .4rem; right: .4rem; display: grid; place-items: center; width: 44px; height: 44px; border-radius: .75rem; }
+.drawer-login-dialog > .panel { border: 0; box-shadow: none; }
+
 .plan-trip-hero-shade {
   position: absolute;
   inset: 0;
