@@ -163,14 +163,10 @@ class Painter {
 
   private drawMasthead(): number {
     let y = 36;
-    this.useDisplay();
-    this.doc.setFontSize(11);
-    this.setInk(INK);
-    this.doc.text(this.document.brand.toUpperCase(), MARGIN, y);
     this.useBody("bold");
     this.doc.setFontSize(11);
     this.setInk(ACCENT);
-    this.doc.text(this.document.sectionLabel, PAGE_W - MARGIN, y, { align: "right" });
+    this.doc.text(pdfText(this.document.sectionLabel), MARGIN, y);
 
     y += 16;
     this.setDraw(BORDER);
@@ -215,19 +211,20 @@ class Painter {
   }
 
   private drawRunningHeader(): number {
+    this.useBody("bold");
+    this.doc.setFontSize(10);
+    this.setInk(ACCENT);
+    const section = pdfText(this.document.sectionLabel);
+    const sectionWidth = this.doc.getTextWidth(section);
+    this.doc.text(section, PAGE_W - MARGIN, 32, { align: "right" });
+    const titleLines = this.wrap(this.document.title, PAGE_W - MARGIN * 2 - sectionWidth - 16, {
+      display: true,
+      size: 10,
+    });
     this.useDisplay();
     this.doc.setFontSize(10);
     this.setInk(INK);
-    this.doc.text(this.document.brand, MARGIN, 32);
-    const brandWidth = this.doc.getTextWidth(this.document.brand);
-    const right = pdfText(`${this.document.title} · ${this.document.sectionLabel}`);
-    const rightLines = this.wrap(right, PAGE_W - MARGIN * 2 - brandWidth - 18, {
-      size: 10,
-    });
-    this.useBody("normal");
-    this.doc.setFontSize(10);
-    this.setInk(MUTED);
-    this.doc.text(rightLines[0] ?? "", PAGE_W - MARGIN, 32, { align: "right" });
+    this.doc.text(titleLines[0] ?? "", MARGIN, 32);
     this.setDraw(BORDER);
     this.doc.setLineWidth(0.6);
     this.doc.line(MARGIN, 40, PAGE_W - MARGIN, 40);

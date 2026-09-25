@@ -311,7 +311,7 @@ test("the three sections render as PDFs without card numbers", async () => {
     writeFileSync(file, bytes);
     const text = spawnSync("pdftotext", ["-layout", file, "-"], { encoding: "utf8" });
     if (text.status !== 0) continue;
-    assert.match(text.stdout, /Alex Journeys|ALEX JOURNEYS/);
+    assert.doesNotMatch(text.stdout, /Alex Journeys|ALEX JOURNEYS|Fernandes Journeys/);
     assert.match(text.stdout, /www\.alexjourneys\.com/);
     assert.doesNotMatch(text.stdout, /fernandesjourneys/i);
     assert.doesNotMatch(text.stdout, /Fernandes Journeys/);
