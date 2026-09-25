@@ -12,7 +12,10 @@ import Link from "next/link";
 import { DateRangeField } from "@/components/trip-planner/DateRangeField";
 import { plan as tripDensity } from "@/components/trip-planner/density";
 import { ItineraryHub } from "@/components/trip-planner/ItineraryHub";
-import { TripWorkspaceFocus } from "@/components/trip-planner/TripFocus";
+import {
+  TripDiscoveryChrome,
+  TripWorkspaceFocus,
+} from "@/components/trip-planner/TripFocus";
 import { PlaceCombobox } from "@/components/trip-planner/PlaceCombobox";
 import { useTripSync } from "@/components/trip-planner/useTripSync";
 import {
@@ -490,6 +493,7 @@ export function TripPlanner({
               createTrip();
             }}
           >
+            <TripDiscoveryChrome />
             <div className="plan-setup-heading">
               <p className="eyebrow text-accent">
                 A little planning. A great journey.

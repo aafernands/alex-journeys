@@ -128,18 +128,27 @@ body.mobile-bottom-nav-visible {
   scroll-padding-bottom: var(--mobile-nav-clearance);
 }
 
-/* Keep focused trip work and modal tasks clear of global navigation. */
+/* Keep focused trip work and modal tasks clear of global navigation.
+   The html class is set before paint, including when the tab bar is portaled in later. */
+html.trip-focus,
 body.trip-focus,
 body:has(.plan-workspace-shell, dialog[open], [aria-modal="true"]:not([hidden])) {
   --mobile-nav-clearance: 0px;
 }
+html.trip-focus .mobile-bottom-nav,
+html.trip-focus .site-alerts,
 body.trip-focus .mobile-bottom-nav,
 body:has(.plan-workspace-shell, dialog[open], [aria-modal="true"]:not([hidden])) .mobile-bottom-nav {
-  display: none;
+  display: none !important;
 }
+html.trip-focus .site-alerts,
 body.trip-focus .site-alerts,
 body:has(.plan-workspace-shell) .site-alerts {
-  display: none;
+  display: none !important;
+}
+html.trip-focus .mobile-bottom-nav-pad,
+body.trip-focus .mobile-bottom-nav-pad {
+  padding-bottom: 0 !important;
 }
 
 /* In-page mobile actions sit on the home indicator once the tab bar is gone. */

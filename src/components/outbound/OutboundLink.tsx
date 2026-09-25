@@ -6,8 +6,17 @@ type OutboundLinkProps = Omit<ComponentPropsWithoutRef<"a">, "href"> & {
   href: string;
   /** Show affiliate disclosure on the interstitial. */
   affiliate?: boolean;
+  /** Opened from a trip lane, so /out stays in focused trip chrome. */
+  tripHop?: boolean;
   children: ReactNode;
 };
+
+function withTripHop(href: string, tripHop: boolean): string {
+  if (!tripHop || !href.startsWith("/out")) return href;
+  const url = new URL(href, "https://alexjourneys.local");
+  url.searchParams.set("from", "trip");
+  return `${url.pathname}?${url.searchParams.toString()}`;
+}
 
 /**
  * Public-facing link that routes external http(s) destinations through /out.
@@ -16,6 +25,7 @@ type OutboundLinkProps = Omit<ComponentPropsWithoutRef<"a">, "href"> & {
 export function OutboundLink({
   href,
   affiliate = false,
+  tripHop = false,
   children,
   className,
   rel,
@@ -27,7 +37,7 @@ export function OutboundLink({
   if (trimmed.startsWith("/out")) {
     return (
       <a
-        href={trimmed}
+        href={withTripHop(trimmed, tripHop)}
         className={className}
         rel={rel ?? "noopener noreferrer"}
         target={target ?? "_blank"}
@@ -83,7 +93,7 @@ export function OutboundLink({
     );
   }
 
-  const out = outboundHref(safe.href, { affiliate });
+  const out = withTripHop(outboundHref(safe.href, { affiliate }), tripHop);
   const nextRel =
     rel ??
     (affiliate ? "noopener noreferrer sponsored" : "noopener noreferrer");

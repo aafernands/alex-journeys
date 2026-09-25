@@ -71,7 +71,8 @@ export default async function ExperiencesPage({ searchParams }: PageProps) {
   const searchUrl = place
     ? viatorExperiencesSearchUrl(place, settings.partnerId, settings.campaign)
     : "";
-  const planHref = planATripHref();
+  const planHref = planATripHref(query.tripId || null);
+  const returnLabel = place || query.tripId ? "Back to itinerary" : "Plan a trip";
 
   return (
     <SitePage
@@ -92,9 +93,18 @@ export default async function ExperiencesPage({ searchParams }: PageProps) {
     >
       {place ? (
         <div className="hub-follow">
-          {context ? (
-            <p className="text-sm font-semibold text-heading">{context}</p>
-          ) : null}
+          <div
+            className="panel plan-inset mb-4 flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+            role="region"
+            aria-label="Trip"
+          >
+            <p className="text-sm font-semibold text-heading">
+              {context ? `Booking for: ${place} · ${context}` : `Booking for: ${place}`}
+            </p>
+            <Link href={planHref} className="btn btn-secondary">
+              {returnLabel}
+            </Link>
+          </div>
           <div className={context ? "mt-4" : ""}>
             <ExperiencesViatorMount markup={markup} ready={settings.widgetReady} />
           </div>

@@ -1051,6 +1051,7 @@ function LaneCta({
     <OutboundLink
       href={href}
       affiliate={!inApp}
+      tripHop={!inApp}
       target={inApp ? undefined : "_blank"}
       rel={inApp ? undefined : "noopener noreferrer sponsored"}
       className={className}
