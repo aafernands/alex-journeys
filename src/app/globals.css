@@ -4508,6 +4508,16 @@ main.plan-flow:has(.plan-trip-summary) > .section-band {
   background: var(--white);
 }
 
+[data-density="compact"] .plan-pack-guide-link {
+  color: var(--heading);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+[data-density="compact"] .plan-pack-guide-link:hover {
+  color: var(--heading);
+}
+
 [data-density="compact"] .plan-pack-summary {
   font-size: var(--type-secondary-size);
   font-weight: 600;

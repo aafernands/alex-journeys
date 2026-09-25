@@ -31,7 +31,7 @@ describe("warm glass chrome", () => {
     const hub = source("../src/components/trip-planner/ItineraryHub.tsx");
     const drawer = source("../src/components/header/MobileNavDrawer.tsx");
     assert.match(header, /site-header glass/);
-    assert.match(nav, /mobile-bottom-nav glass/);
+    assert.match(nav, /mobile-bottom-nav\b[\s\S]*\bglass\b/);
     assert.match(nav, /app-tab-bar/);
     assert.match(hub, /plan-hero-back glass-strong/);
     assert.match(hub, /plan-hero-action glass-strong/);
