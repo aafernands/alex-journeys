@@ -63,6 +63,7 @@ import { TripEntryDialog } from "@/components/trip-planner/TripEntryDialog";
 import { ItemColorField } from "@/components/trip-planner/ItemColorField";
 import { bookedStayHref, ItineraryItemRow } from "@/components/trip-planner/ItineraryItemRow";
 import { WeekView } from "@/components/trip-planner/WeekView";
+import { DownloadTripPdf } from "@/components/trip-planner/DownloadTripPdf";
 
 type Props = {
   headingId: string;
@@ -1087,6 +1088,19 @@ export function ItineraryHub({
     laneKey?: string;
   } | null>(null);
   const [addMenu, setAddMenu] = useState(false);
+  const moreMenuRef = useRef<HTMLDetailsElement>(null);
+  const [moreMenuSession, setMoreMenuSession] = useState(0);
+  useEffect(() => {
+    function onPointer(event: MouseEvent) {
+      const menu = moreMenuRef.current;
+      if (!menu?.open) return;
+      const target = event.target;
+      if (target instanceof Node && menu.contains(target)) return;
+      menu.open = false;
+    }
+    document.addEventListener("mousedown", onPointer);
+    return () => document.removeEventListener("mousedown", onPointer);
+  }, []);
   const nextPartner = partners.find((partner) => {
     if (partner.showWhen === "extra") return false;
     const entries = itemsForLane(items, partner);
@@ -1371,21 +1385,62 @@ export function ItineraryHub({
           >
             <Pencil size={18} aria-hidden="true" />
           </button>
-          <details className="plan-trip-menu" onKeyDown={(event) => {
-            if (event.key === "Escape") {
+          <details
+            className="plan-trip-menu"
+            ref={moreMenuRef}
+            onToggle={(event) => {
+              if (!event.currentTarget.open) setMoreMenuSession((value) => value + 1);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.preventDefault();
+                event.currentTarget.open = false;
+                event.currentTarget.querySelector("summary")?.focus();
+                return;
+              }
+              if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+              const items = [
+                ...event.currentTarget.querySelectorAll<HTMLButtonElement>(
+                  "[role='menuitem']:not(:disabled)",
+                ),
+              ];
+              if (!items.length) return;
               event.preventDefault();
-              event.currentTarget.open = false;
-              event.currentTarget.querySelector("summary")?.focus();
-            }
-          }}>
+              const index = items.indexOf(document.activeElement as HTMLButtonElement);
+              const next =
+                event.key === "ArrowDown"
+                  ? items[(index + 1) % items.length]
+                  : items[(index - 1 + items.length) % items.length];
+              next?.focus();
+            }}
+          >
             <summary className="plan-hero-action glass-strong" aria-label="More options" title="More options"><Ellipsis size={20} aria-hidden="true" /></summary>
-            <button
-              type="button"
-              className={plan.textBtn}
-              onClick={onStartOver}
-            >
-              Start a new trip
-            </button>
+            <div className="plan-trip-menu-panel glass-strong" role="menu" aria-label="More options">
+              <DownloadTripPdf
+                headingId={headingId}
+                session={moreMenuSession}
+                source={{
+                  title: tripTitle?.trim() || state.destination.trim() || "Trip",
+                  destination: state.destination,
+                  dates,
+                  days,
+                  items,
+                  packingNotes,
+                }}
+              />
+              <div className="plan-trip-menu-divider" role="separator" />
+              <button
+                type="button"
+                role="menuitem"
+                className="plan-trip-menu-item"
+                onClick={() => {
+                  if (moreMenuRef.current) moreMenuRef.current.open = false;
+                  onStartOver();
+                }}
+              >
+                Start a new trip
+              </button>
+            </div>
           </details>
         </>
           }
@@ -2342,14 +2397,15 @@ export function ItineraryHub({
               Packing list
             </h3>
             <p className={`${plan.prose} text-muted`}>
-              Keep the essentials for this trip in one simple list.
+              One item per line. A category on its own line, then items, groups
+              the list. Put [x] in front of anything already packed.
             </p>
             <textarea
               className={plan.input}
               aria-label="Packing list"
               rows={5}
               maxLength={4000}
-              placeholder={"Passport\nWalking shoes\nPhone charger"}
+              placeholder={"Documents\n[x] Passport\n\nClothes\n[ ] Rain jacket"}
               value={packingNotes}
               onChange={(event) =>
                 onPackingNotesChange(event.target.value.slice(0, 4000))
