@@ -1705,7 +1705,7 @@ select.plan-input {
 }
 
 .plan-day {
-  padding-bottom: var(--plan-section);
+  padding-bottom: 0.7rem;
 }
 
 .plan-day:last-child {
@@ -1713,108 +1713,370 @@ select.plan-input {
 }
 
 .plan-timeline {
-  gap: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan-day-card > .plan-timeline {
+  margin-top: 0.35rem;
+}
+
+.plan-day-card > .plan-caption {
+  line-height: 1.2;
+}
+
+.plan-day-card > .plan-h4 {
+  margin-top: 0.05rem;
+  line-height: 1.2;
+}
+
+.plan-text-btn.plan-add-plan {
+  min-height: 2.5rem;
+  margin-top: 0.3rem;
+  padding-block: 0.15rem;
 }
 
 .plan-timeline-entry {
-  display: grid;
-  grid-template-columns: 5rem minmax(0, 1fr);
-  gap: 0.65rem;
   border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  border-radius: 0.8rem;
-  background: var(--surface-soft);
-  padding: 0.65rem 0.75rem 0.7rem 0.65rem;
+  border-left: 3px solid var(--plan-item-accent, var(--accent));
+  border-radius: 0.7rem;
+  background: var(--white);
+  min-width: 0;
 }
 
-.plan-timeline-entry[data-status="booked"] {
-  border-left-color: var(--accent-deep);
-  background: color-mix(in srgb, var(--accent) 8%, var(--white));
+.plan-timeline-entry.is-dragging {
+  opacity: 0.5;
 }
 
-.plan-timeline-entry[data-status="skipped"] {
-  border-left-color: var(--muted);
-  background: color-mix(in srgb, var(--surface-soft) 75%, var(--white));
+.plan-timeline-entry:has(.plan-item-menu[open]) {
+  position: relative;
+  z-index: 30;
+}
+
+.plan-timeline-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+  min-height: 3.5rem;
+}
+
+.plan-timeline-row:has(.plan-timeline-drag) {
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+}
+
+.plan-timeline-open {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  column-gap: 0.35rem;
+  align-items: center;
+  min-width: 0;
+  min-height: 3.5rem;
+  padding: 0.3rem 0.15rem 0.3rem 0.65rem;
+  border-radius: 0.65rem 0 0 0.65rem;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+}
+
+.plan-timeline-row:has(.plan-timeline-drag) .plan-timeline-open {
+  padding-left: 0.15rem;
+}
+
+.plan-timeline-open:hover {
+  background: color-mix(in srgb, var(--surface-soft) 80%, transparent);
+}
+
+.plan-timeline-open:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 .plan-timeline-time {
   display: flex;
-  align-items: flex-start;
-  padding-top: 0.12rem;
+  align-items: center;
+  min-width: 0;
 }
 
 .plan-timeline-time-label {
   color: var(--accent-deep);
   font-size: 0.72rem;
-  font-weight: 750;
-  letter-spacing: 0.04em;
-  line-height: 1.25;
-  text-transform: uppercase;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  line-height: 1.15;
+  text-transform: none;
+  white-space: nowrap;
 }
 
 .plan-timeline-content {
   min-width: 0;
 }
 
-.plan-timeline-heading {
+.plan-timeline-title {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  color: var(--heading);
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.2;
 }
 
-.plan-timeline-heading .plan-h4 {
+.plan-timeline-title > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan-timeline-entry[data-status="skipped"] .plan-timeline-title {
+  color: var(--muted);
+}
+
+.plan-timeline-type {
+  flex-shrink: 0;
+  color: var(--plan-item-accent, var(--accent));
+}
+
+.plan-color-field {
+  border: 0;
   margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.plan-color-field > legend {
+  margin-bottom: 0.4rem;
+}
+
+.plan-color-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.plan-color-choice {
+  position: relative;
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.plan-color-face {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgb(31 26 20 / 12%);
+}
+
+.plan-color-default {
+  width: auto;
+  gap: 0.4rem;
+  padding-inline: 0.8rem 0.95rem;
+  border-radius: 999px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--border);
+  color: var(--heading);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.plan-color-dot {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgb(31 26 20 / 16%);
+}
+
+.plan-color-choice input:focus-visible + .plan-color-face {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.plan-color-choice input:checked + .plan-color-face {
+  box-shadow:
+    inset 0 0 0 1px rgb(31 26 20 / 12%),
+    0 0 0 2px var(--white),
+    0 0 0 4px var(--heading);
 }
 
 .plan-timeline-meta {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem 0.75rem;
-  margin-top: 0.2rem;
+  gap: 0.35rem;
+  min-width: 0;
+  margin-top: 0.1rem;
   color: var(--muted);
   font-size: 0.7rem;
-  font-weight: 650;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-transform: none;
 }
 
-.plan-timeline-status {
+.plan-item-pill {
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  padding: 0.05rem 0.4rem;
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+}
+
+.plan-timeline-entry[data-status="booked"] .plan-item-pill {
+  background: color-mix(in srgb, var(--accent) 16%, var(--white));
   color: var(--accent-deep);
 }
 
-.plan-timeline-entry[data-status="skipped"] .plan-timeline-status {
+.plan-timeline-entry[data-status="skipped"] .plan-item-pill {
+  border: 1px solid var(--border);
+  background: transparent;
   color: var(--muted);
 }
 
-.plan-timeline-notes {
-  margin-top: 0.35rem;
+.plan-item-conf {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.plan-timeline-content > .plan-text-btn {
-  display: inline-flex;
-  margin-top: 0.35rem;
+.plan-item-detail {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-@media (max-width: 639px) {
-  .plan-timeline-entry {
-    grid-template-columns: 1fr;
-    gap: 0.3rem;
-    padding: 0.6rem 0.7rem 0.65rem;
-  }
+.plan-timeline-drag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: 0.1rem;
+  border-radius: 0.65rem;
+  color: var(--muted);
+  cursor: grab;
+}
 
-  .plan-timeline-time {
-    padding-top: 0;
-  }
+.plan-timeline-drag:active {
+  cursor: grabbing;
+}
 
-  .plan-timeline-heading {
-    display: block;
-  }
+.plan-item-menu {
+  position: relative;
+}
 
-  .plan-timeline-heading .plan-inline-actions {
-    margin-top: 0.45rem;
-  }
+.plan-item-menu > summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 0.65rem;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+}
+
+.plan-item-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.plan-item-menu[open] > summary,
+.plan-item-menu > summary:hover {
+  background: var(--surface-soft);
+  color: var(--heading);
+}
+
+.plan-item-menu > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.plan-item-menu-panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% - 0.2rem);
+  z-index: 40;
+  min-width: 10.5rem;
+  padding: 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--white);
+  box-shadow: 0 10px 30px rgb(20 17 13 / 8%);
+}
+
+.plan-item-menu-panel button,
+.plan-item-menu-panel a {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--heading);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+}
+
+.plan-item-menu-panel button:hover,
+.plan-item-menu-panel a:hover {
+  background: var(--surface-soft);
+}
+
+.plan-item-menu-panel .plan-item-remove {
+  color: var(--accent-deep);
+}
+
+.plan-timeline-foot {
+  padding: 0 0.55rem 0.4rem;
+}
+
+.plan-week-day-select.plan-input {
+  min-height: 2rem;
+  padding: 0.15rem 1.6rem 0.15rem 0.55rem;
+  font-size: 0.75rem;
+}
+
+.plan-week-desktop .plan-timeline-row:has(.plan-timeline-drag) {
+  grid-template-columns: 28px minmax(0, 1fr) 32px;
+}
+
+.plan-week-desktop .plan-timeline-drag,
+.plan-week-desktop .plan-item-menu > summary {
+  width: 32px;
+  height: 32px;
+}
+
+.plan-week-desktop .plan-timeline-open {
+  grid-template-columns: 2.45rem minmax(0, 1fr);
+  min-height: 3.25rem;
+  padding-left: 0.3rem;
+}
+
+.plan-week-desktop .plan-timeline-title > span:last-child {
+  white-space: normal;
 }
 
 @media (max-width: 639px) {

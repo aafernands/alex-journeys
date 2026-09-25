@@ -35,6 +35,7 @@ import {
   itemsForLane,
   itemTypeForPartner,
   compareScheduledItems,
+  itemScheduleTime,
   planATripLoginHref,
   TRIPS_ACCOUNT_UNAVAILABLE,
   sharePlanHref,
@@ -49,20 +50,18 @@ import {
 } from "@/lib/trip-record";
 import type { StoredPlan } from "@/lib/trip-planner-storage";
 import { flightItemLinkLabel } from "@/lib/flights";
-import {
-  isStayConfirmationPath,
-  parseStaysSearchParams,
-  stayConfirmationPath,
-  stayItemLinkLabel,
-} from "@/lib/stays";
+import { stayItemLinkLabel } from "@/lib/stays";
 import { FLIGHT_LANE_HASH } from "@/lib/flights-itinerary";
 import { STAY_LANE_HASH } from "@/lib/stays-itinerary";
 import { TRIP_SECTION_BAR_QUERY } from "@/lib/trip-focus";
 import { plan } from "@/components/trip-planner/density";
+import { cleanItemColor, itemAccentHex, type TripItemColor } from "@/lib/trip-item-color";
 import { ForwardBookings } from "@/components/trip-planner/ForwardBookings";
 import { PlanFold, PlanHint } from "@/components/trip-planner/PlanFold";
 import { bookingProgress } from "@/lib/trip-workspace";
 import { TripEntryDialog } from "@/components/trip-planner/TripEntryDialog";
+import { ItemColorField } from "@/components/trip-planner/ItemColorField";
+import { bookedStayHref, ItineraryItemRow } from "@/components/trip-planner/ItineraryItemRow";
 import { WeekView } from "@/components/trip-planner/WeekView";
 
 type Props = {
@@ -196,33 +195,7 @@ function ItemUrl({
   item: TripItem;
   compact?: boolean;
 }) {
-  const url =
-    item.type === "hotel" &&
-    item.status === "booked" &&
-    item.confirmation &&
-    item.url.startsWith("/stays") &&
-    !isStayConfirmationPath(item.url)
-      ? stayConfirmationPath(
-          {
-            bookingId: item.confirmation,
-            confirmationCode: item.confirmation,
-            hotelName: item.title,
-            status: "CONFIRMED",
-            checkin: "",
-            checkout: "",
-            dateLabel: "",
-            roomName: "",
-            rateLabel: "",
-            totalLabel: "",
-            sandbox: false,
-          },
-          parseStaysSearchParams(
-            Object.fromEntries(
-              new URL(`https://alexjourneys.com${item.url}`).searchParams,
-            ),
-          ),
-        )
-      : item.url;
+  const url = bookedStayHref(item) || item.url;
   if (!url) return null;
   const onSite = url.startsWith("/") && !url.startsWith("//");
   return (
@@ -242,13 +215,6 @@ function ItemUrl({
       {onSite ? null : <span className="sr-only"> (opens in a new tab)</span>}
     </OutboundLink>
   );
-}
-
-function itemPrimaryTime(item: TripItem): string {
-  if (item.type === "car") return item.pickupTime ?? "";
-  if (item.type === "flight") return item.departureTime ?? item.time ?? "";
-  if (item.type === "hotel") return item.checkinTime ?? item.time ?? "";
-  return item.time ?? "";
 }
 
 function itemWhen(item: TripItem, days: TripDay[]): string {
@@ -347,6 +313,9 @@ function BookingItemForm({
   );
   const [status, setStatus] = useState<TripItemStatus>(
     existing?.status ?? "todo",
+  );
+  const [color, setColor] = useState<TripItemColor | "">(
+    existing?.color ?? "",
   );
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -447,6 +416,7 @@ function BookingItemForm({
           setError("Return date can’t be before departure.");
           return;
         }
+        const chosenColor = cleanItemColor(color);
         if (existing) {
           const next: TripItem = {
             ...existing,
@@ -456,6 +426,8 @@ function BookingItemForm({
             status,
             updatedAt: new Date().toISOString(),
           };
+          if (chosenColor) next.color = chosenColor;
+          else delete next.color;
           if (cleanedConfirmation) next.confirmation = cleanedConfirmation;
           else delete next.confirmation;
           if (parsedDay) next.dayIndex = parsedDay;
@@ -525,6 +497,7 @@ function BookingItemForm({
             checkinTime: type === "hotel" ? cleanedCheckinTime : undefined,
             checkoutTime: type === "hotel" ? cleanedCheckoutTime : undefined,
             status,
+            color: chosenColor,
           }),
         );
       }}
@@ -582,6 +555,7 @@ function BookingItemForm({
           onChange={(event) => setTitle(event.target.value)}
         />
       </label>
+      <ItemColorField type={type} title={title} value={color} onChange={setColor} />
       <label className="plan-field">
         <span className={plan.label}>Link</span>
         <input
@@ -852,6 +826,7 @@ function ItemCard({
       className={`${plan.inset} plan-stack-tight ${
         highlighted ? "ring-2 ring-accent" : ""
       }`}
+      style={{ borderLeft: `3px solid ${itemAccentHex(item)}` }}
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0 plan-stack-tight">
@@ -919,51 +894,7 @@ function TimelineEntry({
     );
   }
   return (
-    <article
-      className="plan-timeline-entry"
-      data-status={item.status}
-    >
-      <div className="plan-timeline-time">
-        <span className="plan-timeline-time-label">
-          {itemPrimaryTime(item) || "Any time"}
-        </span>
-      </div>
-      <div className="plan-timeline-content">
-        <div className="plan-timeline-heading">
-          <h5 className={plan.h4}>{item.title}</h5>
-          <div className="plan-inline-actions shrink-0">
-            <button
-              type="button"
-              className={`${plan.textBtn} text-accent hover:underline`}
-              onClick={onEdit}
-            >
-              Edit details
-            </button>
-            <button
-              type="button"
-              className={`${plan.textBtn} text-muted transition hover:text-accent`}
-              onClick={onRemove}
-            >
-              Remove
-            </button>
-          </div>
-        </div>
-        <div className="plan-timeline-meta">
-          <span className="plan-timeline-status">
-            {TRIP_STATUS_LABEL[item.status]}
-          </span>
-          {item.confirmation ? (
-            <span>Confirmation {item.confirmation}</span>
-          ) : null}
-        </div>
-        {item.notes ? (
-          <p className={`${plan.body} plan-timeline-notes text-text`}>
-            {item.notes}
-          </p>
-        ) : null}
-        <ItemUrl item={item} />
-      </div>
-    </article>
+    <ItineraryItemRow item={item} onEdit={onEdit} onRemove={onRemove} />
   );
 }
 
@@ -1216,14 +1147,15 @@ export function ItineraryHub({
   );
   const nextSort =
     sorted.reduce((max, item) => Math.max(max, item.sortOrder), -1) + 1;
-  const unscheduled = sorted.filter(
-    (item) => scheduledDayIndex(item, days) == null,
-  );
+  const unscheduled = sorted
+    .filter((item) => scheduledDayIndex(item, days) == null)
+    .sort(compareScheduledItems);
 
   function renderTimeline(list: TripItem[]) {
+    const ordered = [...list].sort(compareScheduledItems);
     return (
-      <ol className="plan-stack plan-follow plan-timeline">
-        {list.map((item) => (
+      <ol className="plan-timeline">
+        {ordered.map((item) => (
           <li key={item.id}>
             <TimelineEntry
               item={item}
@@ -1722,9 +1654,10 @@ export function ItineraryHub({
                       (item) =>
                           scheduledDayIndex(item, days) === day.index,
                     )
+                    .sort(compareScheduledItems)
                     .map((item) => (
                       <p key={item.id} className={plan.body}>
-                        {itemPrimaryTime(item) ? `${itemPrimaryTime(item)} · ` : ""}
+                        {itemScheduleTime(item) ? `${itemScheduleTime(item)} · ` : ""}
                         {item.title}
                       </p>
                     ))}
@@ -1738,7 +1671,7 @@ export function ItineraryHub({
                   ) : null}
                   <button
                     type="button"
-                    className={plan.textBtn}
+                    className={`${plan.textBtn} plan-add-plan`}
                     onClick={() =>
                       setQuickEntry({ type: "activity", day: day.index })
                     }
@@ -2295,7 +2228,7 @@ export function ItineraryHub({
                                 )}
                                 <button
                                   type="button"
-                                  className={`${plan.textBtn} plan-follow`}
+                                  className={`${plan.textBtn} plan-add-plan`}
                                   onClick={() =>
                                     setQuickEntry({
                                       type: "activity",
@@ -2364,6 +2297,7 @@ export function ItineraryHub({
                   items={sorted}
                   onAssignDay={assignDay}
                   onEdit={setEditingId}
+                  onRemove={removeItem}
                   onAddDay={(day) => setQuickEntry({ type: "activity", day })}
                 />
               </div>

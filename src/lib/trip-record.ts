@@ -2,6 +2,7 @@
  * Saved-trip shape shared by the itinerary hub, local drafts, and APIs.
  * Safe to import from client components (no Firestore, no filesystem).
  */
+import { cleanItemColor, type TripItemColor } from "@/lib/trip-item-color";
 import {
   dateSummary,
   formatFlexible,
@@ -78,6 +79,8 @@ export type TripItem = {
   checkoutDate?: string;
   checkinTime?: string;
   checkoutTime?: string;
+  /** Optional accent chosen by the reader. Missing uses the color for this kind of plan. */
+  color?: TripItemColor;
 };
 
 export type TripDay = {
@@ -462,10 +465,28 @@ export function formatTripWeekRange(startDate: string): string {
   return `${startLabel} – ${endLabel}`;
 }
 
-/** Timed items first, then earlier sort order. Untimed items stay in entry order. */
+/**
+ * Clock time shown for an item, `HH:MM`.
+ * Cars use pickup, flights use departure, stays use check-in.
+ * Untimed items return an empty string.
+ */
+export function itemScheduleTime(item: {
+  type?: TripItemType;
+  time?: string;
+  pickupTime?: string;
+  departureTime?: string;
+  checkinTime?: string;
+}): string {
+  if (item.type === "car") return item.pickupTime ?? "";
+  if (item.type === "flight") return item.departureTime ?? item.time ?? "";
+  if (item.type === "hotel") return item.checkinTime ?? item.time ?? "";
+  return item.time ?? "";
+}
+
+/** Timed items first (by the time shown), then earlier sort order. Untimed items follow. */
 export function compareScheduledItems(a: TripItem, b: TripItem): number {
-  const ta = a.time ?? "";
-  const tb = b.time ?? "";
+  const ta = itemScheduleTime(a);
+  const tb = itemScheduleTime(b);
   if (ta && tb && ta !== tb) return ta.localeCompare(tb);
   if (ta && !tb) return -1;
   if (!ta && tb) return 1;
@@ -585,6 +606,7 @@ export function createTripItem(input: {
   checkoutTime?: string;
   status?: TripItemStatus;
   laneKey?: string;
+  color?: TripItemColor | "";
   sortOrder: number;
 }): TripItem {
   const title = input.title?.trim() || defaultItemTitle(input.type);
@@ -606,6 +628,7 @@ export function createTripItem(input: {
   const checkinTime = cleanTime(input.checkinTime ?? "");
   const checkoutTime = cleanTime(input.checkoutTime ?? "");
   const dayIndex = cleanDayIndex(input.dayIndex);
+  const color = cleanItemColor(input.color);
   return {
     id: createTripItemId(),
     type: input.type,
@@ -633,6 +656,7 @@ export function createTripItem(input: {
     ...(checkoutDate ? { checkoutDate } : {}),
     ...(checkinTime ? { checkinTime } : {}),
     ...(checkoutTime ? { checkoutTime } : {}),
+    ...(color ? { color } : {}),
   };
 }
 
@@ -721,6 +745,7 @@ export function normalizeTripItem(raw: unknown, index: number): TripItem | null 
   const laneKey = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(laneRaw)
     ? laneRaw.slice(0, 40)
     : "";
+  const color = cleanItemColor(record.color);
 
   return {
     id,
@@ -749,6 +774,7 @@ export function normalizeTripItem(raw: unknown, index: number): TripItem | null 
     ...(checkoutDate ? { checkoutDate } : {}),
     ...(checkinTime ? { checkinTime } : {}),
     ...(checkoutTime ? { checkoutTime } : {}),
+    ...(color ? { color } : {}),
   };
 }
 
