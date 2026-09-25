@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { PinterestPinReveal } from "@/components/pinterest/PinterestPinReveal";
 import { Providers } from "@/components/Providers";
 import { Footer } from "@/components/Footer";
+import { HomeScreenPrompt } from "@/components/HomeScreenPrompt";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { JsonLd } from "@/components/JsonLd";
 import { isReaderAuthConfigured } from "@/auth";
@@ -132,6 +133,7 @@ export default function RootLayout({
             googleConfigured={googleConfigured}
           />
           <PinterestPinReveal />
+          <HomeScreenPrompt />
           <div className="flex min-h-0 flex-1 flex-col mobile-bottom-nav-pad">
             <div className="flex-1">{children}</div>
             <Footer />
