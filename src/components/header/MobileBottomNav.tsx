@@ -65,8 +65,7 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-[150] border-t border-border bg-white/95 shadow-[0_-8px_24px_rgba(20,17,13,0.08)] backdrop-blur-md xl:hidden dark:shadow-[0_-10px_28px_rgba(0,0,0,0.45)]"
-      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      className="mobile-bottom-nav glass fixed z-[150] rounded-[1.6rem] xl:hidden"
       aria-label="Primary mobile"
     >
       <ul className="grid h-16 grid-cols-4 items-stretch">
@@ -77,11 +76,11 @@ export function MobileBottomNav() {
               <Link
                 href={tab.href}
                 className={`flex flex-1 flex-col items-center justify-center gap-0.5 px-1 text-xs font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-accent ${
-                  active ? "text-accent" : "text-muted hover:text-heading"
+                  active ? "text-heading" : "text-muted hover:text-heading"
                 }`}
                 aria-current={active ? "page" : undefined}
               >
-                <span className={`flex h-7 w-14 items-center justify-center rounded-full ${active ? "bg-accent/15" : ""}`}>
+                <span className={`flex h-8 w-14 items-center justify-center rounded-full ${active ? "bg-accent text-on-solid" : ""}`}>
                   <NavIcon name={tab.icon} size={22} />
                 </span>
                 <span>{tab.label}</span>

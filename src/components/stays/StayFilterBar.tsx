@@ -304,7 +304,7 @@ export function StayFilterBar({
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className={`absolute inset-x-0 bottom-0 max-h-[min(85dvh,40rem)] overflow-y-auto rounded-t-3xl border border-border bg-white p-4 shadow-2xl max-md:!top-auto max-md:!right-0 max-md:!left-0 md:right-auto md:bottom-auto md:rounded-2xl ${
+            className={`glass-strong absolute inset-x-0 bottom-0 max-h-[min(85dvh,40rem)] overflow-y-auto rounded-t-3xl p-4 max-md:!top-auto max-md:!right-0 max-md:!left-0 md:right-auto md:bottom-auto md:rounded-2xl ${
               open === "all" ? "md:w-[28rem]" : "md:w-[22rem]"
             }`}
             style={{

@@ -194,7 +194,7 @@ export function ItineraryItemRow({
           <summary aria-label={`Actions for ${item.title}`}>
             <Ellipsis size={18} aria-hidden="true" />
           </summary>
-          <div className="plan-item-menu-panel">
+          <div className="plan-item-menu-panel glass-strong">
             <button
               type="button"
               onClick={(event) => {

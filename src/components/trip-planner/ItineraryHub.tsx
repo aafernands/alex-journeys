@@ -1327,7 +1327,7 @@ export function ItineraryHub({
           headingId={headingId}
           meta={[dates, travelers].filter(Boolean).join(" · ")}
           back={
-            <Link href="/account#trips" className="plan-hero-back">
+            <Link href="/account#trips" className="plan-hero-back glass-strong">
               ← My trips
             </Link>
           }
@@ -1335,7 +1335,7 @@ export function ItineraryHub({
         <>
           <button
             type="button"
-            className="plan-hero-action"
+            className="plan-hero-action glass-strong"
             aria-label="Share a copy"
             title="Share a copy"
             onClick={async () => {
@@ -1364,7 +1364,7 @@ export function ItineraryHub({
           </button>
           <button
             type="button"
-            className="plan-hero-action"
+            className="plan-hero-action glass-strong"
             aria-label="Edit details"
             title="Edit details"
             onClick={onEditTrip}
@@ -1378,7 +1378,7 @@ export function ItineraryHub({
               event.currentTarget.querySelector("summary")?.focus();
             }
           }}>
-            <summary className="plan-hero-action" aria-label="More options" title="More options"><Ellipsis size={20} aria-hidden="true" /></summary>
+            <summary className="plan-hero-action glass-strong" aria-label="More options" title="More options"><Ellipsis size={20} aria-hidden="true" /></summary>
             <button
               type="button"
               className={plan.textBtn}
@@ -1561,7 +1561,7 @@ export function ItineraryHub({
             + Add to trip
           </button>
           {addMenu ? (
-            <div id={`${headingId}-add-options`} className="plan-add-options">
+            <div id={`${headingId}-add-options`} className="plan-add-options glass-strong">
               {(
                 [
                   ["activity", "Activity"],
