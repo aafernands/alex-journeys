@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Share2, Pencil, Ellipsis } from "lucide-react";
+import { nativeShare } from "@/lib/native-share";
 import { TripDestinationHero } from "./TripDestinationHero";
 import {
   journalNotesForDestination,
@@ -579,50 +580,51 @@ function TimelineEntry({
     );
   }
   return (
-    <div className="plan-stack-tight">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <div className="min-w-0 plan-stack-tight">
-          <div className="flex flex-wrap items-center gap-2">
-            {item.time ? (
-              <span
-                className={`${plan.badge} border border-accent/25 bg-accent/10 text-accent`}
-              >
-                {item.time}
-              </span>
-            ) : null}
-            <p className={plan.h4}>{item.title}</p>
-          </div>
-          <p className={plan.label}>
-            {[
-              TRIP_STATUS_LABEL[item.status],
-              item.confirmation ? `Conf. ${item.confirmation}` : null,
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-          {item.notes ? (
-            <p className={`${plan.body} text-text`}>{item.notes}</p>
-          ) : null}
-          <ItemUrl url={item.url} />
-        </div>
-        <div className="plan-inline-actions shrink-0">
-          <button
-            type="button"
-            className={`${plan.textBtn} text-accent hover:underline`}
-            onClick={onEdit}
-          >
-            Edit details
-          </button>
-          <button
-            type="button"
-            className={`${plan.textBtn} text-muted transition hover:text-accent`}
-            onClick={onRemove}
-          >
-            Remove
-          </button>
-        </div>
+    <article
+      className="plan-timeline-entry"
+      data-status={item.status}
+    >
+      <div className="plan-timeline-time">
+        <span className="plan-timeline-time-label">
+          {item.time || "Any time"}
+        </span>
       </div>
-    </div>
+      <div className="plan-timeline-content">
+        <div className="plan-timeline-heading">
+          <h5 className={plan.h4}>{item.title}</h5>
+          <div className="plan-inline-actions shrink-0">
+            <button
+              type="button"
+              className={`${plan.textBtn} text-accent hover:underline`}
+              onClick={onEdit}
+            >
+              Edit details
+            </button>
+            <button
+              type="button"
+              className={`${plan.textBtn} text-muted transition hover:text-accent`}
+              onClick={onRemove}
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+        <div className="plan-timeline-meta">
+          <span className="plan-timeline-status">
+            {TRIP_STATUS_LABEL[item.status]}
+          </span>
+          {item.confirmation ? (
+            <span>Confirmation {item.confirmation}</span>
+          ) : null}
+        </div>
+        {item.notes ? (
+          <p className={`${plan.body} plan-timeline-notes text-text`}>
+            {item.notes}
+          </p>
+        ) : null}
+        <ItemUrl url={item.url} />
+      </div>
+    </article>
   );
 }
 
@@ -877,7 +879,7 @@ export function ItineraryHub({
 
   function renderTimeline(list: TripItem[]) {
     return (
-      <ol className="plan-stack plan-follow">
+      <ol className="plan-stack plan-follow plan-timeline">
         {list.map((item) => (
           <li key={item.id}>
             <TimelineEntry
@@ -1064,6 +1066,8 @@ export function ItineraryHub({
                 items,
                 packingNotes,
               })}`;
+              const outcome = await nativeShare({ title: tripTitle || `Trip to ${state.destination}`, url });
+              if (outcome !== "unavailable") return;
               try {
                 await navigator.clipboard.writeText(url);
               } catch {
@@ -2016,6 +2020,7 @@ export function ItineraryHub({
                   items={sorted}
                   onAssignDay={assignDay}
                   onEdit={setEditingId}
+                  onAddDay={(day) => setQuickEntry({ type: "activity", day })}
                 />
               </div>
             )}

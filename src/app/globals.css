@@ -1664,6 +1664,111 @@ select.plan-input {
   padding-bottom: 0;
 }
 
+.plan-timeline {
+  gap: 0.7rem;
+}
+
+.plan-timeline-entry {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: 0.85rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0.8rem;
+  background: var(--surface-soft);
+  padding: 0.85rem 0.9rem 0.9rem 0.75rem;
+}
+
+.plan-timeline-entry[data-status="booked"] {
+  border-left-color: var(--accent-deep);
+  background: color-mix(in srgb, var(--accent) 8%, var(--white));
+}
+
+.plan-timeline-entry[data-status="skipped"] {
+  border-left-color: var(--muted);
+  background: color-mix(in srgb, var(--surface-soft) 75%, var(--white));
+}
+
+.plan-timeline-time {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 0.12rem;
+}
+
+.plan-timeline-time-label {
+  color: var(--accent-deep);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.plan-timeline-content {
+  min-width: 0;
+}
+
+.plan-timeline-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.plan-timeline-heading .plan-h4 {
+  margin: 0;
+}
+
+.plan-timeline-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.plan-timeline-status {
+  color: var(--accent-deep);
+}
+
+.plan-timeline-entry[data-status="skipped"] .plan-timeline-status {
+  color: var(--muted);
+}
+
+.plan-timeline-notes {
+  margin-top: 0.55rem;
+}
+
+.plan-timeline-content > .plan-text-btn {
+  display: inline-flex;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 639px) {
+  .plan-timeline-entry {
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+    padding: 0.75rem 0.8rem 0.8rem;
+  }
+
+  .plan-timeline-time {
+    padding-top: 0;
+  }
+
+  .plan-timeline-heading {
+    display: block;
+  }
+
+  .plan-timeline-heading .plan-inline-actions {
+    margin-top: 0.65rem;
+  }
+}
+
 @media (max-width: 639px) {
   /* One primary step action spans the card. Pairs stay side by side. */
   .plan-actions-end > .btn,
@@ -2881,6 +2986,27 @@ body.mobile-bottom-nav-visible .plan-sticky {
 .plan-checklist > button span:last-child { text-align: right; font-size: .75rem; }
 .plan-overview-side .plan-grid-2 { grid-template-columns: 1fr; }
 .plan-workspace .plan-hub-days, .plan-workspace .plan-hub-lanes, .plan-workspace .plan-packing-panel { padding: 1.25rem; border: 1px solid var(--border); border-radius: 1.15rem; background: var(--white); margin: 0; }
+.plan-week-navigation { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem; border-radius: 1rem; background: var(--surface-soft); }
+.plan-week-nav { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--border); border-radius: .75rem; background: var(--white); color: var(--heading); }
+.plan-week-nav:disabled { opacity: .35; cursor: not-allowed; }
+.plan-week-calendar { min-width: 70rem; }
+.plan-week-view .plan-week-mobile { display: none; }
+.plan-week-desktop { display: block; }
+@media (max-width: 639px) {
+  .plan-week-view .plan-week-mobile { display: flex; }
+  .plan-week-desktop { display: none; }
+}
+.plan-week-day { padding: .75rem; min-height: 20rem; border-radius: .85rem; }
+.plan-week-off { border-radius: .85rem; background: var(--surface-soft); opacity: .5; }
+.plan-week-card { padding: .65rem; border-radius: .7rem; overflow-wrap: anywhere; box-shadow: 0 2px 8px rgb(0 0 0 / .04); }
+.plan-week-card .plan-control { min-width: 0; width: 100%; }
+.plan-week-add { display: flex; align-items: center; justify-content: center; gap: .3rem; width: 100%; min-height: 44px; border: 1px dashed var(--border-strong); border-radius: .65rem; color: var(--accent); font-size: .8rem; font-weight: 600; }
+.plan-week-add:hover { background: var(--surface-soft); }
+.plan-week-empty { padding-block: 1rem; }
+.plan-week-day-picker { display: flex; gap: .5rem; overflow-x: auto; padding-bottom: .4rem; }
+.plan-week-day-picker > button { display: flex; flex-direction: column; gap: .2rem; flex-shrink: 0; min-height: 60px; padding: .6rem .8rem; border: 1px solid var(--border); border-radius: .75rem; background: var(--white); color: var(--heading); font-size: .8rem; }
+.plan-week-day-picker > button[aria-pressed="true"] { background: var(--ink); color: var(--on-solid, white); border-color: var(--ink); }
+.plan-week-day-picker > button > span:first-child { font-weight: 700; }
 .plan-workspace .plan-hub-days > .plan-fold > h3 { display: none; }
 .plan-workspace .plan-hub-days .plan-fold-panel { display: block; }
 .plan-bookings-heading { margin-bottom: 1.25rem; }
