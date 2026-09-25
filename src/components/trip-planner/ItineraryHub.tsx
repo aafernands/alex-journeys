@@ -1320,15 +1320,17 @@ export function ItineraryHub({
   return (
     <div className="plan-hub plan-workspace" data-view={view}>
       <div className="plan-hub-lead plan-stack-tight">
-        <Link href="/account#trips" className={plan.textBtn}>
-          ← My trips
-        </Link>
         <TripDestinationHero
           fallbackImage={config.fallbackImage}
           destination={state.destination}
           title={tripTitle || state.destination.trim() || config.steps.next.heading}
           headingId={headingId}
           meta={[dates, travelers].filter(Boolean).join(" · ")}
+          back={
+            <Link href="/account#trips" className="plan-hero-back">
+              ← My trips
+            </Link>
+          }
           actions={
         <>
           <button
@@ -2064,10 +2066,7 @@ export function ItineraryHub({
         >
           <section aria-labelledby={`${headingId}-list`}>
             <div className="plan-toolbar">
-              <h3
-                id={`${headingId}-list`}
-                className={`${plan.h3} max-sm:hidden`}
-              >
+              <h3 id={`${headingId}-list`} className={plan.h3}>
                 Day-by-day schedule
               </h3>
               <div
