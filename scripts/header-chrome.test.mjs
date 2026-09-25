@@ -10,7 +10,7 @@ describe("header chrome", () => {
   it("keeps Sign in out of the sticky mobile bar and grows the logo", () => {
     const header = source("../src/components/Header.tsx");
     assert.doesNotMatch(header, /variant="header-mobile"/);
-    assert.match(header, /h-\[2\.8125rem\]/);
+    assert.match(header, /h-8 w-auto/);
     assert.match(header, /sm:h-\[3\.75rem\]/);
     assert.match(header, /lg:h-16/);
     assert.match(header, /xl:h-24/);

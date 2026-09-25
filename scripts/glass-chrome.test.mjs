@@ -32,7 +32,7 @@ describe("warm glass chrome", () => {
     const drawer = source("../src/components/header/MobileNavDrawer.tsx");
     assert.match(header, /site-header glass/);
     assert.match(nav, /mobile-bottom-nav glass/);
-    assert.match(nav, /rounded-\[1\.6rem\]/);
+    assert.match(nav, /app-tab-bar/);
     assert.match(hub, /plan-hero-back glass-strong/);
     assert.match(hub, /plan-hero-action glass-strong/);
     assert.match(drawer, /mobile-nav-panel glass-strong/);

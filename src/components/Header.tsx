@@ -175,7 +175,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
         </div>
         )}
 
-        <div className="section-shell relative grid h-[4.75rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 sm:h-[5.5rem] xl:flex xl:h-24 xl:justify-start xl:gap-4 2xl:gap-6">
+        <div className="section-shell relative grid h-12 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 sm:h-[5.5rem] xl:flex xl:h-24 xl:justify-start xl:gap-4 2xl:gap-6">
           {/* Mobile: search (left) */}
           <button
             type="button"
@@ -220,7 +220,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
           {/* Logo: centered in the middle column on mobile, left on desktop */}
           <div className="z-10 flex min-w-0 items-center justify-center xl:shrink-0 xl:justify-start">
             <BrandLogo
-              className="h-[2.8125rem] w-auto max-w-full object-contain sm:h-[3.75rem] lg:h-16 xl:h-10 xl:max-w-none"
+              className="h-8 w-auto max-w-full object-contain sm:h-[3.75rem] lg:h-16 xl:h-10 xl:max-w-none"
               width={400}
               height={110}
               priority
