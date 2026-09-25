@@ -1,6 +1,6 @@
 # Trip workspace preview
 
-Branch: `feat/trip-workspace-preview`. No changes have been merged or deployed to main.
+Developed on `feat/trip-workspace-preview`; approved for integration into main.
 
 Open the local preview at http://localhost:3107/guides/plan-a-trip.
 To restart it, run `npm run dev -- --port 3107` on this branch.
@@ -21,9 +21,10 @@ The UI retains the existing booking APIs, email receiving setup, guest drafts, a
 ## Validation
 
 - New workspace unit tests: 3 passed.
-- Full suite: 205 passed, 1 existing failure in `scripts/header-chrome.test.mjs` (expects `md:h-20` in the unchanged Header).
+- Full suite after incorporating the latest main: 206 passed, 0 failures.
 - Full lint: 34 existing errors and 17 warnings. Modified/new planner code has no lint findings.
 - Production build: passed.
 - TypeScript check and `git diff --check` pass.
 - Local browser checks passed for category-free creation, exact dates, day-specific activity entry, editing, reload persistence, type-change preservation, unmatched reservations, guest import entry, keyboard focus return, and 390px overflow.
 - Account-backed saves, actual paid bookings, and inbound email delivery were not exercised; their integrations were preserved.
+- Flights and Stay both expose Import confirmation under Keep every booking together. Browser checks confirmed both open the existing guest import panel with a sign-in callback to the planner. Stay search retains destination, dates, and travelers. Existing flight, stay, and authentication regression tests pass.

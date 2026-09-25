@@ -1753,23 +1753,20 @@ export function ItineraryHub({
                     >
                       Add to itinerary
                     </button>
-                    {partner.key !== flightLaneKey &&
-                    partner.key !== stayLaneKey ? (
-                      <button
-                        type="button"
-                        className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
-                        onClick={() => {
-                          setLanePin(OUTSIDE_TAB);
-                          window.requestAnimationFrame(() => {
-                            document
-                              .querySelector(".plan-hub-lanes")
-                              ?.scrollIntoView({ block: "start" });
-                          });
-                        }}
-                      >
-                        Import confirmation
-                      </button>
-                    ) : null}
+                    <button
+                      type="button"
+                      className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
+                      onClick={() => {
+                        setLanePin(OUTSIDE_TAB);
+                        window.requestAnimationFrame(() => {
+                          document
+                            .querySelector(".plan-hub-lanes")
+                            ?.scrollIntoView({ block: "start" });
+                        });
+                      }}
+                    >
+                      Import confirmation
+                    </button>
                   </div>
                 )}
                 {adding ? (
