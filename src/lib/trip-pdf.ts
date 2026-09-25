@@ -273,11 +273,17 @@ function cleanedNotes(notes: string, hide: string[]): string {
     .map((line) => {
       let next = line;
       for (const snippet of snippets) next = next.split(snippet).join(" ");
-      return next.replace(/\bcard\b/gi, " ");
+      next = next.replace(/\bcard\b/gi, " ");
+      next = next.replace(
+        /(?:\s*[·,:-]\s*)?\b(?:total|paid|price|cost|amount)\b\s*[:.]?\s*$/i,
+        "",
+      );
+      return next;
     })
     .filter((line) => {
       const trimmed = line.trim();
       if (!trimmed || ADDRESS_LINE.test(trimmed)) return false;
+      if (/^(?:address|hotel address|location)\s*:?\s*$/i.test(trimmed)) return false;
       const words = trimmed
         .replace(/\b(?:total|paid|price|cost|amount)\b/gi, "")
         .replace(/[^A-Za-zÀ-ÿ0-9]+/g, "");

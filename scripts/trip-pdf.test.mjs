@@ -50,7 +50,7 @@ function sampleSource() {
       checkoutTime: "11:00",
       status: "booked",
       sortOrder: 1,
-      notes: "Address: Pósthússtræti 11, Reykjavík\nTotal $1,240",
+      notes: "Address: Pósthússtræti 11, Reykjavík\nQuiet room. Total $1,240",
     }),
     createTripItem({
       type: "activity",
@@ -159,6 +159,9 @@ test("payment details are removed and prices and addresses stay", () => {
   assert.equal(stay.rows.find((row) => row.label === "Confirmation")?.value, "HTL9921");
   assert.match(stay.rows.find((row) => row.label === "Address")?.value ?? "", /Pósthússtræti/);
   assert.doesNotMatch(stay.notes, /Pósthússtræti/);
+  assert.doesNotMatch(stay.notes, /address/i);
+  assert.match(stay.notes, /Quiet room/);
+  assert.doesNotMatch(stay.notes, /Total/);
   assert.ok(flight && flight.type === "booking");
   assert.match(flight.rows.find((row) => row.label === "Departs")?.value ?? "", /08:40/);
   assert.equal(flight.rows.find((row) => row.label === "Price")?.value, "$640");
