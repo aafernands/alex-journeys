@@ -3,11 +3,11 @@
 import { useState, type DragEvent, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Plus, GripVertical } from "lucide-react";
 import { plan } from "@/components/trip-planner/density";
+import { ItineraryItemRow } from "@/components/trip-planner/ItineraryItemRow";
 import {
   compareScheduledItems,
   formatTripWeekRange,
   scheduledDayIndex,
-  TRIP_STATUS_LABEL,
   TRIP_WEEKDAYS,
   tripWeeks,
   type TripDay,
@@ -20,6 +20,7 @@ type Props = {
   items: TripItem[];
   onAssignDay: (id: string, dayIndex: number | null) => void;
   onEdit: (id: string) => void;
+  onRemove: (id: string) => void;
   onAddDay: (dayIndex: number) => void;
 };
 
@@ -29,13 +30,6 @@ function itemsForDay(items: TripItem[], dayIndex: number, days: TripDay[]): Trip
     .sort(compareScheduledItems);
 }
 
-function itemPrimaryTime(item: TripItem): string {
-  if (item.type === "car") return item.pickupTime ?? "";
-  if (item.type === "flight") return item.departureTime ?? item.time ?? "";
-  if (item.type === "hotel") return item.checkinTime ?? item.time ?? "";
-  return item.time ?? "";
-}
-
 function WeekChip({
   item,
   days,
@@ -43,6 +37,7 @@ function WeekChip({
   idPrefix,
   onAssignDay,
   onEdit,
+  onRemove,
   onDragStart,
   onDragEnd,
 }: {
@@ -52,33 +47,24 @@ function WeekChip({
   idPrefix: string;
   onAssignDay: (id: string, dayIndex: number | null) => void;
   onEdit: (id: string) => void;
+  onRemove: (id: string) => void;
   onDragStart: (id: string) => void;
   onDragEnd: () => void;
 }) {
   const dayIndex = scheduledDayIndex(item, days);
   return (
-    <article
-      className={`${plan.chipCard} plan-week-card plan-stack-tight ${
-        item.status === "booked"
-          ? "border-accent/30 bg-accent/10"
-          : item.status === "skipped"
-            ? "border-border bg-surface-soft"
-            : "border-border bg-white"
-      } ${dragging ? "opacity-50" : ""}`}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <p className={`${plan.body} min-w-0 font-semibold text-heading`}>
-          {itemPrimaryTime(item) ? (
-            <span className="mr-1 text-accent">{itemPrimaryTime(item)}</span>
-          ) : null}
-          {item.title}
-        </p>
+    <ItineraryItemRow
+      item={item}
+      dragging={dragging}
+      onEdit={() => onEdit(item.id)}
+      onRemove={() => onRemove(item.id)}
+      drag={
         <button
           type="button"
           draggable
           aria-label={`Drag ${item.title} to a day`}
           title="Drag to a day"
-          className={`${plan.chip} shrink-0 cursor-grab border-transparent text-muted active:cursor-grabbing`}
+          className="plan-timeline-drag"
           onDragStart={(event) => {
             event.dataTransfer.setData("text/plain", item.id);
             event.dataTransfer.effectAllowed = "move";
@@ -90,37 +76,31 @@ function WeekChip({
         >
           <GripVertical size={16} aria-hidden="true" />
         </button>
-      </div>
-      <p className={plan.label}>{TRIP_STATUS_LABEL[item.status]}</p>
-      <select
-        id={`${idPrefix}-day-${item.id}`}
-        className={plan.input}
-        aria-label={`Day for ${item.title}`}
-        value={dayIndex == null ? "" : String(dayIndex)}
-        onChange={(event) => {
-          const next = event.target.value;
-          onAssignDay(item.id, next ? Number(next) : null);
-        }}
-      >
-        <option value="">Unscheduled</option>
-        {days.map((day) => (
-          <option key={day.index} value={day.index}>
-            {day.label}
-          </option>
-        ))}
-      </select>
-      <button
-        type="button"
-        className={`${plan.textBtn} self-start text-accent hover:underline`}
-        onClick={() => onEdit(item.id)}
-      >
-        Edit
-      </button>
-    </article>
+      }
+      footer={
+        <select
+          id={`${idPrefix}-day-${item.id}`}
+          className={`${plan.input} plan-week-day-select`}
+          aria-label={`Day for ${item.title}`}
+          value={dayIndex == null ? "" : String(dayIndex)}
+          onChange={(event) => {
+            const next = event.target.value;
+            onAssignDay(item.id, next ? Number(next) : null);
+          }}
+        >
+          <option value="">Unscheduled</option>
+          {days.map((day) => (
+            <option key={day.index} value={day.index}>
+              {day.label}
+            </option>
+          ))}
+        </select>
+      }
+    />
   );
 }
 
-export function WeekView({ headingId, days, items, onAssignDay, onEdit, onAddDay }: Props) {
+export function WeekView({ headingId, days, items, onAssignDay, onEdit, onRemove, onAddDay }: Props) {
   const weeks = tripWeeks(days);
   const [weekIndex, setWeekIndex] = useState(0);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
@@ -155,7 +135,7 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit, onAddDay
     setOverKey(null);
   }
 
-  function renderItems(dayItems: TripItem[], day: TripDay, idPrefix: string): ReactNode {
+  function renderItems(dayItems: TripItem[], idPrefix: string): ReactNode {
     if (dayItems.length === 0) {
       return (
         <p className={`${plan.caption} text-muted plan-week-empty`}>
@@ -172,6 +152,7 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit, onAddDay
         idPrefix={idPrefix}
         onAssignDay={onAssignDay}
         onEdit={onEdit}
+        onRemove={onRemove}
         onDragStart={setDraggingId}
         onDragEnd={endDrag}
       />
@@ -225,7 +206,7 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit, onAddDay
                   <p className={`${plan.caption} text-muted`}>{day.detail}</p>
                 ) : null}
               </div>
-              <div className="plan-stack-tight">{renderItems(dayItems, day, "week-stack")}</div>
+              <div className="plan-timeline">{renderItems(dayItems, "week-stack")}</div>
               <button type="button" className="plan-week-add" onClick={() => onAddDay(day.index)}><Plus size={16} aria-hidden="true" /> Add plan</button>
             </div>
           );
@@ -279,7 +260,7 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit, onAddDay
                           <p className={`${plan.caption} text-muted`}>{day.detail}</p>
                         ) : null}
                       </div>
-                      <div className="plan-stack-tight flex-1">{renderItems(dayItems, day, "week-grid")}</div>
+                      <div className="plan-timeline flex-1">{renderItems(dayItems, "week-grid")}</div>
                       <button type="button" className="plan-week-add" aria-label={`Add plan to ${day.label}`} onClick={() => onAddDay(day.index)}><Plus size={16} aria-hidden="true" /> Add plan</button>
                     </div>
                   );
@@ -329,6 +310,7 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit, onAddDay
                   idPrefix="week-open"
                   onAssignDay={onAssignDay}
                   onEdit={onEdit}
+                  onRemove={onRemove}
                   onDragStart={setDraggingId}
                   onDragEnd={endDrag}
                 />

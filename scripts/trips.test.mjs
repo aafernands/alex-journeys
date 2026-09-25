@@ -262,6 +262,21 @@ describe("saved trips", () => {
       [early, untimed, later].sort(compareScheduledItems).map((item) => item.time ?? ""),
       ["09:00", "14:00", ""],
     );
+
+    const shopping = { type: "activity", time: "20:56", sortOrder: 1, updatedAt: "a" };
+    const rental = { type: "car", pickupTime: "14:54", sortOrder: 2, updatedAt: "b" };
+    const flight = {
+      type: "flight",
+      time: "18:00",
+      departureTime: "09:10",
+      sortOrder: 3,
+      updatedAt: "c",
+    };
+    const note = { type: "note", sortOrder: 0, updatedAt: "d" };
+    assert.deepEqual(
+      [shopping, note, rental, flight].sort(compareScheduledItems).map((item) => item.type),
+      ["flight", "car", "activity", "note"],
+    );
   });
 
   it("keeps day, time, and confirmation, and reads a pasted blurb", () => {

@@ -462,10 +462,28 @@ export function formatTripWeekRange(startDate: string): string {
   return `${startLabel} – ${endLabel}`;
 }
 
-/** Timed items first, then earlier sort order. Untimed items stay in entry order. */
+/**
+ * Clock time shown for an item, `HH:MM`.
+ * Cars use pickup, flights use departure, stays use check-in.
+ * Untimed items return an empty string.
+ */
+export function itemScheduleTime(item: {
+  type?: TripItemType;
+  time?: string;
+  pickupTime?: string;
+  departureTime?: string;
+  checkinTime?: string;
+}): string {
+  if (item.type === "car") return item.pickupTime ?? "";
+  if (item.type === "flight") return item.departureTime ?? item.time ?? "";
+  if (item.type === "hotel") return item.checkinTime ?? item.time ?? "";
+  return item.time ?? "";
+}
+
+/** Timed items first (by the time shown), then earlier sort order. Untimed items follow. */
 export function compareScheduledItems(a: TripItem, b: TripItem): number {
-  const ta = a.time ?? "";
-  const tb = b.time ?? "";
+  const ta = itemScheduleTime(a);
+  const tb = itemScheduleTime(b);
   if (ta && tb && ta !== tb) return ta.localeCompare(tb);
   if (ta && !tb) return -1;
   if (!ta && tb) return 1;
