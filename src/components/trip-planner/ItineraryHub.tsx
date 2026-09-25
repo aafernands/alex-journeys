@@ -750,11 +750,11 @@ export function ItineraryHub({
 }: Props) {
   const [copied, setCopied] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [view, updateView] = useState<"overview" | "itinerary" | "bookings">(
+  const [view, updateView] = useState<"overview" | "itinerary" | "bookings" | "packing">(
     focusStay || focusFlight ? "bookings" : "overview",
   );
   const viewKey = `aj.trip-workspace:${tripId ?? state.destination}:${state.startDate || state.month}`;
-  function setView(next: "overview" | "itinerary" | "bookings") {
+  function setView(next: "overview" | "itinerary" | "bookings" | "packing") {
     updateView(next);
     try {
       sessionStorage.setItem(viewKey, next);
@@ -776,7 +776,7 @@ export function ItineraryHub({
         );
       if (
         !returningToBooking &&
-        (saved === "overview" || saved === "itinerary" || saved === "bookings")
+        (saved === "overview" || saved === "itinerary" || saved === "bookings" || saved === "packing")
       ) {
         frame = requestAnimationFrame(() => {
           updateView(saved);
@@ -1207,7 +1207,7 @@ export function ItineraryHub({
           role="tablist"
           aria-label="Trip workspace"
         >
-          {(["overview", "itinerary", "bookings"] as const).map(
+          {(["overview", "itinerary", "bookings", "packing"] as const).map(
             (tab, index, tabs) => (
               <button
                 key={tab}
@@ -1237,11 +1237,18 @@ export function ItineraryHub({
                     ?.focus();
                 }}
               >
+                <NavIcon
+                  name={{ overview: "compass", itinerary: "map-pin", bookings: "book-marked", packing: "backpack" }[tab]}
+                  size={18}
+                  className="shrink-0"
+                />
                 {tab === "overview"
                   ? "Overview"
                   : tab === "itinerary"
                     ? "Itinerary"
-                    : "Bookings"}
+                    : tab === "bookings"
+                      ? "Bookings"
+                      : "Packing list"}
               </button>
             ),
           )}
@@ -2020,27 +2027,25 @@ export function ItineraryHub({
         </PlanFold>
       </div>
 
-      <div className="plan-hub-more" hidden={view === "bookings"}>
-        <PlanFold
-          id={`${headingId}-packing-fold`}
-          title="Packing list"
-          meta={
-            packingNotes.trim()
-              ? `${packingNotes.trim().split("\n").filter(Boolean).length} ${packingNotes.trim().split("\n").filter(Boolean).length === 1 ? "item" : "items"}`
-              : "Optional"
-          }
-        >
+      <div
+        id={`${headingId}-view-packing`}
+        role="tabpanel"
+        aria-labelledby={`${headingId}-workspace-packing`}
+        hidden={view !== "packing"}
+        className="plan-packing-panel"
+        tabIndex={0}
+      >
           <section
             className="plan-stack-tight"
             aria-labelledby={`${headingId}-packing`}
           >
             <h3
               id={`${headingId}-packing`}
-              className={`${plan.h3} max-sm:hidden`}
+              className={plan.h3}
             >
               Packing list
             </h3>
-            <p className={`${plan.prose} text-muted plan-desktop-only`}>
+            <p className={`${plan.prose} text-muted`}>
               Keep the essentials for this trip in one simple list.
             </p>
             <textarea
@@ -2055,8 +2060,8 @@ export function ItineraryHub({
               }
             />
           </section>
-        </PlanFold>
-
+      </div>
+      <div className="plan-hub-more" hidden={view === "bookings"}>
         <p className={`${plan.caption} px-1 pt-3 text-muted`}>
           {config.disclosure}{" "}
           <Link

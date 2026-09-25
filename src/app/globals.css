@@ -2860,7 +2860,7 @@ body.mobile-bottom-nav-visible .plan-sticky {
 .plan-workspace .plan-hub-save .plan-actions { margin-top: .5rem; }
 .plan-workspace-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: relative; }
 .plan-workspace-tabs { display: flex; padding: .3rem; border: 1px solid var(--border); background: var(--white); border-radius: 1rem; }
-.plan-workspace-tabs > button { min-height: 44px; padding: .65rem 1.4rem; font-weight: 600; font-size: .9rem; border-radius: .7rem; color: var(--muted); }
+.plan-workspace-tabs > button { display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px; padding: .65rem 1.4rem; font-weight: 600; font-size: .9rem; border-radius: .7rem; color: var(--muted); }
 .plan-workspace-tabs > button[aria-selected="true"] { background: var(--ink); color: var(--on-solid, white); }
 .plan-workspace button:focus-visible, .plan-entry-dialog button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .plan-add-menu { position: relative; }
@@ -2880,7 +2880,7 @@ body.mobile-bottom-nav-visible .plan-sticky {
 .plan-checklist > button:last-child { border: 0; }
 .plan-checklist > button span:last-child { text-align: right; font-size: .75rem; }
 .plan-overview-side .plan-grid-2 { grid-template-columns: 1fr; }
-.plan-workspace .plan-hub-days, .plan-workspace .plan-hub-lanes { padding: 1.25rem; border: 1px solid var(--border); border-radius: 1.15rem; background: var(--white); margin: 0; }
+.plan-workspace .plan-hub-days, .plan-workspace .plan-hub-lanes, .plan-workspace .plan-packing-panel { padding: 1.25rem; border: 1px solid var(--border); border-radius: 1.15rem; background: var(--white); margin: 0; }
 .plan-workspace .plan-hub-days > .plan-fold > h3 { display: none; }
 .plan-workspace .plan-hub-days .plan-fold-panel { display: block; }
 .plan-bookings-heading { margin-bottom: 1.25rem; }
@@ -2912,7 +2912,7 @@ main.plan-flow .plan-workspace-shell { margin-top: 0; }
   .plan-workspace .plan-trip-hero-title { font-size: 1.9rem; }
   .plan-workspace-toolbar { flex-wrap: wrap; gap: .75rem; }
   .plan-workspace-tabs { width: 100%; }
-  .plan-workspace-tabs > button { flex: 1; padding-inline: .5rem; }
+  .plan-workspace-tabs > button { flex: 1; flex-direction: column; gap: .3rem; padding-inline: .35rem; font-size: .8rem; }
   .plan-add-menu, .plan-add-menu > button { width: 100%; }
   .plan-add-options { width: 100%; }
   .plan-overview { grid-template-columns: 1fr; }
