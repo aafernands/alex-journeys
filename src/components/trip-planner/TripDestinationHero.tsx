@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import type { DestinationPhoto } from "@/lib/destination-photo";
+import {
+  fallbackDestinationPhoto,
+  type DestinationPhoto,
+} from "@/lib/destination-photo";
 
 export function TripDestinationHero({ destination, title, headingId, meta, actions }: {
   destination: string;
@@ -12,7 +15,9 @@ export function TripDestinationHero({ destination, title, headingId, meta, actio
 }) {
   const [result, setResult] = useState<{ destination: string; photo: DestinationPhoto } | null>(null);
   const [failedImage, setFailedImage] = useState<string | null>(null);
-  const photo = result?.destination === destination && result.photo.image !== failedImage ? result.photo : null;
+  const fallback = fallbackDestinationPhoto(destination);
+  const remote = result?.destination === destination ? result.photo : null;
+  const photo = remote?.image !== failedImage ? remote ?? fallback : fallback.image !== failedImage ? fallback : null;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -21,7 +26,7 @@ export function TripDestinationHero({ destination, title, headingId, meta, actio
       .then((body) => {
         if (!controller.signal.aborted && body?.photo) setResult({ destination, photo: body.photo });
       })
-      .catch(() => { /* The neutral banner remains usable when photos are unavailable. */ });
+      .catch(() => { /* The local destination artwork remains available. */ });
     return () => controller.abort();
   }, [destination]);
 
@@ -40,7 +45,9 @@ export function TripDestinationHero({ destination, title, headingId, meta, actio
         <p className="plan-trip-hero-meta">{meta}</p>
       </div>
       {photo ? <p className="plan-trip-hero-credit">
-        Photo by <a href={photo.photographerUrl} target="_blank" rel="noopener noreferrer">{photo.photographer}</a> on <a href="https://unsplash.com/?utm_source=alex_journeys&utm_medium=referral" target="_blank" rel="noopener noreferrer">Unsplash</a>
+        {photo.source === "Alex Journeys artwork" ? "Artwork by " : "Photo by "}
+        <a href={photo.photographerUrl} target={photo.photographerUrl.startsWith("/") ? undefined : "_blank"} rel={photo.photographerUrl.startsWith("/") ? undefined : "noopener noreferrer"}>{photo.photographer}</a>
+        {photo.source === "Alex Journeys artwork" ? null : <> on <a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">{photo.source}</a> · {photo.license}</>}
       </p> : null}
     </div>
   );
