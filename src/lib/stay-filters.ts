@@ -508,11 +508,16 @@ const HOTEL_TYPES = [
   "love hotel",
 ];
 
+function hasTypeName(name: string, item: string): boolean {
+  if (name === item) return true;
+  return new RegExp(`(?:^| )${item}(?: |$)`).test(name);
+}
+
 /** Homes are matched before hotels so "aparthotel" stays with homes. */
 export function classifyStayPropertyType(typeName: string): "hotel" | "home" | null {
   const name = facilityText(typeName);
-  if (!name) return null;
-  if (HOME_TYPES.includes(name)) return "home";
-  if (HOTEL_TYPES.includes(name)) return "hotel";
+  if (!name || /camp|boat|uncertain|cruise/.test(name)) return null;
+  if (HOME_TYPES.some((item) => hasTypeName(name, item))) return "home";
+  if (HOTEL_TYPES.some((item) => hasTypeName(name, item))) return "hotel";
   return null;
 }

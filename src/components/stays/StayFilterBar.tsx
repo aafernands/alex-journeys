@@ -205,7 +205,10 @@ export function StayFilterBar({
                   selected ? "bg-white text-heading shadow-sm" : "text-muted hover:text-heading"
                 }`}
                 aria-pressed={selected}
-                onClick={() => go({ ...filters, kind: kind as StayKind })}
+                onClick={() => {
+                  if (selected) return;
+                  go({ ...filters, kind: kind as StayKind });
+                }}
               >
                 {label}
               </button>

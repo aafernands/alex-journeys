@@ -149,6 +149,7 @@ describe("stay catalog matching", () => {
     assert.equal(scoreStayAmenity("beach", "Beachfront"), 5);
     assert.equal(classifyStayPropertyType("Aparthotels"), "home");
     assert.equal(classifyStayPropertyType("Hotels"), "hotel");
+    assert.equal(classifyStayPropertyType("Boutique hotels"), "hotel");
     assert.equal(classifyStayPropertyType("Campsites"), null);
 
     const catalog = catalogFromPayloads(

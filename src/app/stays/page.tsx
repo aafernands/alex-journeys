@@ -125,6 +125,16 @@ export default async function StaysPage({ searchParams }: PageProps) {
               query={query}
               startCollapsed={Boolean(result)}
             />
+            {result ? (
+              <StayFilterBar
+                query={query}
+                count={result.stays.length}
+                priceBounds={result.priceBounds}
+                amenities={result.amenities}
+                propertyTypes={result.propertyTypes}
+                nights={stayNights(query.startDate, query.endDate)}
+              />
+            ) : null}
             {!configured ? (
               <Notice
                 title="Stays not configured"
@@ -145,16 +155,6 @@ export default async function StaysPage({ searchParams }: PageProps) {
               <p className="rounded-lg bg-surface px-4 py-3 text-sm text-muted">
                 Sandbox results from Nuitee. A booking here is a test reservation.
               </p>
-            ) : null}
-            {result ? (
-              <StayFilterBar
-                query={query}
-                count={result.stays.length}
-                priceBounds={result.priceBounds}
-                amenities={result.amenities}
-                propertyTypes={result.propertyTypes}
-                nights={stayNights(query.startDate, query.endDate)}
-              />
             ) : null}
             {result && result.stays.length === 0 ? (
               <div className="panel plan-inset max-w-2xl p-6">
