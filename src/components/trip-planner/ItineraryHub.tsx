@@ -63,6 +63,7 @@ import { TripEntryDialog } from "@/components/trip-planner/TripEntryDialog";
 import { ItemColorField } from "@/components/trip-planner/ItemColorField";
 import { bookedStayHref, ItineraryItemRow } from "@/components/trip-planner/ItineraryItemRow";
 import { WeekView } from "@/components/trip-planner/WeekView";
+import { DownloadTripPdf } from "@/components/trip-planner/DownloadTripPdf";
 
 type Props = {
   headingId: string;
@@ -1547,6 +1548,18 @@ export function ItineraryHub({
             ),
           )}
         </div>
+        <div className="plan-workspace-actions">
+        <DownloadTripPdf
+          headingId={headingId}
+          source={{
+            title: tripTitle?.trim() || state.destination.trim() || "Trip",
+            destination: state.destination,
+            dates,
+            days,
+            items,
+            packingNotes,
+          }}
+        />
         <div className="plan-add-menu">
           <button
             type="button"
@@ -1589,6 +1602,7 @@ export function ItineraryHub({
               </button>
             </div>
           ) : null}
+        </div>
         </div>
       </div>
       <section
@@ -2343,14 +2357,15 @@ export function ItineraryHub({
               Packing list
             </h3>
             <p className={`${plan.prose} text-muted`}>
-              Keep the essentials for this trip in one simple list.
+              One item per line. A category on its own line, then items, groups
+              the list. Put [x] in front of anything already packed.
             </p>
             <textarea
               className={plan.input}
               aria-label="Packing list"
               rows={5}
               maxLength={4000}
-              placeholder={"Passport\nWalking shoes\nPhone charger"}
+              placeholder={"Documents\n[x] Passport\n\nClothes\n[ ] Rain jacket"}
               value={packingNotes}
               onChange={(event) =>
                 onPackingNotesChange(event.target.value.slice(0, 4000))
