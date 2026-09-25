@@ -6,6 +6,12 @@
 
 const PLAN_A_TRIP_PATH = "/guides/plan-a-trip";
 
+/**
+ * Phones and small tablets. iPad portrait (768px) and desktop keep the
+ * section tabs at the top of the open trip.
+ */
+export const TRIP_SECTION_BAR_QUERY = "(max-width: 767px)";
+
 export function normalizePathname(pathname: string): string {
   if (!pathname) return "/";
   const path = pathname.split("?")[0]?.split("#")[0] ?? "/";

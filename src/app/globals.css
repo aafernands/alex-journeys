@@ -3223,3 +3223,100 @@ dialog.home-screen-prompt::backdrop { background: rgb(31 26 20 / .4); }
   .plan-preview-day { grid-template-columns: 4.5rem 1fr; gap: .75rem; }
   .plan-entry-dialog { width: 100%; max-width: 100%; max-height: 94dvh; margin: auto 0 0; border-radius: 1.25rem 1.25rem 0 0; padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
 }
+
+/* Open-trip section tabs: fixed bottom bar on phones and small tablets.
+   iPad portrait and desktop keep the in-flow tabs. One bar at a time —
+   booking steps keep their own action, and in-section form actions sit inline. */
+@media (max-width: 767px) {
+  .plan-workspace-toolbar {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .plan-workspace .plan-add-menu,
+  .plan-workspace .plan-add-menu > button {
+    width: 100%;
+  }
+
+  .plan-workspace .plan-add-options {
+    z-index: 160;
+    width: 100%;
+  }
+
+  .plan-workspace-tabs {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 140;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: stretch;
+    width: auto;
+    min-height: 3.75rem;
+    margin: 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    background: var(--white);
+    box-shadow: 0 -6px 20px rgba(20, 17, 13, 0.08);
+    padding: 0.25rem 0.35rem calc(0.25rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  html.dark .plan-workspace-tabs {
+    box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.45);
+  }
+
+  .plan-workspace-tabs > button {
+    flex: none;
+    flex-direction: column;
+    gap: 0.12rem;
+    min-height: 3.25rem;
+    padding: 0.35rem 0.15rem 0.3rem;
+    font-size: 0.75rem;
+    line-height: 1.15;
+    border-radius: 0.7rem;
+  }
+
+  .plan-workspace-tabs > button svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  body.trip-focus .plan-trip-hotel:has(.plan-workspace),
+  body:has(.plan-workspace-shell) .plan-trip-hotel:has(.plan-workspace),
+  body:has(main.plan-flow) .plan-trip-hotel:has(.plan-workspace) {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  html:has(body .plan-workspace) {
+    scroll-padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .plan-workspace [role="tabpanel"] .plan-sticky {
+    position: static;
+    inset: auto;
+    z-index: auto;
+    width: auto;
+    margin: 1rem 0 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    backdrop-filter: none;
+  }
+
+  .plan-workspace [role="tabpanel"] .plan-sticky > .btn,
+  .plan-workspace [role="tabpanel"] .plan-sticky > a.btn {
+    width: auto;
+    flex: 1 1 0;
+  }
+
+  body:has(.plan-workspace) dialog.home-screen-prompt {
+    bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
