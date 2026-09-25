@@ -3387,7 +3387,19 @@ body:has(main.plan-flow) .plan-sticky {
 .plan-add-options button { display: block; padding: .8rem; text-align: left; width: 100%; border-radius: .5rem; }
 .plan-add-options button:hover { background: var(--sand); }
 .plan-trip-menu { position: relative; }
-.plan-trip-menu > button { position: absolute; right: 0; top: 100%; width: 12rem; padding: 1rem; z-index: 20; background: var(--white); border: 1px solid var(--border); border-radius: .75rem; }
+.plan-trip-menu-panel { position: absolute; top: calc(100% + .5rem); right: 0; z-index: 40; display: grid; width: min(17.5rem, calc(100vw - 1.5rem)); max-height: min(24rem, calc(100dvh - 5.5rem)); overflow-y: auto; padding: .35rem; border: 1px solid var(--border); border-radius: .85rem; background: var(--white); color: var(--heading); box-shadow: 0 12px 40px rgb(20 17 13 / .16); }
+.plan-trip-menu-label { display: flex; align-items: center; gap: .4rem; margin: .35rem .75rem .15rem; font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.plan-trip-menu-divider { height: 1px; margin: .25rem .4rem; background: var(--border); }
+.plan-trip-menu-item { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: .05rem; width: 100%; min-height: 44px; padding: .45rem .75rem; border: 0; border-radius: .55rem; background: transparent; color: var(--heading); font: inherit; font-weight: 650; text-align: left; cursor: pointer; }
+.plan-trip-menu-item:hover, .plan-trip-menu-item:focus-visible { background: var(--surface-soft); }
+.plan-trip-menu-item:disabled { opacity: .6; cursor: default; }
+.plan-trip-menu-item-label { font-size: .95rem; line-height: 1.2; }
+.plan-trip-menu-item-detail { font-size: .75rem; font-weight: 500; line-height: 1.3; color: var(--muted); }
+.plan-trip-pdf-status, .plan-trip-pdf-hint, .plan-trip-pdf-error { margin: .2rem .75rem .45rem; font-size: .78rem; line-height: 1.4; color: var(--muted); }
+.plan-trip-pdf-error { color: var(--link); }
+.plan-workspace .plan-trip-hero:has(.plan-trip-menu[open]) { overflow: visible; z-index: 8; }
+.plan-workspace .plan-trip-hero:has(.plan-trip-menu[open]) .plan-trip-hero-image,
+.plan-workspace .plan-trip-hero:has(.plan-trip-menu[open]) .plan-trip-hero-shade { border-radius: inherit; }
 .plan-overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(15rem, .48fr); gap: 1.5rem; }
 .plan-overview-main, .plan-overview-side { display: grid; gap: 1.25rem; align-content: start; min-width: 0; }
 .plan-next-action { display: grid; justify-items: start; gap: 1rem; padding: 1.75rem; background: color-mix(in srgb, var(--accent) 9%, var(--white)); border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border)); border-radius: 1.15rem; }
@@ -3465,7 +3477,6 @@ dialog.home-screen-prompt::backdrop { background: rgb(31 26 20 / .4); }
 .plan-hero-action:hover, .plan-trip-menu[open] > .plan-hero-action { background: rgba(15,23,28,.98); }
 .plan-hero-action::-webkit-details-marker { display: none; }
 .plan-workspace .plan-hero-action:focus-visible { outline: 2px solid white; outline-offset: 3px; }
-.plan-trip-hero-actions .plan-trip-menu > button { margin-top: .5rem; color: var(--heading); text-align: left; }
 .plan-workspace .plan-trip-hero:has(.plan-trip-hero-actions) .plan-trip-hero-content { padding-top: 5rem; }
 .plan-workspace .plan-hub-lead > p { display: none; }
 .plan-workspace .plan-trip-hero-title { font-size: clamp(1.9rem, 4vw, 2.8rem); }
@@ -3583,132 +3594,3 @@ dialog.home-screen-prompt::backdrop { background: rgb(31 26 20 / .4); }
   }
 }
 
-.plan-workspace-actions {
-  display: flex;
-  align-items: stretch;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  flex: 0 0 auto;
-}
-
-.plan-pdf-menu {
-  position: relative;
-}
-
-.plan-pdf-trigger {
-  white-space: nowrap;
-}
-
-.plan-pdf-options {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
-  z-index: 160;
-  width: min(18.5rem, calc(100vw - 2rem));
-  padding: 0.4rem;
-  border: 1px solid var(--border);
-  border-radius: 0.85rem;
-  background: var(--white);
-  box-shadow: 0 12px 40px rgb(20 17 13 / 0.12);
-}
-
-.plan-pdf-options-up {
-  top: auto;
-  bottom: calc(100% + 0.5rem);
-}
-
-.plan-pdf-options button[role="menuitem"] {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 0.1rem;
-  width: 100%;
-  min-height: 44px;
-  padding: 0.55rem 0.8rem;
-  border-radius: 0.55rem;
-  text-align: left;
-  color: var(--heading);
-}
-
-.plan-pdf-options button[role="menuitem"]:hover:not(:disabled),
-.plan-pdf-options button[role="menuitem"]:focus-visible {
-  background: var(--surface-soft);
-}
-
-.plan-pdf-options button[role="menuitem"]:disabled {
-  opacity: 0.6;
-}
-
-.plan-pdf-option-label {
-  font-weight: 650;
-  font-size: 0.95rem;
-  line-height: 1.2;
-}
-
-.plan-pdf-option-detail {
-  font-size: 0.78rem;
-  line-height: 1.3;
-  color: var(--muted);
-}
-
-.plan-pdf-status,
-.plan-pdf-hint {
-  margin: 0.35rem 0.8rem 0.55rem;
-  font-size: 0.8rem;
-  line-height: 1.45;
-  color: var(--muted);
-}
-
-.plan-pdf-error {
-  margin: 0.35rem 0.8rem 0.55rem;
-  font-size: 0.8rem;
-  line-height: 1.45;
-  color: var(--link);
-}
-
-.plan-pdf-save.btn {
-  width: calc(100% - 0.7rem);
-  margin: 0.2rem 0.35rem 0.35rem;
-}
-
-@media (max-width: 767px) {
-  .plan-workspace-actions {
-    width: 100%;
-  }
-
-  .plan-workspace .plan-workspace-actions > .plan-add-menu,
-  .plan-workspace .plan-workspace-actions > .plan-pdf-menu,
-  .plan-workspace .plan-workspace-actions > .plan-add-menu > button,
-  .plan-workspace .plan-workspace-actions > .plan-pdf-menu > button {
-    width: auto;
-    flex: 1 1 0;
-    min-width: 0;
-  }
-
-  .plan-workspace .plan-workspace-actions .plan-pdf-trigger,
-  .plan-workspace .plan-workspace-actions .plan-add-menu > button {
-    padding-inline: 0.65rem;
-    font-size: 0.875rem;
-    white-space: nowrap;
-  }
-
-  .plan-pdf-options {
-    left: 0;
-    right: auto;
-  }
-}
-
-@media (max-width: 380px) {
-  .plan-workspace-actions {
-    flex-direction: column;
-  }
-
-  .plan-workspace .plan-workspace-actions > .plan-add-menu,
-  .plan-workspace .plan-workspace-actions > .plan-pdf-menu,
-  .plan-workspace .plan-workspace-actions > .plan-add-menu > button,
-  .plan-workspace .plan-workspace-actions > .plan-pdf-menu > button {
-    width: 100%;
-    flex: none;
-  }
-}

@@ -1088,6 +1088,19 @@ export function ItineraryHub({
     laneKey?: string;
   } | null>(null);
   const [addMenu, setAddMenu] = useState(false);
+  const moreMenuRef = useRef<HTMLDetailsElement>(null);
+  const [moreMenuSession, setMoreMenuSession] = useState(0);
+  useEffect(() => {
+    function onPointer(event: MouseEvent) {
+      const menu = moreMenuRef.current;
+      if (!menu?.open) return;
+      const target = event.target;
+      if (target instanceof Node && menu.contains(target)) return;
+      menu.open = false;
+    }
+    document.addEventListener("mousedown", onPointer);
+    return () => document.removeEventListener("mousedown", onPointer);
+  }, []);
   const nextPartner = partners.find((partner) => {
     if (partner.showWhen === "extra") return false;
     const entries = itemsForLane(items, partner);
@@ -1370,21 +1383,62 @@ export function ItineraryHub({
           >
             <Pencil size={18} aria-hidden="true" />
           </button>
-          <details className="plan-trip-menu" onKeyDown={(event) => {
-            if (event.key === "Escape") {
+          <details
+            className="plan-trip-menu"
+            ref={moreMenuRef}
+            onToggle={(event) => {
+              if (!event.currentTarget.open) setMoreMenuSession((value) => value + 1);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.preventDefault();
+                event.currentTarget.open = false;
+                event.currentTarget.querySelector("summary")?.focus();
+                return;
+              }
+              if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+              const items = [
+                ...event.currentTarget.querySelectorAll<HTMLButtonElement>(
+                  "[role='menuitem']:not(:disabled)",
+                ),
+              ];
+              if (!items.length) return;
               event.preventDefault();
-              event.currentTarget.open = false;
-              event.currentTarget.querySelector("summary")?.focus();
-            }
-          }}>
+              const index = items.indexOf(document.activeElement as HTMLButtonElement);
+              const next =
+                event.key === "ArrowDown"
+                  ? items[(index + 1) % items.length]
+                  : items[(index - 1 + items.length) % items.length];
+              next?.focus();
+            }}
+          >
             <summary className="plan-hero-action" aria-label="More options" title="More options"><Ellipsis size={20} aria-hidden="true" /></summary>
-            <button
-              type="button"
-              className={plan.textBtn}
-              onClick={onStartOver}
-            >
-              Start a new trip
-            </button>
+            <div className="plan-trip-menu-panel" role="menu" aria-label="More options">
+              <DownloadTripPdf
+                headingId={headingId}
+                session={moreMenuSession}
+                source={{
+                  title: tripTitle?.trim() || state.destination.trim() || "Trip",
+                  destination: state.destination,
+                  dates,
+                  days,
+                  items,
+                  packingNotes,
+                }}
+              />
+              <div className="plan-trip-menu-divider" role="separator" />
+              <button
+                type="button"
+                role="menuitem"
+                className="plan-trip-menu-item"
+                onClick={() => {
+                  if (moreMenuRef.current) moreMenuRef.current.open = false;
+                  onStartOver();
+                }}
+              >
+                Start a new trip
+              </button>
+            </div>
           </details>
         </>
           }
@@ -1548,18 +1602,6 @@ export function ItineraryHub({
             ),
           )}
         </div>
-        <div className="plan-workspace-actions">
-        <DownloadTripPdf
-          headingId={headingId}
-          source={{
-            title: tripTitle?.trim() || state.destination.trim() || "Trip",
-            destination: state.destination,
-            dates,
-            days,
-            items,
-            packingNotes,
-          }}
-        />
         <div className="plan-add-menu">
           <button
             type="button"
@@ -1602,7 +1644,6 @@ export function ItineraryHub({
               </button>
             </div>
           ) : null}
-        </div>
         </div>
       </div>
       <section

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type KeyboardEvent as ReactKeyboardEvent,
-} from "react";
+import { useRef, useState } from "react";
 import { Download } from "lucide-react";
 import {
   buildTripPdf,
@@ -49,69 +43,31 @@ async function loadFonts(): Promise<TripPdfFontBytes | undefined> {
   }
 }
 
+function closeMenu(node: HTMLElement | null) {
+  const menu = node?.closest("details");
+  if (menu) menu.open = false;
+}
+
 export function DownloadTripPdf({
   headingId,
   source,
+  session,
 }: {
   headingId: string;
   source: TripPdfSource;
+  /** Changes each time the overflow menu closes, which clears a leftover file. */
+  session: number;
 }) {
-  const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [open, setOpen] = useState(false);
-  const [dropUp, setDropUp] = useState(false);
   const [busy, setBusy] = useState<TripPdfSection | null>(null);
   const [ready, setReady] = useState<ReadyFile | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  function close() {
-    setOpen(false);
+  const [seenSession, setSeenSession] = useState(session);
+  if (session !== seenSession) {
+    setSeenSession(session);
     setReady(null);
     setError(null);
   }
-
-  function toggle() {
-    setError(null);
-    setOpen((current) => {
-      const next = !current;
-      if (next && triggerRef.current) {
-        const rect = triggerRef.current.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - rect.bottom;
-        setDropUp(spaceBelow < 300 && rect.top > spaceBelow);
-      }
-      if (!next) setReady(null);
-      return next;
-    });
-  }
-
-  useEffect(() => {
-    if (!open) return;
-    function onPointer(event: MouseEvent) {
-      const target = event.target;
-      if (!(target instanceof Node) || rootRef.current?.contains(target)) return;
-      close();
-    }
-    function onKey(event: KeyboardEvent) {
-      if (event.key !== "Escape") return;
-      close();
-      triggerRef.current?.focus();
-    }
-    document.addEventListener("mousedown", onPointer);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onPointer);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open || ready) return;
-    menuRef.current
-      ?.querySelector<HTMLButtonElement>("[role='menuitem']:not(:disabled)")
-      ?.focus();
-  }, [open, ready]);
 
   async function choose(section: TripPdfSection) {
     if (busy) return;
@@ -131,8 +87,10 @@ export function DownloadTripPdf({
           title: document.shareTitle,
           label: document.sectionLabel,
         });
+        const menu = rootRef.current?.closest("details");
+        if (menu) menu.open = true;
       } else if (outcome !== "cancelled") {
-        close();
+        closeMenu(rootRef.current);
       }
     } catch {
       setError("Couldn’t create that PDF. Try again in a moment.");
@@ -141,84 +99,55 @@ export function DownloadTripPdf({
     }
   }
 
-  function onMenuKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
-    const items = Array.from(
-      menuRef.current?.querySelectorAll<HTMLButtonElement>("[role='menuitem']:not(:disabled)") ??
-        [],
-    );
-    const index = items.indexOf(document.activeElement as HTMLButtonElement);
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-      event.preventDefault();
-      const next =
-        event.key === "ArrowDown"
-          ? items[(index + 1) % items.length]
-          : items[(index - 1 + items.length) % items.length];
-      next?.focus();
-    }
-  }
-
   return (
-    <div className="plan-pdf-menu" ref={rootRef}>
-      <button
-        type="button"
-        className="btn btn-secondary plan-pdf-trigger"
-        id={`${headingId}-download-pdf`}
-        ref={triggerRef}
-        aria-expanded={open}
-        aria-haspopup="menu"
-        aria-controls={menuId}
-        onClick={toggle}
-      >
-        <Download size={18} aria-hidden="true" />
+    <div className="plan-trip-pdf" ref={rootRef} role="group" aria-label="Download PDF">
+      <div className="plan-trip-menu-label" aria-hidden="true">
+        <Download size={16} />
         Download PDF
-      </button>
-      {open ? (
-        <div
-          id={menuId}
-          ref={menuRef}
-          role="menu"
-          aria-label="Download PDF"
-          className={`plan-pdf-options${dropUp ? " plan-pdf-options-up" : ""}`}
-          onKeyDown={onMenuKeyDown}
-        >
-          {ready ? (
-            <div className="plan-pdf-ready">
-              <p className="plan-pdf-status" role="status">
-                Your {ready.label.toLowerCase()} PDF is ready.
-              </p>
-              <button
-                type="button"
-                className="btn btn-primary plan-pdf-save"
-                onClick={() => presentReadyPdf(ready.blob, ready.filename, ready.title)}
-              >
-                Save or share
-              </button>
-              <p className="plan-pdf-hint">
-                On iPhone, use the share sheet and choose Save to Files.
-              </p>
-            </div>
-          ) : (
-            CHOICES.map((choice) => (
-              <button
-                key={choice.id}
-                type="button"
-                role="menuitem"
-                disabled={busy !== null}
-                onClick={() => void choose(choice.id)}
-              >
-                <span className="plan-pdf-option-label">
-                  {busy === choice.id ? "Preparing…" : choice.label}
-                </span>
-                <span className="plan-pdf-option-detail">{choice.detail}</span>
-              </button>
-            ))
-          )}
-          {error ? (
-            <p className="plan-pdf-error" role="alert">
-              {error}
-            </p>
-          ) : null}
+      </div>
+      {ready ? (
+        <div className="plan-trip-pdf-ready">
+          <p className="plan-trip-pdf-status" role="status">
+            Your {ready.label.toLowerCase()} PDF is ready.
+          </p>
+          <button
+            type="button"
+            role="menuitem"
+            className="plan-trip-menu-item"
+            onClick={(event) => {
+              presentReadyPdf(ready.blob, ready.filename, ready.title);
+              closeMenu(event.currentTarget);
+            }}
+          >
+            Save or share
+          </button>
+          <p className="plan-trip-pdf-hint">
+            On iPhone, use the share sheet and choose Save to Files.
+          </p>
         </div>
+      ) : (
+        CHOICES.map((choice) => (
+          <button
+            key={choice.id}
+            type="button"
+            role="menuitem"
+            className="plan-trip-menu-item"
+            id={`${headingId}-download-${choice.id}`}
+            disabled={busy !== null}
+            aria-label={`Download ${choice.label} PDF`}
+            onClick={() => void choose(choice.id)}
+          >
+            <span className="plan-trip-menu-item-label">
+              {busy === choice.id ? "Preparing…" : choice.label}
+            </span>
+            <span className="plan-trip-menu-item-detail">{choice.detail}</span>
+          </button>
+        ))
+      )}
+      {error ? (
+        <p className="plan-trip-pdf-error" role="alert">
+          {error}
+        </p>
       ) : null}
     </div>
   );
