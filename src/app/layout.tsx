@@ -19,6 +19,7 @@ import {
   siteConfig,
   websiteJsonLd,
 } from "@/lib/seo";
+import { TRIP_FOCUS_BOOT } from "@/lib/trip-focus";
 import "./globals.css";
 
 const googleSiteVerification = getGoogleSiteVerification();
@@ -135,6 +136,9 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{ __html: themeInitScript }}
+        />
+        <script
+          dangerouslySetInnerHTML={{ __html: TRIP_FOCUS_BOOT }}
         />
         <script
           dangerouslySetInnerHTML={{ __html: INSTALL_CAPTURE_SCRIPT }}

@@ -32,12 +32,15 @@ export const VIATOR_DYNAMIC_WIDGET_REF_PLACEHOLDER = "";
 
 const DEST_MAX = 80;
 
+const TRIP_ID_RE = /^[A-Za-z0-9_-]{1,128}$/;
+
 export type ExperiencesQuery = {
   destination: string;
   startDate: string;
   endDate: string;
   adults: number | null;
   children: number | null;
+  tripId: string;
 };
 
 export type ViatorExperiencesSettings = {
@@ -107,6 +110,7 @@ export function parseExperiencesSearchParams(
   );
   if (startDate && endDate && endDate < startDate) endDate = "";
 
+  const tripRaw = firstParam(searchParams, "trip").trim();
   return {
     destination: cleanDestination(
       firstParam(searchParams, "dest") || firstParam(searchParams, "destination"),
@@ -117,6 +121,7 @@ export function parseExperiencesSearchParams(
       firstParam(searchParams, "adults") || firstParam(searchParams, "travelers"),
     ),
     children: cleanCount(firstParam(searchParams, "children")),
+    tripId: TRIP_ID_RE.test(tripRaw) ? tripRaw : "",
   };
 }
 
@@ -127,6 +132,7 @@ export function experiencesPath(input: {
   endDate?: string | null;
   adults?: number | string | null;
   children?: number | string | null;
+  tripId?: string | null;
 }): string {
   const destination = cleanDestination(input.destination);
   if (!destination) return "/experiences";
@@ -142,6 +148,8 @@ export function experiencesPath(input: {
   if (endDate) params.set("end", endDate);
   if (adults) params.set("adults", String(adults));
   if (children) params.set("children", String(children));
+  const tripId = input.tripId?.trim() ?? "";
+  if (TRIP_ID_RE.test(tripId)) params.set("trip", tripId);
   const query = params.toString();
   return query ? `/experiences?${query}` : "/experiences";
 }

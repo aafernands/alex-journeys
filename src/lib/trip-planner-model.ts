@@ -688,6 +688,7 @@ export function partnerLaneHref(
       endDate: values.endDate,
       adults: state.adults,
       children: state.children,
+      tripId,
     });
   }
   return resolveAffiliateHref(

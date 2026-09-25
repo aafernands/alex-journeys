@@ -162,7 +162,7 @@ export function StayHotelOverview({
   const hasStayDates = Boolean(saveTripContext?.startDate && saveTripContext?.endDate);
 
   return (
-    <main className="bg-bg pb-28 md:pb-16">
+    <main className="safe-bottom-page bg-bg md:pb-16">
       <div className="section-shell pt-4 sm:pt-6">
         {failure ? (
           <p className="mb-4 text-sm font-semibold text-link" role="alert">
@@ -506,7 +506,7 @@ export function StayHotelOverview({
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-[calc(var(--mobile-nav-bar)+env(safe-area-inset-bottom,0px))] z-[140] border-t border-line bg-white/95 p-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur md:hidden">
+      <div className="safe-bottom-bar fixed inset-x-0 bottom-0 z-[140] border-t border-line bg-white/95 px-3 pt-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-xl items-center gap-3">
           {fromPriceLabel ? (
             <div className="min-w-0 flex-1">

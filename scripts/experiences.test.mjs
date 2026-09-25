@@ -72,7 +72,12 @@ describe("experiences page", () => {
         endDate: "2027-06-09",
         adults: 2,
         children: 1,
+        tripId: "",
       },
+    );
+    assert.equal(
+      experiencesPath({ destination: "Paris", tripId: "trip_1" }),
+      "/experiences?dest=Paris&trip=trip_1",
     );
     assert.equal(
       parseExperiencesSearchParams({ destination: ["Lisbon"] }).destination,

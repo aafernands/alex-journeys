@@ -12,6 +12,7 @@ import Link from "next/link";
 import { DateRangeField } from "@/components/trip-planner/DateRangeField";
 import { plan as tripDensity } from "@/components/trip-planner/density";
 import { ItineraryHub } from "@/components/trip-planner/ItineraryHub";
+import { TripWorkspaceFocus } from "@/components/trip-planner/TripFocus";
 import { PlaceCombobox } from "@/components/trip-planner/PlaceCombobox";
 import { useTripSync } from "@/components/trip-planner/useTripSync";
 import {
@@ -811,7 +812,14 @@ export function TripPlanner({
               ) : null}
             </div>
 
-            <div className="plan-actions plan-sticky">
+            <div
+              className={`plan-actions plan-sticky plan-sticky-stack${
+                plan.items.length > 0 || plan.tripId ? " plan-sticky-pair" : ""
+              }`}
+            >
+              <p className={`${tripDensity.caption} plan-sticky-note text-muted`}>
+                Saved on this device as you go
+              </p>
               {plan.items.length > 0 || plan.tripId ? (
                 <button
                   type="button"
@@ -826,15 +834,14 @@ export function TripPlanner({
                   ? "Save trip details"
                   : "Create my trip"}
               </button>
-              <span className={`${tripDensity.caption} text-muted`}>
-                Saved on this device as you go
-              </span>
             </div>
           </form>
         ) : null}
 
         {step === 4 ? (
-          <ItineraryHub
+          <>
+            <TripWorkspaceFocus />
+            <ItineraryHub
             headingId={`${baseId}-heading`}
             config={config}
             partners={steps}
@@ -864,6 +871,7 @@ export function TripPlanner({
             onRestoreBackup={sync.restoreGuestBackup}
             onRememberGuestDraft={sync.rememberGuestDraft}
           />
+          </>
         ) : null}
       </div>
     </section>
