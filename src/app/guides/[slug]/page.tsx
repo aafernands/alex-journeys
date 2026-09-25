@@ -16,6 +16,7 @@ import {
   getTripPlannerPartners,
 } from "@/lib/trip-planner";
 import { cmsEditPageHref } from "@/lib/admin-edit";
+import { collectPackingGuides } from "@/lib/packing-guides";
 import {
   getAllPosts,
   getPostBySlug,
@@ -219,6 +220,7 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
             name: dest.name,
             city: destinationCity(dest),
           }))}
+          packingGuides={collectPackingGuides(getAllPosts())}
         />
         </section>
       ) : null}

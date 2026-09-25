@@ -3827,6 +3827,87 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
   }
 }
 
+/* Packing checklist. Paper cards, 44px targets, no extra blur on the scrolling list. */
+.plan-pack { display: grid; gap: 1.15rem; min-width: 0; }
+.plan-pack-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: .75rem; }
+.plan-pack-summary { margin-top: .15rem; font-family: var(--font-outfit), system-ui, sans-serif; font-size: 1.05rem; font-weight: 650; color: var(--accent-deep); }
+.plan-pack-block { display: grid; gap: .6rem; min-width: 0; }
+.plan-pack h4 { margin: 0; }
+.plan-pack button { font: inherit; cursor: pointer; }
+.plan-pack button:disabled { cursor: default; }
+.plan-pack-tools, .plan-pack-editor-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.plan-pack-tool { min-height: 44px; padding: .55rem .95rem; border: 1px solid var(--border); border-radius: 999px; background: var(--white); color: var(--heading); font-size: .875rem; font-weight: 650; }
+.plan-pack-tool:disabled { opacity: .45; }
+.plan-pack-tool-danger { color: var(--link); border-color: color-mix(in srgb, var(--link) 40%, var(--border)); }
+.plan-pack-bar { height: .55rem; overflow: hidden; border-radius: 999px; background: var(--sand); }
+.plan-pack-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width .2s ease; }
+.plan-pack-add-label { font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.plan-pack-add-row { display: flex; gap: .5rem; align-items: stretch; margin-top: .4rem; }
+.plan-pack-add-row input { flex: 1; min-width: 0; min-height: 44px; }
+.plan-pack-add-btn { min-height: 44px; padding-inline: 1.15rem; flex-shrink: 0; }
+.plan-pack-notice { font-size: .85rem; font-weight: 650; color: var(--heading); }
+.plan-pack-templates { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.plan-pack-template { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: .12rem; min-height: 44px; padding: .7rem .8rem; text-align: left; border: 1px solid var(--border); border-radius: 1rem; background: var(--surface-soft); color: var(--heading); box-shadow: var(--glass-sheen); }
+.plan-pack-template:hover, .plan-pack-template:focus-visible { border-color: var(--accent); }
+.plan-pack-template-label { font-family: var(--font-outfit), system-ui, sans-serif; font-size: .95rem; font-weight: 650; line-height: 1.2; }
+.plan-pack-template-detail { font-size: .72rem; line-height: 1.35; color: var(--muted); }
+.plan-pack-suggestions { display: grid; gap: .55rem; margin: 0; padding: 0; list-style: none; }
+.plan-pack-suggestion { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .7rem; padding: .8rem; border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border)); border-radius: 1rem; background: color-mix(in srgb, var(--accent) 8%, var(--white)); }
+.plan-pack-suggestion-label { font-weight: 700; color: var(--heading); }
+.plan-pack-suggestion-reason { margin-top: .1rem; font-size: .78rem; line-height: 1.35; color: var(--muted); }
+.plan-pack-suggestion-actions { display: flex; gap: .4rem; }
+.plan-pack-suggestion-add { min-height: 44px; padding-inline: 1rem; }
+.plan-pack-dismiss { min-height: 44px; padding: 0 .9rem; border: 1px solid var(--border); border-radius: 999px; background: var(--white); color: var(--text); font-weight: 650; }
+.plan-pack-filters { display: flex; gap: .4rem; overflow-x: auto; padding-bottom: .15rem; }
+.plan-pack-filter { flex: 0 0 auto; min-height: 44px; padding: 0 .95rem; border: 1px solid var(--border); border-radius: 999px; background: var(--white); color: var(--heading); font-weight: 650; }
+.plan-pack-filter[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--on-solid); }
+.plan-pack-groups { display: grid; gap: .35rem; }
+.plan-pack-group { border-top: 1px solid var(--border); padding-top: .15rem; }
+.plan-pack-group-head { display: flex; align-items: center; justify-content: space-between; gap: .4rem; }
+.plan-pack-group-toggle { display: flex; flex: 1; align-items: center; justify-content: space-between; gap: .75rem; min-height: 44px; text-align: left; font-family: var(--font-outfit), system-ui, sans-serif; font-size: 1.02rem; font-weight: 700; color: var(--heading); }
+.plan-pack-group-meta { font-family: var(--font-inter), system-ui, sans-serif; font-size: .78rem; font-weight: 600; color: var(--muted); }
+.plan-pack-guide-link { display: inline-flex; flex-shrink: 0; align-items: center; min-height: 44px; font-size: .8rem; font-weight: 700; color: var(--link); text-decoration: none; }
+.plan-pack-guide-link:hover { color: var(--accent-deep); }
+.plan-pack-items { display: grid; gap: .35rem; margin: 0; padding: 0 0 .35rem; list-style: none; }
+.plan-pack-item { border-radius: .9rem; background: var(--surface-soft); }
+.plan-pack-item.is-packed .plan-pack-item-name { color: var(--muted); text-decoration: line-through; }
+.plan-pack-item-main { display: flex; align-items: stretch; gap: .1rem; }
+.plan-pack-check { display: grid; place-items: center; width: 44px; min-height: 44px; flex-shrink: 0; }
+.plan-pack-check > span { display: grid; place-items: center; width: 1.35rem; height: 1.35rem; border: 1.5px solid var(--border-strong); border-radius: .4rem; background: var(--white); font-size: .85rem; font-weight: 800; color: var(--on-solid); }
+.plan-pack-check[aria-checked="true"] > span { border-color: var(--accent); background: var(--accent); }
+.plan-pack-item-label { display: flex; flex: 1; flex-direction: column; align-items: flex-start; justify-content: center; min-height: 44px; padding: .4rem .75rem .4rem 0; text-align: left; }
+.plan-pack-item-name { font-weight: 650; color: var(--heading); line-height: 1.3; }
+.plan-pack-item-meta { font-size: .75rem; color: var(--muted); }
+.plan-pack-editor { display: grid; gap: .75rem; padding: .15rem .8rem .9rem; }
+.plan-pack-editor-row { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.plan-pack-stepper { display: flex; align-items: center; gap: .3rem; }
+.plan-pack-stepper button { width: 44px; height: 44px; border: 1px solid var(--border); border-radius: .75rem; background: var(--white); color: var(--heading); font-size: 1.25rem; }
+.plan-pack-stepper button:disabled { opacity: .4; }
+.plan-pack-stepper span { min-width: 1.6rem; text-align: center; font-weight: 700; color: var(--heading); }
+.plan-pack-empty-group { padding: 0 .15rem .7rem; font-size: .8rem; color: var(--muted); }
+.plan-pack-guides { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(15.5rem, 78%); gap: .75rem; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: .25rem; }
+.plan-pack-guide { display: flex; min-height: 100%; flex-direction: column; overflow: hidden; scroll-snap-align: start; border: 1px solid var(--border); border-radius: 1rem; background: var(--white); color: inherit; text-decoration: none; }
+.plan-pack-guide:hover { border-color: var(--border-strong); }
+.plan-pack-guide-photo { position: relative; display: block; aspect-ratio: 16 / 10; background: var(--surface); }
+.plan-pack-guide-photo img { object-fit: cover; }
+.plan-pack-guide-copy { display: grid; gap: .35rem; padding: .85rem .95rem 1rem; }
+.plan-pack-guide-kicker { font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-deep); }
+.plan-pack-guide-title { font-family: var(--font-outfit), system-ui, sans-serif; font-size: 1rem; font-weight: 700; line-height: 1.3; color: var(--heading); }
+.plan-pack-guide-excerpt { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; font-size: .8rem; line-height: 1.45; color: var(--text); }
+
+@media (min-width: 768px) {
+  .plan-pack-templates { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .plan-pack-guides { grid-auto-flow: row; grid-template-columns: 1fr 1fr; overflow: visible; }
+}
+
+@media (max-width: 639px) {
+  .plan-workspace .plan-packing-panel { padding: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan-pack-bar > span { transition: none; }
+}
+
 @media (min-width: 640px) {
   .plan-sticky,
   .plan-trip-hotel .plan-sticky {
