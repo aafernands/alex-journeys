@@ -55,13 +55,13 @@ const TABS: Tab[] = [
 const BODY_VISIBLE_CLASS = "mobile-bottom-nav-visible";
 
 const tabClass =
-  "flex flex-1 flex-col items-center justify-center gap-0.5 px-1 text-xs font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-accent";
+  "flex flex-1 flex-col items-center justify-center gap-0 px-1 text-xs font-medium leading-none transition focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-accent";
 
 function TabBody({ tab, active }: { tab: Tab; active: boolean }) {
   return (
     <>
-      <span className={`flex h-8 w-14 items-center justify-center rounded-full ${active ? "bg-accent text-on-solid" : ""}`}>
-        <NavIcon name={tab.icon} size={22} />
+      <span className={`flex h-7 w-7 items-center justify-center rounded-full ${active ? "bg-ink text-on-solid" : ""}`}>
+        <NavIcon name={tab.icon} size={20} />
       </span>
       <span>{tab.label}</span>
     </>
@@ -137,10 +137,10 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      className="mobile-bottom-nav glass fixed z-[150] rounded-[1.6rem] xl:hidden"
+      className="mobile-bottom-nav app-tab-bar glass fixed z-[150] xl:hidden"
       aria-label="Primary mobile"
     >
-      <ul className="grid h-16 grid-cols-4 items-stretch">
+      <ul className="grid h-full grid-cols-4 items-stretch">
         {TABS.map((tab) => {
           const active = tab.match(pathname);
           return (

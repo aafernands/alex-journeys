@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
-import Link from "next/link";
 import { Ellipsis } from "lucide-react";
 import { NavIcon } from "@/components/icons/NavIcon";
+import { ListRow } from "@/components/ui/ListRow";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { flightItemLinkLabel } from "@/lib/flights";
 import {
@@ -132,29 +132,9 @@ export function ItineraryItemRow({
     return () => document.removeEventListener("pointerdown", onPointer);
   }, []);
 
-  const body = (
-    <>
-      <span className="plan-timeline-time">
-        <span className="plan-timeline-time-label">{timeLabel}</span>
-      </span>
-      <span className="plan-timeline-content">
-        <span className="plan-timeline-title">
-          <NavIcon name={TYPE_ICON[item.type]} size={14} className="plan-timeline-type" />
-          <span>{item.title}</span>
-        </span>
-        <span className="plan-timeline-meta">
-          <span className="plan-item-pill">{TRIP_STATUS_LABEL[item.status]}</span>
-          {item.confirmation ? (
-            <span className="plan-item-conf">
-              <span className="sr-only">Confirmation </span>
-              {item.confirmation}
-            </span>
-          ) : null}
-          {extra ? <span className="plan-item-detail">{extra}</span> : null}
-        </span>
-      </span>
-    </>
-  );
+  const bodyDetail = [timeLabel, TRIP_STATUS_LABEL[item.status], item.confirmation, extra]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <article
@@ -164,72 +144,76 @@ export function ItineraryItemRow({
       data-color={item.color || "default"}
       style={{ "--plan-item-accent": itemAccentHex(item) } as CSSProperties}
     >
-      <div className="plan-timeline-row">
-        {drag}
-        {stayHref ? (
-          <Link href={stayHref} className="plan-timeline-open">
-            {body}
-          </Link>
-        ) : (
-          <button type="button" className="plan-timeline-open" onClick={onEdit}>
-            {body}
-          </button>
-        )}
-        <details
-          ref={menuRef}
-          className="plan-item-menu"
-          onToggle={(event) => {
-            if (!event.currentTarget.open) return;
-            document.querySelectorAll(".plan-item-menu[open]").forEach((node) => {
-              if (node !== event.currentTarget) (node as HTMLDetailsElement).open = false;
-            });
-          }}
-          onKeyDown={(event) => {
-            if (event.key !== "Escape" || !event.currentTarget.open) return;
-            event.preventDefault();
-            event.currentTarget.open = false;
-            event.currentTarget.querySelector("summary")?.focus();
-          }}
-        >
-          <summary aria-label={`Actions for ${item.title}`}>
-            <Ellipsis size={18} aria-hidden="true" />
-          </summary>
-          <div className="plan-item-menu-panel glass-strong">
-            <button
-              type="button"
-              onClick={(event) => {
-                closeMenu(event.currentTarget);
-                onEdit();
-              }}
-            >
-              Edit details
-            </button>
-            {link ? (
-              <OutboundLink
-                href={link.href}
-                target={link.external ? "_blank" : undefined}
-                rel={link.external ? "noopener noreferrer" : undefined}
-                onClick={(event) => closeMenu(event.currentTarget)}
+      <ListRow
+        leading={
+          <>
+            {drag}
+            <span style={{ color: itemAccentHex(item) }} aria-hidden="true">
+              <NavIcon name={TYPE_ICON[item.type]} size={18} />
+            </span>
+          </>
+        }
+        title={item.title}
+        detail={bodyDetail}
+        href={stayHref || undefined}
+        onClick={stayHref ? undefined : onEdit}
+        trailing={
+          <details
+            ref={menuRef}
+            className="plan-item-menu"
+            onToggle={(event) => {
+              if (!event.currentTarget.open) return;
+              document.querySelectorAll(".plan-item-menu[open]").forEach((node) => {
+                if (node !== event.currentTarget) (node as HTMLDetailsElement).open = false;
+              });
+            }}
+            onKeyDown={(event) => {
+              if (event.key !== "Escape" || !event.currentTarget.open) return;
+              event.preventDefault();
+              event.currentTarget.open = false;
+              event.currentTarget.querySelector("summary")?.focus();
+            }}
+          >
+            <summary aria-label={`Actions for ${item.title}`}>
+              <Ellipsis size={18} aria-hidden="true" />
+            </summary>
+            <div className="plan-item-menu-panel glass-strong">
+              <button
+                type="button"
+                onClick={(event) => {
+                  closeMenu(event.currentTarget);
+                  onEdit();
+                }}
               >
-                {link.label}
-                {link.external ? (
-                  <span className="sr-only"> (opens in a new tab)</span>
-                ) : null}
-              </OutboundLink>
-            ) : null}
-            <button
-              type="button"
-              className="plan-item-remove"
-              onClick={(event) => {
-                closeMenu(event.currentTarget);
-                onRemove();
-              }}
-            >
-              Remove
-            </button>
-          </div>
-        </details>
-      </div>
+                Edit details
+              </button>
+              {link ? (
+                <OutboundLink
+                  href={link.href}
+                  target={link.external ? "_blank" : undefined}
+                  rel={link.external ? "noopener noreferrer" : undefined}
+                  onClick={(event) => closeMenu(event.currentTarget)}
+                >
+                  {link.label}
+                  {link.external ? (
+                    <span className="sr-only"> (opens in a new tab)</span>
+                  ) : null}
+                </OutboundLink>
+              ) : null}
+              <button
+                type="button"
+                className="plan-item-remove"
+                onClick={(event) => {
+                  closeMenu(event.currentTarget);
+                  onRemove();
+                }}
+              >
+                Remove
+              </button>
+            </div>
+          </details>
+        }
+      />
       {footer ? <div className="plan-timeline-foot">{footer}</div> : null}
     </article>
   );

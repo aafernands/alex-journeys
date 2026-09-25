@@ -5,7 +5,9 @@ import {
   INSTALL_CAPTURE_SCRIPT,
   INSTALL_DISMISS_MS,
   buildInstallGuide,
+  INSTALL_PROMPT_DELAY_MS,
   dismissUntilValue,
+  installAutoPromptDelayMs,
   installButtonLabel,
   installCanBeOffered,
   installInstructions,
@@ -36,6 +38,12 @@ test("installation invitation stays out of account, CMS, checkout and booking fl
   assert.equal(isInstallPromptPage("/flights"), true);
   assert.equal(isInstallPromptPage("/stays"), true);
   assert.equal(isInstallPromptPage("/stays/hotel-1"), true);
+});
+
+test("an open trip waits for a gesture before the install prompt", () => {
+  assert.equal(installAutoPromptDelayMs(true, false), null);
+  assert.equal(installAutoPromptDelayMs(true, true), INSTALL_PROMPT_DELAY_MS);
+  assert.equal(installAutoPromptDelayMs(false, false), INSTALL_PROMPT_DELAY_MS);
 });
 
 test("manual installation instructions match phone, tablet and desktop", () => {

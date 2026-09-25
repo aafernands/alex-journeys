@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Share2, Pencil, Ellipsis } from "lucide-react";
+import { Share2, Pencil, Ellipsis, ChevronRight } from "lucide-react";
+import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ListRow } from "@/components/ui/ListRow";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { nativeShare } from "@/lib/native-share";
 import { TripDestinationHero } from "./TripDestinationHero";
 import {
@@ -105,6 +109,15 @@ function laneIcon(partner: TripPlannerPartner): string {
   if (partner.key === "world-nomads") return "shield";
   return "compass";
 }
+
+const ITEM_ICON: Record<TripItemType, string> = {
+  flight: "plane",
+  hotel: "hotel",
+  car: "car",
+  activity: "sparkles",
+  note: "book-open",
+  other: "bookmark",
+};
 
 function StatusChips({
   value,
@@ -825,45 +838,35 @@ function ItemCard({
   highlighted?: boolean;
 }) {
   const when = itemWhen(item, days);
+  const detail = [when, item.notes.replace(/\s+/g, " ").trim()].filter(Boolean).join(" · ");
   return (
-    <div
-      className={`${plan.inset} plan-stack-tight ${
-        highlighted ? "ring-2 ring-accent" : ""
-      }`}
-      style={{ borderLeft: `3px solid ${itemAccentHex(item)}` }}
-    >
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <div className="min-w-0 plan-stack-tight">
-          <p className={plan.h4}>{item.title}</p>
-          {when ? <p className={`${plan.caption} text-muted`}>{when}</p> : null}
-          <ItemUrl item={item} compact />
-          {item.notes ? (
-            <p className={`${plan.body} text-text`}>{item.notes}</p>
-          ) : null}
-        </div>
-        <div className="plan-inline-actions shrink-0">
-          <button
-            type="button"
-            className={`${plan.textBtn} text-accent hover:underline`}
-            onClick={onEdit}
-          >
-            Edit details
-          </button>
-          <button
-            type="button"
-            className={`${plan.textBtn} text-muted transition hover:text-accent`}
-            onClick={onRemove}
-          >
-            Remove
-          </button>
-        </div>
-      </div>
+    <Card className={highlighted ? "ring-2 ring-ink" : ""}>
+      <ListRow
+        leading={
+          <span style={{ color: itemAccentHex(item) }} aria-hidden="true">
+            <NavIcon name={ITEM_ICON[item.type]} size={18} />
+          </span>
+        }
+        title={item.title}
+        detail={detail || TRIP_STATUS_LABEL[item.status]}
+        trailing={
+          <span className="ui-row-actions">
+            <button type="button" className="ui-row-action" onClick={onEdit}>
+              Edit
+            </button>
+            <button type="button" className="ui-row-action" onClick={onRemove}>
+              Remove
+            </button>
+          </span>
+        }
+      />
+      <ItemUrl item={item} compact />
       <StatusChips
         value={item.status}
         label={`Status for ${item.title}`}
         onChange={onStatus}
       />
-    </div>
+    </Card>
   );
 }
 
@@ -1032,6 +1035,7 @@ export function ItineraryHub({
   const [view, updateView] = useState<"overview" | "itinerary" | "bookings" | "packing">(
     focusStay || focusFlight ? "bookings" : "overview",
   );
+  const [addMenu, setAddMenu] = useState(false);
   const viewKey = `aj.trip-workspace:${tripId ?? state.destination}:${state.startDate || state.month}`;
   function setView(next: "overview" | "itinerary" | "bookings" | "packing") {
     updateView(next);
@@ -1040,6 +1044,7 @@ export function ItineraryHub({
     } catch {
       /* In-memory navigation still works. */
     }
+    setAddMenu(false);
     if (window.matchMedia(TRIP_SECTION_BAR_QUERY).matches) {
       window.scrollTo(0, 0);
       if (next === "packing") {
@@ -1098,7 +1103,6 @@ export function ItineraryHub({
     day?: number;
     laneKey?: string;
   } | null>(null);
-  const [addMenu, setAddMenu] = useState(false);
   const moreMenuRef = useRef<HTMLDetailsElement>(null);
   const [moreMenuSession, setMoreMenuSession] = useState(0);
   useEffect(() => {
@@ -1342,6 +1346,65 @@ export function ItineraryHub({
                 "Couldn’t save to your account. This copy stays in this browser."
               : null;
 
+  const addToTripMenu = (
+    <div className="plan-add-menu">
+      <button
+        type="button"
+        className="btn btn-secondary"
+        id={`${headingId}-add-trigger`}
+        aria-expanded={addMenu}
+        aria-controls={`${headingId}-add-options`}
+        onClick={() => setAddMenu(!addMenu)}
+      >
+        + Add to trip
+      </button>
+      {addMenu ? (
+        <div id={`${headingId}-add-options`} className="plan-add-options glass-strong">
+          {(
+            [
+              ["activity", "Activity"],
+              ["note", "Note"],
+              ["other", "Booking"],
+            ] as const
+          ).map(([type, label]) => (
+            <button
+              type="button"
+              key={type}
+              onClick={() => {
+                setQuickEntry({ type });
+                setAddMenu(false);
+              }}
+            >
+              {label}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              openBookings(OUTSIDE_TAB);
+              setAddMenu(false);
+            }}
+          >
+            Import a booking
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+
+  const nextTitle = nextPartner
+    ? itemsForLane(items, nextPartner).length
+      ? "Review your plans"
+      : nextPartner.showWhen === "hotel"
+        ? "Find somewhere to stay"
+        : nextPartner.showWhen === "flights"
+          ? "Find your way there"
+          : "Find a car for your trip"
+    : "Make room for the memorable";
+  const nextSubtitle = nextPartner
+    ? "Keep options and confirmations in one place."
+    : "Add an activity, a place, or a note for later.";
+
   return (
     <div className="plan-hub plan-workspace" data-view={view}>
       <div className="plan-hub-lead plan-stack-tight">
@@ -1461,6 +1524,24 @@ export function ItineraryHub({
         </p>
 
       </div>
+      {saveMode === "local" && !copied ? (
+        <p className="plan-hero-sync">
+          <span>Saved on this device</span>
+          <Link
+            href={planATripLoginHref(tripId, "signin")}
+            className="plan-trip-summary-signin"
+            onClick={onRememberGuestDraft}
+          >
+            Sign in
+          </Link>
+        </p>
+      ) : null}
+      {copied ||
+      saveMode === "offer" ||
+      saveMode === "declined" ||
+      saveCopy ||
+      saveMode === "unavailable" ||
+      saveMode === "error" ? (
       <div className="plan-hub-save">
         {copied ? (
           <p
@@ -1475,19 +1556,6 @@ export function ItineraryHub({
           </p>
         ) : null}
 
-        {saveMode === "local" ? (
-          <div className="plan-local-save">
-            <p className={plan.caption}>Saved on this device</p>
-            <Link
-              href={planATripLoginHref(tripId, "signin")}
-              className={plan.textBtn}
-              onClick={onRememberGuestDraft}
-            >
-              Sign in to sync across devices
-            </Link>
-          </div>
-        ) : null}
-
         {saveMode === "offer" ? (
           <aside
             className={`${plan.soft} plan-section plan-stack-tight`}
@@ -1500,7 +1568,7 @@ export function ItineraryHub({
             <div className="plan-actions plan-actions-inline">
               <button
                 type="button"
-                className="btn btn-ink"
+                className="btn btn-secondary"
                 onClick={onSaveToAccount}
               >
                 Save itinerary
@@ -1542,7 +1610,7 @@ export function ItineraryHub({
                 {" "}
                 <Link
                   href="/account#trips"
-                  className="text-link hover:text-accent"
+                  className="font-semibold text-heading underline underline-offset-2"
                 >
                   View in My trips
                 </Link>
@@ -1562,10 +1630,11 @@ export function ItineraryHub({
           </div>
         ) : null}
       </div>
+      ) : null}
 
       <div className="plan-workspace-toolbar">
         <div
-          className="plan-workspace-tabs"
+          className="plan-workspace-tabs app-tab-bar"
           role="tablist"
           aria-label="Trip workspace"
         >
@@ -1615,49 +1684,6 @@ export function ItineraryHub({
             ),
           )}
         </div>
-        <div className="plan-add-menu">
-          <button
-            type="button"
-            className="btn btn-ink"
-            id={`${headingId}-add-trigger`}
-            aria-expanded={addMenu}
-            aria-controls={`${headingId}-add-options`}
-            onClick={() => setAddMenu(!addMenu)}
-          >
-            + Add to trip
-          </button>
-          {addMenu ? (
-            <div id={`${headingId}-add-options`} className="plan-add-options glass-strong">
-              {(
-                [
-                  ["activity", "Activity"],
-                  ["note", "Note"],
-                  ["other", "Booking"],
-                ] as const
-              ).map(([type, label]) => (
-                <button
-                  type="button"
-                  key={type}
-                  onClick={() => {
-                    setQuickEntry({ type });
-                    setAddMenu(false);
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={() => {
-                  openBookings(OUTSIDE_TAB);
-                  setAddMenu(false);
-                }}
-              >
-                Import a booking
-              </button>
-            </div>
-          ) : null}
-        </div>
       </div>
       <section
         id={`${headingId}-view-overview`}
@@ -1668,87 +1694,67 @@ export function ItineraryHub({
       >
         <div className="plan-overview-main">
           <div className="plan-next-action">
-            <p className="eyebrow text-accent">Your next step</p>
-            <h3 className={plan.h2}>
-              {nextPartner
-                ? itemsForLane(items, nextPartner).length
-                  ? "Review your plans"
-                  : nextPartner.showWhen === "hotel"
-                    ? "Find somewhere to stay"
-                    : nextPartner.showWhen === "flights"
-                      ? "Find your way there"
-                      : "Find a car for your trip"
-                : "Make room for the memorable"}
-            </h3>
-            <p className={`${plan.body} text-muted`}>
-              {nextPartner
-                ? "Keep your options and confirmations together. Only confirmed reservations count as booked."
-                : "Add an activity, a place to explore, or a note for later."}
-            </p>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() =>
-                nextPartner
-                  ? openBookings(nextPartner.key)
-                  : setQuickEntry({ type: "activity" })
-              }
-            >
-              {nextPartner
-                ? `Explore ${nextPartner.showWhen === "hotel" ? "stays" : laneName(nextPartner).toLowerCase()}`
-                : "Add an activity"}
-            </button>
-          </div>
-          <div className="plan-overview-preview">
-            <div className="plan-toolbar">
-              <h3 className={plan.h3}>Your itinerary at a glance</h3>
+            <SectionHeader as="h3" title={nextTitle} subtitle={nextSubtitle} />
+            <div className="plan-next-actions">
               <button
                 type="button"
-                className={plan.textBtn}
-                onClick={() => setView("itinerary")}
+                className="btn btn-primary"
+                onClick={() =>
+                  nextPartner
+                    ? openBookings(nextPartner.key)
+                    : setQuickEntry({ type: "activity" })
+                }
               >
-                View all days
+                {nextPartner
+                  ? `Explore ${nextPartner.showWhen === "hotel" ? "stays" : laneName(nextPartner).toLowerCase()}`
+                  : "Add an activity"}
               </button>
+              {view === "overview" ? addToTripMenu : null}
             </div>
-            {days.slice(0, 3).map((day) => (
-              <div key={day.index} className="plan-preview-day">
-                <div>
-                  <span className="eyebrow text-accent">{day.label}</span>
-                  <p className={plan.caption}>{day.detail}</p>
-                </div>
-                <div>
-                  {sorted
-                    .filter(
-                      (item) =>
-                          scheduledDayIndex(item, days) === day.index,
-                    )
-                    .sort(compareScheduledItems)
-                    .map((item) => (
-                      <p key={item.id} className={plan.body}>
-                        {itemScheduleTime(item) ? `${itemScheduleTime(item)} · ` : ""}
-                        {item.title}
-                      </p>
-                    ))}
-                  {!sorted.some(
-                    (item) =>
-                                scheduledDayIndex(item, days) === day.index,
-                  ) ? (
-                    <p className={`${plan.body} text-muted`}>
-                      A day to make your own.
-                    </p>
-                  ) : null}
-                  <button
-                    type="button"
-                    className={`${plan.textBtn} plan-add-plan`}
-                    onClick={() =>
-                      setQuickEntry({ type: "activity", day: day.index })
+          </div>
+          <Card className="plan-overview-preview">
+            <SectionHeader
+              as="h3"
+              title="Your itinerary at a glance"
+              action={
+                <button type="button" className={plan.textBtn} onClick={() => setView("itinerary")}>
+                  View all days
+                </button>
+              }
+            />
+            {days.slice(0, 3).map((day) => {
+              const dayItems = sorted
+                .filter((item) => scheduledDayIndex(item, days) === day.index)
+                .sort(compareScheduledItems);
+              return (
+                <div key={day.index} className="plan-preview-day">
+                  <ListRow
+                    title={day.label}
+                    detail={day.detail || "Open day"}
+                    trailing={
+                      <button
+                        type="button"
+                        className="ui-row-action"
+                        onClick={() => setQuickEntry({ type: "activity", day: day.index })}
+                      >
+                        Add
+                      </button>
                     }
-                  >
-                    + Add a plan
-                  </button>
+                  />
+                  {dayItems.length ? (
+                    dayItems.map((item) => (
+                      <ListRow
+                        key={item.id}
+                        title={item.title}
+                        detail={itemScheduleTime(item) || TRIP_STATUS_LABEL[item.status]}
+                      />
+                    ))
+                  ) : (
+                    <p className={`${plan.caption} text-muted`}>A day to make your own.</p>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {!days.length ? (
               <button
                 type="button"
@@ -1768,36 +1774,30 @@ export function ItineraryHub({
                 {unscheduled.length === 1 ? "item" : "items"} to organize
               </button>
             ) : null}
-          </div>
+          </Card>
         </div>
         <aside className="plan-overview-side">
-          <div className="plan-checklist">
-            <h3 className={plan.h3}>Booking checklist</h3>
+          <Card className="plan-checklist">
+            <SectionHeader as="h3" title="Booking checklist" />
             {partners.some((partner) => partner.showWhen !== "extra") ? (
               partners
                 .filter((partner) => partner.showWhen !== "extra")
                 .map((partner) => (
-                  <button
-                    type="button"
+                  <ListRow
                     key={partner.key}
+                    title={laneName(partner)}
+                    detail={bookingProgress(itemsForLane(items, partner))}
                     onClick={() => openBookings(partner.key)}
-                  >
-                    <span>{laneName(partner)}</span>
-                    <span className="text-muted">
-                      {bookingProgress(itemsForLane(items, partner))}
-                    </span>
-                  </button>
+                    trailing={<ChevronRight size={18} aria-hidden="true" />}
+                  />
                 ))
             ) : (
-              <p className={plan.body}>
-                No searches selected. Add existing bookings or choose what you
-                need in trip details.
-              </p>
+              <EmptyState>No searches selected. Add existing bookings or choose what you need in trip details.</EmptyState>
             )}
             <button type="button" className={plan.textBtn} onClick={onEditTrip}>
               Edit what you need
             </button>
-          </div>
+          </Card>
           <JournalNotes
             headingId={headingId}
             destination={state.destination}
@@ -1842,13 +1842,16 @@ export function ItineraryHub({
               Search for something new or add a reservation you already have.
             </p>
           </div>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setQuickEntry({ type: "other" })}
-          >
-            Add manually
-          </button>
+          <div className="plan-inline-actions">
+            {view === "bookings" ? addToTripMenu : null}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setQuickEntry({ type: "other" })}
+            >
+              Add manually
+            </button>
+          </div>
         </div>
         {sorted.some(
           (item) =>
@@ -1986,13 +1989,13 @@ export function ItineraryHub({
                 </div>
 
                 {laneItems.length === 0 ? (
-                  <p className={`${plan.body} text-muted`}>
+                  <EmptyState>
                     {partner.key === "booking"
                       ? "Nothing saved here yet. Search stays and the hotel you book comes back to this itinerary."
                       : isFlightLanePartner(partner)
                         ? "Nothing saved here yet. Search flights and the one you book comes back to this itinerary."
                         : "Nothing saved here yet. Search, then add the booking you want to keep."}
-                  </p>
+                  </EmptyState>
                 ) : (
                   <ul className="plan-stack-tight">
                     {laneItems.map((item) => {
@@ -2042,7 +2045,7 @@ export function ItineraryHub({
                   <div className="plan-lane-secondaries">
                     <button
                       type="button"
-                      className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
+                      className={`${plan.textBtn} plan-lane-quiet self-start text-heading underline decoration-border underline-offset-2`}
                       onClick={() => {
                         setLanePin(partner.key);
                         setQuickEntry({
@@ -2055,7 +2058,7 @@ export function ItineraryHub({
                     </button>
                     <button
                       type="button"
-                      className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
+                      className={`${plan.textBtn} plan-lane-quiet self-start text-heading underline decoration-border underline-offset-2`}
                       onClick={() => {
                         setLanePin(OUTSIDE_TAB);
                         window.requestAnimationFrame(() => {
@@ -2167,6 +2170,7 @@ export function ItineraryHub({
                   );
                 })}
               </div>
+              {view === "itinerary" ? addToTripMenu : null}
             </div>
             {sorted.length === 0 ? (
               <p
@@ -2202,25 +2206,18 @@ export function ItineraryHub({
                           <a
                             key={day.index}
                             href={`#${headingId}-day-${day.index}`}
-                            className="plan-control inline-flex min-h-11 shrink-0 flex-col justify-center border border-border bg-white px-4 py-2"
+                            className="plan-control plan-day-chip inline-flex min-h-11 shrink-0 flex-col justify-center border border-border bg-white px-4 py-2"
                           >
                             <span
                               className={`${plan.caption} font-semibold whitespace-nowrap text-heading`}
                             >
                               {day.label}
-                              {count > 0 ? (
-                                <span className="ml-1.5 text-accent">
-                                  {count}
-                                </span>
-                              ) : null}
                             </span>
-                            {day.detail ? (
-                              <span
-                                className={`${plan.caption} whitespace-nowrap text-muted`}
-                              >
-                                {day.detail}
-                              </span>
-                            ) : null}
+                            <span
+                              className={`${plan.caption} plan-week-day-count whitespace-nowrap`}
+                            >
+                              {count === 0 ? "Open" : count === 1 ? "1 plan" : `${count} plans`}
+                            </span>
                           </a>
                         );
                       })}
@@ -2232,16 +2229,15 @@ export function ItineraryHub({
                           className={`${plan.caption} font-semibold whitespace-nowrap text-heading`}
                         >
                           Unscheduled
-                          {unscheduled.length > 0 ? (
-                            <span className="ml-1.5 text-accent">
-                              {unscheduled.length}
-                            </span>
-                          ) : null}
                         </span>
                         <span
-                          className={`${plan.caption} whitespace-nowrap text-muted`}
+                          className={`${plan.caption} plan-week-day-count whitespace-nowrap`}
                         >
-                          No day yet
+                          {unscheduled.length === 0
+                            ? "No day yet"
+                            : unscheduled.length === 1
+                              ? "1 plan"
+                              : `${unscheduled.length} plans`}
                         </span>
                       </a>
                     </nav>
@@ -2405,6 +2401,7 @@ export function ItineraryHub({
           items={items}
           flexibleOn={flexibleOn}
           guides={packingGuides}
+          headerAction={view === "packing" ? addToTripMenu : null}
         />
       </div>
       <div className="plan-hub-more" hidden={view === "bookings"}>

@@ -177,9 +177,16 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit, onRemove
       </p>
       <div className="plan-stack plan-week-mobile">
         <div className="plan-week-day-picker" role="group" aria-label="Choose a day">
-          {visibleDays.map((day) => <button key={day.index} type="button" aria-pressed={activeDay?.index === day.index} onClick={() => setSelectedDay(day.index)}>
-            <span>{day.label}</span><span>{day.detail}</span>
-          </button>)}
+          {visibleDays.map((day) => {
+            const count = itemsForDay(items, day.index, days).length;
+            const countLabel = count === 0 ? "Open" : count === 1 ? "1 plan" : `${count} plans`;
+            return (
+              <button key={day.index} type="button" aria-pressed={activeDay?.index === day.index} aria-label={`${day.label}, ${countLabel}`} onClick={() => setSelectedDay(day.index)}>
+                <span>{day.label}</span>
+                <span className="plan-week-day-count">{countLabel}</span>
+              </button>
+            );
+          })}
         </div>
         {(activeDay ? [activeDay] : []).map((day) => {
           const dayItems = itemsForDay(items, day.index, days);

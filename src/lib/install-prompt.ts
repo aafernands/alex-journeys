@@ -49,6 +49,19 @@ export function dismissUntilValue(now: number): string {
   return String(now + INSTALL_DISMISS_MS);
 }
 
+/**
+ * An open trip should not be covered the moment it appears.
+ * Wait for a gesture on that trip, then use the normal delay.
+ * Null means the timer should not start yet.
+ */
+export function installAutoPromptDelayMs(
+  tripOpen: boolean,
+  interacted: boolean,
+): number | null {
+  if (tripOpen && !interacted) return null;
+  return INSTALL_PROMPT_DELAY_MS;
+}
+
 export function isStandaloneDisplay(
   displayModeStandalone: boolean,
   navigatorStandalone: boolean | undefined,

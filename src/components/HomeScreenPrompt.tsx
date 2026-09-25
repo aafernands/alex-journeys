@@ -12,6 +12,7 @@ import {
   INSTALL_STATE_EVENT,
   buildInstallGuide,
   dismissUntilValue,
+  installAutoPromptDelayMs,
   installButtonLabel,
   installVisibility,
   isInstallPromptPage,
@@ -207,6 +208,19 @@ export function HomeScreenPrompt() {
 
     let cancelled = false;
     let timer = 0;
+    let interacted = false;
+    const cleanGesture = () => {
+      window.removeEventListener("pointerdown", onTripGesture);
+      window.removeEventListener("keydown", onTripGesture);
+    };
+    const onTripGesture = () => {
+      if (!document.querySelector(".plan-workspace")) return;
+      interacted = true;
+      cleanGesture();
+      if (cancelled) return;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(tryOpen, INSTALL_PROMPT_DELAY_MS);
+    };
     const tryOpen = () => {
       if (cancelled || openRef.current) return;
       if (!eligibleForAutoPrompt() || !isInstallPromptPage(window.location.pathname)) return;
@@ -214,11 +228,18 @@ export function HomeScreenPrompt() {
         timer = window.setTimeout(tryOpen, 1000);
         return;
       }
+      const tripOpen = Boolean(document.querySelector(".plan-workspace"));
+      if (installAutoPromptDelayMs(tripOpen, interacted) == null) {
+        window.addEventListener("pointerdown", onTripGesture);
+        window.addEventListener("keydown", onTripGesture);
+        return;
+      }
       setOpen(true);
     };
     timer = window.setTimeout(tryOpen, INSTALL_PROMPT_DELAY_MS);
     return () => {
       cancelled = true;
+      cleanGesture();
       window.clearTimeout(timer);
     };
   }, [pathname, canPrompt, manual]);

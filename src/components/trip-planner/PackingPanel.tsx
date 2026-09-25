@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { tripDays, type TripItem } from "@/lib/trip-record";
@@ -33,6 +33,7 @@ import {
   type PackingListState,
   type PackingTemplateId,
 } from "@/lib/packing-list";
+import { ListRow } from "@/components/ui/ListRow";
 import { plan } from "@/components/trip-planner/density";
 
 const CATEGORY_GUIDE: Record<string, "packing" | "tech" | undefined> = {
@@ -49,6 +50,7 @@ export function PackingPanel({
   items,
   flexibleOn,
   guides,
+  headerAction,
 }: {
   headingId: string;
   notes: string;
@@ -57,6 +59,7 @@ export function PackingPanel({
   items: TripItem[];
   flexibleOn: boolean;
   guides: readonly PackingGuide[];
+  headerAction?: ReactNode;
 }) {
   const list = useMemo(() => readPackingList(notes), [notes]);
   const nights = useMemo(() => {
@@ -144,29 +147,34 @@ export function PackingPanel({
             {summary}
           </p>
         </div>
-        {progress.total > 0 ? (
+        {headerAction || progress.total > 0 ? (
           <div className="plan-pack-tools">
-            <button
-              type="button"
-              className="plan-pack-tool"
-              aria-pressed={hidePacked}
-              onClick={() => setHidePacked((value) => !value)}
-            >
-              {hidePacked ? "Show packed" : "Hide packed"}
-            </button>
-            <button
-              type="button"
-              className="plan-pack-tool"
-              disabled={progress.packed === 0}
-              onClick={() =>
-                commit(
-                  (current) => uncheckAllPacking(current),
-                  "Unchecked everything for the trip home.",
-                )
-              }
-            >
-              Uncheck all
-            </button>
+            {headerAction}
+            {progress.total > 0 ? (
+              <>
+                <button
+                  type="button"
+                  className="plan-pack-tool"
+                  aria-pressed={hidePacked}
+                  onClick={() => setHidePacked((value) => !value)}
+                >
+                  {hidePacked ? "Show packed" : "Hide packed"}
+                </button>
+                <button
+                  type="button"
+                  className="plan-pack-tool"
+                  disabled={progress.packed === 0}
+                  onClick={() =>
+                    commit(
+                      (current) => uncheckAllPacking(current),
+                      "Unchecked everything for the trip home.",
+                    )
+                  }
+                >
+                  Uncheck all
+                </button>
+              </>
+            ) : null}
           </div>
         ) : null}
       </header>
@@ -212,7 +220,7 @@ export function PackingPanel({
             enterKeyHint="done"
             onChange={(event) => setDraft(event.target.value)}
           />
-          <button type="submit" className="btn btn-ink plan-pack-add-btn">
+          <button type="submit" className="btn btn-primary plan-pack-add-btn">
             Add
           </button>
         </div>
@@ -385,7 +393,7 @@ export function PackingPanel({
                 <div className="plan-pack-suggestion-actions">
                   <button
                     type="button"
-                    className="btn btn-ink plan-pack-suggestion-add"
+                    className="btn btn-secondary plan-pack-suggestion-add"
                     onClick={() =>
                       commit(
                         (current) => acceptPackingSuggestion(current, suggestion),
@@ -493,25 +501,29 @@ function PackingRow({
 
   return (
     <li className={`plan-pack-item${item.packed ? " is-packed" : ""}`}>
-      <div className="plan-pack-item-main">
-        <button
-          type="button"
-          className="plan-pack-check"
-          role="checkbox"
-          aria-checked={item.packed}
-          aria-label={`${item.packed ? "Packed" : "Not packed"}: ${item.label}`}
-          onClick={onToggle}
-        >
-          <span aria-hidden="true">{item.packed ? "✓" : ""}</span>
-        </button>
-        <button type="button" className="plan-pack-item-label" aria-expanded={open} onClick={onOpen}>
-          <span className="plan-pack-item-name">{item.label}</span>
+      <ListRow
+        leading={
+          <button
+            type="button"
+            className="plan-pack-check"
+            role="checkbox"
+            aria-checked={item.packed}
+            aria-label={`${item.packed ? "Packed" : "Not packed"}: ${item.label}`}
+            onClick={onToggle}
+          >
+            <span aria-hidden="true">{item.packed ? "✓" : ""}</span>
+          </button>
+        }
+        title={<span className="plan-pack-item-name">{item.label}</span>}
+        detail={
           <span className="plan-pack-item-meta">
             {item.quantity > 1 ? `× ${item.quantity}` : "Qty 1"}
             {who ? ` · ${who}` : ""}
           </span>
-        </button>
-      </div>
+        }
+        onClick={onOpen}
+        expanded={open}
+      />
       {open ? (
         <div className="plan-pack-editor">
           <label className="plan-field">
