@@ -34,7 +34,8 @@ describe("warm glass chrome", () => {
     assert.match(nav, /mobile-bottom-nav\b[\s\S]*\bglass\b/);
     assert.match(nav, /app-tab-bar/);
     assert.match(hub, /plan-hero-back glass-strong/);
-    assert.match(hub, /plan-hero-action glass-strong/);
+    assert.match(hub, /plan-trip-menu-panel glass-strong/);
+    assert.doesNotMatch(hub, /plan-hero-action glass-strong/);
     assert.match(drawer, /mobile-nav-panel glass-strong/);
     const dialog = source("../src/components/header/DrawerLoginDialog.tsx");
     assert.match(dialog, /drawer-login-dialog glass-strong/);

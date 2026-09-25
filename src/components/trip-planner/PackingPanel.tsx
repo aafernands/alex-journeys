@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { tripDays, type TripItem } from "@/lib/trip-record";
@@ -50,6 +50,7 @@ export function PackingPanel({
   items,
   flexibleOn,
   guides,
+  headerAction,
 }: {
   headingId: string;
   notes: string;
@@ -58,6 +59,7 @@ export function PackingPanel({
   items: TripItem[];
   flexibleOn: boolean;
   guides: readonly PackingGuide[];
+  headerAction?: ReactNode;
 }) {
   const list = useMemo(() => readPackingList(notes), [notes]);
   const nights = useMemo(() => {
@@ -145,29 +147,34 @@ export function PackingPanel({
             {summary}
           </p>
         </div>
-        {progress.total > 0 ? (
+        {headerAction || progress.total > 0 ? (
           <div className="plan-pack-tools">
-            <button
-              type="button"
-              className="plan-pack-tool"
-              aria-pressed={hidePacked}
-              onClick={() => setHidePacked((value) => !value)}
-            >
-              {hidePacked ? "Show packed" : "Hide packed"}
-            </button>
-            <button
-              type="button"
-              className="plan-pack-tool"
-              disabled={progress.packed === 0}
-              onClick={() =>
-                commit(
-                  (current) => uncheckAllPacking(current),
-                  "Unchecked everything for the trip home.",
-                )
-              }
-            >
-              Uncheck all
-            </button>
+            {headerAction}
+            {progress.total > 0 ? (
+              <>
+                <button
+                  type="button"
+                  className="plan-pack-tool"
+                  aria-pressed={hidePacked}
+                  onClick={() => setHidePacked((value) => !value)}
+                >
+                  {hidePacked ? "Show packed" : "Hide packed"}
+                </button>
+                <button
+                  type="button"
+                  className="plan-pack-tool"
+                  disabled={progress.packed === 0}
+                  onClick={() =>
+                    commit(
+                      (current) => uncheckAllPacking(current),
+                      "Unchecked everything for the trip home.",
+                    )
+                  }
+                >
+                  Uncheck all
+                </button>
+              </>
+            ) : null}
           </div>
         ) : null}
       </header>

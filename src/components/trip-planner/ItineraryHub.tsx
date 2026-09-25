@@ -1035,6 +1035,7 @@ export function ItineraryHub({
   const [view, updateView] = useState<"overview" | "itinerary" | "bookings" | "packing">(
     focusStay || focusFlight ? "bookings" : "overview",
   );
+  const [addMenu, setAddMenu] = useState(false);
   const viewKey = `aj.trip-workspace:${tripId ?? state.destination}:${state.startDate || state.month}`;
   function setView(next: "overview" | "itinerary" | "bookings" | "packing") {
     updateView(next);
@@ -1043,6 +1044,7 @@ export function ItineraryHub({
     } catch {
       /* In-memory navigation still works. */
     }
+    setAddMenu(false);
     if (window.matchMedia(TRIP_SECTION_BAR_QUERY).matches) {
       window.scrollTo(0, 0);
       if (next === "packing") {
@@ -1101,7 +1103,6 @@ export function ItineraryHub({
     day?: number;
     laneKey?: string;
   } | null>(null);
-  const [addMenu, setAddMenu] = useState(false);
   const moreMenuRef = useRef<HTMLDetailsElement>(null);
   const [moreMenuSession, setMoreMenuSession] = useState(0);
   useEffect(() => {
@@ -1345,6 +1346,65 @@ export function ItineraryHub({
                 "Couldn’t save to your account. This copy stays in this browser."
               : null;
 
+  const addToTripMenu = (
+    <div className="plan-add-menu">
+      <button
+        type="button"
+        className="btn btn-secondary"
+        id={`${headingId}-add-trigger`}
+        aria-expanded={addMenu}
+        aria-controls={`${headingId}-add-options`}
+        onClick={() => setAddMenu(!addMenu)}
+      >
+        + Add to trip
+      </button>
+      {addMenu ? (
+        <div id={`${headingId}-add-options`} className="plan-add-options glass-strong">
+          {(
+            [
+              ["activity", "Activity"],
+              ["note", "Note"],
+              ["other", "Booking"],
+            ] as const
+          ).map(([type, label]) => (
+            <button
+              type="button"
+              key={type}
+              onClick={() => {
+                setQuickEntry({ type });
+                setAddMenu(false);
+              }}
+            >
+              {label}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              openBookings(OUTSIDE_TAB);
+              setAddMenu(false);
+            }}
+          >
+            Import a booking
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+
+  const nextTitle = nextPartner
+    ? itemsForLane(items, nextPartner).length
+      ? "Review your plans"
+      : nextPartner.showWhen === "hotel"
+        ? "Find somewhere to stay"
+        : nextPartner.showWhen === "flights"
+          ? "Find your way there"
+          : "Find a car for your trip"
+    : "Make room for the memorable";
+  const nextSubtitle = nextPartner
+    ? "Keep options and confirmations in one place."
+    : "Add an activity, a place, or a note for later.";
+
   return (
     <div className="plan-hub plan-workspace" data-view={view}>
       <div className="plan-hub-lead plan-stack-tight">
@@ -1356,14 +1416,28 @@ export function ItineraryHub({
           meta={[dates, travelers].filter(Boolean).join(" · ")}
           back={
             <Link href="/account#trips" className="plan-hero-back glass-strong">
-              ← My trips
+              My trips
             </Link>
+          }
+          status={
+            saveMode === "local" && !copied ? (
+              <p className="plan-trip-summary-status">
+                <span>Saved on this device</span>
+                <Link
+                  href={planATripLoginHref(tripId, "signin")}
+                  className="plan-trip-summary-signin"
+                  onClick={onRememberGuestDraft}
+                >
+                  Sign in
+                </Link>
+              </p>
+            ) : null
           }
           actions={
         <>
           <button
             type="button"
-            className="plan-hero-action glass-strong"
+            className="plan-hero-action"
             aria-label="Share a copy"
             title="Share a copy"
             onClick={async () => {
@@ -1392,7 +1466,7 @@ export function ItineraryHub({
           </button>
           <button
             type="button"
-            className="plan-hero-action glass-strong"
+            className="plan-hero-action"
             aria-label="Edit details"
             title="Edit details"
             onClick={onEditTrip}
@@ -1428,7 +1502,7 @@ export function ItineraryHub({
               next?.focus();
             }}
           >
-            <summary className="plan-hero-action glass-strong" aria-label="More options" title="More options"><Ellipsis size={20} aria-hidden="true" /></summary>
+            <summary className="plan-hero-action" aria-label="More options" title="More options"><Ellipsis size={20} aria-hidden="true" /></summary>
             <div className="plan-trip-menu-panel glass-strong" role="menu" aria-label="More options">
               <DownloadTripPdf
                 headingId={headingId}
@@ -1464,6 +1538,12 @@ export function ItineraryHub({
         </p>
 
       </div>
+      {copied ||
+      saveMode === "offer" ||
+      saveMode === "declined" ||
+      saveCopy ||
+      saveMode === "unavailable" ||
+      saveMode === "error" ? (
       <div className="plan-hub-save">
         {copied ? (
           <p
@@ -1476,19 +1556,6 @@ export function ItineraryHub({
               are not shared.
             </span>
           </p>
-        ) : null}
-
-        {saveMode === "local" ? (
-          <div className="plan-local-save">
-            <p className={plan.caption}>Saved on this device</p>
-            <Link
-              href={planATripLoginHref(tripId, "signin")}
-              className={plan.textBtn}
-              onClick={onRememberGuestDraft}
-            >
-              Sign in to sync across devices
-            </Link>
-          </div>
         ) : null}
 
         {saveMode === "offer" ? (
@@ -1565,6 +1632,7 @@ export function ItineraryHub({
           </div>
         ) : null}
       </div>
+      ) : null}
 
       <div className="plan-workspace-toolbar">
         <div
@@ -1618,49 +1686,6 @@ export function ItineraryHub({
             ),
           )}
         </div>
-        <div className="plan-add-menu">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            id={`${headingId}-add-trigger`}
-            aria-expanded={addMenu}
-            aria-controls={`${headingId}-add-options`}
-            onClick={() => setAddMenu(!addMenu)}
-          >
-            + Add to trip
-          </button>
-          {addMenu ? (
-            <div id={`${headingId}-add-options`} className="plan-add-options glass-strong">
-              {(
-                [
-                  ["activity", "Activity"],
-                  ["note", "Note"],
-                  ["other", "Booking"],
-                ] as const
-              ).map(([type, label]) => (
-                <button
-                  type="button"
-                  key={type}
-                  onClick={() => {
-                    setQuickEntry({ type });
-                    setAddMenu(false);
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={() => {
-                  openBookings(OUTSIDE_TAB);
-                  setAddMenu(false);
-                }}
-              >
-                Import a booking
-              </button>
-            </div>
-          ) : null}
-        </div>
       </div>
       <section
         id={`${headingId}-view-overview`}
@@ -1671,36 +1696,23 @@ export function ItineraryHub({
       >
         <div className="plan-overview-main">
           <div className="plan-next-action">
-            <p className={plan.label}>Your next step</p>
-            <h3 className={plan.h2}>
-              {nextPartner
-                ? itemsForLane(items, nextPartner).length
-                  ? "Review your plans"
-                  : nextPartner.showWhen === "hotel"
-                    ? "Find somewhere to stay"
-                    : nextPartner.showWhen === "flights"
-                      ? "Find your way there"
-                      : "Find a car for your trip"
-                : "Make room for the memorable"}
-            </h3>
-            <p className={`${plan.body} text-muted`}>
-              {nextPartner
-                ? "Keep your options and confirmations together. Only confirmed reservations count as booked."
-                : "Add an activity, a place to explore, or a note for later."}
-            </p>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() =>
-                nextPartner
-                  ? openBookings(nextPartner.key)
-                  : setQuickEntry({ type: "activity" })
-              }
-            >
-              {nextPartner
-                ? `Explore ${nextPartner.showWhen === "hotel" ? "stays" : laneName(nextPartner).toLowerCase()}`
-                : "Add an activity"}
-            </button>
+            <SectionHeader as="h3" title={nextTitle} subtitle={nextSubtitle} />
+            <div className="plan-next-actions">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() =>
+                  nextPartner
+                    ? openBookings(nextPartner.key)
+                    : setQuickEntry({ type: "activity" })
+                }
+              >
+                {nextPartner
+                  ? `Explore ${nextPartner.showWhen === "hotel" ? "stays" : laneName(nextPartner).toLowerCase()}`
+                  : "Add an activity"}
+              </button>
+              {view === "overview" ? addToTripMenu : null}
+            </div>
           </div>
           <Card className="plan-overview-preview">
             <SectionHeader
@@ -1832,13 +1844,16 @@ export function ItineraryHub({
               Search for something new or add a reservation you already have.
             </p>
           </div>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setQuickEntry({ type: "other" })}
-          >
-            Add manually
-          </button>
+          <div className="plan-inline-actions">
+            {view === "bookings" ? addToTripMenu : null}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setQuickEntry({ type: "other" })}
+            >
+              Add manually
+            </button>
+          </div>
         </div>
         {sorted.some(
           (item) =>
@@ -2157,6 +2172,7 @@ export function ItineraryHub({
                   );
                 })}
               </div>
+              {view === "itinerary" ? addToTripMenu : null}
             </div>
             {sorted.length === 0 ? (
               <p
@@ -2192,25 +2208,18 @@ export function ItineraryHub({
                           <a
                             key={day.index}
                             href={`#${headingId}-day-${day.index}`}
-                            className="plan-control inline-flex min-h-11 shrink-0 flex-col justify-center border border-border bg-white px-4 py-2"
+                            className="plan-control plan-day-chip inline-flex min-h-11 shrink-0 flex-col justify-center border border-border bg-white px-4 py-2"
                           >
                             <span
                               className={`${plan.caption} font-semibold whitespace-nowrap text-heading`}
                             >
                               {day.label}
-                              {count > 0 ? (
-                                <span className="ml-1.5 text-accent">
-                                  {count}
-                                </span>
-                              ) : null}
                             </span>
-                            {day.detail ? (
-                              <span
-                                className={`${plan.caption} whitespace-nowrap text-muted`}
-                              >
-                                {day.detail}
-                              </span>
-                            ) : null}
+                            <span
+                              className={`${plan.caption} plan-week-day-count whitespace-nowrap`}
+                            >
+                              {count === 0 ? "Open" : count === 1 ? "1 plan" : `${count} plans`}
+                            </span>
                           </a>
                         );
                       })}
@@ -2222,16 +2231,15 @@ export function ItineraryHub({
                           className={`${plan.caption} font-semibold whitespace-nowrap text-heading`}
                         >
                           Unscheduled
-                          {unscheduled.length > 0 ? (
-                            <span className="ml-1.5 text-accent">
-                              {unscheduled.length}
-                            </span>
-                          ) : null}
                         </span>
                         <span
-                          className={`${plan.caption} whitespace-nowrap text-muted`}
+                          className={`${plan.caption} plan-week-day-count whitespace-nowrap`}
                         >
-                          No day yet
+                          {unscheduled.length === 0
+                            ? "No day yet"
+                            : unscheduled.length === 1
+                              ? "1 plan"
+                              : `${unscheduled.length} plans`}
                         </span>
                       </a>
                     </nav>
@@ -2395,6 +2403,7 @@ export function ItineraryHub({
           items={items}
           flexibleOn={flexibleOn}
           guides={packingGuides}
+          headerAction={view === "packing" ? addToTripMenu : null}
         />
       </div>
       <div className="plan-hub-more" hidden={view === "bookings"}>

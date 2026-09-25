@@ -4304,12 +4304,21 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
   gap: var(--space-2);
 }
 
+[data-density="compact"].plan-trip-hotel .plan-h2,
+[data-density="compact"].plan-trip-hotel .plan-h3,
+[data-density="compact"] .ui-section-title {
+  font-size: var(--type-title-size);
+  font-weight: var(--type-title-weight);
+  line-height: var(--type-title-leading);
+  letter-spacing: -0.02em;
+}
+
 [data-density="compact"] .plan-trip-summary {
   position: relative;
   display: grid;
-  grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+  grid-template-columns: 4rem minmax(0, 1fr);
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   width: auto;
   max-width: none;
   min-height: 0;
@@ -4323,8 +4332,8 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
 }
 
 [data-density="compact"] .plan-trip-summary-photo {
-  width: 4.5rem;
-  height: 4.5rem;
+  width: 4rem;
+  height: 4rem;
   overflow: hidden;
   border-radius: var(--radius-control);
   background: var(--surface-soft);
@@ -4340,7 +4349,18 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
   object-fit: cover;
 }
 
+[data-density="compact"] .plan-trip-summary-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+}
+
 [data-density="compact"] .plan-trip-summary .plan-trip-hero-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: normal;
   font-size: var(--type-title-size);
   font-weight: var(--type-title-weight);
   line-height: var(--type-title-leading);
@@ -4349,12 +4369,34 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
 }
 
 [data-density="compact"] .plan-trip-summary .plan-trip-hero-meta,
+[data-density="compact"] .plan-trip-summary-status,
 [data-density="compact"] .plan-trip-summary-credit {
-  margin-top: var(--space-1);
+  margin-top: 0;
   font-size: var(--type-caption-size);
   font-weight: var(--type-caption-weight);
-  line-height: var(--type-caption-leading);
+  line-height: 1.25;
   color: var(--muted);
+}
+
+[data-density="compact"] .plan-trip-summary-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+[data-density="compact"] .plan-trip-summary-signin {
+  flex: 0 0 auto;
+  color: var(--heading);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+[data-density="compact"] .plan-trip-summary-credit {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 [data-density="compact"] .plan-trip-summary-credit a {
@@ -4384,7 +4426,27 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
 [data-density="compact"] .plan-trip-summary .plan-trip-hero-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  flex: 0 0 auto;
+  gap: 0;
+  margin-left: 0;
+}
+
+[data-density="compact"] .plan-trip-summary .plan-hero-action {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+[data-density="compact"] .plan-trip-summary .plan-hero-action:hover,
+[data-density="compact"] .plan-trip-summary .plan-trip-menu[open] > .plan-hero-action {
+  background: var(--surface-soft);
+  color: var(--heading);
+  box-shadow: none;
 }
 
 [data-density="compact"] .plan-workspace .plan-hub-lead {
@@ -4417,6 +4479,30 @@ main.plan-flow:has(.plan-trip-summary) > .section-band {
   background: var(--white);
 }
 
+[data-density="compact"] .plan-next-action .ui-section-header {
+  align-items: center;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+[data-density="compact"] .plan-next-action .ui-section-subtitle {
+  font-size: var(--type-secondary-size);
+  font-weight: var(--type-secondary-weight);
+  line-height: var(--type-secondary-leading);
+}
+
+[data-density="compact"] .plan-next-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+[data-density="compact"] .plan-next-action .btn {
+  min-height: var(--control-height);
+  padding-inline: var(--space-3);
+}
+
 [data-density="compact"] .plan-overview,
 [data-density="compact"] .plan-overview-main,
 [data-density="compact"] .plan-overview-side {
@@ -4427,7 +4513,7 @@ main.plan-flow:has(.plan-trip-summary) > .section-band {
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding-block: var(--space-2);
+  padding-block: 0;
 }
 
 [data-density="compact"] .plan-week-day-picker > button {
@@ -4438,6 +4524,24 @@ main.plan-flow:has(.plan-trip-summary) > .section-band {
   border-radius: var(--radius-pill);
   font-size: var(--type-caption-size);
   line-height: 1.15;
+}
+
+[data-density="compact"] .plan-day-chip {
+  height: var(--control-height);
+  min-height: var(--control-height);
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+}
+
+[data-density="compact"] .plan-week-day-count {
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  line-height: 1.15;
+  color: var(--muted);
+}
+
+[data-density="compact"] .plan-week-day-picker > button[aria-pressed="true"] .plan-week-day-count {
+  color: var(--on-solid);
 }
 
 [data-density="compact"] .plan-week-add {
@@ -4525,8 +4629,31 @@ main.plan-flow:has(.plan-trip-summary) > .section-band {
 }
 
 [data-density="compact"] .plan-workspace .plan-add-menu,
-[data-density="compact"] .plan-workspace .plan-add-menu > button {
+[data-density="compact"] .plan-workspace .plan-add-menu > button,
+[data-density="compact"] .plan-add-menu,
+[data-density="compact"] .plan-add-menu > button {
   width: auto;
+}
+
+[data-density="compact"] .plan-add-menu > .btn {
+  min-height: var(--control-height);
+  padding-inline: var(--space-3);
+  white-space: nowrap;
+}
+
+[data-density="compact"] .plan-hub-days .plan-toolbar,
+[data-density="compact"] .plan-bookings-heading {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+[data-density="compact"] .plan-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 @media (max-width: 767px) {
@@ -4557,22 +4684,23 @@ main.plan-flow:has(.plan-trip-summary) > .section-band {
   body:has(main.plan-flow) .plan-trip-hotel:has(.plan-workspace) {
     padding-bottom: calc(var(--tab-bar-height) + 0.7rem + env(safe-area-inset-bottom, 0px));
   }
+
+  [data-density="compact"] .plan-workspace-toolbar {
+    display: contents;
+  }
 }
 
-@media (max-width: 420px) {
-  [data-density="compact"] .plan-trip-summary {
-    grid-template-columns: 4.5rem minmax(0, 1fr);
-    align-items: center;
+@media (max-width: 639px) {
+  [data-density="compact"] .plan-workspace .plan-trip-summary {
+    min-height: 0;
+    width: auto;
+    margin-left: 0;
+    margin-right: 0;
   }
 
-  [data-density="compact"] .plan-trip-summary-photo {
-    grid-row: span 2;
-    align-self: center;
-  }
-
-  [data-density="compact"] .plan-trip-summary .plan-trip-hero-actions {
-    grid-column: 2;
-    justify-content: flex-start;
+  [data-density="compact"] .plan-workspace .plan-trip-summary .plan-trip-hero-title {
+    font-size: var(--type-title-size);
+    line-height: var(--type-title-leading);
   }
 }
 

@@ -6,14 +6,16 @@ import {
   type DestinationPhoto,
 } from "@/lib/destination-photo";
 
-export function TripDestinationHero({ destination, title, headingId, meta, actions, back, fallbackImage }: {
+export function TripDestinationHero({ destination, title, headingId, meta, actions, back, status, fallbackImage }: {
   destination: string;
   title: string;
   headingId: string;
   meta: string;
   actions?: ReactNode;
-  /** Sits above the title as a short link back to saved trips. */
+  /** Short link kept on the meta line. */
   back?: ReactNode;
+  /** One gray line under the meta, such as local-save status. */
+  status?: ReactNode;
   fallbackImage?: { url: string; alt: string };
 }) {
   const [result, setResult] = useState<{ destination: string; photo: DestinationPhoto } | null>(null);
@@ -51,12 +53,20 @@ export function TripDestinationHero({ destination, title, headingId, meta, actio
         ) : null}
       </div>
       <div className="plan-trip-summary-copy">
-        {back}
-        <h2 id={headingId} className="plan-trip-hero-title">{title}</h2>
-        {meta ? <p className="plan-trip-hero-meta">{meta}</p> : null}
+        <div className="plan-trip-summary-title-row">
+          <h2 id={headingId} className="plan-trip-hero-title">{title}</h2>
+          {actions ? <div className="plan-trip-hero-actions" role="group" aria-label="Trip actions">{actions}</div> : null}
+        </div>
+        {meta || back ? (
+          <p className="plan-trip-hero-meta">
+            {meta}
+            {meta && back ? <span aria-hidden="true"> · </span> : null}
+            {back}
+          </p>
+        ) : null}
+        {status}
         {credit}
       </div>
-      {actions ? <div className="plan-trip-hero-actions" role="group" aria-label="Trip actions">{actions}</div> : null}
     </div>
   );
 }
