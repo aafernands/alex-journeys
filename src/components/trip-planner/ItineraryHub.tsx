@@ -1416,22 +1416,8 @@ export function ItineraryHub({
           meta={[dates, travelers].filter(Boolean).join(" · ")}
           back={
             <Link href="/account#trips" className="plan-hero-back glass-strong">
-              My trips
+              ← My trips
             </Link>
-          }
-          status={
-            saveMode === "local" && !copied ? (
-              <p className="plan-trip-summary-status">
-                <span>Saved on this device</span>
-                <Link
-                  href={planATripLoginHref(tripId, "signin")}
-                  className="plan-trip-summary-signin"
-                  onClick={onRememberGuestDraft}
-                >
-                  Sign in
-                </Link>
-              </p>
-            ) : null
           }
           actions={
         <>
@@ -1538,6 +1524,18 @@ export function ItineraryHub({
         </p>
 
       </div>
+      {saveMode === "local" && !copied ? (
+        <p className="plan-hero-sync">
+          <span>Saved on this device</span>
+          <Link
+            href={planATripLoginHref(tripId, "signin")}
+            className="plan-trip-summary-signin"
+            onClick={onRememberGuestDraft}
+          >
+            Sign in
+          </Link>
+        </p>
+      ) : null}
       {copied ||
       saveMode === "offer" ||
       saveMode === "declined" ||

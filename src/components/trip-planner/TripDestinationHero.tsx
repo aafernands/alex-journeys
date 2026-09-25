@@ -6,16 +6,14 @@ import {
   type DestinationPhoto,
 } from "@/lib/destination-photo";
 
-export function TripDestinationHero({ destination, title, headingId, meta, actions, back, status, fallbackImage }: {
+export function TripDestinationHero({ destination, title, headingId, meta, actions, back, fallbackImage }: {
   destination: string;
   title: string;
   headingId: string;
   meta: string;
   actions?: ReactNode;
-  /** Short link kept on the meta line. */
+  /** Plain control in the top-left of the photo. */
   back?: ReactNode;
-  /** One gray line under the meta, such as local-save status. */
-  status?: ReactNode;
   fallbackImage?: { url: string; alt: string };
 }) {
   const [result, setResult] = useState<{ destination: string; photo: DestinationPhoto } | null>(null);
@@ -45,28 +43,21 @@ export function TripDestinationHero({ destination, title, headingId, meta, actio
 
   return (
     <div className="plan-trip-hero plan-trip-summary">
-      <div className="plan-trip-summary-photo">
-        {photo ? (
-          // Unsplash requires hotlinking the returned image URL.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img className="plan-trip-hero-image" src={photo.image} alt={photo.alt ?? `View of ${destination}`} fetchPriority="high" onError={() => setFailedImages((previous) => new Set(previous).add(photo.image))} />
-        ) : null}
+      {photo ? (
+        // Unsplash requires hotlinking the returned image URL.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className="plan-trip-hero-image" src={photo.image} alt={photo.alt ?? `View of ${destination}`} fetchPriority="high" onError={() => setFailedImages((previous) => new Set(previous).add(photo.image))} />
+      ) : null}
+      <div className="plan-trip-hero-shade" aria-hidden="true" />
+      <div className="plan-trip-hero-bar">
+        {back}
+        {actions ? <div className="plan-trip-hero-actions" role="group" aria-label="Trip actions">{actions}</div> : null}
       </div>
-      <div className="plan-trip-summary-copy">
-        <div className="plan-trip-summary-title-row">
-          <h2 id={headingId} className="plan-trip-hero-title">{title}</h2>
-          {actions ? <div className="plan-trip-hero-actions" role="group" aria-label="Trip actions">{actions}</div> : null}
-        </div>
-        {meta || back ? (
-          <p className="plan-trip-hero-meta">
-            {meta}
-            {meta && back ? <span aria-hidden="true"> · </span> : null}
-            {back}
-          </p>
-        ) : null}
-        {status}
-        {credit}
+      <div className="plan-trip-hero-content">
+        <h2 id={headingId} className="plan-trip-hero-title">{title}</h2>
+        {meta ? <p className="plan-trip-hero-meta">{meta}</p> : null}
       </div>
+      {credit}
     </div>
   );
 }
