@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit, Inter } from "next/font/google";
 import { Header } from "@/components/Header";
 import { PinterestPinReveal } from "@/components/pinterest/PinterestPinReveal";
 import { Providers } from "@/components/Providers";
 import { Footer } from "@/components/Footer";
 import { HomeScreenPrompt } from "@/components/HomeScreenPrompt";
+import { InstallServiceWorker } from "@/components/InstallServiceWorker";
+import { INSTALL_CAPTURE_SCRIPT } from "@/lib/install-prompt";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { JsonLd } from "@/components/JsonLd";
 import { isReaderAuthConfigured } from "@/auth";
@@ -86,10 +88,16 @@ export const metadata: Metadata = {
   icons: {
     icon: faviconHref,
     shortcut: faviconHref,
-    apple: faviconHref,
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: siteConfig.name,
+    statusBarStyle: "default",
   },
   other: {
     "google-adsense-account": adsenseClientId,
+    "apple-mobile-web-app-capable": "yes",
   },
   ...(googleSiteVerification
     ? { verification: { google: googleSiteVerification } }
@@ -97,6 +105,15 @@ export const metadata: Metadata = {
 };
 
 const themeInitScript = `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f0e6" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a1612" },
+  ],
+};
 
 export default function RootLayout({
   children,
@@ -123,6 +140,9 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{ __html: TRIP_FOCUS_BOOT }}
         />
+        <script
+          dangerouslySetInnerHTML={{ __html: INSTALL_CAPTURE_SCRIPT }}
+        />
         <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
         <script
           async
@@ -138,6 +158,7 @@ export default function RootLayout({
           />
           <PinterestPinReveal />
           <HomeScreenPrompt />
+          <InstallServiceWorker />
           <div className="flex min-h-0 flex-1 flex-col mobile-bottom-nav-pad">
             <div className="flex-1">{children}</div>
             <Footer />

@@ -15,6 +15,7 @@ import { SearchInput } from "@/components/search/SearchInput";
 import { DrawerLoginDialog } from "./DrawerLoginDialog";
 import { UserRound, X } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { AddToHomeScreenButton } from "@/components/AddToHomeScreenButton";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { ThemeAppearanceControl } from "@/components/ThemeToggle";
 import { site } from "@/data/content";
@@ -285,6 +286,10 @@ export function MobileNavDrawer({ open, onClose }: Props) {
           </section>
         </div>
         <div className="shrink-0 border-t border-border bg-bg px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
+          <AddToHomeScreenButton
+            className="mb-3 flex min-h-11 w-full items-center gap-2 rounded-xl px-2 text-sm font-semibold text-muted transition hover:bg-surface-soft hover:text-heading"
+            onPress={onClose}
+          />
           <ThemeAppearanceControl />
         </div>
       </nav>

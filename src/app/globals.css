@@ -3100,15 +3100,23 @@ main.plan-flow .plan-hotel-planner-section { padding-top: 0; }
 main.plan-flow .plan-trip:has(.plan-workspace),
 main.plan-flow .plan-workspace-shell { margin-top: 0; }
 .plan-trip-hero { background: linear-gradient(135deg, #193d46, #486c6b); }
-.home-screen-prompt { position: fixed; z-index: 150; right: 1rem; bottom: max(1rem, env(safe-area-inset-bottom)); width: min(26rem, calc(100% - 2rem)); padding: 1.25rem; border: 1px solid var(--border); border-radius: 1.25rem; background: var(--white); box-shadow: 0 12px 48px rgb(0 0 0 / .22); }
+dialog.home-screen-prompt { position: fixed; inset: auto 1rem max(1rem, env(safe-area-inset-bottom)) auto; z-index: 150; width: min(26rem, calc(100vw - 2rem)); max-width: min(26rem, calc(100vw - 2rem)); height: fit-content; max-height: min(40rem, calc(100dvh - 2rem)); margin: 0; overflow: auto; padding: 1.25rem; border: 1px solid var(--border); border-radius: 1.25rem; background: var(--white); color: var(--text); box-shadow: 0 12px 48px rgb(0 0 0 / .22); }
+dialog.home-screen-prompt::backdrop { background: rgb(31 26 20 / .4); }
 .home-screen-prompt-close { position: absolute; top: .5rem; right: .5rem; display: grid; place-items: center; width: 44px; height: 44px; border-radius: .7rem; color: var(--muted); }
 .home-screen-prompt-close:hover { background: var(--surface-soft); }
 .home-screen-prompt-help { margin-top: 1rem; padding: .85rem; border-radius: .75rem; background: var(--surface-soft); color: var(--heading); font-size: .875rem; line-height: 1.6; }
+.home-screen-steps { display: grid; gap: .75rem; margin-top: 1rem; padding: 0; list-style: none; }
+.home-screen-step { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: .75rem; align-items: center; min-height: 44px; }
+.home-screen-step-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: .75rem; background: var(--surface-soft); color: var(--heading); }
+.home-screen-step-title { display: block; font-size: .9375rem; font-weight: 700; color: var(--heading); }
+.home-screen-step-detail { display: block; margin-top: .15rem; font-size: .8125rem; line-height: 1.45; color: var(--text); }
+.home-screen-add-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 2.5rem; height: 1.65rem; padding: 0 .55rem; border-radius: 999px; background: var(--accent); color: var(--on-solid); font-size: .75rem; font-weight: 700; letter-spacing: .01em; }
 @media (max-width: 1279px) {
-  body.mobile-bottom-nav-visible .home-screen-prompt { bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
+  body.mobile-bottom-nav-visible dialog.home-screen-prompt {
+    bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+    max-height: calc(100dvh - 6.25rem - env(safe-area-inset-bottom, 0px));
+  }
 }
-body:has(.mobile-nav-drawer-shell) .home-screen-prompt,
-body:has(dialog[open]) .home-screen-prompt { display: none; }
 .plan-trip-hero-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
 .plan-trip-hero-actions { position: absolute; top: 1rem; right: 1rem; display: flex; gap: .5rem; z-index: 2; }
 .plan-hero-action { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid rgba(255,255,255,.45); border-radius: .75rem; color: white; background: rgba(15,23,28,.8); cursor: pointer; list-style: none; }
