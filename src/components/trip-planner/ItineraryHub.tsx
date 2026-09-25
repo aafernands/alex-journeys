@@ -1423,7 +1423,7 @@ export function ItineraryHub({
         <>
           <button
             type="button"
-            className="plan-hero-action"
+            className="plan-hero-action glass-strong"
             aria-label="Share a copy"
             title="Share a copy"
             onClick={async () => {
@@ -1452,7 +1452,7 @@ export function ItineraryHub({
           </button>
           <button
             type="button"
-            className="plan-hero-action"
+            className="plan-hero-action glass-strong"
             aria-label="Edit details"
             title="Edit details"
             onClick={onEditTrip}
@@ -1488,7 +1488,7 @@ export function ItineraryHub({
               next?.focus();
             }}
           >
-            <summary className="plan-hero-action" aria-label="More options" title="More options"><Ellipsis size={20} aria-hidden="true" /></summary>
+            <summary className="plan-hero-action glass-strong" aria-label="More options" title="More options"><Ellipsis size={20} aria-hidden="true" /></summary>
             <div className="plan-trip-menu-panel glass-strong" role="menu" aria-label="More options">
               <DownloadTripPdf
                 headingId={headingId}

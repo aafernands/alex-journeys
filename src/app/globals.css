@@ -4357,11 +4357,6 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
   object-fit: cover;
 }
 
-[data-density="compact"] .plan-trip-summary .plan-trip-hero-shade {
-  background:
-    linear-gradient(180deg, rgba(31, 26, 20, 0.5) 0%, rgba(31, 26, 20, 0.22) 42%, rgba(31, 26, 20, 0.62) 100%);
-}
-
 [data-density="compact"] .plan-trip-summary .plan-trip-hero-bar {
   position: relative;
   z-index: 3;
@@ -4369,11 +4364,7 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  padding:
-    2px
-    max(2px, env(safe-area-inset-right, 0px))
-    0
-    max(2px, env(safe-area-inset-left, 0px));
+  padding: var(--space-2) 1.25rem 0;
 }
 
 [data-density="compact"] .plan-trip-summary .plan-trip-hero-content {
@@ -4382,49 +4373,57 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
   display: flex;
   flex: 1;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-end;
   min-height: 0;
-  padding: 0 var(--space-4) 28px;
-  text-align: center;
+  padding: 0 1.25rem 28px;
+  text-align: left;
   color: var(--hero-type);
+}
+
+[data-density="compact"] .plan-trip-summary .overlay-kicker {
+  margin-bottom: var(--space-1);
 }
 
 [data-density="compact"] .plan-trip-summary .plan-trip-hero-title {
   margin: 0;
-  max-width: 22rem;
+  max-width: none;
   overflow-wrap: normal;
+  text-align: left;
   font-family: var(--font-outfit), system-ui, sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--hero-type);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 [data-density="compact"] .plan-trip-summary .plan-trip-hero-meta {
   margin-top: var(--space-1);
+  text-align: left;
   font-size: var(--type-secondary-size);
   font-weight: var(--type-secondary-weight);
   line-height: var(--type-secondary-leading);
-  color: color-mix(in srgb, var(--hero-type) 82%, transparent);
+  color: var(--hero-type);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 [data-density="compact"] .plan-trip-summary-credit {
   position: absolute;
-  right: var(--space-4);
-  bottom: 22px;
-  left: var(--space-4);
+  right: 1.25rem;
+  bottom: 26px;
+  left: 1.25rem;
   z-index: 2;
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: center;
+  text-align: left;
   font-size: var(--type-caption-size);
   font-weight: var(--type-caption-weight);
   line-height: 1.25;
-  color: color-mix(in srgb, var(--hero-type) 78%, transparent);
+  color: var(--hero-type);
 }
 
 [data-density="compact"] .plan-trip-summary-credit a {
@@ -4434,54 +4433,50 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
 }
 
 [data-density="compact"] .plan-trip-summary .plan-hero-back {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
-  padding: 0 var(--space-2);
-  border: 0;
-  border-radius: var(--radius-control);
-  background: transparent;
-  box-shadow: none;
-  color: var(--hero-type);
+  height: 36px;
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  color: var(--heading);
   font-size: var(--type-secondary-size);
   font-weight: 600;
   line-height: 1;
   text-decoration: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+}
+
+[data-density="compact"] .plan-trip-summary .plan-hero-back::before,
+[data-density="compact"] .plan-trip-summary .plan-hero-action::before {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
 }
 
 [data-density="compact"] .plan-trip-summary .plan-hero-back:hover,
 [data-density="compact"] .plan-trip-summary .plan-hero-back:visited {
-  background: color-mix(in srgb, var(--hero-type) 16%, transparent);
-  color: var(--hero-type);
+  color: var(--heading);
 }
 
 [data-density="compact"] .plan-trip-summary .plan-trip-hero-actions {
   display: flex;
   align-items: center;
   flex: 0 0 auto;
-  gap: 0;
+  gap: var(--space-2);
   margin-left: auto;
 }
 
 [data-density="compact"] .plan-trip-summary .plan-hero-action {
-  width: 44px;
-  height: 44px;
-  border: 0;
-  border-radius: var(--radius-control);
-  background: color-mix(in srgb, var(--hero-type) 16%, transparent);
-  box-shadow: none;
-  color: var(--hero-type);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  color: var(--heading);
 }
 
-[data-density="compact"] .plan-trip-summary .plan-hero-action:hover,
-[data-density="compact"] .plan-trip-summary .plan-trip-menu[open] > .plan-hero-action {
-  background: color-mix(in srgb, var(--hero-type) 28%, transparent);
-  color: var(--hero-type);
-  box-shadow: none;
+[data-density="compact"] .plan-trip-summary .plan-hero-action::before {
+  inset: -4px;
 }
 
 [data-density="compact"] .plan-trip-summary:has(.plan-trip-menu[open]) {
@@ -4489,9 +4484,20 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
   z-index: 8;
 }
 
-[data-density="compact"] .plan-workspace .plan-hero-action:focus-visible,
-[data-density="compact"] .plan-workspace .plan-hero-back:focus-visible {
-  outline-color: var(--hero-type);
+@media (min-width: 768px) {
+  [data-density="compact"] .plan-trip-summary .plan-trip-hero-bar {
+    padding-inline: 2rem;
+  }
+
+  [data-density="compact"] .plan-trip-summary .plan-trip-hero-content,
+  [data-density="compact"] .plan-trip-summary-credit {
+    padding-inline: 2rem;
+  }
+
+  [data-density="compact"] .plan-trip-summary-credit {
+    right: 2rem;
+    left: 2rem;
+  }
 }
 
 [data-density="compact"] .plan-workspace .plan-hub-lead {
@@ -4784,7 +4790,7 @@ main.plan-flow:has(.plan-trip-summary) > .section-band {
   }
 
   [data-density="compact"] .plan-workspace .plan-trip-summary .plan-trip-hero-title {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
     line-height: 1.2;
   }
 }

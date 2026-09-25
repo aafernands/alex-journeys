@@ -54,6 +54,7 @@ export function TripDestinationHero({ destination, title, headingId, meta, actio
         {actions ? <div className="plan-trip-hero-actions" role="group" aria-label="Trip actions">{actions}</div> : null}
       </div>
       <div className="plan-trip-hero-content">
+        <p className="overlay-kicker">Your trip</p>
         <h2 id={headingId} className="plan-trip-hero-title">{title}</h2>
         {meta ? <p className="plan-trip-hero-meta">{meta}</p> : null}
       </div>
