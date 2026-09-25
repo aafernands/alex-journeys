@@ -48,6 +48,12 @@ import {
 } from "@/lib/trip-record";
 import type { StoredPlan } from "@/lib/trip-planner-storage";
 import { flightItemLinkLabel } from "@/lib/flights";
+import {
+  isStayConfirmationPath,
+  parseStaysSearchParams,
+  stayConfirmationPath,
+  stayItemLinkLabel,
+} from "@/lib/stays";
 import { FLIGHT_LANE_HASH } from "@/lib/flights-itinerary";
 import { STAY_LANE_HASH } from "@/lib/stays-itinerary";
 import { plan } from "@/components/trip-planner/density";
@@ -181,7 +187,40 @@ function newestBookedFlightId(items: TripItem[]): string | undefined {
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0]?.id;
 }
 
-function ItemUrl({ url, compact = false }: { url: string; compact?: boolean }) {
+function ItemUrl({
+  item,
+  compact = false,
+}: {
+  item: TripItem;
+  compact?: boolean;
+}) {
+  const url =
+    item.type === "hotel" &&
+    item.status === "booked" &&
+    item.confirmation &&
+    item.url.startsWith("/stays") &&
+    !isStayConfirmationPath(item.url)
+      ? stayConfirmationPath(
+          {
+            bookingId: item.confirmation,
+            confirmationCode: item.confirmation,
+            hotelName: item.title,
+            status: "CONFIRMED",
+            checkin: "",
+            checkout: "",
+            dateLabel: "",
+            roomName: "",
+            rateLabel: "",
+            totalLabel: "",
+            sandbox: false,
+          },
+          parseStaysSearchParams(
+            Object.fromEntries(
+              new URL(`https://alexjourneys.com${item.url}`).searchParams,
+            ),
+          ),
+        )
+      : item.url;
   if (!url) return null;
   const onSite = url.startsWith("/") && !url.startsWith("//");
   return (
@@ -193,6 +232,7 @@ function ItemUrl({ url, compact = false }: { url: string; compact?: boolean }) {
     >
       {onSite
         ? flightItemLinkLabel(url) ||
+          stayItemLinkLabel(url) ||
           (url.startsWith("/stays") ? "View stay" : "View")
         : compact
           ? url.replace(/^https?:\/\//, "")
@@ -518,7 +558,7 @@ function ItemCard({
         <div className="min-w-0 plan-stack-tight">
           <p className={plan.h4}>{item.title}</p>
           {when ? <p className={`${plan.caption} text-muted`}>{when}</p> : null}
-          <ItemUrl url={item.url} compact />
+          <ItemUrl item={item} compact />
           {item.notes ? (
             <p className={`${plan.body} text-text`}>{item.notes}</p>
           ) : null}
@@ -622,7 +662,7 @@ function TimelineEntry({
             {item.notes}
           </p>
         ) : null}
-        <ItemUrl url={item.url} />
+        <ItemUrl item={item} />
       </div>
     </article>
   );

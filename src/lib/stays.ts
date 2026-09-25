@@ -317,6 +317,90 @@ export function staysHotelPath(hotelId: string, query: StaysQuery): string {
   return params ? `/stays/${id}?${params}` : `/stays/${id}`;
 }
 
+function sitePathname(href: string): string {
+  const path = href.trim().split("?")[0]?.split("#")[0] ?? "";
+  return path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
+}
+
+export function isStayConfirmationPath(href: string): boolean {
+  return sitePathname(href) === "/stays/confirmation";
+}
+
+export function stayItemLinkLabel(url: string): string {
+  if (isStayConfirmationPath(url)) return "View reservation";
+  if (sitePathname(url) === "/stays") return "Search stays";
+  return "";
+}
+
+export function stayConfirmationPath(
+  confirmation: Pick<
+    StayConfirmationDetails,
+    | "bookingId"
+    | "confirmationCode"
+    | "hotelName"
+    | "status"
+    | "checkin"
+    | "checkout"
+    | "dateLabel"
+    | "roomName"
+    | "rateLabel"
+    | "totalLabel"
+    | "sandbox"
+  >,
+  query: StaysQuery,
+): string {
+  const bookingId = text(confirmation.bookingId, 80);
+  if (!bookingId) return "";
+  const params = new URLSearchParams(staysQueryString(query));
+  params.set("booking", bookingId);
+  const values: Array<[string, string]> = [
+    ["ref", text(confirmation.confirmationCode, 80)],
+    ["hotel", text(confirmation.hotelName, 160)],
+    ["status", text(confirmation.status, 40)],
+    ["checkin", cleanStayDate(confirmation.checkin)],
+    ["checkout", cleanStayDate(confirmation.checkout)],
+    ["dates", text(confirmation.dateLabel, 80)],
+    ["room", text(confirmation.roomName, 160)],
+    ["rate", text(confirmation.rateLabel, 120)],
+    ["total", text(confirmation.totalLabel, 40)],
+  ];
+  for (const [key, value] of values) if (value) params.set(key, value);
+  if (confirmation.sandbox) params.set("sandbox", "1");
+  return `/stays/confirmation?${params.toString()}`;
+}
+
+export function stayConfirmationFromParams(
+  searchParams: Record<string, string | string[] | undefined>,
+): StayConfirmationDetails | null {
+  const bookingId = firstParam(searchParams, "booking").trim().slice(0, 80);
+  if (!bookingId) return null;
+  const checkin = cleanStayDate(firstParam(searchParams, "checkin"));
+  const checkout = cleanStayDate(firstParam(searchParams, "checkout"));
+  return {
+    hotelName: firstParam(searchParams, "hotel").trim().slice(0, 160) || "Stay",
+    bookingId,
+    confirmationCode: firstParam(searchParams, "ref").trim().slice(0, 80) || bookingId,
+    status: firstParam(searchParams, "status").trim().slice(0, 40),
+    checkin,
+    checkout,
+    dateLabel: firstParam(searchParams, "dates").trim().slice(0, 80),
+    roomName: firstParam(searchParams, "room").trim().slice(0, 160),
+    rateLabel: firstParam(searchParams, "rate").trim().slice(0, 120),
+    cancellation: [],
+    conditions: [],
+    remarks: "",
+    terms: "",
+    totalLabel: firstParam(searchParams, "total").trim().slice(0, 40),
+    guestName: "",
+    guestEmail: "",
+    payment: {
+      method: "guest_card",
+      label: "Payment was confirmed through Nuitee.",
+    },
+    sandbox: firstParam(searchParams, "sandbox") === "1",
+  };
+}
+
 export function staysCheckoutPath(
   hotelId: string,
   offerId: string,

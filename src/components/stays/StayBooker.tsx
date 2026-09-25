@@ -12,6 +12,7 @@ import {
   formatStayMoney,
   parseStayGuest,
   refundableLabel,
+  stayConfirmationPath,
   stayGuestFieldErrors,
   stayNights,
   staysCheckoutPath,
@@ -307,9 +308,10 @@ export function StayBooker({
 
   useEffect(() => {
     if (!confirmation) return;
+    const confirmationHref = stayConfirmationPath(confirmation, query);
     let cancelled = false;
     void commitBookedStay(
-      bookedStayFromConfirmation(confirmation, stayHref),
+      bookedStayFromConfirmation(confirmation, confirmationHref || stayHref),
       stayTripContext(query),
     ).then((result) => {
       if (!cancelled) applyCommit(result);
@@ -322,8 +324,9 @@ export function StayBooker({
   function addToItinerary() {
     if (!confirmation || itinerary === "adding") return;
     setItinerary("adding");
+    const confirmationHref = stayConfirmationPath(confirmation, query);
     void commitBookedStay(
-      bookedStayFromConfirmation(confirmation, stayHref),
+      bookedStayFromConfirmation(confirmation, confirmationHref || stayHref),
       stayTripContext(query),
     ).then(applyCommit);
   }

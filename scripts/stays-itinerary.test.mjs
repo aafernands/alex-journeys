@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { initialPlannerState } from "../src/lib/trip-planner-model.ts";
 import { parseTripWrite, tripWriteFromPlan } from "../src/lib/trip-record.ts";
-import { parseStaysSearchParams } from "../src/lib/stays.ts";
+import {
+  parseStaysSearchParams,
+  stayConfirmationFromParams,
+  stayConfirmationPath,
+} from "../src/lib/stays.ts";
 import {
   itineraryStayHref,
   mergeBookedStay,
@@ -79,6 +83,7 @@ describe("stays itinerary handoff", () => {
       sortOrder: 0,
       updatedAt: "2026-09-21T00:00:00.000Z",
     };
+
     const plan = lisbonPlan({ tripId: "trip_abc", items: [flight] });
     const first = mergeBookedStay(plan, stay);
     assert.equal(first.added, true);
@@ -93,6 +98,43 @@ describe("stays itinerary handoff", () => {
     assert.equal(hotel.dayIndex, 1);
     assert.equal(hotel.url, stay.href);
     assert.equal(first.plan.items[0].title, "Outbound");
+
+    const confirmationHref = stayConfirmationPath(
+      {
+        bookingId: "book_123",
+        confirmationCode: "CONF-12345",
+        hotelName: "Hotel du Test",
+        status: "CONFIRMED",
+        checkin: "2027-04-12",
+        checkout: "2027-04-19",
+        dateLabel: "Apr 12, 2027 – Apr 19, 2027",
+        roomName: "King",
+        rateLabel: "Breakfast",
+        totalLabel: "$240",
+        sandbox: true,
+      },
+      parseStaysSearchParams({
+        dest: "Lisbon, Portugal",
+        start: "2027-04-12",
+        end: "2027-04-19",
+        trip: "trip_abc",
+      }),
+    );
+    assert.equal(confirmationHref.startsWith("/stays/confirmation?"), true);
+    const parsedConfirmation = stayConfirmationFromParams(
+      Object.fromEntries(
+        new URL(`https://example.test${confirmationHref}`).searchParams,
+      ),
+    );
+    assert.equal(parsedConfirmation?.hotelName, "Hotel du Test");
+    assert.equal(parsedConfirmation?.confirmationCode, "CONF-12345");
+
+    const upgraded = mergeBookedStay(first.plan, {
+      ...stay,
+      href: confirmationHref,
+    });
+    assert.equal(upgraded.added, false);
+    assert.equal(upgraded.plan.items[1]?.url, confirmationHref);
 
     const again = mergeBookedStay(first.plan, stay);
     assert.equal(again.added, false);

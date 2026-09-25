@@ -1,4 +1,8 @@
-import type { StayConfirmationDetails, StaysQuery } from "@/lib/stays";
+import {
+  isStayConfirmationPath,
+  type StayConfirmationDetails,
+  type StaysQuery,
+} from "@/lib/stays";
 import {
   formatDateRange,
   initialPlannerState,
@@ -175,6 +179,23 @@ function isSameStay(item: TripItem, confirmation: string, href: string, title: s
   return Boolean(href) && item.url === href && item.title === title;
 }
 
+function withConfirmationHref(
+  items: TripItem[],
+  confirmation: string,
+  href: string,
+  title: string,
+): TripItem[] {
+  if (!href || !isStayConfirmationPath(href)) return items;
+  let changed = false;
+  const next = items.map((item) => {
+    if (!isSameStay(item, confirmation, item.url, title)) return item;
+    if (item.url === href || isStayConfirmationPath(item.url)) return item;
+    changed = true;
+    return { ...item, url: href, updatedAt: new Date().toISOString() };
+  });
+  return changed ? next : items;
+}
+
 /** Append a booked hotel, or leave the plan alone when that confirmation is already there. */
 export function mergeBookedStay(
   plan: StoredPlan,
@@ -186,10 +207,11 @@ export function mergeBookedStay(
   const state = withHotelCategory(plan.state);
   const already = plan.items.some((item) => isSameStay(item, confirmation, href, title));
   if (already) {
-    const changed = state !== plan.state || plan.step !== 4;
+    const items = withConfirmationHref(plan.items, confirmation, href, title);
+    const changed = state !== plan.state || plan.step !== 4 || items !== plan.items;
     return {
       added: false,
-      plan: changed ? { ...plan, step: 4, state } : plan,
+      plan: changed ? { ...plan, step: 4, state, items } : plan,
     };
   }
   const sortOrder = plan.items.reduce((max, item) => Math.max(max, item.sortOrder), -1) + 1;
