@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { TripDestinationHero } from "./TripDestinationHero";
 import {
   journalNotesForDestination,
   type JournalNote,
@@ -719,55 +720,6 @@ function LaneCta({
   );
 }
 
-function destinationHero(destination: string): {
-  image: string;
-  credit: string;
-  creditUrl: string;
-} {
-  const place = destination.split(",")[0]?.trim().toLowerCase() ?? "";
-  const commonsFile = (filename: string) =>
-    `https://commons.wikimedia.org/wiki/Special:Redirect/file/${encodeURIComponent(filename)}?width=1800`;
-
-  const known: Record<
-    string,
-    { image: string; credit: string; creditUrl: string }
-  > = {
-    "las vegas": {
-      image: commonsFile("Las Vegas skyline.jpg"),
-      credit: "Antoine Taveneaux / Wikimedia Commons",
-      creditUrl:
-        "https://commons.wikimedia.org/wiki/File:Las_Vegas_skyline.jpg",
-    },
-    miami: {
-      image: commonsFile("Miami, Florida skyline.jpg"),
-      credit: "Wilfredor / Wikimedia Commons",
-      creditUrl:
-        "https://commons.wikimedia.org/wiki/File:Miami,_Florida_skyline.jpg",
-    },
-    "miami beach": {
-      image: commonsFile("Miami skyline (1).jpg"),
-      credit: "Marc Averette / Wikimedia Commons",
-      creditUrl:
-        "https://commons.wikimedia.org/wiki/File:Miami_skyline_(1).jpg",
-    },
-    "los angeles": {
-      image: commonsFile("Los Angeles - Skyline.jpg"),
-      credit: "Jon Sullivan / Wikimedia Commons",
-      creditUrl:
-        "https://commons.wikimedia.org/wiki/File:Los_Angeles_-_Skyline.jpg",
-    },
-  };
-
-  return (
-    known[place] ?? {
-      image:
-        "/media/migrated/2026-06-a60c26af-799c-4f17-8a9f-f97a75adb417-e1780787677499-fcca20aa.webp",
-      credit: "Alex Journeys",
-      creditUrl: "/destinations",
-    }
-  );
-}
-
 export function ItineraryHub({
   headingId,
   config,
@@ -921,7 +873,6 @@ export function ItineraryHub({
   const unscheduled = sorted.filter(
     (item) => scheduledDayIndex(item, days.length) == null,
   );
-  const hero = destinationHero(state.destination);
 
   function renderTimeline(list: TripItem[]) {
     return (
@@ -1094,33 +1045,12 @@ export function ItineraryHub({
         <Link href="/account#trips" className={plan.textBtn}>
           ← My trips
         </Link>
-        <div
-          className="plan-trip-hero"
-          style={{ backgroundImage: `url("${hero.image}")` }}
-        >
-          <div className="plan-trip-hero-shade" aria-hidden="true" />
-          <div className="plan-trip-hero-content">
-            <p className="plan-trip-hero-kicker">Your trip</p>
-            <h2 id={headingId} className="plan-trip-hero-title">
-              {tripTitle ||
-                state.destination.trim() ||
-                config.steps.next.heading}
-            </h2>
-            <p className="plan-trip-hero-meta">
-              {[dates, travelers].filter(Boolean).join(" · ")}
-            </p>
-          </div>
-          <a
-            href={hero.creditUrl}
-            target={hero.creditUrl.startsWith("/") ? undefined : "_blank"}
-            rel={
-              hero.creditUrl.startsWith("/") ? undefined : "noopener noreferrer"
-            }
-            className="plan-trip-hero-credit"
-          >
-            {hero.credit}
-          </a>
-        </div>
+        <TripDestinationHero
+          destination={state.destination}
+          title={tripTitle || state.destination.trim() || config.steps.next.heading}
+          headingId={headingId}
+          meta={[dates, travelers].filter(Boolean).join(" · ")}
+        />
         <p className={`${plan.prose} text-muted plan-desktop-only`}>
           {subhead}
         </p>

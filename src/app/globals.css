@@ -2850,8 +2850,8 @@ body.mobile-bottom-nav-visible .plan-sticky {
 .plan-workspace > * { order: 0; min-width: 0; }
 .plan-workspace [hidden] { display: none !important; }
 .plan-workspace .plan-hub-lead { padding: 0; border: 0; }
-.plan-workspace .plan-trip-hero { min-height: 11rem; border-radius: 1.25rem; }
-.plan-workspace .plan-trip-hero-content { min-height: 11rem; padding: 1.5rem 2rem; }
+.plan-workspace .plan-trip-hero { min-height: 22rem; border-radius: 1.25rem; }
+.plan-workspace .plan-trip-hero-content { min-height: 22rem; padding: 2rem 2rem 3rem; }
 .plan-workspace .plan-hub-actions { padding-inline: .25rem; }
 .plan-workspace .plan-hub-save { margin: 0; padding: .75rem 1rem; border: 1px solid var(--border); border-radius: .85rem; background: var(--white); }
 .plan-workspace .plan-hub-save:empty { display: none; }
@@ -2896,13 +2896,19 @@ body.mobile-bottom-nav-visible .plan-sticky {
 .plan-unassigned-bookings h3 { margin-bottom: .75rem; }
 /* Once a trip exists, its own header replaces the setup introduction. */
 #planner:has(.plan-workspace) > .mb-5 { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-main.plan-flow:has(.plan-workspace) { padding-top: 1.5rem; }
+main.plan-flow { padding-top: 0; }
+main.plan-flow > .section-band { padding-top: 1rem; }
+main.plan-flow .plan-hotel-planner-section { padding-top: 0; }
+main.plan-flow .plan-trip:has(.plan-workspace),
+main.plan-flow .plan-workspace-shell { margin-top: 0; }
+.plan-trip-hero { background: linear-gradient(135deg, #193d46, #486c6b); }
+.plan-trip-hero-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
 .plan-workspace .plan-hub-lead > p { display: none; }
 .plan-workspace .plan-trip-hero-title { font-size: clamp(1.9rem, 4vw, 2.8rem); }
 @media (max-width: 639px) {
   .plan-workspace > * { order: 0 !important; }
-  .plan-workspace .plan-trip-hero { min-height: 8rem; }
-  .plan-workspace .plan-trip-hero-content { min-height: 8rem; padding: 1.25rem; }
+  .plan-workspace .plan-trip-hero { min-height: 17rem; }
+  .plan-workspace .plan-trip-hero-content { min-height: 17rem; padding: 1.25rem 1.25rem 3rem; }
   .plan-workspace .plan-trip-hero-title { font-size: 1.9rem; }
   .plan-workspace-toolbar { flex-wrap: wrap; gap: .75rem; }
   .plan-workspace-tabs { width: 100%; }
