@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { journalNotesForDestination } from "../src/lib/trip-journal.ts";
+import { cleanItemColor, defaultItemColor, itemAccentHex } from "../src/lib/trip-item-color.ts";
 import { initialPlannerState } from "../src/lib/trip-planner-model.ts";
 import {
   bookedChecklist,
@@ -117,6 +118,43 @@ describe("saved trips", () => {
     assert.deepEqual(bookedChecklist(parsed.data.items), [item.id]);
     assert.equal(parsed.data.title, "Lisbon · Apr 2027");
     assert.equal(parsed.data.packingNotes, "");
+  });
+
+  it("keeps a chosen color and falls back for older items", () => {
+    const item = createTripItem({
+      type: "activity",
+      title: "Shopping",
+      color: "plum",
+      sortOrder: 0,
+    });
+    assert.equal(item.color, "plum");
+    assert.equal(itemAccentHex(item), itemAccentHex({ color: "plum" }));
+    const parsed = parseTripWrite(
+      tripWriteFromPlan({ state: lisbonState(), items: [item] }, true),
+    );
+    assert.equal(parsed.ok, true);
+    if (!parsed.ok) return;
+    assert.equal(parsed.data.items[0]?.color, "plum");
+
+    const legacy = createTripItem({
+      type: "hotel",
+      title: "Alfama stay",
+      sortOrder: 1,
+    });
+    assert.equal(legacy.color, undefined);
+    assert.equal(defaultItemColor(legacy), "coral");
+    assert.equal(defaultItemColor({ type: "flight", title: "Outbound" }), "sky");
+    assert.equal(defaultItemColor({ type: "car", title: "Rental car" }), "amber");
+    assert.equal(defaultItemColor({ type: "activity", title: "Dinner" }), "berry");
+    assert.equal(defaultItemColor({ type: "activity", title: "Shopping" }), "clay");
+    assert.equal(defaultItemColor({ type: "activity", title: "Museum" }), "sage");
+    assert.equal(defaultItemColor({ type: "note", title: "Pack snacks" }), "stone");
+    assert.equal(itemAccentHex({ type: "activity", title: "Shopping", color: "sage" }), itemAccentHex({ color: "sage" }));
+    assert.equal(cleanItemColor("neon"), "");
+    assert.equal(cleanItemColor("Coral"), "coral");
+    const dropped = normalizeTripItems([{ ...item, color: "neon" }]);
+    assert.equal(dropped[0]?.color, undefined);
+    assert.equal(itemAccentHex(dropped[0]), itemAccentHex({ type: "activity", title: "Shopping" }));
   });
 
   it("keeps pickup and return details for a car booking", () => {

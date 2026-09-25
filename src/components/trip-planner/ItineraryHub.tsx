@@ -55,10 +55,12 @@ import { FLIGHT_LANE_HASH } from "@/lib/flights-itinerary";
 import { STAY_LANE_HASH } from "@/lib/stays-itinerary";
 import { TRIP_SECTION_BAR_QUERY } from "@/lib/trip-focus";
 import { plan } from "@/components/trip-planner/density";
+import { cleanItemColor, itemAccentHex, type TripItemColor } from "@/lib/trip-item-color";
 import { ForwardBookings } from "@/components/trip-planner/ForwardBookings";
 import { PlanFold, PlanHint } from "@/components/trip-planner/PlanFold";
 import { bookingProgress } from "@/lib/trip-workspace";
 import { TripEntryDialog } from "@/components/trip-planner/TripEntryDialog";
+import { ItemColorField } from "@/components/trip-planner/ItemColorField";
 import { bookedStayHref, ItineraryItemRow } from "@/components/trip-planner/ItineraryItemRow";
 import { WeekView } from "@/components/trip-planner/WeekView";
 
@@ -312,6 +314,9 @@ function BookingItemForm({
   const [status, setStatus] = useState<TripItemStatus>(
     existing?.status ?? "todo",
   );
+  const [color, setColor] = useState<TripItemColor | "">(
+    existing?.color ?? "",
+  );
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [error, setError] = useState<string | null>(null);
 
@@ -411,6 +416,7 @@ function BookingItemForm({
           setError("Return date can’t be before departure.");
           return;
         }
+        const chosenColor = cleanItemColor(color);
         if (existing) {
           const next: TripItem = {
             ...existing,
@@ -420,6 +426,8 @@ function BookingItemForm({
             status,
             updatedAt: new Date().toISOString(),
           };
+          if (chosenColor) next.color = chosenColor;
+          else delete next.color;
           if (cleanedConfirmation) next.confirmation = cleanedConfirmation;
           else delete next.confirmation;
           if (parsedDay) next.dayIndex = parsedDay;
@@ -489,6 +497,7 @@ function BookingItemForm({
             checkinTime: type === "hotel" ? cleanedCheckinTime : undefined,
             checkoutTime: type === "hotel" ? cleanedCheckoutTime : undefined,
             status,
+            color: chosenColor,
           }),
         );
       }}
@@ -764,6 +773,7 @@ function BookingItemForm({
           />
         </div>
       ) : null}
+      <ItemColorField type={type} title={title} value={color} onChange={setColor} />
       <label className="plan-field">
         <span className={plan.label}>
           Notes{" "}
@@ -816,6 +826,7 @@ function ItemCard({
       className={`${plan.inset} plan-stack-tight ${
         highlighted ? "ring-2 ring-accent" : ""
       }`}
+      style={{ borderLeft: `3px solid ${itemAccentHex(item)}` }}
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0 plan-stack-tight">

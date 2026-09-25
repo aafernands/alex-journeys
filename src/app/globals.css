@@ -1742,18 +1742,10 @@ select.plan-input {
 
 .plan-timeline-entry {
   border: 1px solid var(--border);
-  border-left: 2px solid color-mix(in srgb, var(--accent) 38%, var(--border));
+  border-left: 3px solid var(--plan-item-accent, var(--accent));
   border-radius: 0.7rem;
   background: var(--white);
   min-width: 0;
-}
-
-.plan-timeline-entry[data-status="booked"] {
-  border-left-color: var(--accent);
-}
-
-.plan-timeline-entry[data-status="skipped"] {
-  border-left-color: var(--border-strong);
 }
 
 .plan-timeline-entry.is-dragging {
@@ -1848,7 +1840,74 @@ select.plan-input {
 
 .plan-timeline-type {
   flex-shrink: 0;
-  color: var(--accent);
+  color: var(--plan-item-accent, var(--accent));
+}
+
+.plan-color-field {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.plan-color-field > legend {
+  margin-bottom: 0.4rem;
+}
+
+.plan-color-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.plan-color-choice {
+  position: relative;
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.plan-color-face {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgb(31 26 20 / 12%);
+}
+
+.plan-color-default {
+  width: auto;
+  gap: 0.4rem;
+  padding-inline: 0.8rem 0.95rem;
+  border-radius: 999px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--border);
+  color: var(--heading);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.plan-color-dot {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgb(31 26 20 / 16%);
+}
+
+.plan-color-choice input:focus-visible + .plan-color-face {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.plan-color-choice input:checked + .plan-color-face {
+  box-shadow:
+    inset 0 0 0 1px rgb(31 26 20 / 12%),
+    0 0 0 2px var(--white),
+    0 0 0 4px var(--heading);
 }
 
 .plan-timeline-meta {

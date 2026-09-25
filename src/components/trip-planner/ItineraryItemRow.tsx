@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { Ellipsis } from "lucide-react";
 import { NavIcon } from "@/components/icons/NavIcon";
@@ -12,6 +12,7 @@ import {
   stayConfirmationPath,
   stayItemLinkLabel,
 } from "@/lib/stays";
+import { itemAccentHex } from "@/lib/trip-item-color";
 import {
   itemScheduleTime,
   TRIP_STATUS_LABEL,
@@ -160,6 +161,8 @@ export function ItineraryItemRow({
       className={`plan-timeline-entry${dragging ? " is-dragging" : ""}`}
       data-status={item.status}
       data-type={item.type}
+      data-color={item.color || "default"}
+      style={{ "--plan-item-accent": itemAccentHex(item) } as CSSProperties}
     >
       <div className="plan-timeline-row">
         {drag}

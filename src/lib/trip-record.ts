@@ -2,6 +2,7 @@
  * Saved-trip shape shared by the itinerary hub, local drafts, and APIs.
  * Safe to import from client components (no Firestore, no filesystem).
  */
+import { cleanItemColor, type TripItemColor } from "@/lib/trip-item-color";
 import {
   dateSummary,
   formatFlexible,
@@ -78,6 +79,8 @@ export type TripItem = {
   checkoutDate?: string;
   checkinTime?: string;
   checkoutTime?: string;
+  /** Optional accent chosen by the reader. Missing uses the color for this kind of plan. */
+  color?: TripItemColor;
 };
 
 export type TripDay = {
@@ -603,6 +606,7 @@ export function createTripItem(input: {
   checkoutTime?: string;
   status?: TripItemStatus;
   laneKey?: string;
+  color?: TripItemColor | "";
   sortOrder: number;
 }): TripItem {
   const title = input.title?.trim() || defaultItemTitle(input.type);
@@ -624,6 +628,7 @@ export function createTripItem(input: {
   const checkinTime = cleanTime(input.checkinTime ?? "");
   const checkoutTime = cleanTime(input.checkoutTime ?? "");
   const dayIndex = cleanDayIndex(input.dayIndex);
+  const color = cleanItemColor(input.color);
   return {
     id: createTripItemId(),
     type: input.type,
@@ -651,6 +656,7 @@ export function createTripItem(input: {
     ...(checkoutDate ? { checkoutDate } : {}),
     ...(checkinTime ? { checkinTime } : {}),
     ...(checkoutTime ? { checkoutTime } : {}),
+    ...(color ? { color } : {}),
   };
 }
 
@@ -739,6 +745,7 @@ export function normalizeTripItem(raw: unknown, index: number): TripItem | null 
   const laneKey = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(laneRaw)
     ? laneRaw.slice(0, 40)
     : "";
+  const color = cleanItemColor(record.color);
 
   return {
     id,
@@ -767,6 +774,7 @@ export function normalizeTripItem(raw: unknown, index: number): TripItem | null 
     ...(checkoutDate ? { checkoutDate } : {}),
     ...(checkinTime ? { checkinTime } : {}),
     ...(checkoutTime ? { checkoutTime } : {}),
+    ...(color ? { color } : {}),
   };
 }
 
