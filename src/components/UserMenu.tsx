@@ -118,10 +118,10 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
       : "inline-flex min-h-9 max-w-[11rem] items-center gap-2 rounded-full py-0.5 pl-0.5 pr-2.5 transition hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:max-w-[13rem]";
 
   const menuClass = isDrawer
-    ? "absolute left-0 right-0 top-full z-50 mt-1.5 rounded-xl border border-border bg-white py-1.5 shadow-lg"
+    ? "glass-strong absolute left-0 right-0 top-full z-50 mt-1.5 rounded-xl py-1.5"
     : isMobile
-      ? "absolute left-0 bottom-full z-50 mb-2 min-w-[14rem] rounded-xl border border-border bg-white py-1.5 shadow-lg"
-      : "absolute right-0 top-full z-50 mt-2 min-w-[14rem] rounded-xl border border-border bg-white py-1.5 shadow-lg";
+      ? "glass-strong absolute left-0 bottom-full z-50 mb-2 min-w-[14rem] rounded-xl py-1.5"
+      : "glass-strong absolute right-0 top-full z-50 mt-2 min-w-[14rem] rounded-xl py-1.5";
 
   return (
     <div
