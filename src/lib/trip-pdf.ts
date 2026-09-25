@@ -18,8 +18,8 @@ import {
 /** Public journal name. Matches `site.name` in src/data/content.ts. */
 export const TRIP_PDF_BRAND = "Alex Journeys";
 export const TRIP_PDF_AUTHOR = "Alex Fernandes";
-/** Printed in the footer. The public site host is alexjourneys.com. */
-export const TRIP_PDF_SITE = "www.fernandesjourneys.com";
+/** Printed in the footer. Matches the public host in src/data/content.ts. */
+export const TRIP_PDF_SITE = "www.alexjourneys.com";
 
 export const TRIP_PDF_SECTIONS = [
   "itinerary",

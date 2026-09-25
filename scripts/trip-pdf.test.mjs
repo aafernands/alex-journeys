@@ -312,7 +312,9 @@ test("the three sections render as PDFs without card numbers", async () => {
     const text = spawnSync("pdftotext", ["-layout", file, "-"], { encoding: "utf8" });
     if (text.status !== 0) continue;
     assert.match(text.stdout, /Alex Journeys|ALEX JOURNEYS/);
-    assert.match(text.stdout, /www\.fernandesjourneys\.com/);
+    assert.match(text.stdout, /www\.alexjourneys\.com/);
+    assert.doesNotMatch(text.stdout, /fernandesjourneys/i);
+    assert.doesNotMatch(text.stdout, /Fernandes Journeys/);
     assert.match(text.stdout, /Iceland in October/);
     if (section === "itinerary") {
       assert.match(text.stdout, /Prepared for Alex Fernandes/);
