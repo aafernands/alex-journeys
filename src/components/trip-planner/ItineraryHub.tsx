@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Share2, Pencil, Ellipsis } from "lucide-react";
+import { Share2, Pencil, Ellipsis, ChevronRight } from "lucide-react";
+import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ListRow } from "@/components/ui/ListRow";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { nativeShare } from "@/lib/native-share";
 import { TripDestinationHero } from "./TripDestinationHero";
 import {
@@ -105,6 +109,15 @@ function laneIcon(partner: TripPlannerPartner): string {
   if (partner.key === "world-nomads") return "shield";
   return "compass";
 }
+
+const ITEM_ICON: Record<TripItemType, string> = {
+  flight: "plane",
+  hotel: "hotel",
+  car: "car",
+  activity: "sparkles",
+  note: "book-open",
+  other: "bookmark",
+};
 
 function StatusChips({
   value,
@@ -825,45 +838,35 @@ function ItemCard({
   highlighted?: boolean;
 }) {
   const when = itemWhen(item, days);
+  const detail = [when, item.notes.replace(/\s+/g, " ").trim()].filter(Boolean).join(" · ");
   return (
-    <div
-      className={`${plan.inset} plan-stack-tight ${
-        highlighted ? "ring-2 ring-accent" : ""
-      }`}
-      style={{ borderLeft: `3px solid ${itemAccentHex(item)}` }}
-    >
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <div className="min-w-0 plan-stack-tight">
-          <p className={plan.h4}>{item.title}</p>
-          {when ? <p className={`${plan.caption} text-muted`}>{when}</p> : null}
-          <ItemUrl item={item} compact />
-          {item.notes ? (
-            <p className={`${plan.body} text-text`}>{item.notes}</p>
-          ) : null}
-        </div>
-        <div className="plan-inline-actions shrink-0">
-          <button
-            type="button"
-            className={`${plan.textBtn} text-accent hover:underline`}
-            onClick={onEdit}
-          >
-            Edit details
-          </button>
-          <button
-            type="button"
-            className={`${plan.textBtn} text-muted transition hover:text-accent`}
-            onClick={onRemove}
-          >
-            Remove
-          </button>
-        </div>
-      </div>
+    <Card className={highlighted ? "ring-2 ring-ink" : ""}>
+      <ListRow
+        leading={
+          <span style={{ color: itemAccentHex(item) }} aria-hidden="true">
+            <NavIcon name={ITEM_ICON[item.type]} size={18} />
+          </span>
+        }
+        title={item.title}
+        detail={detail || TRIP_STATUS_LABEL[item.status]}
+        trailing={
+          <span className="ui-row-actions">
+            <button type="button" className="ui-row-action" onClick={onEdit}>
+              Edit
+            </button>
+            <button type="button" className="ui-row-action" onClick={onRemove}>
+              Remove
+            </button>
+          </span>
+        }
+      />
+      <ItemUrl item={item} compact />
       <StatusChips
         value={item.status}
         label={`Status for ${item.title}`}
         onChange={onStatus}
       />
-    </div>
+    </Card>
   );
 }
 
@@ -1500,7 +1503,7 @@ export function ItineraryHub({
             <div className="plan-actions plan-actions-inline">
               <button
                 type="button"
-                className="btn btn-ink"
+                className="btn btn-secondary"
                 onClick={onSaveToAccount}
               >
                 Save itinerary
@@ -1542,7 +1545,7 @@ export function ItineraryHub({
                 {" "}
                 <Link
                   href="/account#trips"
-                  className="text-link hover:text-accent"
+                  className="font-semibold text-heading underline underline-offset-2"
                 >
                   View in My trips
                 </Link>
@@ -1565,7 +1568,7 @@ export function ItineraryHub({
 
       <div className="plan-workspace-toolbar">
         <div
-          className="plan-workspace-tabs"
+          className="plan-workspace-tabs app-tab-bar"
           role="tablist"
           aria-label="Trip workspace"
         >
@@ -1618,7 +1621,7 @@ export function ItineraryHub({
         <div className="plan-add-menu">
           <button
             type="button"
-            className="btn btn-ink"
+            className="btn btn-secondary"
             id={`${headingId}-add-trigger`}
             aria-expanded={addMenu}
             aria-controls={`${headingId}-add-options`}
@@ -1668,7 +1671,7 @@ export function ItineraryHub({
       >
         <div className="plan-overview-main">
           <div className="plan-next-action">
-            <p className="eyebrow text-accent">Your next step</p>
+            <p className={plan.label}>Your next step</p>
             <h3 className={plan.h2}>
               {nextPartner
                 ? itemsForLane(items, nextPartner).length
@@ -1699,56 +1702,49 @@ export function ItineraryHub({
                 : "Add an activity"}
             </button>
           </div>
-          <div className="plan-overview-preview">
-            <div className="plan-toolbar">
-              <h3 className={plan.h3}>Your itinerary at a glance</h3>
-              <button
-                type="button"
-                className={plan.textBtn}
-                onClick={() => setView("itinerary")}
-              >
-                View all days
-              </button>
-            </div>
-            {days.slice(0, 3).map((day) => (
-              <div key={day.index} className="plan-preview-day">
-                <div>
-                  <span className="eyebrow text-accent">{day.label}</span>
-                  <p className={plan.caption}>{day.detail}</p>
-                </div>
-                <div>
-                  {sorted
-                    .filter(
-                      (item) =>
-                          scheduledDayIndex(item, days) === day.index,
-                    )
-                    .sort(compareScheduledItems)
-                    .map((item) => (
-                      <p key={item.id} className={plan.body}>
-                        {itemScheduleTime(item) ? `${itemScheduleTime(item)} · ` : ""}
-                        {item.title}
-                      </p>
-                    ))}
-                  {!sorted.some(
-                    (item) =>
-                                scheduledDayIndex(item, days) === day.index,
-                  ) ? (
-                    <p className={`${plan.body} text-muted`}>
-                      A day to make your own.
-                    </p>
-                  ) : null}
-                  <button
-                    type="button"
-                    className={`${plan.textBtn} plan-add-plan`}
-                    onClick={() =>
-                      setQuickEntry({ type: "activity", day: day.index })
+          <Card className="plan-overview-preview">
+            <SectionHeader
+              as="h3"
+              title="Your itinerary at a glance"
+              action={
+                <button type="button" className={plan.textBtn} onClick={() => setView("itinerary")}>
+                  View all days
+                </button>
+              }
+            />
+            {days.slice(0, 3).map((day) => {
+              const dayItems = sorted
+                .filter((item) => scheduledDayIndex(item, days) === day.index)
+                .sort(compareScheduledItems);
+              return (
+                <div key={day.index} className="plan-preview-day">
+                  <ListRow
+                    title={day.label}
+                    detail={day.detail || "Open day"}
+                    trailing={
+                      <button
+                        type="button"
+                        className="ui-row-action"
+                        onClick={() => setQuickEntry({ type: "activity", day: day.index })}
+                      >
+                        Add
+                      </button>
                     }
-                  >
-                    + Add a plan
-                  </button>
+                  />
+                  {dayItems.length ? (
+                    dayItems.map((item) => (
+                      <ListRow
+                        key={item.id}
+                        title={item.title}
+                        detail={itemScheduleTime(item) || TRIP_STATUS_LABEL[item.status]}
+                      />
+                    ))
+                  ) : (
+                    <p className={`${plan.caption} text-muted`}>A day to make your own.</p>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {!days.length ? (
               <button
                 type="button"
@@ -1768,36 +1764,30 @@ export function ItineraryHub({
                 {unscheduled.length === 1 ? "item" : "items"} to organize
               </button>
             ) : null}
-          </div>
+          </Card>
         </div>
         <aside className="plan-overview-side">
-          <div className="plan-checklist">
-            <h3 className={plan.h3}>Booking checklist</h3>
+          <Card className="plan-checklist">
+            <SectionHeader as="h3" title="Booking checklist" />
             {partners.some((partner) => partner.showWhen !== "extra") ? (
               partners
                 .filter((partner) => partner.showWhen !== "extra")
                 .map((partner) => (
-                  <button
-                    type="button"
+                  <ListRow
                     key={partner.key}
+                    title={laneName(partner)}
+                    detail={bookingProgress(itemsForLane(items, partner))}
                     onClick={() => openBookings(partner.key)}
-                  >
-                    <span>{laneName(partner)}</span>
-                    <span className="text-muted">
-                      {bookingProgress(itemsForLane(items, partner))}
-                    </span>
-                  </button>
+                    trailing={<ChevronRight size={18} aria-hidden="true" />}
+                  />
                 ))
             ) : (
-              <p className={plan.body}>
-                No searches selected. Add existing bookings or choose what you
-                need in trip details.
-              </p>
+              <EmptyState>No searches selected. Add existing bookings or choose what you need in trip details.</EmptyState>
             )}
             <button type="button" className={plan.textBtn} onClick={onEditTrip}>
               Edit what you need
             </button>
-          </div>
+          </Card>
           <JournalNotes
             headingId={headingId}
             destination={state.destination}
@@ -1986,13 +1976,13 @@ export function ItineraryHub({
                 </div>
 
                 {laneItems.length === 0 ? (
-                  <p className={`${plan.body} text-muted`}>
+                  <EmptyState>
                     {partner.key === "booking"
                       ? "Nothing saved here yet. Search stays and the hotel you book comes back to this itinerary."
                       : isFlightLanePartner(partner)
                         ? "Nothing saved here yet. Search flights and the one you book comes back to this itinerary."
                         : "Nothing saved here yet. Search, then add the booking you want to keep."}
-                  </p>
+                  </EmptyState>
                 ) : (
                   <ul className="plan-stack-tight">
                     {laneItems.map((item) => {
@@ -2042,7 +2032,7 @@ export function ItineraryHub({
                   <div className="plan-lane-secondaries">
                     <button
                       type="button"
-                      className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
+                      className={`${plan.textBtn} plan-lane-quiet self-start text-heading underline decoration-border underline-offset-2`}
                       onClick={() => {
                         setLanePin(partner.key);
                         setQuickEntry({
@@ -2055,7 +2045,7 @@ export function ItineraryHub({
                     </button>
                     <button
                       type="button"
-                      className={`${plan.textBtn} plan-lane-quiet self-start text-muted hover:text-heading sm:text-accent sm:hover:underline`}
+                      className={`${plan.textBtn} plan-lane-quiet self-start text-heading underline decoration-border underline-offset-2`}
                       onClick={() => {
                         setLanePin(OUTSIDE_TAB);
                         window.requestAnimationFrame(() => {

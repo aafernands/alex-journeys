@@ -12,7 +12,7 @@ export function TripDestinationHero({ destination, title, headingId, meta, actio
   headingId: string;
   meta: string;
   actions?: ReactNode;
-  /** Overlaid on the photo, on the same row as the trip actions. */
+  /** Sits above the title as a short link back to saved trips. */
   back?: ReactNode;
   fallbackImage?: { url: string; alt: string };
 }) {
@@ -33,32 +33,30 @@ export function TripDestinationHero({ destination, title, headingId, meta, actio
     return () => controller.abort();
   }, [destination]);
 
+  const credit = photo && photo.source !== "Trip planner image" ? (
+    <p className="plan-trip-summary-credit">
+      {photo.source === "Alex Journeys artwork" ? "Artwork by " : "Photo by "}
+      <a href={photo.photographerUrl} target={photo.photographerUrl.startsWith("/") ? undefined : "_blank"} rel={photo.photographerUrl.startsWith("/") ? undefined : "noopener noreferrer"}>{photo.photographer}</a>
+      {photo.source === "Alex Journeys artwork" ? null : <> on <a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">{photo.source}</a> · {photo.license}</>}
+    </p>
+  ) : null;
+
   return (
-    <div className="plan-trip-hero">
-      {photo ? (
-        // Unsplash requires hotlinking the returned image URL.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img className="plan-trip-hero-image" src={photo.image} alt={photo.alt ?? `View of ${destination}`} fetchPriority="high" onError={() => setFailedImages((previous) => new Set(previous).add(photo.image))} />
-      ) : null}
-      <div className="plan-trip-hero-shade" aria-hidden="true" />
-      <div className="plan-trip-hero-frame">
-        {back || actions ? (
-          <div className="plan-trip-hero-bar">
-            {back ? <div className="plan-trip-hero-back">{back}</div> : null}
-            {actions ? <div className="plan-trip-hero-actions" role="group" aria-label="Trip actions">{actions}</div> : null}
-          </div>
+    <div className="plan-trip-hero plan-trip-summary">
+      <div className="plan-trip-summary-photo">
+        {photo ? (
+          // Unsplash requires hotlinking the returned image URL.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="plan-trip-hero-image" src={photo.image} alt={photo.alt ?? `View of ${destination}`} fetchPriority="high" onError={() => setFailedImages((previous) => new Set(previous).add(photo.image))} />
         ) : null}
-        <div className="plan-trip-hero-content">
-          <p className="plan-trip-hero-kicker">Your trip</p>
-          <h2 id={headingId} className="plan-trip-hero-title">{title}</h2>
-          <p className="plan-trip-hero-meta">{meta}</p>
-        </div>
-        {photo && photo.source !== "Trip planner image" ? <p className="plan-trip-hero-credit">
-          {photo.source === "Alex Journeys artwork" ? "Artwork by " : "Photo by "}
-          <a href={photo.photographerUrl} target={photo.photographerUrl.startsWith("/") ? undefined : "_blank"} rel={photo.photographerUrl.startsWith("/") ? undefined : "noopener noreferrer"}>{photo.photographer}</a>
-          {photo.source === "Alex Journeys artwork" ? null : <> on <a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">{photo.source}</a> · {photo.license}</>}
-        </p> : null}
       </div>
+      <div className="plan-trip-summary-copy">
+        {back}
+        <h2 id={headingId} className="plan-trip-hero-title">{title}</h2>
+        {meta ? <p className="plan-trip-hero-meta">{meta}</p> : null}
+        {credit}
+      </div>
+      {actions ? <div className="plan-trip-hero-actions" role="group" aria-label="Trip actions">{actions}</div> : null}
     </div>
   );
 }

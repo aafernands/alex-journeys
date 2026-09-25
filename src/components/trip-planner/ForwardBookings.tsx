@@ -79,13 +79,13 @@ function SuggestionCard({
           href={suggestion.url}
           target="_blank"
           rel="noopener noreferrer"
-          className={`${plan.textBtn} self-start text-link hover:text-accent`}
+          className={`${plan.textBtn} self-start text-heading underline underline-offset-2`}
         >
           {hostOf(suggestion.url)}
         </a>
       ) : null}
       <div className="plan-actions plan-actions-inline">
-        <button type="button" className="btn btn-ink disabled:opacity-60" disabled={busy} onClick={onAdd}>
+        <button type="button" className="btn btn-secondary disabled:opacity-60" disabled={busy} onClick={onAdd}>
           Add to itinerary
         </button>
         <button type="button" className="btn btn-secondary disabled:opacity-60" disabled={busy} onClick={onDismiss}>
@@ -377,7 +377,7 @@ export function ForwardBookings({
                   <>
                     <button
                       type="button"
-                      className="btn btn-ink"
+                      className="btn btn-secondary"
                       disabled={loading || busyId !== null}
                       onClick={() => void patchMailbox({ rotate: true })}
                     >

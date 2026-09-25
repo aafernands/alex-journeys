@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
+import { Chip as FilterChip } from "@/components/ui/Chip";
 import { DateRangeField } from "@/components/trip-planner/DateRangeField";
 import { plan as tripDensity } from "@/components/trip-planner/density";
 import { ItineraryHub } from "@/components/trip-planner/ItineraryHub";
@@ -86,22 +87,14 @@ function Chip({
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
+    <FilterChip
+      selected={pressed}
       aria-pressed={pressed}
       onClick={onClick}
-      className={`${tripDensity.chip} ${
-        pressed
-          ? dashed
-            ? "border-dashed border-accent bg-accent/10 text-accent"
-            : "border-accent bg-accent/10 text-accent"
-          : dashed
-            ? "border-dashed border-border-strong bg-white text-muted hover:border-accent hover:text-heading"
-            : "border-border bg-white text-heading hover:border-border-strong"
-      }`}
+      className={dashed && !pressed ? "border-dashed bg-white text-muted" : undefined}
     >
       {children}
-    </button>
+    </FilterChip>
   );
 }
 
@@ -163,7 +156,7 @@ function describedBy(id: string, error?: string): string | undefined {
 function PlannerShell() {
   return (
     <section
-      className="plan-trip plan-trip-hotel plan-block max-w-6xl"
+      className="plan-trip plan-trip-hotel plan-block max-w-6xl" data-density="compact"
       aria-hidden="true"
     >
       <div className="h-1 rounded-full bg-sand" />
@@ -383,7 +376,7 @@ export function TripPlanner({
     const hasLocalDraft = Boolean(plan.state.destination.trim());
     return (
       <section
-        className="plan-trip plan-trip-hotel plan-block max-w-6xl"
+        className="plan-trip plan-trip-hotel plan-block max-w-6xl" data-density="compact"
         aria-labelledby={`${baseId}-heading`}
       >
         <div className={tripDensity.panel}>
@@ -397,7 +390,7 @@ export function TripPlanner({
           <div className="plan-actions">
             <Link
               href={planATripLoginHref(urlTripId, "signin")}
-              className="btn btn-ink"
+              className="btn btn-primary"
             >
               Sign in
             </Link>
@@ -421,7 +414,7 @@ export function TripPlanner({
   if (urlTripId && sync.signedIn && sync.remote === "missing") {
     return (
       <section
-        className="plan-trip plan-trip-hotel plan-block max-w-6xl"
+        className="plan-trip plan-trip-hotel plan-block max-w-6xl" data-density="compact"
         aria-labelledby={`${baseId}-heading`}
       >
         <div className={tripDensity.panel}>
@@ -448,7 +441,7 @@ export function TripPlanner({
   ) {
     return (
       <section
-        className="plan-trip plan-trip-hotel plan-block max-w-6xl"
+        className="plan-trip plan-trip-hotel plan-block max-w-6xl" data-density="compact"
         aria-labelledby={`${baseId}-heading`}
       >
         <div className={tripDensity.panel}>
@@ -480,7 +473,7 @@ export function TripPlanner({
   return (
     <section
       aria-labelledby={`${baseId}-heading`}
-      className="plan-trip plan-trip-hotel plan-block max-w-6xl"
+      className="plan-trip plan-trip-hotel plan-block max-w-6xl" data-density="compact"
     >
       <div
         className={`${tripDensity.panel} plan-section ${step < 4 ? "plan-setup" : "plan-workspace-shell"}`}
@@ -494,7 +487,7 @@ export function TripPlanner({
             }}
           >
             <div className="plan-setup-heading">
-              <p className="eyebrow text-accent">
+              <p className={tripDensity.label}>
                 A little planning. A great journey.
               </p>
               <h2 id={`${baseId}-heading`} className={tripDensity.h2}>
