@@ -271,6 +271,83 @@ describe("stays mapping", () => {
     assert.deepEqual(bunk.photos, []);
   });
 
+  it("maps bed type, size, occupancy, and room amenities without inventing them", () => {
+    const [room] = mapRoomOffers(
+      {
+        data: [
+          {
+            hotelId: "lp1897",
+            roomTypes: [
+              {
+                offerId: "ROOMFACTS123456789",
+                offerRetailRate: [{ amount: 200, currency: "USD" }],
+                rates: [
+                  {
+                    name: "Deluxe King",
+                    mappedRoomId: 42,
+                    maxOccupancy: 9,
+                    boardName: "Breakfast included",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        data: {
+          rooms: [
+            {
+              id: 42,
+              roomName: "Deluxe King",
+              bedTypes: [
+                { quantity: 1, bedType: "King Bed" },
+                { quantity: 1, bedType: "Sofa Bed" },
+              ],
+              roomSizeSquare: 320,
+              roomSizeUnit: "sqft",
+              maxAdults: 3,
+              maxOccupancy: 4,
+              roomAmenities: [{ name: "Air conditioning" }, { name: "Air conditioning" }, "Safe"],
+              photos: Array.from({ length: 14 }, (_, index) => ({
+                url: `https://cdn.example.com/room-${index}.jpg`,
+                mainPhoto: index === 3,
+              })),
+            },
+          ],
+        },
+      },
+    );
+    assert.equal(room.bed, "King Bed, Sofa Bed");
+    assert.equal(room.size, "320 sq ft");
+    assert.equal(room.maxGuests, 4);
+    assert.deepEqual(room.amenities, ["Air conditioning", "Safe"]);
+    assert.equal(room.photos.length, 12);
+    assert.equal(room.photos[0].url, "https://cdn.example.com/room-3.jpg");
+  });
+
+  it("uses rate occupancy when hotel content has no room facts", () => {
+    const [room] = mapRoomOffers({
+      data: [
+        {
+          hotelId: "lp1897",
+          roomTypes: [
+            {
+              offerId: "OCCUPANCYONLY123456",
+              offerRetailRate: [{ amount: 80, currency: "USD" }],
+              rates: [{ name: "Bunk", boardName: "Room Only", maxAdults: 2 }],
+            },
+          ],
+        },
+      ],
+    });
+    assert.equal(room.maxGuests, 2);
+    assert.equal(room.bed, "");
+    assert.equal(room.size, "");
+    assert.deepEqual(room.amenities, []);
+    assert.deepEqual(room.photos, []);
+  });
+
   it("uses photos embedded on a rate when the room is not mapped", () => {
     const [room] = mapRoomOffers({
       data: [

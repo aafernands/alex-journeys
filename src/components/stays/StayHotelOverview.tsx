@@ -506,7 +506,7 @@ export function StayHotelOverview({
         </div>
       </div>
 
-      <div className="safe-bottom-bar fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 px-3 pt-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur md:hidden">
+      <div className="safe-bottom-bar fixed inset-x-0 bottom-0 z-[140] border-t border-line bg-white/95 px-3 pt-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-xl items-center gap-3">
           {fromPriceLabel ? (
             <div className="min-w-0 flex-1">

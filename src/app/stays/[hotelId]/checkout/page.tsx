@@ -90,7 +90,7 @@ export default async function StayCheckoutPage({ params, searchParams }: PagePro
   }
 
   return (
-    <main className="plan-sticky-host bg-bg md:pb-16">
+    <main className="bg-bg pb-20">
       <div className="section-shell pt-5 sm:pt-7">
         <div className="mx-auto max-w-5xl">
           <nav aria-label="Checkout navigation" className="text-sm text-muted">
