@@ -981,7 +981,7 @@ function JournalNotes({
   const place = destination.split(",")[0]?.trim() || destination.trim();
   return (
     <section className="plan-block" aria-labelledby={`${headingId}-journal`}>
-      <h3 id={`${headingId}-journal`} className={`${plan.h3} max-sm:hidden`}>
+      <h3 id={`${headingId}-journal`} className={plan.h3}>
         From Alex’s journal
       </h3>
       {matches.length === 0 ? (
