@@ -555,6 +555,7 @@ function BookingItemForm({
           onChange={(event) => setTitle(event.target.value)}
         />
       </label>
+      <ItemColorField type={type} title={title} value={color} onChange={setColor} />
       <label className="plan-field">
         <span className={plan.label}>Link</span>
         <input
@@ -773,7 +774,6 @@ function BookingItemForm({
           />
         </div>
       ) : null}
-      <ItemColorField type={type} title={title} value={color} onChange={setColor} />
       <label className="plan-field">
         <span className={plan.label}>
           Notes{" "}
