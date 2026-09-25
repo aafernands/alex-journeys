@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { destinationSlugs } from "@/data/destinations";
 import { NavIcon } from "@/components/icons/NavIcon";
+import { useTripFocus } from "@/components/trip-planner/TripFocus";
 
 type Tab = {
   href: string;
@@ -44,14 +45,16 @@ const TABS: Tab[] = [
 
 const BODY_VISIBLE_CLASS = "mobile-bottom-nav-visible";
 
-/** Persistent discovery navigation; focused workspaces and overlays hide it in CSS. */
+/** Persistent discovery navigation. Trip workspaces, booking flows, and overlays hide it. */
 export function MobileBottomNav() {
-  const pathname = usePathname();
-  const visible = !/^\/(cms|api|login|signup|forgot-password|reset-password)(\/|$)/.test(pathname)
+  const pathname = usePathname() ?? "";
+  const { focused } = useTripFocus();
+  const visible = !focused
+    && !/^\/(cms|api|login|signup|forgot-password|reset-password)(\/|$)/.test(pathname)
     && !/\/(checkout|confirmation)(\/|$)/.test(pathname)
     && pathname !== "/flights/book";
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.body.classList.toggle(BODY_VISIBLE_CLASS, visible);
     return () => {
       document.body.classList.remove(BODY_VISIBLE_CLASS);

@@ -12,6 +12,7 @@ import Link from "next/link";
 import { DateRangeField } from "@/components/trip-planner/DateRangeField";
 import { plan as tripDensity } from "@/components/trip-planner/density";
 import { ItineraryHub } from "@/components/trip-planner/ItineraryHub";
+import { TripWorkspaceFocus } from "@/components/trip-planner/TripFocus";
 import { PlaceCombobox } from "@/components/trip-planner/PlaceCombobox";
 import { useTripSync } from "@/components/trip-planner/useTripSync";
 import {
@@ -834,7 +835,9 @@ export function TripPlanner({
         ) : null}
 
         {step === 4 ? (
-          <ItineraryHub
+          <>
+            <TripWorkspaceFocus />
+            <ItineraryHub
             headingId={`${baseId}-heading`}
             config={config}
             partners={steps}
@@ -864,6 +867,7 @@ export function TripPlanner({
             onRestoreBackup={sync.restoreGuestBackup}
             onRememberGuestDraft={sync.rememberGuestDraft}
           />
+          </>
         ) : null}
       </div>
     </section>

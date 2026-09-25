@@ -129,11 +129,28 @@ body.mobile-bottom-nav-visible {
 }
 
 /* Keep focused trip work and modal tasks clear of global navigation. */
+body.trip-focus,
 body:has(.plan-workspace-shell, dialog[open], [aria-modal="true"]:not([hidden])) {
   --mobile-nav-clearance: 0px;
 }
+body.trip-focus .mobile-bottom-nav,
 body:has(.plan-workspace-shell, dialog[open], [aria-modal="true"]:not([hidden])) .mobile-bottom-nav {
   display: none;
+}
+body.trip-focus .site-alerts,
+body:has(.plan-workspace-shell) .site-alerts {
+  display: none;
+}
+
+/* In-page mobile actions sit on the home indicator once the tab bar is gone. */
+.safe-bottom-bar {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 767px) {
+  .safe-bottom-page {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* Admin public chrome — below mobile nav / drawers, above page content. */
@@ -1943,6 +1960,16 @@ body:has(main.plan-flow) a[href="#newsletter"] {
     );
   }
 
+  html:has(body.trip-focus),
+  html:has(.plan-workspace-shell) {
+    scroll-padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  html:has(body.trip-focus .plan-sticky),
+  html:has(.plan-workspace-shell .plan-sticky) {
+    scroll-padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
   .plan-day-card {
     border: 0;
     border-radius: 0;
@@ -2338,6 +2365,11 @@ body.mobile-bottom-nav-visible .plan-sticky {
   bottom: calc(var(--mobile-nav-bar) + env(safe-area-inset-bottom, 0px));
 }
 
+body.trip-focus .plan-sticky,
+body:has(.plan-workspace-shell) .plan-sticky {
+  bottom: 0;
+}
+
 .plan-sticky-page {
   margin-right: 0;
   margin-bottom: 0;
@@ -2364,6 +2396,12 @@ body.mobile-bottom-nav-visible .plan-sticky {
 
   body.mobile-bottom-nav-visible .plan-trip {
     padding-bottom: calc(5.5rem + var(--mobile-nav-bar) + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.trip-focus .plan-trip:has(.plan-sticky),
+  body.trip-focus .plan-sticky-host:has(.plan-sticky),
+  body:has(.plan-workspace-shell) .plan-trip:has(.plan-sticky) {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
   }
 
   .plan-sticky-solo > .btn,
@@ -2531,6 +2569,16 @@ body.mobile-bottom-nav-visible .plan-sticky {
 
   .plan-trip-hotel {
     padding-bottom: calc(6rem + var(--mobile-nav-bar) + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.trip-focus .plan-trip-hotel,
+  body:has(.plan-workspace-shell) .plan-trip-hotel {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  body.trip-focus .plan-trip-hotel:has(.plan-sticky),
+  body:has(.plan-workspace-shell) .plan-trip-hotel:has(.plan-sticky) {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
   }
 
   .plan-trip-hotel > .plan-panel {

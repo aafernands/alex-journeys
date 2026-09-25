@@ -49,7 +49,7 @@ export function StaysSearchForm({ query }: Props) {
         );
       }}
     >
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(14rem,2fr)_minmax(18rem,2fr)_minmax(6rem,.65fr)_minmax(6rem,.65fr)_auto] lg:items-end">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(14rem,2fr)_minmax(18rem,2fr)_minmax(6rem,.65fr)_minmax(6rem,.65fr)] lg:items-end">
         <label className="plan-stack-tight">
           <span className={plan.label}>Destination</span>
           <input
@@ -104,9 +104,6 @@ export function StaysSearchForm({ query }: Props) {
             className={plan.input}
           />
         </label>
-        <button type="submit" className="btn btn-primary w-full lg:w-auto" disabled={pending}>
-          {pending ? "Searching…" : "Search"}
-        </button>
       </div>
       <label className={`${plan.label} mt-3 flex items-center gap-2 lg:ml-auto lg:w-fit`}>
         Children
@@ -120,6 +117,11 @@ export function StaysSearchForm({ query }: Props) {
           aria-label="Children"
         />
       </label>
+      <div className="plan-actions plan-sticky plan-sticky-page plan-sticky-solo">
+        <button type="submit" className="btn btn-primary" disabled={pending}>
+          {pending ? "Searching…" : "Search"}
+        </button>
+      </div>
     </form>
   );
 }

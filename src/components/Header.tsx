@@ -8,6 +8,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { TopicFlyout } from "@/components/header/TopicFlyout";
 import { MobileBottomNav } from "@/components/header/MobileBottomNav";
+import { useTripFocus } from "@/components/trip-planner/TripFocus";
 import { MobileNavDrawer } from "@/components/header/MobileNavDrawer";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
@@ -27,6 +28,7 @@ type Props = {
 
 export function Header({ latestPost = null, googleConfigured = false }: Props) {
   const pathname = usePathname();
+  const { focused } = useTripFocus();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [destOpen, setDestOpen] = useState(false);
@@ -142,8 +144,9 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-md">
-        <div className="border-b border-border bg-surface-soft">
-          <div className="section-shell flex items-center justify-between gap-3 py-1.5">
+        {focused ? null : (
+          <div className="site-alerts border-b border-border bg-surface-soft">
+            <div className="section-shell flex items-center justify-between gap-3 py-1.5">
             <a
               href="#newsletter"
               className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-accent transition hover:text-accent-deep"
@@ -170,6 +173,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             )}
           </div>
         </div>
+        )}
 
         <div className="section-shell relative grid h-[4.75rem] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 sm:h-[5.5rem] xl:flex xl:h-24 xl:justify-start xl:gap-4 2xl:gap-6">
           {/* Mobile: search (left) */}

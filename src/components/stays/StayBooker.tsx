@@ -555,14 +555,16 @@ export function StayBooker({
               }}
             />
           </div>
-          <button type="submit" className="btn btn-primary" disabled={pending === "book" || pending === "rates"}>
-            {pending === "book" ? "Booking…" : "Book this stay"}
-          </button>
-          {pending === "book" ? (
-            <p className="text-sm text-muted" role="status">
-              Sending the reservation to Nuitee…
-            </p>
-          ) : null}
+          <div className="plan-actions plan-sticky plan-sticky-page plan-sticky-solo">
+            {pending === "book" ? (
+              <p className="w-full text-sm text-muted" role="status">
+                Sending the reservation to Nuitee…
+              </p>
+            ) : null}
+            <button type="submit" className="btn btn-primary" disabled={pending === "book" || pending === "rates"}>
+              {pending === "book" ? "Booking…" : "Book this stay"}
+            </button>
+          </div>
         </form>
       ) : null}
     </div>
