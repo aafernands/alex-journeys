@@ -20,8 +20,10 @@ import {
   ItineraryEditor,
   itineraryFromInitial,
 } from "./ItineraryEditor";
+import type { SeoLinkCatalog } from "@/lib/seo-audit";
 import { MediaPicker } from "./MediaPicker";
 import { RichTextEditor } from "./RichTextEditor";
+import { SeoPanel } from "./SeoPanel";
 
 export type DestinationOption = { slug: string; name: string };
 
@@ -40,6 +42,9 @@ export type PostFormInitial = {
   bookingDestination?: string;
   experienceWidgetHtml?: string;
   itinerary?: PostItinerary;
+  seoTitle?: string;
+  seoDescription?: string;
+  focusKeyword?: string;
 };
 
 type Props = {
@@ -48,6 +53,7 @@ type Props = {
   initial?: Partial<PostFormInitial>;
   /** When editing a file under src/content/drafts */
   isDraft?: boolean;
+  linkCatalog: SeoLinkCatalog;
 };
 
 const PLAN_A_TRIP = "plan-a-trip";
@@ -81,6 +87,7 @@ export function PostForm({
   mode,
   initial,
   isDraft = false,
+  linkCatalog,
 }: Props) {
   const router = useRouter();
   const [title, setTitle] = useState(initial?.title ?? "");
@@ -115,6 +122,11 @@ export function PostForm({
   const [itinerary, setItinerary] = useState<PostItinerary>(() =>
     itineraryFromInitial(initial?.itinerary),
   );
+  const [seoTitle, setSeoTitle] = useState(initial?.seoTitle ?? "");
+  const [seoDescription, setSeoDescription] = useState(
+    initial?.seoDescription ?? "",
+  );
+  const [focusKeyword, setFocusKeyword] = useState(initial?.focusKeyword ?? "");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{
     commitUrl: string;
@@ -186,6 +198,9 @@ export function PostForm({
             bookingDestination,
             experienceWidgetHtml,
             itinerary: itinerary.enabled ? itinerary : { enabled: false },
+            seoTitle,
+            seoDescription,
+            focusKeyword,
             update: mode === "edit" && !isDraft && !asDraft,
             draft: asDraft,
           }),
@@ -226,6 +241,7 @@ export function PostForm({
       date,
       excerpt,
       experienceWidgetHtml,
+      focusKeyword,
       featuredImageAlt,
       featuredImageUrl,
       finalSlug,
@@ -236,6 +252,8 @@ export function PostForm({
       selectedBookingTools,
       selectedDestinations,
       selectedGuideHubs,
+      seoDescription,
+      seoTitle,
       title,
     ],
   );
@@ -350,7 +368,7 @@ export function PostForm({
           <div>
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <label htmlFor="cms-excerpt" className="text-sm font-semibold text-heading">
-                Excerpt / meta description <span className="text-accent">*</span>
+                Excerpt <span className="text-accent">*</span>
               </label>
               <span
                 className={`text-xs ${
@@ -374,7 +392,10 @@ export function PostForm({
               maxLength={EXCERPT_HARD_MAX}
               className={areaClass}
             />
-            <p className="mt-1 text-xs text-muted">{excerptHint}</p>
+            <p className="mt-1 text-xs text-muted">
+              {excerptHint} Shown on cards. The SEO panel uses this as the meta
+              description when its description field is empty.
+            </p>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">
@@ -710,6 +731,24 @@ export function PostForm({
           </div>
         ) : null}
       </div>
+
+      <SeoPanel
+        title={title}
+        excerpt={excerpt}
+        slug={finalSlug}
+        seoTitle={seoTitle}
+        seoDescription={seoDescription}
+        focusKeyword={focusKeyword}
+        contentHtml={contentHtml}
+        featuredImageUrl={featuredImageUrl}
+        featuredImageAlt={featuredImageAlt}
+        itinerary={itinerary}
+        linkCatalog={linkCatalog}
+        onSeoTitle={setSeoTitle}
+        onSeoDescription={setSeoDescription}
+        onFocusKeyword={setFocusKeyword}
+        onDirty={markDirty}
+      />
 
       {error ? (
         <p className="text-sm font-medium text-red-600" role="alert">

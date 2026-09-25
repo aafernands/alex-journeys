@@ -10,9 +10,14 @@ import {
 import { getPageBySlug, getAllCmsPages } from "@/lib/pages";
 import { getPostBySlug, getPostSlugs } from "@/lib/posts";
 import {
+  resolvedSeoDescription,
+  resolvedSeoTitle,
+} from "@/lib/post-seo";
+import {
   publicDestinationPath,
   publicPostPath,
 } from "@/lib/public-paths";
+import { buildPageMetadata } from "@/lib/seo";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -93,35 +98,16 @@ export async function generateMetadata({
   const post = getPostBySlug(slug);
   if (post) {
     const path = publicPostPath(slug);
-    const description = post.excerpt || `Travel story: ${post.title}`;
-    const images = post.featuredImage
-      ? [
-          {
-            url: post.featuredImage.url,
-            alt: post.featuredImage.alt || post.title,
-          },
-        ]
-      : undefined;
-    return {
-      title: post.title,
-      description,
-      alternates: { canonical: path },
-      openGraph: {
-        title: post.title,
-        description,
-        type: "article",
-        publishedTime: post.date,
-        modifiedTime: post.updatedAt ?? post.date,
-        url: path,
-        images,
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: post.title,
-        description,
-        images: post.featuredImage ? [post.featuredImage.url] : undefined,
-      },
-    };
+    return buildPageMetadata({
+      title: resolvedSeoTitle(post),
+      description: resolvedSeoDescription(post),
+      path,
+      image: post.featuredImage?.url,
+      imageAlt: post.featuredImage?.alt || post.title,
+      type: "article",
+      publishedTime: post.date,
+      modifiedTime: post.updatedAt ?? post.date,
+    });
   }
 
   if (!RESERVED_CATCHALL_SLUGS.has(slug)) {

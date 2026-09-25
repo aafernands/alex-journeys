@@ -133,7 +133,7 @@ export const topics: Topic[] = [
     icon: "mountain",
     postSlugs: [
       "top-adventure-travel-destinations-for-2025",
-      "marron-bells",
+      "maroon-bells",
       "the-ultimate-insiders-guide-to-u-s-ski-destinations",
     ],
   },
@@ -143,7 +143,7 @@ export const topics: Topic[] = [
     title: "Day Trips",
     description: "Short getaways from past itineraries.",
     icon: "sun",
-    postSlugs: ["marron-bells", "toronto-travel-guide", "nj-wine-expo-2024"],
+    postSlugs: ["maroon-bells", "toronto-travel-guide", "nj-wine-expo-2024"],
   },
   {
     slug: "outdoors",
@@ -152,7 +152,7 @@ export const topics: Topic[] = [
     description: "Mountains, lakes, and alpine mornings.",
     icon: "trees",
     postSlugs: [
-      "marron-bells",
+      "maroon-bells",
       "discovering-iceland-a-week-in-the-land-of-fire-and-ice",
       "the-ultimate-insiders-guide-to-u-s-ski-destinations",
     ],
@@ -192,7 +192,7 @@ export const topics: Topic[] = [
     postSlugs: [
       "cancun-5-day-travel-guide",
       "discovering-iceland-a-week-in-the-land-of-fire-and-ice",
-      "marron-bells",
+      "maroon-bells",
     ],
   },
 ];

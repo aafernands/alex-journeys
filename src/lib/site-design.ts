@@ -246,7 +246,7 @@ function seedFeaturedSlideFromHero(
     note: `Sunrise at ${caption.replace(" · ", ", ")} — cold air, quiet lake, and the kind of light that makes you glad you left before dawn. Start here for places, stories, and guides from trips already behind me.`,
     windowBadge: hero.windowBadge || "Field note",
     stats: hero.stats.map((s) => ({ ...s })),
-    href: "/marron-bells",
+    href: "/maroon-bells",
     ctaLabel: "Read the sunrise story",
   };
 }

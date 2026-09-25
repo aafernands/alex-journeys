@@ -12,7 +12,8 @@ After sign-in, the shell provides:
 | --- | --- | --- |
 | Dashboard | `/cms` | Stats, publish readiness, recent posts, drafts, quick actions |
 | Posts | `/cms/posts` | Search/filter, edit, duplicate, delete; drafts + published |
-| New / Edit post | `/cms/new`, `/cms/edit/[slug]` | Editor with SEO excerpt guidance, image preview, draft/publish, ⌘/Ctrl+S |
+| SEO | `/cms/seo` | Scores for every published post, worst first, linking into the editor |
+| New / Edit post | `/cms/new`, `/cms/edit/[slug]` | Editor with SEO panel (title, meta description, checklist, search preview), image preview, draft/publish, ⌘/Ctrl+S |
 | Pages | `/cms/pages` | List/create/edit/delete JSON pages under `src/content/pages` |
 | Destinations | `/cms/destinations` | Countries, map, climate, itinerary → `tree.json` |
 | Media | `/cms/media` | Post image library + author photo |
@@ -61,7 +62,7 @@ Never commit secrets. Never put them in client code. The dashboard only shows co
 
 ### Posts (stories)
 
-1. **New post** → title (slug auto), date, excerpt (counter + ~150–160 SEO guidance), featured image preview, destinations (Place pages), optional **Guides → Plan a trip**, rich text story Content, optional **Trip timeline** (structured day-by-day itinerary — separate from Content HTML; renders as a public timeline).
+1. **New post** → title (slug auto), date, excerpt (card copy; fallback meta description), featured image preview, destinations (Place pages), optional **Guides → Plan a trip**, rich text story Content, optional **Trip timeline** (structured day-by-day itinerary — separate from Content HTML; renders as a public timeline), then the **SEO** panel: search title, meta description, optional focus keyword, Google-style preview, and a live checklist. Empty SEO fields fall back to the title and excerpt. Checklist warnings do not block publish. Scores for every story live at `/cms/seo`.
 2. **Save draft** → `src/content/drafts/{slug}.json`.
 3. **Publish** → `src/content/posts/{slug}.json` + `_index.json`; matching draft is removed when present.
 4. Vercel redeploys → live at `/{slug}`.

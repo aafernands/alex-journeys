@@ -12,6 +12,7 @@ import {
 import { sanitizeSlug } from "@/lib/cms/validate";
 import type { Post } from "@/lib/post-types";
 import { getPostBySlug } from "@/lib/posts";
+import { getSeoLinkCatalog } from "@/lib/seo-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,9 @@ async function loadDraft(slug: string): Promise<DraftPost | null> {
         bookingTools: fromGh.bookingTools,
         bookingDestination: fromGh.bookingDestination,
         experienceWidgetHtml: fromGh.experienceWidgetHtml,
+        seoTitle: fromGh.seoTitle,
+        seoDescription: fromGh.seoDescription,
+        focusKeyword: fromGh.focusKeyword,
         contentHtml: fromGh.contentHtml ?? "",
         itinerary: fromGh.itinerary,
         source: fromGh.source,
@@ -87,7 +91,7 @@ export default async function CmsEditPostPage({ params, searchParams }: PageProp
   }));
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6">
       <div>
         <Link
           href="/cms/posts"
@@ -130,9 +134,13 @@ export default async function CmsEditPostPage({ params, searchParams }: PageProp
             "bookingDestination" in source ? (source.bookingDestination ?? "") : "",
           experienceWidgetHtml:
             "experienceWidgetHtml" in source ? (source.experienceWidgetHtml ?? "") : "",
+          seoTitle: source.seoTitle ?? "",
+          seoDescription: source.seoDescription ?? "",
+          focusKeyword: source.focusKeyword ?? "",
           itinerary:
             "itinerary" in source ? (source.itinerary ?? undefined) : undefined,
         }}
+        linkCatalog={getSeoLinkCatalog()}
       />
     </div>
   );

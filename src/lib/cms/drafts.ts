@@ -14,6 +14,9 @@ export type DraftPost = {
   bookingTools?: PostBookingTool[];
   bookingDestination?: string;
   experienceWidgetHtml?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  focusKeyword?: string;
   contentHtml: string;
   itinerary?: PostItinerary;
   source?: unknown;

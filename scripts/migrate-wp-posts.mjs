@@ -11,6 +11,11 @@ const ROOT = path.resolve(__dirname, "..");
 const SOURCE = "/workspace/wp-migration/all-posts.json";
 const OUT_DIR = path.join(ROOT, "src/content/posts");
 
+/** WordPress slug → published slug. Maroon Bells was imported with a typo. */
+const SLUG_RENAMES = {
+  "marron-bells": "maroon-bells",
+};
+
 const DESTINATION_MAP = {
   "cancun-5-day-travel-guide": ["mexico"],
   "marron-bells": ["united-states"],
@@ -28,7 +33,7 @@ const FEATURED_HOMEPAGE = [
   "discovering-iceland-a-week-in-the-land-of-fire-and-ice",
   "rio-de-janeiro-itinerary",
   "toronto-travel-guide",
-  "marron-bells",
+  "maroon-bells",
   "best-solo-travel-destinations",
 ];
 
@@ -241,7 +246,8 @@ function main() {
   const cleanupNotes = [];
 
   for (const post of raw) {
-    const slug = post.slug;
+    const sourceSlug = post.slug;
+    const slug = SLUG_RENAMES[sourceSlug] || sourceSlug;
     const title = decodeEntities(stripTags(post.title?.rendered || ""));
     const excerpt = stripTags(post.excerpt?.rendered || "");
     const date = post.date; // preserve original
@@ -250,7 +256,7 @@ function main() {
     const hadStyles = /style=/i.test(originalHtml);
     const contentHtml = cleanHtml(originalHtml);
     const featuredImage = pickFeaturedImage(post);
-    const destinations = DESTINATION_MAP[slug] || [];
+    const destinations = DESTINATION_MAP[sourceSlug] || DESTINATION_MAP[slug] || [];
 
     if (hadScripts || hadStyles) {
       cleanupNotes.push({

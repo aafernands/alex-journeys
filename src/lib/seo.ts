@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { site as contentSite } from "@/data/content";
 import { getSiteDesign } from "@/lib/site-design";
-
-const DEFAULT_SITE_URL = "https://www.alexjourneys.com";
+import { getSiteUrl } from "@/lib/site-url";
 
 /** Prefer CMS branding.logoOnLight; falls back if design JSON is incomplete. */
 function designLogoOnLight(): string {
@@ -15,15 +14,9 @@ function designLogoOnLight(): string {
   return "/brand/logo-on-light.png";
 }
 
-function normalizeSiteUrl(raw: string): string {
-  return raw.replace(/\/+$/, "");
-}
-
 export const siteConfig = {
   name: contentSite.name,
-  url: normalizeSiteUrl(
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() || DEFAULT_SITE_URL,
-  ),
+  url: getSiteUrl(),
   description:
     "Alex Journeys is a personal travel journal — destinations from past trips, trip notes, and photos from the road. Written by Alex Fernandes.",
   shortDescription:
@@ -69,6 +62,7 @@ export function buildPageMetadata({
   description,
   path,
   image,
+  imageAlt,
   type = "website",
   publishedTime,
   modifiedTime,
@@ -77,6 +71,7 @@ export function buildPageMetadata({
   description?: string;
   path: string;
   image?: string | null;
+  imageAlt?: string | null;
   type?: "website" | "article";
   publishedTime?: string;
   modifiedTime?: string;
@@ -84,6 +79,7 @@ export function buildPageMetadata({
   const desc = description ?? siteConfig.description;
   const url = absoluteUrl(path);
   const ogImage = image ? absoluteUrl(image) : absoluteUrl(siteConfig.ogImage);
+  const alt = imageAlt?.trim() || undefined;
 
   return {
     title,
@@ -98,7 +94,7 @@ export function buildPageMetadata({
       type,
       ...(publishedTime ? { publishedTime } : {}),
       ...(modifiedTime ? { modifiedTime } : {}),
-      images: [{ url: ogImage }],
+      images: [{ url: ogImage, ...(alt ? { alt } : {}) }],
     },
     twitter: {
       card: "summary_large_image",

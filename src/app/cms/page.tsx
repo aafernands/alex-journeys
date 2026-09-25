@@ -25,6 +25,7 @@ import {
   Compass,
   FileText,
   MapPin,
+  ListChecks,
   PenLine,
   Plus,
   AlertTriangle,
@@ -204,6 +205,16 @@ export default async function CmsPage() {
           <div>
             <p className="font-semibold text-heading">Write a story</p>
             <p className="text-xs text-muted">New post → GitHub publish</p>
+          </div>
+        </Link>
+        <Link
+          href="/cms/seo"
+          className="panel flex items-center gap-3 p-5 transition hover:ring-2 hover:ring-accent/30"
+        >
+          <ListChecks className="h-5 w-5 text-accent" aria-hidden />
+          <div>
+            <p className="font-semibold text-heading">SEO scores</p>
+            <p className="text-xs text-muted">Checklist for every story</p>
           </div>
         </Link>
         <Link

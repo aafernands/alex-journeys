@@ -442,7 +442,7 @@ function SlideEditor({
           <input
             value={slide.href}
             onChange={(e) => onChange({ href: e.target.value })}
-            placeholder="/marron-bells"
+            placeholder="/maroon-bells"
             className={fieldClass}
           />
         </div>

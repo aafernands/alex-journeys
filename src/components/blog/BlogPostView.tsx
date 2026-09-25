@@ -21,6 +21,10 @@ import {
   postUpdatedDisplayDate,
 } from "@/lib/posts";
 import { publicPostPath } from "@/lib/public-paths";
+import {
+  resolvedSeoDescription,
+  resolvedSeoTitle,
+} from "@/lib/post-seo";
 import { blogPostingJsonLd } from "@/lib/seo";
 import { site } from "@/data/content";
 import { cmsEditPostHref } from "@/lib/admin-edit";
@@ -55,8 +59,8 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
   const related = getRelatedPosts(slug, 3);
   const updatedAt = postUpdatedDisplayDate(post);
   const jsonLd = blogPostingJsonLd({
-    title: post.title,
-    description: post.excerpt || undefined,
+    title: resolvedSeoTitle(post),
+    description: resolvedSeoDescription(post),
     path: publicPostPath(slug),
     datePublished: post.date,
     dateModified: post.updatedAt ?? post.date,
