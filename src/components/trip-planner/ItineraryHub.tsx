@@ -243,6 +243,13 @@ function ItemUrl({
   );
 }
 
+function itemPrimaryTime(item: TripItem): string {
+  if (item.type === "car") return item.pickupTime ?? "";
+  if (item.type === "flight") return item.departureTime ?? item.time ?? "";
+  if (item.type === "hotel") return item.checkinTime ?? item.time ?? "";
+  return item.time ?? "";
+}
+
 function itemWhen(item: TripItem, days: TripDay[]): string {
   const index = scheduledDayIndex(item, days);
   const day = index == null ? null : days.find((entry) => entry.index === index);
@@ -267,7 +274,9 @@ function itemWhen(item: TripItem, days: TripDay[]): string {
           : [];
   return [
     day ? `${day.label} · ${day.detail}` : null,
-    item.time ?? null,
+    item.type === "car" || item.type === "flight" || item.type === "hotel"
+      ? null
+      : item.time ?? null,
     schedule.filter(Boolean).join(" · ") || null,
     item.confirmation ? `Conf. ${item.confirmation}` : null,
   ]
@@ -601,6 +610,7 @@ function BookingItemForm({
           />
         </label>
       ) : null}
+      {!(["car", "flight", "hotel"] as TripItemType[]).includes(type) ? (
       <div className="plan-grid-2">
         <label className="plan-field">
           <span className={plan.label}>Day</span>
@@ -633,6 +643,7 @@ function BookingItemForm({
           />
         </label>
       </div>
+      ) : null}
       {type === "car" ? (
         <fieldset className="plan-stack-tight rounded-lg border border-border bg-surface-soft p-3">
           <legend className={`${plan.label} px-1`}>Car details</legend>
@@ -913,7 +924,7 @@ function TimelineEntry({
     >
       <div className="plan-timeline-time">
         <span className="plan-timeline-time-label">
-          {item.time || "Any time"}
+          {itemPrimaryTime(item) || "Any time"}
         </span>
       </div>
       <div className="plan-timeline-content">
@@ -1707,7 +1718,7 @@ export function ItineraryHub({
                     )
                     .map((item) => (
                       <p key={item.id} className={plan.body}>
-                        {item.time ? `${item.time} ? ` : ""}
+                        {itemPrimaryTime(item) ? `${itemPrimaryTime(item)} · ` : ""}
                         {item.title}
                       </p>
                     ))}

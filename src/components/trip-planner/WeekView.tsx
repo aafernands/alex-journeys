@@ -29,6 +29,13 @@ function itemsForDay(items: TripItem[], dayIndex: number, days: TripDay[]): Trip
     .sort(compareScheduledItems);
 }
 
+function itemPrimaryTime(item: TripItem): string {
+  if (item.type === "car") return item.pickupTime ?? "";
+  if (item.type === "flight") return item.departureTime ?? item.time ?? "";
+  if (item.type === "hotel") return item.checkinTime ?? item.time ?? "";
+  return item.time ?? "";
+}
+
 function WeekChip({
   item,
   days,
@@ -61,8 +68,8 @@ function WeekChip({
     >
       <div className="flex items-start justify-between gap-2">
         <p className={`${plan.body} min-w-0 font-semibold text-heading`}>
-          {item.time ? (
-            <span className="mr-1 text-accent">{item.time}</span>
+          {itemPrimaryTime(item) ? (
+            <span className="mr-1 text-accent">{itemPrimaryTime(item)}</span>
           ) : null}
           {item.title}
         </p>
