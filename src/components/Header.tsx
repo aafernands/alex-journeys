@@ -143,9 +143,9 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-md">
+      <header className="site-header glass sticky top-0 z-50">
         {focused ? null : (
-          <div className="site-alerts border-b border-border bg-surface-soft">
+          <div className="site-alerts border-b border-border/70">
             <div className="section-shell flex items-center justify-between gap-3 py-1.5">
             <a
               href="#newsletter"
@@ -258,7 +258,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
                   id={destMenuId}
                   role="menu"
                   aria-label="Places"
-                  className="absolute left-0 top-full z-50 mt-3 min-w-[14rem] rounded-xl border border-border bg-white py-2 shadow-lg"
+                  className="glass-strong absolute left-0 top-full z-50 mt-3 min-w-[14rem] rounded-xl py-2"
                 >
                   <Link
                     href="/destinations"
@@ -296,7 +296,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
                         {isContinentOpen && (
                           <ul
                             role="menu"
-                            className="absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl border border-border bg-white py-2 shadow-lg"
+                            className="glass-strong absolute left-full top-0 ml-1 min-w-[11rem] rounded-xl py-2"
                           >
                             {continent.countries.map((country) => (
                               <li key={country.slug} role="none">
@@ -410,7 +410,7 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
         {mobileSearchOpen && (
           <div
             id="mobile-search-panel"
-            className="border-t border-border bg-white px-5 py-3 xl:hidden"
+            className="site-header-panel px-5 py-3 xl:hidden"
           >
             <SearchInput
               ref={mobileSearchRef}

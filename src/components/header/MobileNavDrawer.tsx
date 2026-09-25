@@ -66,14 +66,14 @@ export function MobileNavDrawer({ open, onClose }: Props) {
     >
       <button
         type="button"
-        className="absolute inset-0 bg-heading/40 backdrop-blur-[1px]"
+        className="absolute inset-0 bg-heading/25"
         aria-label="Close menu"
         onClick={onClose}
       />
 
       <nav
         id="mobile-nav"
-        className="absolute inset-0 flex w-full flex-col bg-bg shadow-xl"
+        className="mobile-nav-panel glass-strong absolute inset-0 flex w-full flex-col"
         aria-label="Mobile"
       >
         <div className="shrink-0 border-b border-border px-4 py-3">

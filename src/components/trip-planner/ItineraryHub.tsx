@@ -1334,20 +1334,22 @@ export function ItineraryHub({
   return (
     <div className="plan-hub plan-workspace" data-view={view}>
       <div className="plan-hub-lead plan-stack-tight">
-        <Link href="/account#trips" className={plan.textBtn}>
-          ← My trips
-        </Link>
         <TripDestinationHero
           fallbackImage={config.fallbackImage}
           destination={state.destination}
           title={tripTitle || state.destination.trim() || config.steps.next.heading}
           headingId={headingId}
           meta={[dates, travelers].filter(Boolean).join(" · ")}
+          back={
+            <Link href="/account#trips" className="plan-hero-back glass-strong">
+              ← My trips
+            </Link>
+          }
           actions={
         <>
           <button
             type="button"
-            className="plan-hero-action"
+            className="plan-hero-action glass-strong"
             aria-label="Share a copy"
             title="Share a copy"
             onClick={async () => {
@@ -1376,7 +1378,7 @@ export function ItineraryHub({
           </button>
           <button
             type="button"
-            className="plan-hero-action"
+            className="plan-hero-action glass-strong"
             aria-label="Edit details"
             title="Edit details"
             onClick={onEditTrip}
@@ -1412,8 +1414,8 @@ export function ItineraryHub({
               next?.focus();
             }}
           >
-            <summary className="plan-hero-action" aria-label="More options" title="More options"><Ellipsis size={20} aria-hidden="true" /></summary>
-            <div className="plan-trip-menu-panel" role="menu" aria-label="More options">
+            <summary className="plan-hero-action glass-strong" aria-label="More options" title="More options"><Ellipsis size={20} aria-hidden="true" /></summary>
+            <div className="plan-trip-menu-panel glass-strong" role="menu" aria-label="More options">
               <DownloadTripPdf
                 headingId={headingId}
                 session={moreMenuSession}
@@ -1614,7 +1616,7 @@ export function ItineraryHub({
             + Add to trip
           </button>
           {addMenu ? (
-            <div id={`${headingId}-add-options`} className="plan-add-options">
+            <div id={`${headingId}-add-options`} className="plan-add-options glass-strong">
               {(
                 [
                   ["activity", "Activity"],
@@ -2119,10 +2121,7 @@ export function ItineraryHub({
         >
           <section aria-labelledby={`${headingId}-list`}>
             <div className="plan-toolbar">
-              <h3
-                id={`${headingId}-list`}
-                className={`${plan.h3} max-sm:hidden`}
-              >
+              <h3 id={`${headingId}-list`} className={plan.h3}>
                 Day-by-day schedule
               </h3>
               <div

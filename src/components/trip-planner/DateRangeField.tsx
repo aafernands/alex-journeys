@@ -299,7 +299,7 @@ export function DateRangeField({
             aria-modal="true"
             aria-labelledby={titleId}
             aria-describedby={promptId}
-            className="plan-date-popover plan-control"
+            className="plan-date-popover plan-control glass-strong"
           >
             <p id={titleId} className="sr-only">
               {dialogLabel}

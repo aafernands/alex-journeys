@@ -134,7 +134,7 @@ export function PlaceCombobox({
           id={listId}
           role="listbox"
           aria-label={listLabel}
-          className="plan-control absolute z-30 mt-2 max-h-64 w-full overflow-auto border border-border bg-white py-1 shadow-[0_12px_32px_rgba(60,40,20,0.12)]"
+          className="plan-control glass-strong absolute z-30 mt-2 max-h-64 w-full overflow-auto rounded-xl py-1"
         >
           {options.map((option, index) => {
             const selected = index === active;
