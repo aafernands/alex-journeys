@@ -41,8 +41,8 @@ export default async function CmsHelpPage() {
             Fill title (slug auto-fills), date, excerpt, optional featured image
             + destinations (Place pages), optional Guides → Plan a trip, then
             story Content. The SEO panel under the story sets the search title
-            and meta description (they fall back to the title and excerpt) and
-            shows a live checklist. For day-by-day trips, enable{" "}
+            and meta description (they fall back to the title and excerpt),
+            optional noindex, and a live checklist. For day-by-day trips, enable{" "}
             <strong>Trip timeline</strong> below Content (structured data, not
             HTML in the editor).
           </li>

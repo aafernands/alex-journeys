@@ -17,6 +17,7 @@ export type DraftPost = {
   seoTitle?: string;
   seoDescription?: string;
   focusKeyword?: string;
+  noindex?: boolean;
   contentHtml: string;
   itinerary?: PostItinerary;
   source?: unknown;

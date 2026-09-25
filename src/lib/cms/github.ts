@@ -267,6 +267,7 @@ export async function fetchDraftFromGithub(
   seoTitle?: string;
   seoDescription?: string;
   focusKeyword?: string;
+  noindex?: boolean;
   contentHtml: string;
   itinerary?: Post["itinerary"];
   source?: unknown;
@@ -286,6 +287,7 @@ export async function fetchDraftFromGithub(
     seoTitle?: string;
     seoDescription?: string;
     focusKeyword?: string;
+    noindex?: boolean;
     contentHtml: string;
     itinerary?: Post["itinerary"];
     source?: unknown;
@@ -496,6 +498,7 @@ export async function publishDraft(
       ? { seoDescription: validated.seoDescription }
       : {}),
     ...(validated.focusKeyword ? { focusKeyword: validated.focusKeyword } : {}),
+    ...(validated.noindex ? { noindex: true } : {}),
     contentHtml: validated.contentHtml,
     source: "cms" as const,
     ...(validated.itinerary ? { itinerary: validated.itinerary } : {}),

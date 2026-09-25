@@ -49,20 +49,46 @@ export function readSeoFields(input: {
   return { ok: true, seoTitle, seoDescription, focusKeyword };
 }
 
+/** True only for an explicit hide-from-Google choice. */
+export function readNoindex(value: unknown): boolean {
+  return value === true || value === "true";
+}
+
 /** Drop blank SEO fields so published JSON stays small. */
 export function optionalSeoFields(data: {
   seoTitle: string;
   seoDescription: string;
   focusKeyword: string;
+  noindex?: boolean;
 }): {
   seoTitle?: string;
   seoDescription?: string;
   focusKeyword?: string;
+  noindex?: true;
 } {
   return {
     ...(data.seoTitle ? { seoTitle: data.seoTitle } : {}),
     ...(data.seoDescription ? { seoDescription: data.seoDescription } : {}),
     ...(data.focusKeyword ? { focusKeyword: data.focusKeyword } : {}),
+    ...(data.noindex ? { noindex: true as const } : {}),
+  };
+}
+
+/** Published posts stay in the sitemap unless they are explicitly noindex. */
+export function isPostIndexable(post: { noindex?: boolean | null }): boolean {
+  return post.noindex !== true;
+}
+
+/** Robots directives for a post hidden from search engines. */
+export function noindexRobots(): {
+  index: false;
+  follow: true;
+  googleBot: { index: false; follow: true };
+} {
+  return {
+    index: false,
+    follow: true,
+    googleBot: { index: false, follow: true },
   };
 }
 

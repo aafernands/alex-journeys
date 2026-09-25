@@ -48,6 +48,8 @@ export type PostMeta = {
   seoDescription?: string;
   /** Optional editor keyword. Not rendered on the public page. */
   focusKeyword?: string;
+  /** When true, the public post is noindex and omitted from the sitemap. */
+  noindex?: boolean;
 };
 
 /** Day-by-day trip timeline stored separately from contentHtml. */
