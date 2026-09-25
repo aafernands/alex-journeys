@@ -555,13 +555,15 @@ export function StayBooker({
               }}
             />
           </div>
-          <button
-            type="submit"
-            className={`btn btn-primary ${checkoutMode ? "max-md:hidden" : ""}`}
-            disabled={pending === "book" || pending === "rates"}
-          >
-            {pending === "book" ? "Booking…" : "Book this stay"}
-          </button>
+          <div className={checkoutMode ? "hidden md:block" : undefined}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={pending === "book" || pending === "rates"}
+            >
+              {pending === "book" ? "Booking…" : "Book this stay"}
+            </button>
+          </div>
           {pending === "book" ? (
             <p className="text-sm text-muted" role="status">
               Sending the reservation to Nuitee…

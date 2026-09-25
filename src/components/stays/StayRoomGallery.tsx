@@ -38,6 +38,8 @@ export function StayRoomGallery({ photos, fallback = "", label }: Props) {
   const viewerIndexRef = useRef(0);
   const pendingScroll = useRef<number | null>(null);
   const pointer = useRef({ x: 0, moved: false });
+  const stripTarget = useRef<number | null>(null);
+  const viewerTarget = useRef<number | null>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
   const [index, setIndex] = useState(0);
@@ -71,6 +73,8 @@ export function StayRoomGallery({ photos, fallback = "", label }: Props) {
       setViewerIndex(next);
       setIndex(next);
       setGrid(false);
+      viewerTarget.current = next;
+      stripTarget.current = next;
       requestAnimationFrame(() => {
         scrollToIndex(viewerScroller.current, next);
         scrollToIndex(scroller.current, next);
@@ -98,6 +102,7 @@ export function StayRoomGallery({ photos, fallback = "", label }: Props) {
     if (!open || grid || pendingScroll.current == null) return;
     const next = pendingScroll.current;
     pendingScroll.current = null;
+    viewerTarget.current = next;
     const frame = requestAnimationFrame(() => {
       scrollToIndex(viewerScroller.current, next, "auto");
     });
@@ -111,6 +116,8 @@ export function StayRoomGallery({ photos, fallback = "", label }: Props) {
     setViewerIndex(next);
     setIndex(next);
     setGrid(false);
+    viewerTarget.current = next;
+    stripTarget.current = next;
     requestAnimationFrame(() => {
       scrollToIndex(viewerScroller.current, next);
       scrollToIndex(scroller.current, next);
@@ -129,6 +136,7 @@ export function StayRoomGallery({ photos, fallback = "", label }: Props) {
   }
 
   function onPointerDown(event: PointerEvent<HTMLElement>) {
+    stripTarget.current = null;
     pointer.current = { x: event.clientX, moved: false };
   }
 
@@ -138,6 +146,9 @@ export function StayRoomGallery({ photos, fallback = "", label }: Props) {
 
   function onStripScroll(event: UIEvent<HTMLDivElement>, viewer = false) {
     const next = slideIndex(event.currentTarget);
+    const target = viewer ? viewerTarget : stripTarget;
+    if (target.current != null && next !== target.current) return;
+    target.current = null;
     if (viewer) {
       viewerIndexRef.current = next;
       indexRef.current = next;
@@ -153,6 +164,7 @@ export function StayRoomGallery({ photos, fallback = "", label }: Props) {
     const clamped = Math.max(0, Math.min(next, slideCount - 1));
     indexRef.current = clamped;
     setIndex(clamped);
+    stripTarget.current = clamped;
     scrollToIndex(scroller.current, clamped);
   }
 
@@ -225,7 +237,7 @@ export function StayRoomGallery({ photos, fallback = "", label }: Props) {
           <button
             type="button"
             className="absolute bottom-3 left-3 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-heading/85 px-3 text-xs font-semibold text-on-solid"
-            onClick={() => openAt(index, true)}
+            onClick={() => openAt(indexRef.current, true)}
           >
             <Images className="h-4 w-4" aria-hidden="true" />
             All {slides.length} photos
@@ -326,6 +338,9 @@ export function StayRoomGallery({ photos, fallback = "", label }: Props) {
                   <div
                     ref={viewerScroller}
                     className="flex h-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                    onPointerDown={() => {
+                      viewerTarget.current = null;
+                    }}
                     onScroll={(event) => onStripScroll(event, true)}
                   >
                     {slides.map((photo, photoIndex) => (
