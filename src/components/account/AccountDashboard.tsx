@@ -8,7 +8,7 @@ import {
   Luggage,
   MapPin,
 } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { AccountAuthActions } from "@/components/AccountAuthActions";
 import {
   MyTripsList,
@@ -25,10 +25,15 @@ import {
   SavedHotelsList,
   type SavedHotelRow,
 } from "@/components/account/SavedHotelsList";
+import {
+  ACCOUNT_SECTIONS,
+  accountSectionFromLocation,
+  type AccountSection,
+} from "@/lib/account-section";
 import { planATripHref } from "@/lib/trip-record";
 
-const SECTIONS = ["overview", "trips", "saved", "settings"] as const;
-type Section = (typeof SECTIONS)[number];
+const SECTIONS = ACCOUNT_SECTIONS;
+type Section = AccountSection;
 
 const SECTION_LABEL: Record<Section, string> = {
   overview: "Overview",
@@ -53,13 +58,6 @@ export type AccountDashboardProps = {
   hotels: SavedHotelRow[];
   hotelsError: string | null;
 };
-
-function sectionFromHash(hash: string): Section {
-  const id = hash.replace(/^#/, "");
-  return (SECTIONS as readonly string[]).includes(id)
-    ? (id as Section)
-    : "overview";
-}
 
 function useSiteHeaderHeight(): number {
   const [height, setHeight] = useState(112);
@@ -137,8 +135,21 @@ export function AccountDashboard({
   const displayName = name.trim() || "Traveler";
   const googlePhoto = Boolean(image?.includes("googleusercontent.com"));
 
-  useEffect(() => {
-    const apply = () => setSection(sectionFromHash(window.location.hash));
+  useLayoutEffect(() => {
+    const apply = () => {
+      const next = accountSectionFromLocation(
+        window.location.hash,
+        window.location.search,
+      );
+      setSection(next);
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has("section")) return;
+      params.delete("section");
+      const search = params.toString();
+      const hash = next === "overview" ? "" : `#${next}`;
+      const url = `${window.location.pathname}${search ? `?${search}` : ""}${hash}`;
+      window.history.replaceState(null, "", url);
+    };
     apply();
     window.addEventListener("hashchange", apply);
     return () => window.removeEventListener("hashchange", apply);
@@ -146,8 +157,11 @@ export function AccountDashboard({
 
   function select(next: Section) {
     setSection(next);
-    const base = `${window.location.pathname}${window.location.search}`;
-    const url = next === "overview" ? base : `${base}#${next}`;
+    const params = new URLSearchParams(window.location.search);
+    params.delete("section");
+    const search = params.toString();
+    const hash = next === "overview" ? "" : `#${next}`;
+    const url = `${window.location.pathname}${search ? `?${search}` : ""}${hash}`;
     window.history.replaceState(null, "", url);
     document.getElementById("account-sections")?.scrollIntoView({
       block: "start",

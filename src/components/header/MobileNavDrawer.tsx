@@ -12,7 +12,7 @@ import {
 } from "@/components/icons/SocialIcons";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { SearchInput } from "@/components/search/SearchInput";
-import { DrawerLoginDialog } from "./DrawerLoginDialog";
+import { useReaderLoginPrompt } from "@/components/ReaderLoginPrompt";
 import { UserRound, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { AddToHomeScreenButton } from "@/components/AddToHomeScreenButton";
@@ -51,7 +51,7 @@ const leafLinkClass =
  */
 export function MobileNavDrawer({ open, onClose }: Props) {
   const [placesOpen, setPlacesOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
+  const openReaderLogin = useReaderLoginPrompt();
   const { status } = useSession();
   const [openContinent, setOpenContinent] = useState<string | null>(null);
 
@@ -111,7 +111,7 @@ export function MobileNavDrawer({ open, onClose }: Props) {
                 className="drawer-header-icon"
                 aria-label="Sign in"
                 aria-haspopup="dialog"
-                onClick={() => setLoginOpen(true)}
+                onClick={() => openReaderLogin({ onAuthenticated: onClose })}
               >
                 <UserRound size={22} aria-hidden="true" />
               </button>
@@ -293,15 +293,6 @@ export function MobileNavDrawer({ open, onClose }: Props) {
           <ThemeAppearanceControl />
         </div>
       </nav>
-      {loginOpen ? (
-        <DrawerLoginDialog
-          onClose={() => setLoginOpen(false)}
-          onAuthenticated={() => {
-            setLoginOpen(false);
-            onClose();
-          }}
-        />
-      ) : null}
     </div>
   );
 }

@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { auth, isReaderAuthConfigured } from "@/auth";
-import { AccountAuthActions } from "@/components/AccountAuthActions";
+import { Suspense } from "react";
+import {
+  auth,
+  isCredentialsAuthConfigured,
+  isGoogleAuthConfigured,
+  isOauthConfigured,
+  isTwitterAuthConfigured,
+} from "@/auth";
+import { AccountSignIn } from "@/components/account/AccountSignIn";
 import {
   AccountDashboard,
   type AccountDashboardProps,
@@ -27,7 +33,6 @@ import {
 import { dateSummary } from "@/lib/trip-planner-model";
 import { getTripPlannerConfig } from "@/lib/trip-planner";
 import {
-  planATripHref,
   plannerStateFromTrip,
   TRIPS_LIST_UNAVAILABLE,
 } from "@/lib/trip-record";
@@ -61,7 +66,6 @@ function enrichSavedPosts(
 
 export default async function AccountPage() {
   const session = await auth();
-  const readerAuthConfigured = isReaderAuthConfigured();
   const userId = session?.user?.id?.trim();
   const signedIn = Boolean(session?.user && userId);
   const user = session?.user;
@@ -208,33 +212,20 @@ export default async function AccountPage() {
         <AccountDashboard {...dashboardProps} />
       ) : (
         <div className="section-shell section-band">
-          <div className="mx-auto max-w-xl">
-            <div className="panel p-6 md:p-8">
-              <h2 className="font-display text-xl font-bold text-heading">
-                Sign in to continue
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-text">
-                Save stories you want to reread and itineraries you’re planning.
-                Use email and password, or Google.
-              </p>
-              <div className="mt-5">
-                <AccountAuthActions
-                  mode="sign-in"
-                  googleConfigured={readerAuthConfigured}
-                />
-              </div>
-              <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-                <Link
-                  href={planATripHref()}
-                  className="btn btn-secondary w-full sm:w-auto"
-                >
-                  Plan a trip
-                </Link>
-                <Link href="/blog" className="btn btn-secondary w-full sm:w-auto">
-                  Browse stories
-                </Link>
-              </div>
-            </div>
+          <div className="mx-auto max-w-md">
+            <Suspense
+              fallback={
+                <div className="panel p-6 md:p-8">
+                  <p className="text-sm text-muted">Loading…</p>
+                </div>
+              }
+            >
+              <AccountSignIn
+                googleConfigured={isOauthConfigured() && isGoogleAuthConfigured()}
+                twitterConfigured={isOauthConfigured() && isTwitterAuthConfigured()}
+                credentialsConfigured={isCredentialsAuthConfigured()}
+              />
+            </Suspense>
           </div>
         </div>
       )}

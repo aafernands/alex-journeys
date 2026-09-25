@@ -36,6 +36,9 @@ describe("warm glass chrome", () => {
     assert.match(hub, /plan-hero-back glass-strong/);
     assert.match(hub, /plan-hero-action glass-strong/);
     assert.match(drawer, /mobile-nav-panel glass-strong/);
+    const dialog = source("../src/components/header/DrawerLoginDialog.tsx");
+    assert.match(dialog, /drawer-login-dialog glass-strong/);
+    assert.match(css, /\.drawer-login-dialog > \.panel \{[^}]*background: transparent/);
     assert.match(css, /main\.plan-flow:has\(\.plan-workspace\) \{\s*margin-top: calc\(-1 \* \(var\(--site-header-bar\) \+ 1px\)\)/);
     assert.match(css, /\.plan-workspace-tabs \{[\s\S]*position: fixed;/);
     assert.match(css, /@media \(max-width: 639px\) \{[\s\S]*\.plan-sticky,[\s\S]*background: var\(--glass-fill\)/);

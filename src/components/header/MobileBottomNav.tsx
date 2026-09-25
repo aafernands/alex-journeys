@@ -1,17 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useLayoutEffect } from "react";
+import { getSession, useSession } from "next-auth/react";
 import { destinationSlugs } from "@/data/destinations";
 import { NavIcon } from "@/components/icons/NavIcon";
+import { useReaderLoginPrompt } from "@/components/ReaderLoginPrompt";
 import { useTripFocus } from "@/components/trip-planner/TripFocus";
+import {
+  SAVED_ACCOUNT_HREF,
+  SAVED_SIGN_IN_INTRO,
+  SAVED_SIGN_IN_RETURN,
+} from "@/lib/account-section";
 
 type Tab = {
   href: string;
   label: string;
   icon: string;
   match: (path: string) => boolean;
+  saved?: boolean;
 };
 
 const TABS: Tab[] = [
@@ -36,14 +44,78 @@ const TABS: Tab[] = [
     match: (path) => path === "/guides/plan-a-trip",
   },
   {
-    href: "/account#saved",
+    href: SAVED_ACCOUNT_HREF,
     label: "Saved",
     icon: "bookmark",
+    saved: true,
     match: (path) => path === "/account" || path.startsWith("/account/"),
   },
 ];
 
 const BODY_VISIBLE_CLASS = "mobile-bottom-nav-visible";
+
+const tabClass =
+  "flex flex-1 flex-col items-center justify-center gap-0.5 px-1 text-xs font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-accent";
+
+function TabBody({ tab, active }: { tab: Tab; active: boolean }) {
+  return (
+    <>
+      <span className={`flex h-8 w-14 items-center justify-center rounded-full ${active ? "bg-accent text-on-solid" : ""}`}>
+        <NavIcon name={tab.icon} size={22} />
+      </span>
+      <span>{tab.label}</span>
+    </>
+  );
+}
+
+function SavedTab({ tab, active }: { tab: Tab; active: boolean }) {
+  const { status } = useSession();
+  const router = useRouter();
+  const openReaderLogin = useReaderLoginPrompt();
+  const signedIn = status === "authenticated";
+
+  async function openSaved() {
+    let signedInNow = signedIn;
+    if (status === "loading") {
+      const session = await getSession();
+      signedInNow = Boolean(session?.user);
+    }
+    if (signedInNow) {
+      router.push(SAVED_ACCOUNT_HREF);
+      return;
+    }
+    openReaderLogin({
+      returnTo: SAVED_SIGN_IN_RETURN,
+      intro: SAVED_SIGN_IN_INTRO,
+    });
+  }
+
+  if (signedIn) {
+    return (
+      <Link
+        href={tab.href}
+        className={`${tabClass} ${active ? "text-heading" : "text-muted hover:text-heading"}`}
+        aria-current={active ? "page" : undefined}
+      >
+        <TabBody tab={tab} active={active} />
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className={`${tabClass} ${active ? "text-heading" : "text-muted hover:text-heading"}`}
+      aria-haspopup="dialog"
+      aria-current={active ? "page" : undefined}
+      onClick={() => {
+        void openSaved();
+      }}
+    >
+      <TabBody tab={tab} active={active} />
+    </button>
+  );
+}
 
 /** Persistent discovery navigation. Trip workspaces, booking flows, and overlays hide it. */
 export function MobileBottomNav() {
@@ -73,18 +145,17 @@ export function MobileBottomNav() {
           const active = tab.match(pathname);
           return (
             <li key={tab.href} className="flex">
-              <Link
-                href={tab.href}
-                className={`flex flex-1 flex-col items-center justify-center gap-0.5 px-1 text-xs font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-accent ${
-                  active ? "text-heading" : "text-muted hover:text-heading"
-                }`}
-                aria-current={active ? "page" : undefined}
-              >
-                <span className={`flex h-8 w-14 items-center justify-center rounded-full ${active ? "bg-accent text-on-solid" : ""}`}>
-                  <NavIcon name={tab.icon} size={22} />
-                </span>
-                <span>{tab.label}</span>
-              </Link>
+              {tab.saved ? (
+                <SavedTab tab={tab} active={active} />
+              ) : (
+                <Link
+                  href={tab.href}
+                  className={`${tabClass} ${active ? "text-heading" : "text-muted hover:text-heading"}`}
+                  aria-current={active ? "page" : undefined}
+                >
+                  <TabBody tab={tab} active={active} />
+                </Link>
+              )}
             </li>
           );
         })}

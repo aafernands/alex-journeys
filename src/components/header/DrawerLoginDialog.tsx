@@ -16,15 +16,21 @@ const ReaderLoginForm = dynamic(
 export function DrawerLoginDialog({
   onClose,
   onAuthenticated,
+  returnTo: returnToOverride,
+  intro,
 }: {
   onClose: () => void;
-  onAuthenticated: () => void;
+  onAuthenticated?: () => void;
+  /** When set, sign-in returns here instead of the page that opened the sheet. */
+  returnTo?: string;
+  /** Short line under the title, for example why Saved asked you to sign in. */
+  intro?: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [providers, setProviders] = useState<
     Awaited<ReturnType<typeof getProviders>> | undefined
   >(undefined);
-  const [returnTo, setReturnTo] = useState("/account");
+  const [returnTo, setReturnTo] = useState(returnToOverride ?? "/account");
   useEffect(() => {
     const element = dialog.current;
     const trigger = document.activeElement;
@@ -34,11 +40,13 @@ export function DrawerLoginDialog({
       .then((result) => {
         if (active) {
           setProviders(result);
-          setReturnTo(
-            window.location.pathname +
-              window.location.search +
-              window.location.hash,
-          );
+          if (!returnToOverride) {
+            setReturnTo(
+              window.location.pathname +
+                window.location.search +
+                window.location.hash,
+            );
+          }
         }
       })
       .catch(() => {
@@ -50,11 +58,11 @@ export function DrawerLoginDialog({
       if (trigger instanceof HTMLElement && trigger.isConnected)
         trigger.focus();
     };
-  }, []);
+  }, [returnToOverride]);
   return (
     <dialog
       ref={dialog}
-      className="drawer-login-dialog"
+      className="drawer-login-dialog glass-strong"
       aria-label="Sign in to Alex Journeys"
       onClick={(event) => {
         const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
@@ -102,6 +110,7 @@ export function DrawerLoginDialog({
             twitterConfigured={Boolean(providers.twitter)}
             credentialsConfigured={Boolean(providers.credentials)}
             returnTo={returnTo}
+            intro={intro}
             onAuthenticated={onAuthenticated}
           />
         </Suspense>

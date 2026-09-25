@@ -20,7 +20,10 @@ describe("header chrome", () => {
     assert.doesNotMatch(header, /md:flex/);
     const drawer = source("../src/components/header/MobileNavDrawer.tsx");
     assert.match(drawer, /mobile-drawer-search/);
-    assert.match(drawer, /<DrawerLoginDialog/);
+    assert.match(drawer, /useReaderLoginPrompt\(\)/);
+    assert.match(drawer, /openReaderLogin\(\{ onAuthenticated: onClose \}\)/);
+    const prompt = source("../src/components/ReaderLoginPrompt.tsx");
+    assert.match(prompt, /<DrawerLoginDialog/);
     assert.ok(drawer.indexOf('aria-label="Social"') > drawer.indexOf('aria-label="Primary"'));
     assert.ok(drawer.indexOf('aria-label="Social"') < drawer.indexOf('<ThemeAppearanceControl'));
     assert.match(drawer, /<BrandLogo/);

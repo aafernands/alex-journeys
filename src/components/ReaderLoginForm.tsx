@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useRef, useState, type FormEvent } from "react";
+import { useId, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   TurnstileField,
   isTurnstileWidgetEnabled,
@@ -13,11 +13,19 @@ import { readerLoginErrorMessage } from "@/lib/reader-login-errors";
 
 type Mode = "signin" | "signup";
 
+export type LoginFooterLink = { href: string; label: string };
+
 type Props = {
   googleConfigured: boolean;
   twitterConfigured: boolean;
   credentialsConfigured: boolean;
   returnTo?: string;
+  /** Replaces the default supporting line under the title. */
+  intro?: string;
+  /** Account page already has a page title, so the form title steps down. */
+  titleLevel?: "h1" | "h2";
+  /** Quiet text links under the form. Defaults to Browse stories and Home. */
+  footerLinks?: LoginFooterLink[];
   onAuthenticated?: () => void;
 };
 
@@ -80,15 +88,35 @@ function safeCallbackUrl(raw: string | null): string {
   return raw;
 }
 
+const titleClass = "font-display mt-2 text-2xl font-bold text-heading md:text-3xl";
+
+function LoginTitle({
+  level,
+  children,
+}: {
+  level: "h1" | "h2";
+  children: string;
+}) {
+  if (level === "h2") return <h2 className={titleClass}>{children}</h2>;
+  return <h1 className={titleClass}>{children}</h1>;
+}
+
 export function ReaderLoginForm({
   googleConfigured,
   twitterConfigured,
   credentialsConfigured,
   returnTo,
+  intro,
+  titleLevel = "h1",
+  footerLinks,
   onAuthenticated,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const fieldId = useId();
+  const nameId = `${fieldId}-name`;
+  const emailId = `${fieldId}-email`;
+  const passwordId = `${fieldId}-password`;
   const callbackUrl = useMemo(
     () => safeCallbackUrl(returnTo ?? searchParams.get("callbackUrl")),
     [returnTo, searchParams],
@@ -112,6 +140,15 @@ export function ReaderLoginForm({
   const anyAuth =
     googleConfigured || twitterConfigured || credentialsConfigured;
   const oauthConfigured = googleConfigured || twitterConfigured;
+  const supportingLine =
+    intro ??
+    (returningToItinerary
+      ? "After you continue, you’ll return to this itinerary. A draft in this browser can be saved to your account."
+      : "Keep the stories you love and the trips you’re planning, ready on any device.");
+  const links = footerLinks ?? [
+    { href: "/blog", label: "Browse stories" },
+    { href: "/", label: "Home" },
+  ];
 
   async function startOauth(provider: OauthProvider) {
     setError(null);
@@ -132,21 +169,32 @@ export function ReaderLoginForm({
     return (
       <div className="panel p-6 md:p-8">
         <p className="eyebrow text-accent">Alex Journeys</p>
-        <h1 className="font-display mt-2 text-2xl font-bold text-heading md:text-3xl">
-          Sign-in isn’t available yet
-        </h1>
+        <LoginTitle level={titleLevel}>Sign-in isn’t available yet</LoginTitle>
         <p className="mt-4 text-sm leading-relaxed text-text">
           You can still read stories and sketch a trip in this browser. Saving
           them to an account will be back soon.
         </p>
-        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-          <Link href="/" className="btn btn-secondary">
-            Back home
-          </Link>
-          <Link href="/blog" className="btn btn-secondary">
-            Browse stories
-          </Link>
-        </div>
+        {footerLinks?.length ? (
+          <p className="mt-6 text-center text-sm text-muted">
+            {footerLinks.map((link, index) => (
+              <span key={`${link.href}-${link.label}`}>
+                {index > 0 ? " · " : null}
+                <Link href={link.href} className="font-semibold text-accent hover:underline">
+                  {link.label}
+                </Link>
+              </span>
+            ))}
+          </p>
+        ) : (
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+            <Link href="/" className="btn btn-secondary">
+              Back home
+            </Link>
+            <Link href="/blog" className="btn btn-secondary">
+              Browse stories
+            </Link>
+          </div>
+        )}
       </div>
     );
   }
@@ -219,14 +267,10 @@ export function ReaderLoginForm({
   return (
     <div className="panel p-6 md:p-8">
       <p className="eyebrow text-accent">Alex Journeys</p>
-      <h1 className="font-display mt-2 text-2xl font-bold text-heading md:text-3xl">
+      <LoginTitle level={titleLevel}>
         {mode === "signin" ? "Welcome back" : "Create your account"}
-      </h1>
-      <p className="mt-3 text-sm leading-relaxed text-muted">
-        {returningToItinerary
-          ? "After you continue, you’ll return to this itinerary. A draft in this browser can be saved to your account."
-          : "Keep the stories you love and the trips you’re planning, ready on any device."}
-      </p>
+      </LoginTitle>
+      <p className="mt-3 text-sm leading-relaxed text-muted">{supportingLine}</p>
 
       {error || authError ? (
         <p
@@ -279,13 +323,13 @@ export function ReaderLoginForm({
           {mode === "signup" ? (
             <div>
               <label
-                htmlFor="login-name"
+                htmlFor={nameId}
                 className="block text-sm font-semibold text-heading"
               >
                 Name
               </label>
               <input
-                id="login-name"
+                id={nameId}
                 name="name"
                 type="text"
                 autoComplete="name"
@@ -299,13 +343,13 @@ export function ReaderLoginForm({
 
           <div>
             <label
-              htmlFor="login-email"
+              htmlFor={emailId}
               className="block text-sm font-semibold text-heading"
             >
               Email
             </label>
             <input
-              id="login-email"
+              id={emailId}
               name="email"
               type="email"
               autoComplete="email"
@@ -318,13 +362,13 @@ export function ReaderLoginForm({
 
           <div>
             <label
-              htmlFor="login-password"
+              htmlFor={passwordId}
               className="block text-sm font-semibold text-heading"
             >
               Password
             </label>
             <input
-              id="login-password"
+              id={passwordId}
               name="password"
               type="password"
               autoComplete={
@@ -383,7 +427,7 @@ export function ReaderLoginForm({
             <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center">
-            <span className="bg-white px-3 text-xs font-medium text-text">
+            <span className="login-or bg-white px-3 text-xs font-medium text-text">
               or continue with
             </span>
           </div>
@@ -437,13 +481,14 @@ export function ReaderLoginForm({
       </p>
 
       <p className="mt-6 text-center text-sm text-muted">
-        <Link href="/blog" className="font-semibold text-accent hover:underline">
-          Browse stories
-        </Link>
-        {" · "}
-        <Link href="/" className="font-semibold text-accent hover:underline">
-          Home
-        </Link>
+        {links.map((link, index) => (
+          <span key={`${link.href}-${link.label}`}>
+            {index > 0 ? " · " : null}
+            <Link href={link.href} className="font-semibold text-accent hover:underline">
+              {link.label}
+            </Link>
+          </span>
+        ))}
       </p>
     </div>
   );
