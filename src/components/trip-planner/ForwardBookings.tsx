@@ -110,6 +110,7 @@ export function ForwardBookings({
   const [account, setAccount] = useState<InboundMailboxView | null>(null);
   const [trip, setTrip] = useState<InboundMailboxView | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checked, setChecked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -118,6 +119,7 @@ export function ForwardBookings({
 
   const load = useCallback(async () => {
     setLoading(true);
+    setChecked(false);
     setError(null);
     try {
       const accountRes = await fetch("/api/trips/forward", { cache: "no-store" });
@@ -136,6 +138,7 @@ export function ForwardBookings({
 
       if (!tripId) {
         setTrip(null);
+        setChecked(true);
         return;
       }
       const tripRes = await fetch(`/api/trips/${encodeURIComponent(tripId)}/forward`, {
@@ -148,6 +151,7 @@ export function ForwardBookings({
       }
       const tripBody = (await tripRes.json()) as { mailbox?: InboundMailboxView };
       setTrip(tripBody.mailbox ?? null);
+      setChecked(true);
     } catch {
       setError("Could not load your forward address.");
     } finally {
@@ -281,6 +285,26 @@ export function ForwardBookings({
             </button>
           </div>
 
+          {status === "authenticated" ? (
+            <div className="plan-stack-tight">
+              <button
+                type="button"
+                className="btn btn-secondary self-start disabled:opacity-60"
+                disabled={loading || busyId !== null}
+                onClick={() => void load()}
+              >
+                {loading ? "Checking…" : "Refresh"}
+              </button>
+              <p className={`${plan.caption} text-muted`} role="status">
+                {loading
+                  ? "Checking for forwarded confirmations…"
+                  : checked
+                    ? "Inbox checked. Received confirmations appear below. If your email is still processing, refresh again shortly."
+                    : "Refresh to check for forwarded confirmations."}
+              </p>
+            </div>
+          ) : null}
+
           {status === "loading" || (status === "authenticated" && loading && !primary) ? (
             <p className={`${plan.caption} text-muted`} role="status">
               Loading your forward address…
@@ -344,7 +368,7 @@ export function ForwardBookings({
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  disabled={busyId === "mailbox"}
+                  disabled={loading || busyId !== null}
                   onClick={() => void patchMailbox({ enabled: !primary.enabled })}
                 >
                   {primary.enabled ? "Turn off forwarding" : "Turn forwarding back on"}
@@ -354,7 +378,7 @@ export function ForwardBookings({
                     <button
                       type="button"
                       className="btn btn-ink"
-                      disabled={busyId === "mailbox"}
+                      disabled={loading || busyId !== null}
                       onClick={() => void patchMailbox({ rotate: true })}
                     >
                       Replace address
@@ -409,7 +433,7 @@ export function ForwardBookings({
                     <SuggestionCard
                       key={suggestion.id}
                       suggestion={suggestion}
-                      busy={busyId !== null}
+                      busy={loading || busyId !== null}
                       onAdd={() =>
                         void resolveSuggestion(tripId ? "trip" : "account", suggestion, "add")
                       }
@@ -431,7 +455,7 @@ export function ForwardBookings({
                       <SuggestionCard
                         key={suggestion.id}
                         suggestion={suggestion}
-                        busy={busyId !== null}
+                        busy={loading || busyId !== null}
                         onAdd={() => void resolveSuggestion("account", suggestion, "add")}
                         onDismiss={() => void resolveSuggestion("account", suggestion, "dismiss")}
                       />
