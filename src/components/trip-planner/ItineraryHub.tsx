@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { Share2, Pencil, Ellipsis } from "lucide-react";
 import { TripDestinationHero } from "./TripDestinationHero";
 import {
   journalNotesForDestination,
@@ -1050,14 +1051,13 @@ export function ItineraryHub({
           title={tripTitle || state.destination.trim() || config.steps.next.heading}
           headingId={headingId}
           meta={[dates, travelers].filter(Boolean).join(" · ")}
-        />
-        <p className={`${plan.prose} text-muted plan-desktop-only`}>
-          {subhead}
-        </p>
-        <div className="plan-inline-actions plan-hub-actions">
+          actions={
+        <>
           <button
             type="button"
-            className={`${plan.textBtn} text-muted sm:text-accent`}
+            className="plan-hero-action"
+            aria-label="Share a copy"
+            title="Share a copy"
             onClick={async () => {
               const url = `${window.location.origin}${sharePlanHref({
                 state,
@@ -1078,17 +1078,25 @@ export function ItineraryHub({
               window.setTimeout(() => setCopied(false), 2500);
             }}
           >
-            Share a copy
+            <Share2 size={18} aria-hidden="true" />
           </button>
           <button
             type="button"
-            className={`${plan.textBtn} text-muted sm:text-heading`}
+            className="plan-hero-action"
+            aria-label="Edit details"
+            title="Edit details"
             onClick={onEditTrip}
           >
-            Edit details
+            <Pencil size={18} aria-hidden="true" />
           </button>
-          <details className="plan-trip-menu">
-            <summary className={plan.textBtn}>More options</summary>
+          <details className="plan-trip-menu" onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              event.currentTarget.open = false;
+              event.currentTarget.querySelector("summary")?.focus();
+            }
+          }}>
+            <summary className="plan-hero-action" aria-label="More options" title="More options"><Ellipsis size={20} aria-hidden="true" /></summary>
             <button
               type="button"
               className={plan.textBtn}
@@ -1097,7 +1105,13 @@ export function ItineraryHub({
               Start a new trip
             </button>
           </details>
-        </div>
+        </>
+          }
+        />
+        <p className={`${plan.prose} text-muted plan-desktop-only`}>
+          {subhead}
+        </p>
+
       </div>
       <div className="plan-hub-save">
         {copied ? (

@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { DestinationPhoto } from "@/lib/destination-photo";
 
-export function TripDestinationHero({ destination, title, headingId, meta }: {
+export function TripDestinationHero({ destination, title, headingId, meta, actions }: {
   destination: string;
   title: string;
   headingId: string;
   meta: string;
+  actions?: ReactNode;
 }) {
   const [result, setResult] = useState<{ destination: string; photo: DestinationPhoto } | null>(null);
   const [failedImage, setFailedImage] = useState<string | null>(null);
@@ -32,6 +33,7 @@ export function TripDestinationHero({ destination, title, headingId, meta }: {
         <img className="plan-trip-hero-image" src={photo.image} alt={`View of ${destination}`} fetchPriority="high" onError={() => setFailedImage(photo.image)} />
       ) : null}
       <div className="plan-trip-hero-shade" aria-hidden="true" />
+      {actions ? <div className="plan-trip-hero-actions" role="group" aria-label="Trip actions">{actions}</div> : null}
       <div className="plan-trip-hero-content">
         <p className="plan-trip-hero-kicker">Your trip</p>
         <h2 id={headingId} className="plan-trip-hero-title">{title}</h2>

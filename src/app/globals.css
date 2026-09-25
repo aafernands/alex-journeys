@@ -2903,6 +2903,13 @@ main.plan-flow .plan-trip:has(.plan-workspace),
 main.plan-flow .plan-workspace-shell { margin-top: 0; }
 .plan-trip-hero { background: linear-gradient(135deg, #193d46, #486c6b); }
 .plan-trip-hero-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+.plan-trip-hero-actions { position: absolute; top: 1rem; right: 1rem; display: flex; gap: .5rem; z-index: 2; }
+.plan-hero-action { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid rgba(255,255,255,.45); border-radius: .75rem; color: white; background: rgba(15,23,28,.8); cursor: pointer; list-style: none; }
+.plan-hero-action:hover, .plan-trip-menu[open] > .plan-hero-action { background: rgba(15,23,28,.98); }
+.plan-hero-action::-webkit-details-marker { display: none; }
+.plan-workspace .plan-hero-action:focus-visible { outline: 2px solid white; outline-offset: 3px; }
+.plan-trip-hero-actions .plan-trip-menu > button { margin-top: .5rem; color: var(--heading); text-align: left; }
+.plan-workspace .plan-trip-hero:has(.plan-trip-hero-actions) .plan-trip-hero-content { padding-top: 5rem; }
 .plan-workspace .plan-hub-lead > p { display: none; }
 .plan-workspace .plan-trip-hero-title { font-size: clamp(1.9rem, 4vw, 2.8rem); }
 @media (max-width: 639px) {
