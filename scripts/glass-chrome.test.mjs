@@ -15,7 +15,7 @@ describe("warm glass chrome", () => {
     assert.match(css, /backdrop-filter: blur\(var\(--glass-blur\)\)/);
     assert.match(css, /@supports not \(backdrop-filter: blur\(1px\)\)/);
     assert.match(css, /@media \(prefers-reduced-transparency: reduce\)/);
-    assert.match(css, /--glass-fill: rgb\(246 240 230 \/ 0\.78\)/);
+    assert.match(css, /--glass-fill: rgb\(246 240 230 \/ 0\.66\)/);
     assert.match(css, /background: var\(--glass-fallback\)/);
   });
 
@@ -39,5 +39,6 @@ describe("warm glass chrome", () => {
     assert.match(css, /main\.plan-flow:has\(\.plan-workspace\) \{\s*margin-top: calc\(-1 \* \(var\(--site-header-bar\) \+ 1px\)\)/);
     assert.match(css, /\.plan-workspace-tabs \{[\s\S]*position: fixed;/);
     assert.match(css, /@media \(max-width: 639px\) \{[\s\S]*\.plan-sticky,[\s\S]*background: var\(--glass-fill\)/);
+    assert.match(css, /\.plan-trip-hotel \.plan-control:not\(\.glass-strong\) \{\s*background: var\(--white\)/);
   });
 });

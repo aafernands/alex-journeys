@@ -25,7 +25,7 @@
   --border-strong: #cbbba3;
   --on-solid: #fffcf7;
   /* Warm cream glass — floating chrome only. Content stays solid. */
-  --glass-fill: rgb(246 240 230 / 0.78);
+  --glass-fill: rgb(246 240 230 / 0.66);
   --glass-fill-strong: rgb(255 252 247 / 0.9);
   --glass-fallback: #fffcf7;
   --glass-edge: rgb(255 252 247 / 0.72);
@@ -60,7 +60,7 @@ html.dark {
   --border: #3d3428;
   --border-strong: #524636;
   --on-solid: #fffcf7;
-  --glass-fill: rgb(26 22 18 / 0.82);
+  --glass-fill: rgb(26 22 18 / 0.74);
   --glass-fill-strong: rgb(34 30 24 / 0.92);
   --glass-fallback: #221e18;
   --glass-edge: rgb(255 252 247 / 0.16);
@@ -2945,6 +2945,9 @@ body:has(main.plan-flow) .plan-sticky {
 
 .plan-trip-hotel .plan-control {
   border-radius: 0.8rem;
+}
+
+.plan-trip-hotel .plan-control:not(.glass-strong) {
   background: var(--white);
 }
 
