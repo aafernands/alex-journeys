@@ -20,7 +20,7 @@ export function DrawerLoginDialog({
   intro,
 }: {
   onClose: () => void;
-  onAuthenticated?: () => void;
+  onAuthenticated: () => void;
   /** When set, sign-in returns here instead of the page that opened the sheet. */
   returnTo?: string;
   /** Short line under the title, for example why Saved asked you to sign in. */
