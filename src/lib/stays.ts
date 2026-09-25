@@ -117,6 +117,14 @@ export type StayRoomOffer = {
    * Empty when that room has no imagery.
    */
   photos: StayPhoto[];
+  /** Structured bed label, when hotel content sends bed types. */
+  bed: string;
+  /** Room size, when hotel content sends it. */
+  size: string;
+  /** Max guests, from room content or the rate occupancy. */
+  maxGuests: number | null;
+  /** Room amenities from hotel content. Empty when Nuitee doesn't send them. */
+  amenities: string[];
 };
 
 export type StayPrebook = {
@@ -786,7 +794,95 @@ function facilityName(value: unknown): string {
   return text(record?.name ?? record?.facility, 80);
 }
 
-const ROOM_PHOTO_LIMIT = 4;
+const ROOM_PHOTO_LIMIT = 12;
+
+type RoomFacts = {
+  photos: StayPhoto[];
+  bed: string;
+  size: string;
+  maxGuests: number | null;
+  amenities: string[];
+};
+
+const EMPTY_ROOM_FACTS: RoomFacts = {
+  photos: [],
+  bed: "",
+  size: "",
+  maxGuests: null,
+  amenities: [],
+};
+
+function guestCount(value: unknown): number | null {
+  const count = numberOrNull(value);
+  if (count == null) return null;
+  const guests = Math.round(count);
+  if (guests < 1 || guests > 20) return null;
+  return guests;
+}
+
+function bedLabel(record: Record<string, unknown>): string {
+  const parts: string[] = [];
+  for (const item of asArray(record.bedTypes ?? record.bed_types ?? record.beds)) {
+    if (typeof item === "string") {
+      const label = text(item, 40);
+      if (label && !parts.includes(label)) parts.push(label);
+    } else {
+      const row = asRecord(item);
+      if (!row) continue;
+      const kind = text(row.bedType ?? row.bed_type ?? row.type ?? row.name, 40);
+      if (!kind) continue;
+      const quantity = guestCount(row.quantity ?? row.count) ?? 1;
+      const label = quantity > 1 ? `${quantity} ${kind}` : kind;
+      if (!parts.includes(label)) parts.push(label);
+    }
+    if (parts.length >= 3) break;
+  }
+  return parts.join(", ").slice(0, 80);
+}
+
+function sizeLabel(record: Record<string, unknown>): string {
+  const square = numberOrNull(
+    record.roomSizeSquare ?? record.room_size_square ?? record.roomSize ?? record.size,
+  );
+  if (square == null || square <= 0 || square > 2000) return "";
+  const rounded = Math.round(square);
+  const unit = text(record.roomSizeUnit ?? record.room_size_unit, 12).toLowerCase();
+  if (unit === "sqft" || unit === "sq ft" || unit === "ft2" || unit === "feet") {
+    return `${rounded} sq ft`;
+  }
+  return `${rounded} m²`;
+}
+
+function roomAmenityLabels(record: Record<string, unknown>): string[] {
+  const labels: string[] = [];
+  for (const item of asArray(record.roomAmenities ?? record.room_amenities ?? record.amenities)) {
+    const label = facilityName(item);
+    if (!label || labels.includes(label)) continue;
+    labels.push(label);
+    if (labels.length >= 12) break;
+  }
+  return labels;
+}
+
+function roomFactsFrom(record: Record<string, unknown>): RoomFacts {
+  return {
+    photos: collectPhotos(record),
+    bed: bedLabel(record),
+    size: sizeLabel(record),
+    maxGuests: guestCount(record.maxOccupancy ?? record.maxAdults ?? record.max_occupancy),
+    amenities: roomAmenityLabels(record),
+  };
+}
+
+function factsAreEmpty(facts: RoomFacts): boolean {
+  return (
+    facts.photos.length === 0 &&
+    !facts.bed &&
+    !facts.size &&
+    facts.maxGuests == null &&
+    facts.amenities.length === 0
+  );
+}
 
 function photoFrom(value: unknown): StayPhoto | null {
   if (typeof value === "string") {
@@ -840,9 +936,9 @@ function collectPhotos(record: Record<string, unknown> | null): StayPhoto[] {
   return photos;
 }
 
-type RoomPhotoIndex = {
-  byId: Map<string, StayPhoto[]>;
-  byName: Map<string, StayPhoto[]>;
+type RoomContentIndex = {
+  byId: Map<string, RoomFacts>;
+  byName: Map<string, RoomFacts>;
 };
 
 function roomIdKey(value: unknown): string {
@@ -861,17 +957,17 @@ function roomNameKey(value: unknown): string {
     .trim();
 }
 
-function indexRoomRecord(index: RoomPhotoIndex, record: Record<string, unknown>) {
-  const photos = collectPhotos(record);
-  if (photos.length === 0) return;
+function indexRoomRecord(index: RoomContentIndex, record: Record<string, unknown>) {
+  const facts = roomFactsFrom(record);
+  if (factsAreEmpty(facts)) return;
   const id = roomIdKey(record.id ?? record.roomId);
-  if (id && !index.byId.has(id)) index.byId.set(id, photos);
+  if (id && !index.byId.has(id)) index.byId.set(id, facts);
   const name = roomNameKey(record.roomName ?? record.name);
-  if (name && !index.byName.has(name)) index.byName.set(name, photos);
+  if (name && !index.byName.has(name)) index.byName.set(name, facts);
 }
 
 /** Hotel content `rooms[]`, plus any rooms nested on a rates payload. */
-function indexRoomPhotos(payload: unknown, index: RoomPhotoIndex) {
+function indexRoomPhotos(payload: unknown, index: RoomContentIndex) {
   const root = asRecord(payload);
   if (!root) return;
   const data = asRecord(root.data);
@@ -910,9 +1006,9 @@ function mappedRoomId(
   return "";
 }
 
-function photosByName(name: string, index: RoomPhotoIndex): StayPhoto[] {
+function factsByName(name: string, index: RoomContentIndex): RoomFacts | null {
   const key = roomNameKey(name);
-  if (!key) return [];
+  if (!key) return null;
   const exact = index.byName.get(key);
   if (exact) return exact;
   let best = "";
@@ -921,24 +1017,33 @@ function photosByName(name: string, index: RoomPhotoIndex): StayPhoto[] {
     if (!key.includes(candidate)) continue;
     if (candidate.length > best.length) best = candidate;
   }
-  return best ? (index.byName.get(best) ?? []) : [];
+  return best ? (index.byName.get(best) ?? null) : null;
 }
 
-function offerPhotos(
+function offerRoomFacts(
   room: Record<string, unknown>,
   rate: Record<string, unknown> | null,
-  index: RoomPhotoIndex,
-): StayPhoto[] {
+  index: RoomContentIndex,
+): RoomFacts {
   const id = mappedRoomId(room, rate);
-  if (id) {
-    const match = index.byId.get(id);
-    if (match?.length) return match;
-  }
+  const matched =
+    (id ? index.byId.get(id) : undefined) ??
+    factsByName(text(rate?.name ?? room.name, 160), index) ??
+    EMPTY_ROOM_FACTS;
   const embedded = collectPhotos(room);
-  if (embedded.length) return embedded;
   const fromRate = collectPhotos(rate);
-  if (fromRate.length) return fromRate;
-  return photosByName(text(rate?.name ?? room.name, 160), index);
+  const photos = matched.photos.length
+    ? matched.photos
+    : embedded.length
+      ? embedded
+      : fromRate;
+  return {
+    photos,
+    bed: matched.bed,
+    size: matched.size,
+    maxGuests: matched.maxGuests ?? guestCount(rate?.maxOccupancy ?? rate?.maxAdults),
+    amenities: matched.amenities,
+  };
 }
 
 export function mapHotelContent(
@@ -1084,9 +1189,9 @@ export function mapStayReviews(payload: unknown): StayReviewSummary {
 export function mapRoomOffers(payload: unknown, hotelPayload?: unknown): StayRoomOffer[] {
   const root = asRecord(payload);
   if (!root) return [];
-  const photos: RoomPhotoIndex = { byId: new Map(), byName: new Map() };
-  indexRoomPhotos(hotelPayload, photos);
-  indexRoomPhotos(payload, photos);
+  const rooms: RoomContentIndex = { byId: new Map(), byName: new Map() };
+  indexRoomPhotos(hotelPayload, rooms);
+  indexRoomPhotos(payload, rooms);
   const offers: StayRoomOffer[] = [];
   const seen = new Set<string>();
   for (const row of asArray(root.data)) {
@@ -1098,6 +1203,7 @@ export function mapRoomOffers(payload: unknown, hotelPayload?: unknown): StayRoo
       const rate = asRecord(asArray(room.rates)[0]);
       const name = text(rate?.name ?? room.name, 160) || "Room";
       const price = offerPrice(room);
+      const facts = offerRoomFacts(room, rate, rooms);
       seen.add(offerId);
       offers.push({
         offerId,
@@ -1108,7 +1214,11 @@ export function mapRoomOffers(payload: unknown, hotelPayload?: unknown): StayRoo
         remarks: plainStayText(text(rate?.remarks, 800)).slice(0, 320),
         cancellation: cancellationLines(rate, price?.currency || "USD"),
         conditions: conditionLines(rate),
-        photos: offerPhotos(room, rate, photos),
+        photos: facts.photos,
+        bed: facts.bed,
+        size: facts.size,
+        maxGuests: facts.maxGuests,
+        amenities: facts.amenities,
       });
     }
   }

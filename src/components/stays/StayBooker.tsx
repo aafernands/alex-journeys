@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Check, ShieldCheck } from "lucide-react";
 import { StayConfirmation } from "@/components/stays/StayConfirmation";
 import { StayFailureNotice } from "@/components/stays/StayFailureNotice";
+import { StayRoomGallery } from "@/components/stays/StayRoomGallery";
 import { plan } from "@/components/trip-planner/density";
 import {
   buildStayConfirmation,
@@ -21,8 +22,8 @@ import {
   type StayConfirmationDetails,
   type StayFailure,
   type StayGuest,
-  type StayPhoto,
   type StayPrebook,
+  type StayRefundable,
   type StayRoomOffer,
   type StaysQuery,
 } from "@/lib/stays";
@@ -373,59 +374,52 @@ export function StayBooker({
           </Link>
         </div>
       ) : !checkoutMode ? (
-        <fieldset className="space-y-5" disabled={busy}>
-          <legend className="sr-only">Available rooms</legend>
+        <div className="space-y-5 pb-2">
+          <h2 className="sr-only">Available rooms</h2>
           {roomGroups.map((group) => {
             const room = group[0];
+            const nights = stayNights(query.startDate, query.endDate);
+            const lowest = lowestAmount(group);
+            let markedLowest = false;
             return (
               <article key={room.offerId} className="overflow-hidden rounded-xl border border-line bg-white shadow-sm">
-                <div className="border-b border-line p-4 sm:flex sm:items-center sm:gap-4 sm:p-5">
-                  <RoomPhotos photos={room.photos ?? []} fallback={fallbackPhoto} />
-                  <div className="mt-3 min-w-0 sm:mt-0">
+                <div className="md:grid md:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
+                  <div className="relative h-64 md:h-full md:min-h-72">
+                    <StayRoomGallery
+                      photos={room.photos ?? []}
+                      fallback={fallbackPhoto}
+                      label={room.name}
+                    />
+                  </div>
+                  <div className="min-w-0 p-4 sm:p-5">
                     <h3 className="font-display text-xl font-bold text-heading">{room.name}</h3>
-                    <p className="mt-1 text-sm text-muted">
-                      {group.length} {group.length === 1 ? "rate" : "rates"} available for your dates
+                    <RoomFacts room={room} />
+                    <RoomAmenities amenities={room.amenities ?? []} />
+                    <p className="mt-3 text-sm text-muted">
+                      {group.length} {group.length === 1 ? "rate" : "rates"} for your dates
                     </p>
                   </div>
                 </div>
-                <div className="divide-y divide-line">
+                <div className="divide-y divide-line border-t border-line">
                   {group.map((rate) => {
+                    const isLowest =
+                      !markedLowest && group.length > 1 && rate.price?.amount === lowest;
+                    if (isLowest) markedLowest = true;
                     return (
-                      <div key={rate.offerId} className="grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:p-5">
-                        <div className="min-w-0">
-                          <p className="font-semibold text-heading">{rate.boardName || "Room only"}</p>
-                          <p className={`mt-1 flex items-center gap-1.5 text-sm font-semibold ${rate.refundable ? "text-emerald-700" : "text-muted"}`}>
-                            {rate.refundable ? <Check className="h-4 w-4" aria-hidden="true" /> : null}
-                            {refundableLabel(rate.refundable)}
-                          </p>
-                          {rate.cancellation.map((line) => (
-                            <p key={line} className="mt-2 text-sm leading-6 text-text">{line}</p>
-                          ))}
-                          {rate.conditions.map((line) => (
-                            <p key={line} className="mt-1 text-sm leading-6 text-text">{line}</p>
-                          ))}
-                          {rate.remarks ? <p className="mt-2 text-sm leading-6 text-text">{rate.remarks}</p> : null}
-                        </div>
-                        <div className="shrink-0 sm:min-w-44 sm:text-right">
-                          <p className="text-xs text-muted">Total for your stay</p>
-                          <p className="mt-1 font-display text-2xl font-bold text-heading">
-                            {rate.price ? formatStayMoney(rate.price) : "Price on confirm"}
-                          </p>
-                          <Link
-                            href={staysCheckoutPath(hotelId, rate.offerId, query)}
-                            className="btn btn-primary mt-3 w-full sm:w-auto"
-                          >
-                            Select
-                          </Link>
-                        </div>
-                      </div>
+                      <RateRow
+                        key={rate.offerId}
+                        rate={rate}
+                        nights={nights}
+                        lowest={isLowest}
+                        href={staysCheckoutPath(hotelId, rate.offerId, query)}
+                      />
                     );
                   })}
                 </div>
               </article>
             );
           })}
-        </fieldset>
+        </div>
       ) : null}
       {pending === "prebook" ? (
         <div className={checkoutMode ? "rounded-xl border border-line bg-white p-6 text-center" : ""} role="status">
@@ -435,7 +429,11 @@ export function StayBooker({
       ) : null}
 
       {prebook ? (
-        <form className="space-y-5 rounded-xl border border-line bg-white p-5 shadow-sm sm:p-6" onSubmit={(event) => void bookRoom(event)}>
+        <form
+          id="stay-guest-form"
+          className={`space-y-5 rounded-xl border border-line bg-white p-5 shadow-sm sm:p-6 ${checkoutMode ? "max-md:mb-24" : ""}`}
+          onSubmit={(event) => void bookRoom(event)}
+        >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Selected room</p>
@@ -465,6 +463,8 @@ export function StayBooker({
             prebook={prebook}
             fallbackPhoto={fallbackPhoto}
             query={query}
+            alternatives={sameRoomRates(rooms, selectedForReview, offerId, prebook.roomName)}
+            hotelId={hotelId}
           />
           <div className="border-t border-line pt-5">
             <p className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
@@ -555,7 +555,11 @@ export function StayBooker({
               }}
             />
           </div>
-          <button type="submit" className="btn btn-primary" disabled={pending === "book" || pending === "rates"}>
+          <button
+            type="submit"
+            className={`btn btn-primary ${checkoutMode ? "max-md:hidden" : ""}`}
+            disabled={pending === "book" || pending === "rates"}
+          >
             {pending === "book" ? "Booking…" : "Book this stay"}
           </button>
           {pending === "book" ? (
@@ -564,6 +568,33 @@ export function StayBooker({
             </p>
           ) : null}
         </form>
+      ) : null}
+      {checkoutMode && prebook ? (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 p-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur md:hidden" style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}>
+          <div className="mx-auto flex max-w-xl items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-heading">
+                {prebook.roomName || selectedForReview?.name || "Selected room"}
+              </p>
+              <p className="text-xs text-muted">
+                {prebook.price != null
+                  ? formatStayMoney({
+                      amount: prebook.price,
+                      currency: prebook.currency || "USD",
+                    })
+                  : "Total confirmed at booking"}
+              </p>
+            </div>
+            <button
+              type="submit"
+              form="stay-guest-form"
+              className="btn btn-primary shrink-0"
+              disabled={pending === "book" || pending === "rates"}
+            >
+              {pending === "book" ? "Booking…" : "Book this stay"}
+            </button>
+          </div>
+        </div>
       ) : null}
     </div>
   );
@@ -597,67 +628,158 @@ function findRoomForPrebook(rooms: StayRoomOffer[], prebook: StayPrebook) {
   );
 }
 
-function RoomPhotos({ photos, fallback }: { photos: StayPhoto[]; fallback: string }) {
-  const gallery = photos.slice(0, 3);
-  if (gallery.length > 0) {
-    return (
-      <span className="mt-0.5 flex shrink-0 gap-1">
-        {gallery.map((photo, index) => (
-          <RoomImage
-            key={photo.url}
-            photo={photo}
-            className={
-              index === 0
-                ? "h-16 w-20 sm:h-[4.5rem] sm:w-24"
-                : "hidden h-16 w-12 sm:block"
-            }
-          />
-        ))}
-      </span>
-    );
+function lowestAmount(group: StayRoomOffer[]): number | null {
+  let lowest: number | null = null;
+  for (const rate of group) {
+    if (rate.price == null) continue;
+    if (lowest == null || rate.price.amount < lowest) lowest = rate.price.amount;
   }
-  if (fallback) {
-    return (
-      <span className="mt-0.5 flex w-20 shrink-0 flex-col gap-1 sm:w-24">
-        <RoomImage
-          photo={{ url: fallback, caption: "" }}
-          className="h-16 w-full sm:h-[4.5rem]"
-        />
-        <span className={`${plan.caption} text-muted`}>Hotel photo</span>
-      </span>
-    );
-  }
+  return lowest;
+}
+
+function nightlyLabel(amount: number, currency: string, nights: number): string {
+  if (nights < 1) return "";
+  return formatStayMoney({ amount: amount / nights, currency });
+}
+
+function freeCancellationLine(lines: string[]): string {
+  return lines.find((line) => /free cancellation/i.test(line)) ?? "";
+}
+
+function sameRoomRates(
+  rooms: StayRoomOffer[],
+  current: StayRoomOffer | null,
+  currentOfferId: string,
+  roomName: string,
+): StayRoomOffer[] {
+  const key = normalizedRoomName(current?.name || roomName);
+  if (!key) return [];
+  return rooms.filter((room) => {
+    if (room.offerId === currentOfferId) return false;
+    return normalizedRoomName(room.name) === key;
+  });
+}
+
+function RoomFacts({ room }: { room: StayRoomOffer }) {
+  const facts = [
+    room.bed,
+    room.size,
+    room.maxGuests ? `Sleeps ${room.maxGuests}` : "",
+  ].filter(Boolean);
+  if (facts.length === 0) return null;
   return (
-    <span
-      className={`${plan.caption} mt-0.5 grid h-16 w-20 shrink-0 place-items-center rounded-md bg-surface text-center text-muted sm:h-[4.5rem] sm:w-24`}
-    >
-      No photo
-    </span>
+    <ul className="mt-3 flex flex-wrap gap-2">
+      {facts.map((fact) => (
+        <li
+          key={fact}
+          className="rounded-full border border-line bg-canvas px-3 py-1 text-xs font-semibold text-text"
+        >
+          {fact}
+        </li>
+      ))}
+    </ul>
   );
 }
 
-function RoomImage({ photo, className }: { photo: StayPhoto; className: string }) {
+function RoomAmenities({ amenities }: { amenities: string[] }) {
+  const [open, setOpen] = useState(false);
+  if (amenities.length === 0) return null;
+  const shown = open ? amenities : amenities.slice(0, 4);
   return (
-    // Room CDNs are not a fixed host list, same as hotel cards on /stays.
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={photo.url}
-      alt=""
-      width={96}
-      height={72}
-      loading="lazy"
-      decoding="async"
-      className={`rounded-md object-cover ${className}`}
-      onError={(event) => {
-        const img = event.currentTarget;
-        if (photo.fallbackUrl && img.dataset.fallback !== "1") {
-          img.dataset.fallback = "1";
-          img.src = photo.fallbackUrl;
-          return;
-        }
-        img.classList.add("hidden");
-      }}
-    />
+    <div className="mt-3">
+      <ul className="flex flex-wrap gap-1.5" aria-label="Room amenities">
+        {shown.map((item) => (
+          <li key={item} className="rounded-full bg-surface px-2.5 py-1 text-xs text-text">
+            {item}
+          </li>
+        ))}
+      </ul>
+      {amenities.length > 4 ? (
+        <button
+          type="button"
+          className="inline-flex min-h-11 items-center text-sm font-semibold text-link"
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+        >
+          {open ? "Show fewer amenities" : `Show all ${amenities.length} amenities`}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function RateRow({
+  rate,
+  nights,
+  lowest,
+  href,
+  selected = false,
+}: {
+  rate: StayRoomOffer;
+  nights: number;
+  lowest: boolean;
+  href: string;
+  selected?: boolean;
+}) {
+  const refundable = rate.refundable === "refundable";
+  const freeLine = refundable ? freeCancellationLine(rate.cancellation) : "";
+  const extra = [
+    ...rate.cancellation.filter((line) => line !== freeLine),
+    ...rate.conditions,
+    rate.remarks,
+  ].filter(Boolean);
+  const nightly =
+    rate.price && nights > 0 ? nightlyLabel(rate.price.amount, rate.price.currency, nights) : "";
+  return (
+    <div className={`grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:p-5 ${selected ? "bg-surface" : ""}`}>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="font-semibold text-heading">{rate.boardName || "Room only"}</p>
+          {selected ? (
+            <span className="rounded-full bg-heading px-2.5 py-1 text-xs font-semibold text-on-solid">
+              Selected
+            </span>
+          ) : null}
+          {lowest ? (
+            <span className="rounded-full bg-surface px-2.5 py-1 text-xs font-semibold text-heading">
+              Lowest price
+            </span>
+          ) : null}
+        </div>
+        <p className={`mt-1 flex items-center gap-1.5 text-sm font-semibold ${refundable ? "text-emerald-700" : "text-muted"}`}>
+          {refundable ? <Check className="h-4 w-4" aria-hidden="true" /> : null}
+          {freeLine || refundableLabel(rate.refundable)}
+        </p>
+        {extra.length > 0 ? (
+          <details className="mt-1">
+            <summary className="inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">
+              Rate details
+            </summary>
+            <div className="space-y-1 pb-2">
+              {extra.map((line) => (
+                <p key={line} className="text-sm leading-6 text-text">
+                  {line}
+                </p>
+              ))}
+            </div>
+          </details>
+        ) : null}
+      </div>
+      <div className="shrink-0 sm:min-w-44 sm:text-right">
+        <p className="text-xs text-muted">Total for your stay</p>
+        <p className="mt-1 font-display text-2xl font-bold text-heading">
+          {rate.price ? formatStayMoney(rate.price) : "Price on confirm"}
+        </p>
+        {nightly ? <p className="mt-1 text-xs text-muted">{nightly} per night</p> : null}
+        {selected ? (
+          <p className="mt-3 text-sm font-semibold text-heading">This rate</p>
+        ) : (
+          <Link href={href} className="btn btn-primary mt-3 w-full sm:w-auto">
+            Select
+          </Link>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -666,25 +788,31 @@ function SelectedRoomSummary({
   prebook,
   fallbackPhoto,
   query,
+  alternatives,
+  hotelId,
 }: {
   room: StayRoomOffer | null;
   prebook: StayPrebook;
   fallbackPhoto: string;
   query: StaysQuery;
+  alternatives: StayRoomOffer[];
+  hotelId: string;
 }) {
-  const photos = room?.photos?.length ? room.photos.slice(0, 4) : fallbackPhoto
-    ? [{ url: fallbackPhoto, caption: "" }]
-    : [];
   const nights = stayNights(query.startDate, query.endDate);
+  const currency = prebook.currency || room?.price?.currency || "USD";
   const total =
     prebook.price != null
-      ? formatStayMoney({
-          amount: prebook.price,
-          currency: prebook.currency || room?.price?.currency || "USD",
-        })
+      ? formatStayMoney({ amount: prebook.price, currency })
       : room?.price
         ? formatStayMoney(room.price)
         : "";
+  const nightly =
+    prebook.price != null && nights > 0 ? nightlyLabel(prebook.price, currency, nights) : "";
+  const refundable: StayRefundable =
+    prebook.refundable && prebook.refundable !== "unknown"
+      ? prebook.refundable
+      : room?.refundable || "unknown";
+  const freeLine = refundable === "refundable" ? freeCancellationLine(prebook.cancellation) : "";
   const occupancy = [
     `${query.rooms} ${query.rooms === 1 ? "room" : "rooms"}`,
     `${query.adults} ${query.adults === 1 ? "adult" : "adults"}`,
@@ -695,36 +823,32 @@ function SelectedRoomSummary({
   ]
     .filter(Boolean)
     .join(" · ");
+  const label = prebook.roomName || room?.name || "Selected room";
 
   return (
-    <section className="overflow-hidden rounded-lg border border-line bg-surface" aria-label="Selected room details">
-      {photos.length > 0 ? (
-        <div className="grid grid-cols-4 gap-px bg-line">
-          {photos.map((photo, index) => (
-            <div
-              key={photo.url}
-              className={index === 0 ? "col-span-4 sm:col-span-2 sm:row-span-2" : "col-span-2 sm:col-span-1"}
-            >
-              <RoomImage
-                photo={photo}
-                className={index === 0 ? "h-52 w-full sm:h-full sm:min-h-48" : "h-24 w-full sm:h-24"}
-              />
-            </div>
-          ))}
-        </div>
-      ) : null}
+    <section className="overflow-hidden rounded-lg border border-heading bg-surface" aria-label="Selected room details">
+      <div className="relative h-72 sm:h-96">
+        <StayRoomGallery
+          photos={room?.photos ?? []}
+          fallback={fallbackPhoto}
+          label={label}
+        />
+      </div>
       <div className="plan-stack p-4 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <h3 className="font-display text-xl font-bold leading-tight text-heading">
-              {prebook.roomName || room?.name || "Selected room"}
-            </h3>
+            <span className="inline-flex rounded-full bg-heading px-2.5 py-1 text-xs font-semibold text-on-solid">
+              Selected
+            </span>
+            <h3 className="mt-2 font-display text-xl font-bold leading-tight text-heading">{label}</h3>
             <p className="mt-2 text-sm text-muted">{occupancy}</p>
+            {room ? <RoomFacts room={room} /> : null}
           </div>
           {total ? (
             <div className="shrink-0 sm:text-right">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Confirmed total</p>
               <p className="mt-1 font-display text-xl font-bold text-heading">{total}</p>
+              {nightly ? <p className="mt-1 text-xs text-muted">{nightly} per night</p> : null}
             </div>
           ) : null}
         </div>
@@ -735,18 +859,22 @@ function SelectedRoomSummary({
               {prebook.boardName || room?.boardName}
             </span>
           ) : null}
-          <span className="rounded-full border border-line bg-canvas px-3 py-1 text-xs font-semibold text-text">
-            {refundableLabel(prebook.refundable || room?.refundable || "unknown")}
+          <span className={`rounded-full border border-line bg-canvas px-3 py-1 text-xs font-semibold ${refundable === "refundable" ? "text-emerald-700" : "text-text"}`}>
+            {freeLine || refundableLabel(refundable)}
           </span>
         </div>
 
-        {prebook.cancellation.length > 0 ? (
+        {room ? <RoomAmenities amenities={room.amenities ?? []} /> : null}
+
+        {prebook.cancellation.filter((line) => line !== freeLine).length > 0 ? (
           <div>
             <p className="text-sm font-semibold text-heading">Cancellation</p>
             <ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-text">
-              {prebook.cancellation.map((line) => (
-                <li key={line}>• {line}</li>
-              ))}
+              {prebook.cancellation
+                .filter((line) => line !== freeLine)
+                .map((line) => (
+                  <li key={line}>• {line}</li>
+                ))}
             </ul>
           </div>
         ) : null}
@@ -762,8 +890,23 @@ function SelectedRoomSummary({
           </div>
         ) : null}
 
-        {prebook.remarks ? (
-          <p className="text-sm leading-relaxed text-text">{prebook.remarks}</p>
+        {prebook.remarks ? <p className="text-sm leading-relaxed text-text">{prebook.remarks}</p> : null}
+
+        {alternatives.length > 0 ? (
+          <div className="border-t border-line pt-4">
+            <p className="text-sm font-semibold text-heading">Other rates for this room</p>
+            <div className="mt-2 divide-y divide-line overflow-hidden rounded-lg border border-line bg-white">
+              {alternatives.map((rate) => (
+                <RateRow
+                  key={rate.offerId}
+                  rate={rate}
+                  nights={nights}
+                  lowest={false}
+                  href={staysCheckoutPath(hotelId, rate.offerId, query)}
+                />
+              ))}
+            </div>
+          </div>
         ) : null}
       </div>
     </section>
