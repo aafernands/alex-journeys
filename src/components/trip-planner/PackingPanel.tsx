@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { tripDays, type TripItem } from "@/lib/trip-record";
@@ -88,8 +88,17 @@ export function PackingPanel({
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
+  const listRef = useRef(list);
+  useEffect(() => {
+    listRef.current = list;
+  });
 
-  function commit(next: PackingListState, message = "") {
+  function commit(
+    update: PackingListState | ((current: PackingListState) => PackingListState),
+    message = "",
+  ) {
+    const next = typeof update === "function" ? update(listRef.current) : update;
+    listRef.current = next;
     onChange(writePackingList(next));
     setNotice(message);
   }
@@ -149,7 +158,12 @@ export function PackingPanel({
               type="button"
               className="plan-pack-tool"
               disabled={progress.packed === 0}
-              onClick={() => commit(uncheckAllPacking(list), "Unchecked everything for the trip home.")}
+              onClick={() =>
+                commit(
+                  (current) => uncheckAllPacking(current),
+                  "Unchecked everything for the trip home.",
+                )
+              }
             >
               Uncheck all
             </button>
@@ -179,8 +193,8 @@ export function PackingPanel({
         className="plan-pack-add"
         onSubmit={(event) => {
           event.preventDefault();
-          const next = addQuickPackingItem(list, draft);
-          if (next.items.length === list.items.length) return;
+          const next = addQuickPackingItem(listRef.current, draft);
+          if (next.items.length === listRef.current.items.length) return;
           setDraft("");
           commit(next, "Added to the list.");
         }}
@@ -212,15 +226,20 @@ export function PackingPanel({
 
       <div className="plan-pack-block">
         <h4 className={plan.h4}>{progress.total === 0 ? "Start from a list" : "Add a list"}</h4>
-        <div className="plan-pack-templates">
+        <div className={`plan-pack-templates${progress.total > 0 ? " is-compact" : ""}`}>
           {PACKING_TEMPLATES.map((template) => (
             <button
               key={template.id}
               type="button"
               className="plan-pack-template"
               onClick={() => {
-                const next = addPackingTemplate(list, template.id as PackingTemplateId, ctx);
-                const added = next.items.length - list.items.length;
+                const before = listRef.current.items.length;
+                const next = addPackingTemplate(
+                  listRef.current,
+                  template.id as PackingTemplateId,
+                  ctx,
+                );
+                const added = next.items.length - before;
                 commit(
                   next,
                   added > 0
@@ -240,42 +259,6 @@ export function PackingPanel({
           ))}
         </div>
       </div>
-
-      {suggestions.length > 0 ? (
-        <div className="plan-pack-block">
-          <h4 className={plan.h4}>Suggested for this trip</h4>
-          <ul className="plan-pack-suggestions">
-            {suggestions.map((suggestion) => (
-              <li key={suggestion.id} className="plan-pack-suggestion">
-                <div className="plan-pack-suggestion-copy">
-                  <p className="plan-pack-suggestion-label">
-                    {suggestion.label}
-                    {suggestion.quantity > 1 ? ` × ${suggestion.quantity}` : ""}
-                  </p>
-                  <p className="plan-pack-suggestion-reason">{suggestion.reason}</p>
-                </div>
-                <div className="plan-pack-suggestion-actions">
-                  <button
-                    type="button"
-                    className="btn btn-ink plan-pack-suggestion-add"
-                    onClick={() => commit(acceptPackingSuggestion(list, suggestion), `Added ${suggestion.label}.`)}
-                  >
-                    Add
-                  </button>
-                  <button
-                    type="button"
-                    className="plan-pack-dismiss"
-                    aria-label={`Dismiss ${suggestion.label}`}
-                    onClick={() => commit(dismissPackingSuggestion(list, suggestion.id))}
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
 
       {assigned && travelers.length > 1 ? (
         <div className="plan-pack-filters" role="group" aria-label="Whose list">
@@ -352,18 +335,25 @@ export function PackingPanel({
                         confirmDelete={confirmDelete === item.id}
                         canMoveUp={group.items[0]?.id !== item.id}
                         canMoveDown={group.items[group.items.length - 1]?.id !== item.id}
-                        onToggle={() => commit(togglePacked(list, item.id))}
+                        onToggle={() => commit((current) => togglePacked(current, item.id))}
                         onOpen={() => {
                           setOpenId((current) => (current === item.id ? null : item.id));
                           setConfirmDelete(null);
                         }}
-                        onChange={(patch) => commit(updatePackingItem(list, item.id, patch))}
-                        onShift={(direction) => commit(shiftPackingItem(list, item.id, direction))}
+                        onChange={(patch) =>
+                          commit((current) => updatePackingItem(current, item.id, patch))
+                        }
+                        onShift={(direction) =>
+                          commit((current) => shiftPackingItem(current, item.id, direction))
+                        }
                         onAskDelete={() => setConfirmDelete(item.id)}
                         onDelete={() => {
                           setOpenId(null);
                           setConfirmDelete(null);
-                          commit(deletePackingItem(list, item.id), `Removed ${item.label}.`);
+                          commit(
+                            (current) => deletePackingItem(current, item.id),
+                            `Removed ${item.label}.`,
+                          );
                         }}
                         onCancelDelete={() => setConfirmDelete(null)}
                       />
@@ -376,6 +366,49 @@ export function PackingPanel({
               </section>
             );
           })}
+        </div>
+      ) : null}
+
+      {suggestions.length > 0 ? (
+        <div className="plan-pack-block">
+          <h4 className={plan.h4}>Suggested for this trip</h4>
+          <ul className="plan-pack-suggestions">
+            {suggestions.map((suggestion) => (
+              <li key={suggestion.id} className="plan-pack-suggestion">
+                <div className="plan-pack-suggestion-copy">
+                  <p className="plan-pack-suggestion-label">
+                    {suggestion.label}
+                    {suggestion.quantity > 1 ? ` × ${suggestion.quantity}` : ""}
+                  </p>
+                  <p className="plan-pack-suggestion-reason">{suggestion.reason}</p>
+                </div>
+                <div className="plan-pack-suggestion-actions">
+                  <button
+                    type="button"
+                    className="btn btn-ink plan-pack-suggestion-add"
+                    onClick={() =>
+                      commit(
+                        (current) => acceptPackingSuggestion(current, suggestion),
+                        `Added ${suggestion.label}.`,
+                      )
+                    }
+                  >
+                    Add
+                  </button>
+                  <button
+                    type="button"
+                    className="plan-pack-dismiss"
+                    aria-label={`Dismiss ${suggestion.label}`}
+                    onClick={() =>
+                      commit((current) => dismissPackingSuggestion(current, suggestion.id))
+                    }
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       ) : null}
 

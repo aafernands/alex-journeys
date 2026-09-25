@@ -1042,6 +1042,13 @@ export function ItineraryHub({
     }
     if (window.matchMedia(TRIP_SECTION_BAR_QUERY).matches) {
       window.scrollTo(0, 0);
+      if (next === "packing") {
+        window.requestAnimationFrame(() => {
+          document.getElementById(`${headingId}-view-packing`)?.scrollIntoView({
+            block: "start",
+          });
+        });
+      }
     }
   }
   useEffect(() => {
