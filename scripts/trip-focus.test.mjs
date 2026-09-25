@@ -5,6 +5,7 @@ import {
   isFocusedBookingPath,
   isFocusedTripChrome,
   TRIP_FOCUS_BOOT,
+  TRIP_SECTION_BAR_QUERY,
 } from "../src/lib/trip-focus.ts";
 
 function source(path) {
@@ -96,5 +97,36 @@ describe("focused trip chrome wiring", () => {
     assert.match(layout, /TRIP_FOCUS_BOOT/);
     assert.match(css, /body\.trip-focus \.plan-trip-hotel/);
     assert.match(css, /dialog\[open\]/);
+  });
+});
+
+describe("open trip section bar", () => {
+  it("uses the tablet breakpoint below iPad portrait", () => {
+    assert.equal(TRIP_SECTION_BAR_QUERY, "(max-width: 767px)");
+  });
+
+  it("pins the four section tabs to the bottom only while a trip is open", () => {
+    const hub = source("../src/components/trip-planner/ItineraryHub.tsx");
+    const css = source("../src/app/globals.css");
+    const planner = source("../src/components/trip-planner/TripPlanner.tsx");
+    assert.match(hub, /TRIP_SECTION_BAR_QUERY/);
+    assert.match(hub, /window\.scrollTo\(0, 0\)/);
+    assert.match(hub, /role="tablist"/);
+    assert.match(hub, /aria-selected=\{view === tab\}/);
+    assert.doesNotMatch(
+      hub.slice(hub.indexOf("plan-workspace-tabs"), hub.indexOf("plan-add-menu")),
+      /Packing list/,
+    );
+    assert.match(hub, /: "Packing"/);
+    assert.match(css, /@media \(max-width: 767px\)/);
+    assert.match(css, /\.plan-workspace-tabs \{[\s\S]*position: fixed;/);
+    assert.match(css, /env\(safe-area-inset-bottom, 0px\)/);
+    assert.match(
+      css,
+      /\.plan-workspace \[role="tabpanel"\] \.plan-sticky \{[\s\S]*position: static;/,
+    );
+    assert.match(planner, /Create my trip/);
+    assert.match(planner, /plan-sticky/);
+    assert.ok(planner.indexOf("plan-setup") < planner.indexOf("<ItineraryHub"));
   });
 });

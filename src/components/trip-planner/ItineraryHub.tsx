@@ -57,6 +57,7 @@ import {
 } from "@/lib/stays";
 import { FLIGHT_LANE_HASH } from "@/lib/flights-itinerary";
 import { STAY_LANE_HASH } from "@/lib/stays-itinerary";
+import { TRIP_SECTION_BAR_QUERY } from "@/lib/trip-focus";
 import { plan } from "@/components/trip-planner/density";
 import { ForwardBookings } from "@/components/trip-planner/ForwardBookings";
 import { PlanFold, PlanHint } from "@/components/trip-planner/PlanFold";
@@ -1103,6 +1104,9 @@ export function ItineraryHub({
     } catch {
       /* In-memory navigation still works. */
     }
+    if (window.matchMedia(TRIP_SECTION_BAR_QUERY).matches) {
+      window.scrollTo(0, 0);
+    }
   }
   useEffect(() => {
     let frame = 0;
@@ -1606,7 +1610,7 @@ export function ItineraryHub({
                     ? "Itinerary"
                     : tab === "bookings"
                       ? "Bookings"
-                      : "Packing list"}
+                      : "Packing"}
               </button>
             ),
           )}
