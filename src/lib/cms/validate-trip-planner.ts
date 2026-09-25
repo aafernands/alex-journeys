@@ -52,6 +52,14 @@ export function validateTripPlannerInput(
 
   const configIn = asRecord(body.config);
   if (!configIn) return { ok: false, error: "Config is required." };
+  if (configIn.fallbackImage != null) {
+    const image = asRecord(configIn.fallbackImage);
+    if (!image || typeof image.url !== "string" || image.url.length > 2000 ||
+      !(image.url.startsWith("/media/") || image.url.startsWith("https://") && isHttpUrl(image.url)) ||
+      typeof image.alt !== "string" || image.alt.length > 300) {
+      return { ok: false, error: "Fallback image needs a media path or HTTPS URL and alt text up to 300 characters." };
+    }
+  }
 
   const title = requiredString(configIn.title, "Title", 120);
   if (!title.ok) return title;

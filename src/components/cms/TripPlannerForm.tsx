@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { MediaPicker } from "./MediaPicker";
+import { MAX_MEDIA_UPLOAD_BYTES, MAX_MEDIA_UPLOAD_LABEL } from "@/lib/cms/media-limits";
 import {
   PARTNER_SHOW_WHEN,
   type PartnerShowWhen,
@@ -46,6 +48,35 @@ export function TripPlannerForm({ config: initialConfig, partners: initialPartne
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
+
+  async function uploadFallback(file: File) {
+    setError(null);
+    setSuccess(null);
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type) || file.size > MAX_MEDIA_UPLOAD_BYTES) {
+      setError(`Choose a JPEG, PNG, WebP, or GIF up to ${MAX_MEDIA_UPLOAD_LABEL}.`);
+      return;
+    }
+    setUploading(true);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      body.append("alt", config.fallbackImage?.alt ?? "");
+      const response = await fetch("/api/cms/media", { method: "POST", body });
+      const result = await response.json();
+      if (!response.ok || !result.item?.url) throw new Error(result.error || "Image upload failed.");
+      updateConfig({ fallbackImage: { url: result.item.url, alt: result.item.alt || "" } });
+      setPreview(URL.createObjectURL(file));
+      setSuccess("Image uploaded. Save trip planner to use it as the fallback. It will appear on the site after publishing finishes.");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Image upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   const updateConfig = useCallback((partial: Partial<TripPlannerConfig>) => {
     setConfig((current) => ({ ...current, ...partial }));
@@ -80,6 +111,7 @@ export function TripPlannerForm({ config: initialConfig, partners: initialPartne
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (uploading || pending) return;
     setError(null);
     setSuccess(null);
     setPending(true);
@@ -104,6 +136,28 @@ export function TripPlannerForm({ config: initialConfig, partners: initialPartne
 
   return (
     <form onSubmit={onSubmit} className="space-y-8">
+      <section className="panel space-y-4 p-5 md:p-6" aria-labelledby="planner-fallback-heading">
+        <h2 id="planner-fallback-heading" className="font-display text-lg font-bold text-heading">Fallback destination image</h2>
+        <p className="text-sm text-muted">Choose the banner shown while a destination photo loads or when Unsplash is unavailable. A wide landscape image works best.</p>
+        {config.fallbackImage ? (
+          <div className="space-y-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={preview || config.fallbackImage.url} alt={config.fallbackImage.alt} className="aspect-[3/1] w-full rounded-xl object-cover" />
+            <label className="block text-sm font-semibold text-heading">Image description
+              <input className={fieldClass} maxLength={300} value={config.fallbackImage.alt} disabled={uploading || pending} onChange={(event) => updateConfig({ fallbackImage: { url: config.fallbackImage!.url, alt: event.target.value } })} />
+            </label>
+          </div>
+        ) : <p className="text-sm text-muted">No custom image selected. The automatic fallback is currently used.</p>}
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="block text-sm font-semibold text-heading">Upload image
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled={uploading || pending} className="mt-2 block w-full text-sm" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void uploadFallback(file); }} />
+          </label>
+          <button type="button" className="btn btn-secondary" disabled={uploading || pending} onClick={() => setPickerOpen(true)}>Choose from library</button>
+          {config.fallbackImage ? <button type="button" className="btn btn-secondary" disabled={uploading || pending} onClick={() => { updateConfig({ fallbackImage: undefined }); setPreview(null); }}>Remove image</button> : null}
+        </div>
+        {uploading ? <p role="status" className="text-sm text-muted">Uploading image…</p> : null}
+        <MediaPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onSelect={(image) => { updateConfig({ fallbackImage: image }); setPreview(null); setPickerOpen(false); }} title="Choose trip planner fallback image" />
+      </section>
       <section className="panel space-y-4 p-5 md:p-6">
         <h2 className="font-display text-sm font-bold uppercase tracking-wide text-heading">
           Page
@@ -443,7 +497,7 @@ export function TripPlannerForm({ config: initialConfig, partners: initialPartne
           {success}
         </p>
       ) : null}
-      <button type="submit" className="btn btn-primary" disabled={pending}>
+      <button type="submit" className="btn btn-primary" disabled={pending || uploading}>
         {pending ? "Saving…" : "Save trip planner"}
       </button>
     </form>

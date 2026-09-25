@@ -45,6 +45,7 @@ export type StepCopy = {
 };
 
 export type TripPlannerConfig = {
+  fallbackImage?: { url: string; alt: string };
   title: string;
   label: string;
   intro: string;
@@ -737,7 +738,11 @@ export function normalizeConfig(raw: unknown): TripPlannerConfig {
   const chips = asRecord(record.chips);
   const steps = asRecord(record.steps);
   const base = DEFAULT_CONFIG;
+  const fallbackImage = asRecord(record.fallbackImage);
   return {
+    ...(typeof fallbackImage.url === "string" && fallbackImage.url.trim()
+      ? { fallbackImage: { url: fallbackImage.url.trim(), alt: typeof fallbackImage.alt === "string" ? fallbackImage.alt.trim() : "" } }
+      : {}),
     title: str(record.title, base.title),
     label: str(record.label, base.label),
     intro: str(record.intro, base.intro),

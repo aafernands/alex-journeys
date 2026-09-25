@@ -1387,6 +1387,7 @@ export function ItineraryHub({
           ← My trips
         </Link>
         <TripDestinationHero
+          fallbackImage={config.fallbackImage}
           destination={state.destination}
           title={tripTitle || state.destination.trim() || config.steps.next.heading}
           headingId={headingId}

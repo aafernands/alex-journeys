@@ -1,4 +1,5 @@
 export type DestinationPhoto = {
+  alt?: string;
   image: string;
   photographer: string;
   photographerUrl: string;
@@ -12,7 +13,16 @@ function cleanDestination(value: string): string {
 }
 
 /** A local, attribution-free image that keeps the hero visual even offline. */
-export function fallbackDestinationPhoto(destination: string): DestinationPhoto {
+export function fallbackDestinationPhoto(destination: string, custom?: { url: string; alt: string }): DestinationPhoto {
+  if (custom?.url) return {
+    image: custom.url,
+    alt: custom.alt,
+    photographer: "Alex Journeys",
+    photographerUrl: "/about",
+    source: "Trip planner image",
+    sourceUrl: "/about",
+    license: "",
+  };
   const label = cleanDestination(destination) || "Your destination";
   const encoded = encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><rect width="1600" height="900" fill="#243c48"/><path d="M0 690C260 520 410 760 650 600s390-40 520 40 260 70 430-80v340H0Z" fill="#d18a4b"/><path d="M0 760c260-120 400 30 650-90s430 10 950-60v290H0Z" fill="#13242d" opacity=".7"/><circle cx="1260" cy="190" r="92" fill="#e8c88a"/><path d="M180 610c150-130 260-130 410 0M690 650c130-160 250-160 390 0" fill="none" stroke="#f4dfb0" stroke-width="18" stroke-linecap="round" opacity=".75"/><text x="90" y="150" fill="#fff7e8" font-family="Georgia,serif" font-size="68" font-weight="700">${label}</text><text x="94" y="205" fill="#f4dfb0" font-family="Arial,sans-serif" font-size="22" letter-spacing="5">YOUR JOURNEY STARTS HERE</text></svg>`,
@@ -102,11 +112,12 @@ async function findCommonsPhoto(destination: string): Promise<DestinationPhoto |
 }
 
 /** Server-side lookup: preserve the full place name to disambiguate cities. */
-export async function findDestinationPhoto(destination: string): Promise<DestinationPhoto | null> {
+export async function findDestinationPhoto(destination: string, custom?: { url: string; alt: string }): Promise<DestinationPhoto | null> {
   const key = process.env.UNSPLASH_ACCESS_KEY?.trim();
   if (!destination.trim()) return null;
-  const fallback = fallbackDestinationPhoto(destination);
-  if (!key) return (await findCommonsPhoto(destination)) ?? fallback;
+  const fallback = fallbackDestinationPhoto(destination, custom);
+  const getFallback = async () => custom?.url ? fallback : (await findCommonsPhoto(destination)) ?? fallback;
+  if (!key) return getFallback();
   const query = new URLSearchParams({
     query: `${destination.trim()} landscape landmark`,
     orientation: "landscape",
@@ -119,7 +130,7 @@ export async function findDestinationPhoto(destination: string): Promise<Destina
       next: { revalidate: 86400 },
       signal: AbortSignal.timeout(6000),
     });
-    if (!response.ok) return (await findCommonsPhoto(destination)) ?? fallback;
+    if (!response.ok) return getFallback();
     const body = await response.json();
     const photo = body.results?.[0];
     if (
@@ -127,11 +138,11 @@ export async function findDestinationPhoto(destination: string): Promise<Destina
       typeof photo?.user?.links?.html !== "string" ||
       typeof photo?.user?.name !== "string"
     ) {
-      return (await findCommonsPhoto(destination)) ?? fallback;
+      return getFallback();
     }
     const image = validImageUrl(photo.urls.regular, "images.unsplash.com");
     const profile = validImageUrl(photo.user.links.html, "unsplash.com");
-    if (!image || !profile) return (await findCommonsPhoto(destination)) ?? fallback;
+    if (!image || !profile) return getFallback();
     image.searchParams.set("w", "1800");
     image.searchParams.set("q", "85");
     profile.searchParams.set("utm_source", "alex_journeys");
@@ -145,6 +156,6 @@ export async function findDestinationPhoto(destination: string): Promise<Destina
       license: "Unsplash License",
     };
   } catch {
-    return (await findCommonsPhoto(destination)) ?? fallback;
+    return getFallback();
   }
 }

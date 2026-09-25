@@ -6,18 +6,19 @@ import {
   type DestinationPhoto,
 } from "@/lib/destination-photo";
 
-export function TripDestinationHero({ destination, title, headingId, meta, actions }: {
+export function TripDestinationHero({ destination, title, headingId, meta, actions, fallbackImage }: {
   destination: string;
   title: string;
   headingId: string;
   meta: string;
   actions?: ReactNode;
+  fallbackImage?: { url: string; alt: string };
 }) {
   const [result, setResult] = useState<{ destination: string; photo: DestinationPhoto } | null>(null);
-  const [failedImage, setFailedImage] = useState<string | null>(null);
-  const fallback = fallbackDestinationPhoto(destination);
+  const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
+  const fallback = fallbackDestinationPhoto(destination, fallbackImage);
   const remote = result?.destination === destination ? result.photo : null;
-  const photo = remote?.image !== failedImage ? remote ?? fallback : fallback.image !== failedImage ? fallback : null;
+  const photo = remote && !failedImages.has(remote.image) ? remote : !failedImages.has(fallback.image) ? fallback : null;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -35,7 +36,7 @@ export function TripDestinationHero({ destination, title, headingId, meta, actio
       {photo ? (
         // Unsplash requires hotlinking the returned image URL.
         // eslint-disable-next-line @next/next/no-img-element
-        <img className="plan-trip-hero-image" src={photo.image} alt={`View of ${destination}`} fetchPriority="high" onError={() => setFailedImage(photo.image)} />
+        <img className="plan-trip-hero-image" src={photo.image} alt={photo.alt ?? `View of ${destination}`} fetchPriority="high" onError={() => setFailedImages((previous) => new Set(previous).add(photo.image))} />
       ) : null}
       <div className="plan-trip-hero-shade" aria-hidden="true" />
       {actions ? <div className="plan-trip-hero-actions" role="group" aria-label="Trip actions">{actions}</div> : null}
@@ -44,7 +45,7 @@ export function TripDestinationHero({ destination, title, headingId, meta, actio
         <h2 id={headingId} className="plan-trip-hero-title">{title}</h2>
         <p className="plan-trip-hero-meta">{meta}</p>
       </div>
-      {photo ? <p className="plan-trip-hero-credit">
+      {photo && photo.source !== "Trip planner image" ? <p className="plan-trip-hero-credit">
         {photo.source === "Alex Journeys artwork" ? "Artwork by " : "Photo by "}
         <a href={photo.photographerUrl} target={photo.photographerUrl.startsWith("/") ? undefined : "_blank"} rel={photo.photographerUrl.startsWith("/") ? undefined : "noopener noreferrer"}>{photo.photographer}</a>
         {photo.source === "Alex Journeys artwork" ? null : <> on <a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">{photo.source}</a> · {photo.license}</>}
