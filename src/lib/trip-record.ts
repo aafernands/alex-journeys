@@ -64,6 +64,12 @@ export type TripItem = {
   dayIndex?: number;
   /** Optional local time, `HH:MM`. */
   time?: string;
+  pickupLocation?: string;
+  dropoffLocation?: string;
+  pickupDate?: string;
+  dropoffDate?: string;
+  pickupTime?: string;
+  dropoffTime?: string;
 };
 
 export type TripDay = {
@@ -352,6 +358,14 @@ export function cleanTime(value: string): string {
   return `${match[1]}:${match[2]}`;
 }
 
+export function cleanItemDate(value: string): string {
+  const trimmed = value.trim();
+  const parsed = parseIsoDate(trimmed);
+  if (!parsed) return "";
+  const date = new Date(Date.UTC(parsed.y, parsed.m - 1, parsed.d));
+  return date.toISOString().slice(0, 10) === trimmed ? trimmed : "";
+}
+
 export function cleanDayIndex(value: unknown): number | null {
   const n = typeof value === "number" ? value : Number(value);
   if (!Number.isInteger(n) || n < 1 || n > 90) return null;
@@ -530,6 +544,12 @@ export function createTripItem(input: {
   confirmation?: string;
   dayIndex?: number | null;
   time?: string;
+  pickupLocation?: string;
+  dropoffLocation?: string;
+  pickupDate?: string;
+  dropoffDate?: string;
+  pickupTime?: string;
+  dropoffTime?: string;
   status?: TripItemStatus;
   laneKey?: string;
   sortOrder: number;
@@ -538,6 +558,12 @@ export function createTripItem(input: {
   const laneKey = input.laneKey?.trim();
   const confirmation = cleanConfirmation(input.confirmation ?? "");
   const time = cleanTime(input.time ?? "");
+  const pickupLocation = input.pickupLocation?.trim().slice(0, 160) ?? "";
+  const dropoffLocation = input.dropoffLocation?.trim().slice(0, 160) ?? "";
+  const pickupDate = cleanItemDate(input.pickupDate ?? "");
+  const dropoffDate = cleanItemDate(input.dropoffDate ?? "");
+  const pickupTime = cleanTime(input.pickupTime ?? "");
+  const dropoffTime = cleanTime(input.dropoffTime ?? "");
   const dayIndex = cleanDayIndex(input.dayIndex);
   return {
     id: createTripItemId(),
@@ -552,6 +578,12 @@ export function createTripItem(input: {
     ...(confirmation ? { confirmation } : {}),
     ...(dayIndex ? { dayIndex } : {}),
     ...(time ? { time } : {}),
+    ...(pickupLocation ? { pickupLocation } : {}),
+    ...(dropoffLocation ? { dropoffLocation } : {}),
+    ...(pickupDate ? { pickupDate } : {}),
+    ...(dropoffDate ? { dropoffDate } : {}),
+    ...(pickupTime ? { pickupTime } : {}),
+    ...(dropoffTime ? { dropoffTime } : {}),
   };
 }
 
@@ -590,6 +622,24 @@ export function normalizeTripItem(raw: unknown, index: number): TripItem | null 
     typeof record.confirmation === "string" ? record.confirmation : "",
   );
   const time = cleanTime(typeof record.time === "string" ? record.time : "");
+  const pickupLocation =
+    typeof record.pickupLocation === "string"
+      ? record.pickupLocation.trim().slice(0, 160)
+      : "";
+  const dropoffLocation =
+    typeof record.dropoffLocation === "string"
+      ? record.dropoffLocation.trim().slice(0, 160)
+      : "";
+  const pickupDate =
+    typeof record.pickupDate === "string" ? cleanItemDate(record.pickupDate) : "";
+  const dropoffDate =
+    typeof record.dropoffDate === "string"
+      ? cleanItemDate(record.dropoffDate)
+      : "";
+  const pickupTime =
+    typeof record.pickupTime === "string" ? cleanTime(record.pickupTime) : "";
+  const dropoffTime =
+    typeof record.dropoffTime === "string" ? cleanTime(record.dropoffTime) : "";
   const dayIndex = cleanDayIndex(record.dayIndex);
   if (!title && !url && !notes && !confirmation) return null;
 
@@ -620,6 +670,12 @@ export function normalizeTripItem(raw: unknown, index: number): TripItem | null 
     ...(confirmation ? { confirmation } : {}),
     ...(dayIndex ? { dayIndex } : {}),
     ...(time ? { time } : {}),
+    ...(pickupLocation ? { pickupLocation } : {}),
+    ...(dropoffLocation ? { dropoffLocation } : {}),
+    ...(pickupDate ? { pickupDate } : {}),
+    ...(dropoffDate ? { dropoffDate } : {}),
+    ...(pickupTime ? { pickupTime } : {}),
+    ...(dropoffTime ? { dropoffTime } : {}),
   };
 }
 

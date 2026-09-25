@@ -119,6 +119,26 @@ describe("saved trips", () => {
     assert.equal(parsed.data.packingNotes, "");
   });
 
+  it("keeps pickup and return details for a car booking", () => {
+    const item = createTripItem({
+      type: "car",
+      title: "Avis rental",
+      pickupLocation: "Denver airport",
+      dropoffLocation: "Downtown Denver",
+      pickupDate: "2027-04-12",
+      dropoffDate: "2027-04-19",
+      pickupTime: "09:30",
+      dropoffTime: "16:00",
+      sortOrder: 1,
+    });
+    const parsed = parseTripWrite(
+      tripWriteFromPlan({ state: lisbonState(), items: [item] }, true),
+    );
+    assert.equal(parsed.ok, true);
+    if (!parsed.ok) return;
+    assert.deepEqual(parsed.data.items[0], item);
+  });
+
   it("keeps packing notes on the trip", () => {
     const parsed = parseTripWrite({
       ...tripWriteFromPlan(

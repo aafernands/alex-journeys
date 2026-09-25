@@ -26,6 +26,7 @@ import {
 import {
   cleanConfirmation,
   cleanDayIndex,
+  cleanItemDate,
   cleanTime,
   createTripItem,
   extractBookingPaste,
@@ -250,6 +251,17 @@ function itemWhen(item: TripItem, days: TripDay[]): string {
   return [
     day ? `${day.label} · ${day.detail}` : null,
     item.time ?? null,
+    item.type === "car" &&
+    (item.pickupDate || item.dropoffDate || item.pickupLocation || item.dropoffLocation)
+      ? [
+          item.pickupDate && `Pick up ${item.pickupDate}${item.pickupTime ? ` at ${item.pickupTime}` : ""}`,
+          item.dropoffDate && `Return ${item.dropoffDate}${item.dropoffTime ? ` at ${item.dropoffTime}` : ""}`,
+          item.pickupLocation && `from ${item.pickupLocation}`,
+          item.dropoffLocation && `to ${item.dropoffLocation}`,
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : null,
     item.confirmation ? `Conf. ${item.confirmation}` : null,
   ]
     .filter(Boolean)
@@ -290,6 +302,16 @@ function BookingItemForm({
     return index == null ? "" : String(index);
   });
   const [time, setTime] = useState(existing?.time ?? "");
+  const [pickupLocation, setPickupLocation] = useState(
+    existing?.pickupLocation ?? "",
+  );
+  const [dropoffLocation, setDropoffLocation] = useState(
+    existing?.dropoffLocation ?? "",
+  );
+  const [pickupDate, setPickupDate] = useState(existing?.pickupDate ?? "");
+  const [dropoffDate, setDropoffDate] = useState(existing?.dropoffDate ?? "");
+  const [pickupTime, setPickupTime] = useState(existing?.pickupTime ?? "");
+  const [dropoffTime, setDropoffTime] = useState(existing?.dropoffTime ?? "");
   const [status, setStatus] = useState<TripItemStatus>(
     existing?.status ?? "todo",
   );
@@ -343,6 +365,24 @@ function BookingItemForm({
         const parsedDay = cleanDayIndex(dayIndex || null);
         const cleanedConfirmation = cleanConfirmation(confirmation);
         const cleanedTime = cleanTime(time);
+        const cleanedPickupDate = cleanItemDate(pickupDate);
+        const cleanedDropoffDate = cleanItemDate(dropoffDate);
+        const cleanedPickupTime = cleanTime(pickupTime);
+        const cleanedDropoffTime = cleanTime(dropoffTime);
+        if (type === "car") {
+          if (Boolean(cleanedPickupDate) !== Boolean(cleanedDropoffDate)) {
+            setError("Add both pickup and return dates.");
+            return;
+          }
+          if (
+            cleanedPickupDate &&
+            cleanedDropoffDate &&
+            cleanedDropoffDate < cleanedPickupDate
+          ) {
+            setError("Return date can’t be before pickup.");
+            return;
+          }
+        }
         if (existing) {
           const next: TripItem = {
             ...existing,
@@ -358,6 +398,20 @@ function BookingItemForm({
           else delete next.dayIndex;
           if (cleanedTime) next.time = cleanedTime;
           else delete next.time;
+          if (type === "car") {
+            if (pickupLocation.trim()) next.pickupLocation = pickupLocation.trim().slice(0, 160);
+            else delete next.pickupLocation;
+            if (dropoffLocation.trim()) next.dropoffLocation = dropoffLocation.trim().slice(0, 160);
+            else delete next.dropoffLocation;
+            if (cleanedPickupDate) next.pickupDate = cleanedPickupDate;
+            else delete next.pickupDate;
+            if (cleanedDropoffDate) next.dropoffDate = cleanedDropoffDate;
+            else delete next.dropoffDate;
+            if (cleanedPickupTime) next.pickupTime = cleanedPickupTime;
+            else delete next.pickupTime;
+            if (cleanedDropoffTime) next.dropoffTime = cleanedDropoffTime;
+            else delete next.dropoffTime;
+          }
           onSave(next);
           return;
         }
@@ -372,6 +426,12 @@ function BookingItemForm({
             confirmation: cleanedConfirmation,
             dayIndex: parsedDay,
             time: cleanedTime,
+            pickupLocation: type === "car" ? pickupLocation : undefined,
+            dropoffLocation: type === "car" ? dropoffLocation : undefined,
+            pickupDate: type === "car" ? cleanedPickupDate : undefined,
+            dropoffDate: type === "car" ? cleanedDropoffDate : undefined,
+            pickupTime: type === "car" ? cleanedPickupTime : undefined,
+            dropoffTime: type === "car" ? cleanedDropoffTime : undefined,
             status,
           }),
         );
@@ -491,6 +551,65 @@ function BookingItemForm({
           />
         </label>
       </div>
+      {type === "car" ? (
+        <fieldset className="plan-stack-tight rounded-lg border border-border bg-surface-soft p-3">
+          <legend className={`${plan.label} px-1`}>Car details</legend>
+          <div className="plan-grid-2">
+            <label className="plan-field">
+              <span className={plan.label}>Pickup location</span>
+              <input
+                className={plan.input}
+                value={pickupLocation}
+                onChange={(event) => setPickupLocation(event.target.value)}
+              />
+            </label>
+            <label className="plan-field">
+              <span className={plan.label}>Return location</span>
+              <input
+                className={plan.input}
+                value={dropoffLocation}
+                onChange={(event) => setDropoffLocation(event.target.value)}
+              />
+            </label>
+            <label className="plan-field">
+              <span className={plan.label}>Pickup date</span>
+              <input
+                className={plan.input}
+                type="date"
+                value={pickupDate}
+                onChange={(event) => setPickupDate(event.target.value)}
+              />
+            </label>
+            <label className="plan-field">
+              <span className={plan.label}>Return date</span>
+              <input
+                className={plan.input}
+                type="date"
+                value={dropoffDate}
+                onChange={(event) => setDropoffDate(event.target.value)}
+              />
+            </label>
+            <label className="plan-field">
+              <span className={plan.label}>Pickup time</span>
+              <input
+                className={plan.input}
+                type="time"
+                value={pickupTime}
+                onChange={(event) => setPickupTime(event.target.value.slice(0, 5))}
+              />
+            </label>
+            <label className="plan-field">
+              <span className={plan.label}>Return time</span>
+              <input
+                className={plan.input}
+                type="time"
+                value={dropoffTime}
+                onChange={(event) => setDropoffTime(event.target.value.slice(0, 5))}
+              />
+            </label>
+          </div>
+        </fieldset>
+      ) : null}
       {type !== "note" ? (
         <div className="plan-stack-tight">
           <p className={plan.label}>Status</p>
