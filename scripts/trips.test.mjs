@@ -139,6 +139,35 @@ describe("saved trips", () => {
     assert.deepEqual(parsed.data.items[0], item);
   });
 
+  it("places dated bookings on their matching itinerary day", () => {
+    const days = [
+      { index: 1, date: "2027-04-12", label: "Day 1", detail: "Mon, Apr 12" },
+      { index: 2, date: "2027-04-13", label: "Day 2", detail: "Tue, Apr 13" },
+      { index: 3, date: "2027-04-14", label: "Day 3", detail: "Wed, Apr 14" },
+    ];
+    assert.equal(
+      scheduledDayIndex(
+        createTripItem({ type: "flight", departureDate: "2027-04-13", sortOrder: 0 }),
+        days,
+      ),
+      2,
+    );
+    assert.equal(
+      scheduledDayIndex(
+        createTripItem({ type: "hotel", checkinDate: "2027-04-14", sortOrder: 1 }),
+        days,
+      ),
+      3,
+    );
+    assert.equal(
+      scheduledDayIndex(
+        createTripItem({ type: "car", pickupDate: "2027-04-12", sortOrder: 2 }),
+        days,
+      ),
+      1,
+    );
+  });
+
   it("keeps packing notes on the trip", () => {
     const parsed = parseTripWrite({
       ...tripWriteFromPlan(

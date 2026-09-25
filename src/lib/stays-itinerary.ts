@@ -48,6 +48,8 @@ export type BookedStayInput = {
   href: string;
   checkin?: string;
   checkout?: string;
+  checkinTime?: string;
+  checkoutTime?: string;
 };
 
 export type PendingBookedStay = {
@@ -225,6 +227,10 @@ export function mergeBookedStay(
     laneKey: "booking",
     sortOrder,
     dayIndex: stayDayIndex(plan.state.startDate, stay.checkin ?? ""),
+    checkinDate: stay.checkin,
+    checkoutDate: stay.checkout,
+    checkinTime: stay.checkinTime,
+    checkoutTime: stay.checkoutTime,
   });
   return {
     added: true,
@@ -313,6 +319,10 @@ function parsePending(raw: string | null): PendingBookedStay[] {
           href: typeof fields.href === "string" ? fields.href : "",
           checkin: typeof fields.checkin === "string" ? fields.checkin : "",
           checkout: typeof fields.checkout === "string" ? fields.checkout : "",
+          checkinTime:
+            typeof fields.checkinTime === "string" ? fields.checkinTime : "",
+          checkoutTime:
+            typeof fields.checkoutTime === "string" ? fields.checkoutTime : "",
         },
       });
     }

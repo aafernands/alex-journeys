@@ -70,6 +70,14 @@ export type TripItem = {
   dropoffDate?: string;
   pickupTime?: string;
   dropoffTime?: string;
+  departureDate?: string;
+  returnDate?: string;
+  departureTime?: string;
+  returnTime?: string;
+  checkinDate?: string;
+  checkoutDate?: string;
+  checkinTime?: string;
+  checkoutTime?: string;
 };
 
 export type TripDay = {
@@ -464,7 +472,24 @@ export function compareScheduledItems(a: TripItem, b: TripItem): number {
   return a.sortOrder - b.sortOrder || a.updatedAt.localeCompare(b.updatedAt);
 }
 
-export function scheduledDayIndex(item: TripItem, dayCount: number): number | null {
+export function scheduledDayIndex(
+  item: TripItem,
+  daysOrCount: TripDay[] | number,
+): number | null {
+  const dayCount = Array.isArray(daysOrCount) ? daysOrCount.length : daysOrCount;
+  const days = Array.isArray(daysOrCount) ? daysOrCount : null;
+  const date =
+    item.type === "car"
+      ? item.pickupDate
+      : item.type === "flight"
+        ? item.departureDate
+        : item.type === "hotel"
+          ? item.checkinDate
+          : undefined;
+  if (days && date) {
+    const matched = days.find((day) => day.date === date)?.index;
+    if (matched) return matched;
+  }
   if (item.dayIndex == null || dayCount < 1) return null;
   if (item.dayIndex < 1 || item.dayIndex > dayCount) return null;
   return item.dayIndex;
@@ -550,6 +575,14 @@ export function createTripItem(input: {
   dropoffDate?: string;
   pickupTime?: string;
   dropoffTime?: string;
+  departureDate?: string;
+  returnDate?: string;
+  departureTime?: string;
+  returnTime?: string;
+  checkinDate?: string;
+  checkoutDate?: string;
+  checkinTime?: string;
+  checkoutTime?: string;
   status?: TripItemStatus;
   laneKey?: string;
   sortOrder: number;
@@ -564,6 +597,14 @@ export function createTripItem(input: {
   const dropoffDate = cleanItemDate(input.dropoffDate ?? "");
   const pickupTime = cleanTime(input.pickupTime ?? "");
   const dropoffTime = cleanTime(input.dropoffTime ?? "");
+  const departureDate = cleanItemDate(input.departureDate ?? "");
+  const returnDate = cleanItemDate(input.returnDate ?? "");
+  const departureTime = cleanTime(input.departureTime ?? "");
+  const returnTime = cleanTime(input.returnTime ?? "");
+  const checkinDate = cleanItemDate(input.checkinDate ?? "");
+  const checkoutDate = cleanItemDate(input.checkoutDate ?? "");
+  const checkinTime = cleanTime(input.checkinTime ?? "");
+  const checkoutTime = cleanTime(input.checkoutTime ?? "");
   const dayIndex = cleanDayIndex(input.dayIndex);
   return {
     id: createTripItemId(),
@@ -584,6 +625,14 @@ export function createTripItem(input: {
     ...(dropoffDate ? { dropoffDate } : {}),
     ...(pickupTime ? { pickupTime } : {}),
     ...(dropoffTime ? { dropoffTime } : {}),
+    ...(departureDate ? { departureDate } : {}),
+    ...(returnDate ? { returnDate } : {}),
+    ...(departureTime ? { departureTime } : {}),
+    ...(returnTime ? { returnTime } : {}),
+    ...(checkinDate ? { checkinDate } : {}),
+    ...(checkoutDate ? { checkoutDate } : {}),
+    ...(checkinTime ? { checkinTime } : {}),
+    ...(checkoutTime ? { checkoutTime } : {}),
   };
 }
 
@@ -640,6 +689,22 @@ export function normalizeTripItem(raw: unknown, index: number): TripItem | null 
     typeof record.pickupTime === "string" ? cleanTime(record.pickupTime) : "";
   const dropoffTime =
     typeof record.dropoffTime === "string" ? cleanTime(record.dropoffTime) : "";
+  const departureDate =
+    typeof record.departureDate === "string" ? cleanItemDate(record.departureDate) : "";
+  const returnDate =
+    typeof record.returnDate === "string" ? cleanItemDate(record.returnDate) : "";
+  const departureTime =
+    typeof record.departureTime === "string" ? cleanTime(record.departureTime) : "";
+  const returnTime =
+    typeof record.returnTime === "string" ? cleanTime(record.returnTime) : "";
+  const checkinDate =
+    typeof record.checkinDate === "string" ? cleanItemDate(record.checkinDate) : "";
+  const checkoutDate =
+    typeof record.checkoutDate === "string" ? cleanItemDate(record.checkoutDate) : "";
+  const checkinTime =
+    typeof record.checkinTime === "string" ? cleanTime(record.checkinTime) : "";
+  const checkoutTime =
+    typeof record.checkoutTime === "string" ? cleanTime(record.checkoutTime) : "";
   const dayIndex = cleanDayIndex(record.dayIndex);
   if (!title && !url && !notes && !confirmation) return null;
 
@@ -676,6 +741,14 @@ export function normalizeTripItem(raw: unknown, index: number): TripItem | null 
     ...(dropoffDate ? { dropoffDate } : {}),
     ...(pickupTime ? { pickupTime } : {}),
     ...(dropoffTime ? { dropoffTime } : {}),
+    ...(departureDate ? { departureDate } : {}),
+    ...(returnDate ? { returnDate } : {}),
+    ...(departureTime ? { departureTime } : {}),
+    ...(returnTime ? { returnTime } : {}),
+    ...(checkinDate ? { checkinDate } : {}),
+    ...(checkoutDate ? { checkoutDate } : {}),
+    ...(checkinTime ? { checkinTime } : {}),
+    ...(checkoutTime ? { checkoutTime } : {}),
   };
 }
 

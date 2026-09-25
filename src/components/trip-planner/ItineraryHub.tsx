@@ -244,24 +244,31 @@ function ItemUrl({
 }
 
 function itemWhen(item: TripItem, days: TripDay[]): string {
-  const dayCount = days.length;
-  const index = scheduledDayIndex(item, dayCount);
-  const day =
-    index == null ? null : days.find((entry) => entry.index === index);
-  return [
-    day ? `${day.label} · ${day.detail}` : null,
-    item.time ?? null,
-    item.type === "car" &&
-    (item.pickupDate || item.dropoffDate || item.pickupLocation || item.dropoffLocation)
+  const index = scheduledDayIndex(item, days);
+  const day = index == null ? null : days.find((entry) => entry.index === index);
+  const schedule =
+    item.type === "car"
       ? [
           item.pickupDate && `Pick up ${item.pickupDate}${item.pickupTime ? ` at ${item.pickupTime}` : ""}`,
           item.dropoffDate && `Return ${item.dropoffDate}${item.dropoffTime ? ` at ${item.dropoffTime}` : ""}`,
           item.pickupLocation && `from ${item.pickupLocation}`,
           item.dropoffLocation && `to ${item.dropoffLocation}`,
         ]
-          .filter(Boolean)
-          .join(" · ")
-      : null,
+      : item.type === "flight"
+        ? [
+            item.departureDate && `Depart ${item.departureDate}${item.departureTime ? ` at ${item.departureTime}` : ""}`,
+            item.returnDate && `Return ${item.returnDate}${item.returnTime ? ` at ${item.returnTime}` : ""}`,
+          ]
+        : item.type === "hotel"
+          ? [
+              item.checkinDate && `Check in ${item.checkinDate}${item.checkinTime ? ` at ${item.checkinTime}` : ""}`,
+              item.checkoutDate && `Check out ${item.checkoutDate}${item.checkoutTime ? ` at ${item.checkoutTime}` : ""}`,
+            ]
+          : [];
+  return [
+    day ? `${day.label} · ${day.detail}` : null,
+    item.time ?? null,
+    schedule.filter(Boolean).join(" · ") || null,
     item.confirmation ? `Conf. ${item.confirmation}` : null,
   ]
     .filter(Boolean)
@@ -298,7 +305,7 @@ function BookingItemForm({
   );
   const [dayIndex, setDayIndex] = useState(() => {
     if (!existing) return initialDay ? String(initialDay) : "";
-    const index = scheduledDayIndex(existing, days.length);
+    const index = scheduledDayIndex(existing, days);
     return index == null ? "" : String(index);
   });
   const [time, setTime] = useState(existing?.time ?? "");
@@ -312,6 +319,22 @@ function BookingItemForm({
   const [dropoffDate, setDropoffDate] = useState(existing?.dropoffDate ?? "");
   const [pickupTime, setPickupTime] = useState(existing?.pickupTime ?? "");
   const [dropoffTime, setDropoffTime] = useState(existing?.dropoffTime ?? "");
+  const [departureDate, setDepartureDate] = useState(
+    existing?.departureDate ?? "",
+  );
+  const [returnDate, setReturnDate] = useState(existing?.returnDate ?? "");
+  const [departureTime, setDepartureTime] = useState(
+    existing?.departureTime ?? "",
+  );
+  const [returnTime, setReturnTime] = useState(existing?.returnTime ?? "");
+  const [checkinDate, setCheckinDate] = useState(existing?.checkinDate ?? "");
+  const [checkoutDate, setCheckoutDate] = useState(
+    existing?.checkoutDate ?? "",
+  );
+  const [checkinTime, setCheckinTime] = useState(existing?.checkinTime ?? "");
+  const [checkoutTime, setCheckoutTime] = useState(
+    existing?.checkoutTime ?? "",
+  );
   const [status, setStatus] = useState<TripItemStatus>(
     existing?.status ?? "todo",
   );
@@ -369,6 +392,14 @@ function BookingItemForm({
         const cleanedDropoffDate = cleanItemDate(dropoffDate);
         const cleanedPickupTime = cleanTime(pickupTime);
         const cleanedDropoffTime = cleanTime(dropoffTime);
+        const cleanedDepartureDate = cleanItemDate(departureDate);
+        const cleanedReturnDate = cleanItemDate(returnDate);
+        const cleanedDepartureTime = cleanTime(departureTime);
+        const cleanedReturnTime = cleanTime(returnTime);
+        const cleanedCheckinDate = cleanItemDate(checkinDate);
+        const cleanedCheckoutDate = cleanItemDate(checkoutDate);
+        const cleanedCheckinTime = cleanTime(checkinTime);
+        const cleanedCheckoutTime = cleanTime(checkoutTime);
         if (type === "car") {
           if (Boolean(cleanedPickupDate) !== Boolean(cleanedDropoffDate)) {
             setError("Add both pickup and return dates.");
@@ -382,6 +413,29 @@ function BookingItemForm({
             setError("Return date can’t be before pickup.");
             return;
           }
+        }
+        if (type === "hotel") {
+          if (Boolean(cleanedCheckinDate) !== Boolean(cleanedCheckoutDate)) {
+            setError("Add both check-in and check-out dates.");
+            return;
+          }
+          if (
+            cleanedCheckinDate &&
+            cleanedCheckoutDate &&
+            cleanedCheckoutDate <= cleanedCheckinDate
+          ) {
+            setError("Check-out must be after check-in.");
+            return;
+          }
+        }
+        if (
+          type === "flight" &&
+          cleanedDepartureDate &&
+          cleanedReturnDate &&
+          cleanedReturnDate < cleanedDepartureDate
+        ) {
+          setError("Return date can’t be before departure.");
+          return;
         }
         if (existing) {
           const next: TripItem = {
@@ -412,6 +466,26 @@ function BookingItemForm({
             if (cleanedDropoffTime) next.dropoffTime = cleanedDropoffTime;
             else delete next.dropoffTime;
           }
+          if (type === "flight") {
+            if (cleanedDepartureDate) next.departureDate = cleanedDepartureDate;
+            else delete next.departureDate;
+            if (cleanedReturnDate) next.returnDate = cleanedReturnDate;
+            else delete next.returnDate;
+            if (cleanedDepartureTime) next.departureTime = cleanedDepartureTime;
+            else delete next.departureTime;
+            if (cleanedReturnTime) next.returnTime = cleanedReturnTime;
+            else delete next.returnTime;
+          }
+          if (type === "hotel") {
+            if (cleanedCheckinDate) next.checkinDate = cleanedCheckinDate;
+            else delete next.checkinDate;
+            if (cleanedCheckoutDate) next.checkoutDate = cleanedCheckoutDate;
+            else delete next.checkoutDate;
+            if (cleanedCheckinTime) next.checkinTime = cleanedCheckinTime;
+            else delete next.checkinTime;
+            if (cleanedCheckoutTime) next.checkoutTime = cleanedCheckoutTime;
+            else delete next.checkoutTime;
+          }
           onSave(next);
           return;
         }
@@ -432,6 +506,14 @@ function BookingItemForm({
             dropoffDate: type === "car" ? cleanedDropoffDate : undefined,
             pickupTime: type === "car" ? cleanedPickupTime : undefined,
             dropoffTime: type === "car" ? cleanedDropoffTime : undefined,
+            departureDate: type === "flight" ? cleanedDepartureDate : undefined,
+            returnDate: type === "flight" ? cleanedReturnDate : undefined,
+            departureTime: type === "flight" ? cleanedDepartureTime : undefined,
+            returnTime: type === "flight" ? cleanedReturnTime : undefined,
+            checkinDate: type === "hotel" ? cleanedCheckinDate : undefined,
+            checkoutDate: type === "hotel" ? cleanedCheckoutDate : undefined,
+            checkinTime: type === "hotel" ? cleanedCheckinTime : undefined,
+            checkoutTime: type === "hotel" ? cleanedCheckoutTime : undefined,
             status,
           }),
         );
@@ -605,6 +687,92 @@ function BookingItemForm({
                 type="time"
                 value={dropoffTime}
                 onChange={(event) => setDropoffTime(event.target.value.slice(0, 5))}
+              />
+            </label>
+          </div>
+        </fieldset>
+      ) : null}
+      {type === "flight" ? (
+        <fieldset className="plan-stack-tight rounded-lg border border-border bg-surface-soft p-3">
+          <legend className={`${plan.label} px-1`}>Flight schedule</legend>
+          <div className="plan-grid-2">
+            <label className="plan-field">
+              <span className={plan.label}>Departure date</span>
+              <input
+                className={plan.input}
+                type="date"
+                value={departureDate}
+                onChange={(event) => setDepartureDate(event.target.value)}
+              />
+            </label>
+            <label className="plan-field">
+              <span className={plan.label}>Return date</span>
+              <input
+                className={plan.input}
+                type="date"
+                value={returnDate}
+                onChange={(event) => setReturnDate(event.target.value)}
+              />
+            </label>
+            <label className="plan-field">
+              <span className={plan.label}>Departure time</span>
+              <input
+                className={plan.input}
+                type="time"
+                value={departureTime}
+                onChange={(event) => setDepartureTime(event.target.value.slice(0, 5))}
+              />
+            </label>
+            <label className="plan-field">
+              <span className={plan.label}>Return time</span>
+              <input
+                className={plan.input}
+                type="time"
+                value={returnTime}
+                onChange={(event) => setReturnTime(event.target.value.slice(0, 5))}
+              />
+            </label>
+          </div>
+        </fieldset>
+      ) : null}
+      {type === "hotel" ? (
+        <fieldset className="plan-stack-tight rounded-lg border border-border bg-surface-soft p-3">
+          <legend className={`${plan.label} px-1`}>Stay schedule</legend>
+          <div className="plan-grid-2">
+            <label className="plan-field">
+              <span className={plan.label}>Check-in date</span>
+              <input
+                className={plan.input}
+                type="date"
+                value={checkinDate}
+                onChange={(event) => setCheckinDate(event.target.value)}
+              />
+            </label>
+            <label className="plan-field">
+              <span className={plan.label}>Check-out date</span>
+              <input
+                className={plan.input}
+                type="date"
+                value={checkoutDate}
+                onChange={(event) => setCheckoutDate(event.target.value)}
+              />
+            </label>
+            <label className="plan-field">
+              <span className={plan.label}>Check-in time</span>
+              <input
+                className={plan.input}
+                type="time"
+                value={checkinTime}
+                onChange={(event) => setCheckinTime(event.target.value.slice(0, 5))}
+              />
+            </label>
+            <label className="plan-field">
+              <span className={plan.label}>Check-out time</span>
+              <input
+                className={plan.input}
+                type="time"
+                value={checkoutTime}
+                onChange={(event) => setCheckoutTime(event.target.value.slice(0, 5))}
               />
             </label>
           </div>
@@ -1033,7 +1201,7 @@ export function ItineraryHub({
   const nextSort =
     sorted.reduce((max, item) => Math.max(max, item.sortOrder), -1) + 1;
   const unscheduled = sorted.filter(
-    (item) => scheduledDayIndex(item, days.length) == null,
+    (item) => scheduledDayIndex(item, days) == null,
   );
 
   function renderTimeline(list: TripItem[]) {
@@ -1095,7 +1263,7 @@ export function ItineraryHub({
     onItemsChange(
       items.map((item) => {
         if (item.id !== id) return item;
-        const current = scheduledDayIndex(item, days.length);
+        const current = scheduledDayIndex(item, days);
         if (current === nextIndex) return item;
         const next: TripItem = { ...item, updatedAt: new Date().toISOString() };
         if (nextIndex == null) delete next.dayIndex;
@@ -1535,7 +1703,7 @@ export function ItineraryHub({
                   {sorted
                     .filter(
                       (item) =>
-                        scheduledDayIndex(item, days.length) === day.index,
+                          scheduledDayIndex(item, days) === day.index,
                     )
                     .map((item) => (
                       <p key={item.id} className={plan.body}>
@@ -1545,7 +1713,7 @@ export function ItineraryHub({
                     ))}
                   {!sorted.some(
                     (item) =>
-                      scheduledDayIndex(item, days.length) === day.index,
+                                scheduledDayIndex(item, days) === day.index,
                   ) ? (
                     <p className={`${plan.body} text-muted`}>
                       A day to make your own.
@@ -2013,7 +2181,7 @@ export function ItineraryHub({
                       {days.map((day) => {
                         const count = sorted.filter(
                           (item) =>
-                            scheduledDayIndex(item, days.length) === day.index,
+                            scheduledDayIndex(item, days) === day.index,
                         ).length;
                         return (
                           <a
@@ -2072,7 +2240,7 @@ export function ItineraryHub({
                           const dayItems = sorted
                             .filter(
                               (item) =>
-                                scheduledDayIndex(item, days.length) ===
+                                scheduledDayIndex(item, days) ===
                                 day.index,
                             )
                             .sort(compareScheduledItems);

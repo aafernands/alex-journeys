@@ -23,9 +23,9 @@ type Props = {
   onAddDay: (dayIndex: number) => void;
 };
 
-function itemsForDay(items: TripItem[], dayIndex: number, dayCount: number): TripItem[] {
+function itemsForDay(items: TripItem[], dayIndex: number, days: TripDay[]): TripItem[] {
   return items
-    .filter((item) => scheduledDayIndex(item, dayCount) === dayIndex)
+    .filter((item) => scheduledDayIndex(item, days) === dayIndex)
     .sort(compareScheduledItems);
 }
 
@@ -48,7 +48,7 @@ function WeekChip({
   onDragStart: (id: string) => void;
   onDragEnd: () => void;
 }) {
-  const dayIndex = scheduledDayIndex(item, days.length);
+  const dayIndex = scheduledDayIndex(item, days);
   return (
     <article
       className={`${plan.chipCard} plan-week-card plan-stack-tight ${
@@ -124,7 +124,7 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit, onAddDay
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [overKey, setOverKey] = useState<string | null>(null);
   const unscheduled = items
-    .filter((item) => scheduledDayIndex(item, days.length) == null)
+    .filter((item) => scheduledDayIndex(item, days) == null)
     .sort(compareScheduledItems);
 
   function allowDrop(event: DragEvent, key: string) {
@@ -194,7 +194,7 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit, onAddDay
           </button>)}
         </div>
         {(activeDay ? [activeDay] : []).map((day) => {
-          const dayItems = itemsForDay(items, day.index, days.length);
+          const dayItems = itemsForDay(items, day.index, days);
           const key = `day-${day.index}`;
           const active = overKey === key && draggingId != null;
           return (
@@ -246,7 +246,7 @@ export function WeekView({ headingId, days, items, onAssignDay, onEdit, onAddDay
                       />
                     );
                   }
-                  const dayItems = itemsForDay(items, day.index, days.length);
+                  const dayItems = itemsForDay(items, day.index, days);
                   const key = `day-${day.index}`;
                   const active = overKey === key && draggingId != null;
                   return (

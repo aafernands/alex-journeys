@@ -56,6 +56,8 @@ export type BookedFlightInput = {
   href: string;
   departDate: string;
   time: string;
+  returnDate?: string;
+  returnTime?: string;
 };
 
 export type PendingBookedFlight = {
@@ -86,6 +88,7 @@ export function bookedFlightFromConfirmation(
     "title" | "confirmationCode" | "dateLabel" | "routeLabel" | "cabin" | "departDate" | "departTime"
   >,
   href: string,
+  returnDate = "",
 ): BookedFlightInput {
   return {
     title: confirmation.title,
@@ -96,6 +99,7 @@ export function bookedFlightFromConfirmation(
     href,
     departDate: confirmation.departDate,
     time: confirmation.departTime,
+    returnDate,
   };
 }
 
@@ -242,6 +246,10 @@ export function mergeBookedFlight(
     sortOrder,
     dayIndex: flightDayIndex(plan.state.startDate, flight.departDate),
     time: cleanTime(flight.time),
+    departureDate: flight.departDate,
+    departureTime: cleanTime(flight.time),
+    returnDate: flight.returnDate,
+    returnTime: cleanTime(flight.returnTime ?? ""),
   });
   return {
     added: true,
@@ -333,6 +341,8 @@ function parsePending(raw: string | null): PendingBookedFlight[] {
           href: typeof fields.href === "string" ? fields.href : "",
           departDate: typeof fields.departDate === "string" ? fields.departDate : "",
           time: typeof fields.time === "string" ? fields.time : "",
+          returnDate: typeof fields.returnDate === "string" ? fields.returnDate : "",
+          returnTime: typeof fields.returnTime === "string" ? fields.returnTime : "",
         },
       });
     }

@@ -74,7 +74,7 @@ export function FlightConfirmationScreen({
     const href = flightConfirmationPath(details, query);
     let cancelled = false;
     void commitBookedFlight(
-      bookedFlightFromConfirmation(details, href),
+      bookedFlightFromConfirmation(details, href, query.endDate),
       flightTripContext(query),
     ).then((result) => {
       if (!cancelled) applyCommit(result);
@@ -91,7 +91,11 @@ export function FlightConfirmationScreen({
     if (!details || itinerary === "adding") return;
     setItinerary("adding");
     void commitBookedFlight(
-      bookedFlightFromConfirmation(details, flightConfirmationPath(details, query)),
+      bookedFlightFromConfirmation(
+        details,
+        flightConfirmationPath(details, query),
+        query.endDate,
+      ),
       flightTripContext(query),
     ).then(applyCommit);
   }
