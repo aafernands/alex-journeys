@@ -2,15 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { randomUUID } from "node:crypto";
 import { MapPin, Star } from "lucide-react";
+import { StayFilterBar } from "@/components/stays/StayFilterBar";
 import { StayTripBar } from "@/components/stays/StayTripBar";
 import { StaysSearchForm } from "@/components/stays/StaysSearchForm";
 import { SitePage } from "@/components/pages/SitePage";
 import { LiteApiError, liteApiKeyInfo } from "@/lib/liteapi";
 import { getTripPlannerConfig } from "@/lib/trip-planner";
 import { planATripHref } from "@/lib/trip-record";
+import { hasNarrowingStayFilters, stayResultsHeading } from "@/lib/stay-filters";
 import {
   formatStayMoney,
   formatStayRating,
+  stayNights,
   staysHotelPath,
   staysQueryIssue,
   staysQueryString,
@@ -117,7 +120,11 @@ export default async function StaysPage({ searchParams }: PageProps) {
           />
         ) : (
           <>
-            <StaysSearchForm key={staysQueryString(query)} query={query} />
+            <StaysSearchForm
+              key={staysQueryString(query)}
+              query={query}
+              startCollapsed={Boolean(result)}
+            />
             {!configured ? (
               <Notice
                 title="Stays not configured"
@@ -139,11 +146,27 @@ export default async function StaysPage({ searchParams }: PageProps) {
                 Sandbox results from Nuitee. A booking here is a test reservation.
               </p>
             ) : null}
+            {result ? (
+              <StayFilterBar
+                query={query}
+                count={result.stays.length}
+                priceBounds={result.priceBounds}
+                amenities={result.amenities}
+                propertyTypes={result.propertyTypes}
+                nights={stayNights(query.startDate, query.endDate)}
+              />
+            ) : null}
             {result && result.stays.length === 0 ? (
               <div className="panel plan-inset max-w-2xl p-6">
-                <h2 className="font-display text-xl font-bold text-heading">No stays for these dates</h2>
+                <h2 className="font-display text-xl font-bold text-heading">
+                  {hasNarrowingStayFilters(query.filters)
+                    ? "No stays match these filters"
+                    : "No stays for these dates"}
+                </h2>
                 <p className="mt-2 text-sm leading-relaxed text-text">
-                  Nothing bookable came back for {result.placeName}. Shift the dates and search again.
+                  {hasNarrowingStayFilters(query.filters)
+                    ? `Nothing in this search for ${result.placeName} fits the filters. Clear them to see the full list.`
+                    : `Nothing bookable came back for ${result.placeName}. Shift the dates and search again.`}
                 </p>
               </div>
             ) : null}
@@ -151,9 +174,11 @@ export default async function StaysPage({ searchParams }: PageProps) {
               <section aria-labelledby="hotel-results" className="max-w-6xl">
                 <div className="mb-4 flex items-end justify-between gap-4">
                   <div>
-                    <p className="text-sm font-semibold text-muted">{result.stays.length} properties</p>
+                    <p className="text-sm font-semibold text-muted">
+                      {result.stays.length} {result.stays.length === 1 ? "property" : "properties"}
+                    </p>
                     <h2 id="hotel-results" className="mt-1 font-display text-2xl font-bold text-heading">
-                      Recommended stays
+                      {stayResultsHeading(query.filters.sort)}
                     </h2>
                   </div>
                   <p className="hidden text-sm text-muted sm:block">Prices shown for your selected dates</p>

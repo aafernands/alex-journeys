@@ -3,6 +3,15 @@
  * Network calls live in src/lib/liteapi.ts and stay on the server.
  */
 
+import {
+  DEFAULT_STAY_FILTERS,
+  parseStayFilters,
+  stayFilterSearchParams,
+  type StayResultFilters,
+} from "@/lib/stay-filters";
+
+export type { StayResultFilters };
+
 const DEST_MAX = 80;
 const HOTEL_ID_RE = /^[A-Za-z0-9_-]{2,64}$/;
 const SESSION_RE =
@@ -23,6 +32,8 @@ export type StaysQuery = {
   sessionId: string;
   /** Saved itinerary id, when Plan a Trip opened this search. */
   tripId: string;
+  /** Manual result filters. Defaults leave the search unfiltered. */
+  filters: StayResultFilters;
 };
 
 export type StayMoney = {
@@ -276,6 +287,7 @@ export function parseStaysSearchParams(
     rooms: cleanPositive(firstParam(searchParams, "rooms"), 1, 8),
     sessionId: SESSION_RE.test(sessionRaw) ? sessionRaw.toLowerCase() : "",
     tripId: cleanStayTripId(firstParam(searchParams, "trip")),
+    filters: parseStayFilters(searchParams),
   };
 }
 
@@ -288,6 +300,7 @@ export function staysPath(input: {
   rooms?: number | string | null;
   sessionId?: string | null;
   tripId?: string | null;
+  filters?: StayResultFilters | null;
 }): string {
   const query = parseStaysSearchParams({
     dest: input.destination ?? "",
@@ -305,6 +318,7 @@ export function staysPath(input: {
       input.rooms == null || input.rooms === "" ? undefined : String(input.rooms),
     session: input.sessionId ?? "",
     trip: input.tripId ?? "",
+    ...Object.fromEntries(stayFilterSearchParams(input.filters ?? DEFAULT_STAY_FILTERS)),
   });
   if (!query.destination) return "/stays";
   return `/stays?${staysQueryString(query)}`;
@@ -436,6 +450,9 @@ export function staysQueryString(query: StaysQuery): string {
   if (query.rooms > 1) params.set("rooms", String(query.rooms));
   if (query.sessionId) params.set("session", query.sessionId);
   if (query.tripId) params.set("trip", query.tripId);
+  for (const [key, value] of stayFilterSearchParams(query.filters ?? DEFAULT_STAY_FILTERS)) {
+    params.set(key, value);
+  }
   return params.toString();
 }
 
@@ -760,12 +777,6 @@ export function mapStaySearch(payload: unknown): StayListItem[] {
     });
   }
 
-  cards.sort((a, b) => {
-    if (a.fromPrice && b.fromPrice) return a.fromPrice.amount - b.fromPrice.amount;
-    if (a.fromPrice) return -1;
-    if (b.fromPrice) return 1;
-    return a.name.localeCompare(b.name);
-  });
   return cards;
 }
 

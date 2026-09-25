@@ -2732,6 +2732,14 @@ body.mobile-bottom-nav-visible .plan-sticky {
   display: none;
 }
 
+.stay-filter-scroller {
+  scrollbar-width: none;
+}
+
+.stay-filter-scroller::-webkit-scrollbar {
+  display: none;
+}
+
 .plan-lane-tab {
   position: relative;
   min-width: auto;

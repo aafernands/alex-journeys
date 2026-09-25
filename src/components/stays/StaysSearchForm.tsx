@@ -2,25 +2,80 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Search } from "lucide-react";
 import { DateRangeField } from "@/components/trip-planner/DateRangeField";
 import { plan } from "@/components/trip-planner/density";
 import { staysPath, type StaysQuery } from "@/lib/stays";
 
 type Props = {
   query: StaysQuery;
+  /** Collapse the editor behind a summary once results are on screen. */
+  startCollapsed?: boolean;
 };
 
-export function StaysSearchForm({ query }: Props) {
+function summaryDate(value: string): Date | null {
+  if (!value) return null;
+  const date = new Date(`${value}T00:00:00Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function summaryWhen(startDate: string, endDate: string): string {
+  const start = summaryDate(startDate);
+  const end = summaryDate(endDate);
+  if (!start || !end) return "Add dates";
+  const month = new Intl.DateTimeFormat("en-US", { month: "short", timeZone: "UTC" });
+  const sameMonth =
+    start.getUTCFullYear() === end.getUTCFullYear() && start.getUTCMonth() === end.getUTCMonth();
+  if (sameMonth) return `${month.format(start)} ${start.getUTCDate()}–${end.getUTCDate()}`;
+  return `${month.format(start)} ${start.getUTCDate()} – ${month.format(end)} ${end.getUTCDate()}`;
+}
+
+export function StaysSearchForm({ query, startCollapsed = false }: Props) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const [editing, setEditing] = useState(!startCollapsed);
   const [startDate, setStartDate] = useState(query.startDate);
   const [endDate, setEndDate] = useState(query.endDate);
   const [startError, setStartError] = useState("");
   const [endError, setEndError] = useState("");
+  const travelers = query.adults + query.children;
+  const when = summaryWhen(query.startDate, query.endDate);
 
   return (
+    <div className="rounded-xl border border-line bg-white p-3 shadow-sm sm:p-4">
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-full border border-border bg-surface-soft px-3 py-1.5 text-left"
+          aria-expanded={editing}
+          aria-controls="stays-search-editor"
+          onClick={() => setEditing((value) => !value)}
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-on-solid" aria-hidden="true">
+            <Search className="h-4 w-4" strokeWidth={2.4} />
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold text-heading">{query.destination}</span>
+            <span className="block truncate text-xs text-muted">
+              {when} · {travelers} {travelers === 1 ? "traveler" : "travelers"}
+              {query.rooms > 1 ? ` · ${query.rooms} rooms` : ""}
+            </span>
+          </span>
+        </button>
+        <button
+          type="button"
+          className="inline-flex min-h-11 shrink-0 items-center rounded-full px-3 text-sm font-semibold text-link"
+          aria-expanded={editing}
+          aria-controls="stays-search-editor"
+          onClick={() => setEditing((value) => !value)}
+        >
+          {editing ? "Close" : "Edit"}
+        </button>
+      </div>
     <form
-      className="rounded-xl border border-line bg-white p-4 shadow-sm sm:p-5"
+      id="stays-search-editor"
+      hidden={!editing}
+      className="mt-4 border-t border-line pt-4"
       onSubmit={(event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -45,6 +100,7 @@ export function StaysSearchForm({ query }: Props) {
             rooms: value("rooms"),
             sessionId: query.sessionId,
             tripId: query.tripId,
+            filters: query.filters,
           }),
         );
       }}
@@ -121,5 +177,6 @@ export function StaysSearchForm({ query }: Props) {
         />
       </label>
     </form>
+    </div>
   );
 }
