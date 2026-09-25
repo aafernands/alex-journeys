@@ -331,6 +331,30 @@ export function TripPlanner({
     setErrors({});
   }
 
+  function saveItems(items: StoredPlan["items"]) {
+    const itemCategories = new Set(
+      items.flatMap((item) =>
+        item.type === "flight"
+          ? ["flights" as const]
+          : item.type === "hotel" || item.type === "car"
+            ? [item.type]
+          : [],
+      ),
+    );
+    const categories = TRIP_CATEGORIES.filter(
+      (category) => state.categories.includes(category) || itemCategories.has(category),
+    );
+    savePlan({
+      step,
+      state:
+        categories.length === state.categories.length &&
+        categories.every((category, index) => category === state.categories[index])
+          ? state
+          : { ...state, categories },
+      items,
+    });
+  }
+
   const steps = visiblePartners(partners, state, config.extras);
   const subhead = nextStepsSubhead(config.steps.next.helper, state, flexibleOn);
   if (isPendingPlan(storedPlan)) {
@@ -828,7 +852,7 @@ export function TripPlanner({
             journalNotes={journalNotes}
             journalPlaceIndex={journalPlaceIndex}
             packingNotes={plan.packingNotes}
-            onItemsChange={(items) => savePlan({ step, state, items })}
+            onItemsChange={saveItems}
             onPackingNotesChange={(packingNotes) =>
               savePlan({ step, state, packingNotes })
             }
