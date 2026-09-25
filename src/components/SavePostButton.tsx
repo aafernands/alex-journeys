@@ -3,6 +3,12 @@
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
+import { useReaderLoginPrompt } from "@/components/ReaderLoginPrompt";
+import {
+  forgetPendingPostSave,
+  rememberPendingPostSave,
+  takePendingPostSave,
+} from "@/lib/pending-save";
 
 type Props = {
   slug: string;
@@ -13,11 +19,40 @@ type Props = {
  */
 export function SavePostButton({ slug }: Props) {
   const { data: session, status } = useSession();
+  const openReaderLogin = useReaderLoginPrompt();
   const signedIn = status === "authenticated" && Boolean(session?.user?.id);
   const [saved, setSaved] = useState(false);
   const [ready, setReady] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const saveStory = useCallback(async () => {
+    setPending(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/saved", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug }),
+      });
+      if (res.status === 503) {
+        setError("Saving is temporarily unavailable.");
+        return;
+      }
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        setError(data?.error ?? "Could not save.");
+        return;
+      }
+      setSaved(true);
+    } catch {
+      setError("Something went wrong.");
+    } finally {
+      setPending(false);
+    }
+  }, [slug]);
 
   const refresh = useCallback(async () => {
     if (!signedIn) {
@@ -53,14 +88,27 @@ export function SavePostButton({ slug }: Props) {
 
   useEffect(() => {
     if (status === "loading") return;
-    void refresh();
-  }, [status, refresh]);
+    let cancelled = false;
+    void (async () => {
+      await refresh();
+      if (cancelled || !signedIn || !takePendingPostSave(slug)) return;
+      await saveStory();
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [refresh, saveStory, signedIn, slug, status]);
 
   const onClick = async () => {
     setError(null);
     if (!signedIn) {
       const path = window.location.pathname + window.location.search;
-      window.location.href = `/login?callbackUrl=${encodeURIComponent(path || "/account")}`;
+      rememberPendingPostSave(slug);
+      openReaderLogin({
+        returnTo: path || "/",
+        intro: "Sign in to save this story.",
+        onClose: () => forgetPendingPostSave(slug),
+      });
       return;
     }
 
@@ -82,23 +130,8 @@ export function SavePostButton({ slug }: Props) {
         }
         setSaved(false);
       } else {
-        const res = await fetch("/api/saved", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ slug }),
-        });
-        if (res.status === 503) {
-          setError("Saving is temporarily unavailable.");
-          return;
-        }
-        if (!res.ok) {
-          const data = (await res.json().catch(() => null)) as {
-            error?: string;
-          } | null;
-          setError(data?.error ?? "Could not save.");
-          return;
-        }
-        setSaved(true);
+        await saveStory();
+        return;
       }
     } catch {
       setError("Something went wrong.");

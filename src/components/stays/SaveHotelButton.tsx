@@ -3,6 +3,13 @@
 import { Heart } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
+import { useReaderLoginPrompt } from "@/components/ReaderLoginPrompt";
+import {
+  forgetPendingHotelSave,
+  rememberPendingHotelSave,
+  takePendingHotelSave,
+  type PendingHotelSave,
+} from "@/lib/pending-save";
 
 type Props = {
   hotel: {
@@ -27,6 +34,7 @@ type Props = {
 
 export function SaveHotelButton({ hotel, tripContext }: Props) {
   const { data: session, status } = useSession();
+  const openReaderLogin = useReaderLoginPrompt();
   const signedIn = status === "authenticated" && Boolean(session?.user?.id);
   const [saved, setSaved] = useState(false);
   const [ready, setReady] = useState(false);
@@ -60,53 +68,91 @@ export function SaveHotelButton({ hotel, tripContext }: Props) {
     }
   }, [hotel.hotelId, signedIn]);
 
+  const hotelPayload = useCallback((): PendingHotelSave => {
+    return {
+      ...hotel,
+      destination: tripContext?.destination ?? "",
+      startDate: tripContext?.startDate ?? "",
+      endDate: tripContext?.endDate ?? "",
+      adults: tripContext?.adults,
+      children: tripContext?.children,
+      rooms: tripContext?.rooms,
+      tripId: tripContext?.tripId ?? "",
+    };
+  }, [hotel, tripContext]);
+
+  const saveHotel = useCallback(async (payload: PendingHotelSave) => {
+    setPending(true);
+    setError("");
+    try {
+      const response = await fetch("/api/saved-hotels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as { error?: string } | null;
+        setError(body?.error || "Could not update favorites.");
+        return;
+      }
+      const body = (await response.json().catch(() => null)) as
+        | { hotel?: { tripHref?: string } }
+        | null;
+      setSaved(true);
+      setTripHref(body?.hotel?.tripHref ?? "");
+    } catch {
+      setError("Could not update favorites.");
+    } finally {
+      setPending(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (status === "loading") return;
-    void refresh();
-  }, [refresh, status]);
+    let cancelled = false;
+    void (async () => {
+      await refresh();
+      if (cancelled || !signedIn) return;
+      const pendingSave = takePendingHotelSave(hotel.hotelId);
+      if (!pendingSave) return;
+      await saveHotel(pendingSave);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [hotel.hotelId, refresh, saveHotel, signedIn, status]);
 
   async function toggle() {
     setError("");
     if (!signedIn) {
-      const callbackUrl = `${window.location.pathname}${window.location.search}`;
-      window.location.href = `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+      const payload = hotelPayload();
+      rememberPendingHotelSave(payload);
+      openReaderLogin({
+        returnTo: `${window.location.pathname}${window.location.search}` || "/",
+        intro: "Sign in to save this hotel.",
+        onClose: () => forgetPendingHotelSave(hotel.hotelId),
+      });
       return;
     }
 
     setPending(true);
     try {
+      if (!saved) {
+        await saveHotel(hotelPayload());
+        return;
+      }
       const response = await fetch("/api/saved-hotels", {
-        method: saved ? "DELETE" : "POST",
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          saved
-            ? { hotelId: hotel.hotelId }
-            : {
-                ...hotel,
-                destination: tripContext?.destination ?? "",
-                startDate: tripContext?.startDate ?? "",
-                endDate: tripContext?.endDate ?? "",
-                adults: tripContext?.adults,
-                children: tripContext?.children,
-                rooms: tripContext?.rooms,
-                tripId: tripContext?.tripId ?? "",
-              },
-        ),
+        body: JSON.stringify({ hotelId: hotel.hotelId }),
       });
       if (!response.ok) {
         const payload = (await response.json().catch(() => null)) as { error?: string } | null;
         setError(payload?.error || "Could not update favorites.");
         return;
       }
-      const payload = (await response.json().catch(() => null)) as
-        | { hotel?: { tripHref?: string } }
-        | null;
-      setSaved((current) => !current);
-      if (saved) {
-        setTripHref("");
-      } else {
-        setTripHref(payload?.hotel?.tripHref ?? "");
-      }
+      setSaved(false);
+      setTripHref("");
     } catch {
       setError("Could not update favorites.");
     } finally {
