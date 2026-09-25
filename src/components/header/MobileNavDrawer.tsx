@@ -15,9 +15,7 @@ import { SearchInput } from "@/components/search/SearchInput";
 import { useReaderLoginPrompt } from "@/components/ReaderLoginPrompt";
 import { UserRound, X } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { AddToHomeScreenButton } from "@/components/AddToHomeScreenButton";
 import { BrandLogo } from "@/components/brand/BrandLogo";
-import { ThemeAppearanceControl } from "@/components/ThemeToggle";
 import { site } from "@/data/content";
 import { destinationsTree } from "@/data/destinations";
 import { guidesNav } from "@/data/guides";
@@ -124,7 +122,7 @@ export function MobileNavDrawer({ open, onClose }: Props) {
             onNavigate={onClose}
           />
         </div>
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pt-4">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]">
           <ul className="flex flex-col" aria-label="Primary">
             <li>
               <Link
@@ -231,10 +229,7 @@ export function MobileNavDrawer({ open, onClose }: Props) {
             </li>
           </ul>
 
-          <section
-            className="mt-8 pb-6 text-center"
-            aria-label="Follow Alex Journeys"
-          >
+          <section className="mt-8 text-center" aria-label="Follow Alex Journeys">
             <p className="mb-3 text-xs font-bold uppercase tracking-[.18em] text-muted">
               Follow the journey
             </p>
@@ -284,13 +279,6 @@ export function MobileNavDrawer({ open, onClose }: Props) {
               </li>
             </ul>
           </section>
-        </div>
-        <div className="shrink-0 border-t border-border bg-bg px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
-          <AddToHomeScreenButton
-            className="mb-3 flex min-h-11 w-full items-center gap-2 rounded-xl px-2 text-sm font-semibold text-muted transition hover:bg-surface-soft hover:text-heading"
-            onPress={onClose}
-          />
-          <ThemeAppearanceControl />
         </div>
       </nav>
     </div>

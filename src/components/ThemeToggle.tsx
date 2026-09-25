@@ -1,106 +1,145 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { Moon, Sun } from "lucide-react";
+import { useCallback, useLayoutEffect, useSyncExternalStore } from "react";
+import {
+  THEME_CHANGE_EVENT,
+  THEME_STORAGE_KEY,
+  applyThemePreference,
+  msUntilThemeBoundary,
+  readColorScheme,
+  readStoredTheme,
+  resolveThemeDark,
+  writeStoredTheme,
+  type ThemePreference,
+} from "@/lib/theme";
 
-export type ThemePreference = "light" | "dark" | "system";
+export type { ThemePreference };
 
-const STORAGE_KEY = "theme";
 const CYCLE: ThemePreference[] = ["light", "dark", "system"];
 
-function getSystemDark(): boolean {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches;
-}
+type ThemeSnapshot = {
+  preference: ThemePreference;
+  isDark: boolean;
+};
 
-function resolveDark(preference: ThemePreference): boolean {
-  if (preference === "dark") return true;
-  if (preference === "light") return false;
-  return getSystemDark();
-}
+const SERVER_SNAPSHOT: ThemeSnapshot = { preference: "system", isDark: false };
 
-function applyTheme(preference: ThemePreference) {
-  const root = document.documentElement;
-  if (resolveDark(preference)) {
-    root.classList.add("dark");
-  } else {
-    root.classList.remove("dark");
+let clientSnapshot: ThemeSnapshot = SERVER_SNAPSHOT;
+const listeners = new Set<() => void>();
+let stopListening: (() => void) | null = null;
+
+function readSnapshot(): ThemeSnapshot {
+  const preference = readStoredTheme();
+  const isDark = resolveThemeDark(
+    preference,
+    readColorScheme(
+      typeof window.matchMedia === "function" ? window.matchMedia.bind(window) : null,
+    ),
+    new Date().getHours(),
+  );
+  if (clientSnapshot.preference === preference && clientSnapshot.isDark === isDark) {
+    return clientSnapshot;
   }
+  clientSnapshot = { preference, isDark };
+  return clientSnapshot;
 }
 
-function readPreference(): ThemePreference {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "light" || stored === "dark" || stored === "system") {
-      return stored;
+function emitTheme() {
+  applyThemePreference(readStoredTheme());
+  for (const listener of listeners) listener();
+}
+
+function ensureListening() {
+  if (stopListening || typeof window === "undefined") return;
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === THEME_STORAGE_KEY || event.key === null) emitTheme();
+  };
+  window.addEventListener(THEME_CHANGE_EVENT, emitTheme);
+  window.addEventListener("storage", onStorage);
+
+  const unlistenMedia: Array<() => void> = [];
+  const watch = (query: string) => {
+    try {
+      const mq = window.matchMedia(query);
+      if (typeof mq.addEventListener !== "function") return;
+      mq.addEventListener("change", emitTheme);
+      unlistenMedia.push(() => mq.removeEventListener("change", emitTheme));
+    } catch {
+      /* matchMedia unsupported. The clock fallback still runs. */
     }
-  } catch {
-    /* ignore */
-  }
-  return "system";
+  };
+  watch("(prefers-color-scheme: dark)");
+  watch("(prefers-color-scheme: light)");
+
+  const onVisible = () => {
+    if (document.visibilityState === "visible") emitTheme();
+  };
+  document.addEventListener("visibilitychange", onVisible);
+
+  let timer = 0;
+  const arm = () => {
+    timer = window.setTimeout(() => {
+      emitTheme();
+      arm();
+    }, msUntilThemeBoundary(new Date()));
+  };
+  arm();
+
+  stopListening = () => {
+    window.removeEventListener(THEME_CHANGE_EVENT, emitTheme);
+    window.removeEventListener("storage", onStorage);
+    for (const stop of unlistenMedia) stop();
+    document.removeEventListener("visibilitychange", onVisible);
+    window.clearTimeout(timer);
+    stopListening = null;
+  };
 }
 
-function persistPreference(next: ThemePreference) {
-  try {
-    localStorage.setItem(STORAGE_KEY, next);
-  } catch {
-    /* ignore */
-  }
-  applyTheme(next);
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  ensureListening();
+  return () => {
+    listeners.delete(listener);
+    if (listeners.size === 0) stopListening?.();
+  };
 }
 
-function useThemePreference() {
-  const [preference, setPreference] = useState<ThemePreference>("system");
-  const [systemDark, setSystemDark] = useState(false);
-  const [mounted, setMounted] = useState(false);
+export function useThemePreference() {
+  const snap = useSyncExternalStore(subscribe, readSnapshot, () => SERVER_SNAPSHOT);
 
-  useEffect(() => {
-    const pref = readPreference();
-    setPreference(pref);
-    setSystemDark(getSystemDark());
-    applyTheme(pref);
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => {
-      setSystemDark(mq.matches);
-      if (preference === "system") applyTheme("system");
-    };
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, [mounted, preference]);
+  useLayoutEffect(() => {
+    applyThemePreference(readStoredTheme());
+  }, [snap]);
 
   const setTheme = useCallback((next: ThemePreference) => {
-    persistPreference(next);
-    setPreference(next);
+    writeStoredTheme(next);
   }, []);
 
   const cycle = useCallback(() => {
-    setPreference((current) => {
-      const idx = CYCLE.indexOf(current);
-      const next = CYCLE[(idx + 1) % CYCLE.length] ?? "system";
-      persistPreference(next);
-      return next;
-    });
+    const current = readStoredTheme();
+    const idx = CYCLE.indexOf(current);
+    const next = CYCLE[(idx + 1) % CYCLE.length] ?? "system";
+    writeStoredTheme(next);
   }, []);
 
-  const isDark =
-    preference === "dark" || (preference === "system" && systemDark);
-
-  return { preference, systemDark, mounted, isDark, setTheme, cycle };
+  return {
+    preference: snap.preference,
+    isDark: snap.isDark,
+    setTheme,
+    cycle,
+  };
 }
 
-/** Compact cycle button for desktop header. */
+/** Compact cycle button for the desktop header. */
 export function ThemeToggle({ className = "" }: { className?: string }) {
-  const { preference, mounted, isDark, cycle } = useThemePreference();
+  const { preference, isDark, cycle } = useThemePreference();
 
   const label =
     preference === "light"
       ? "Switch to dark mode"
       : preference === "dark"
-        ? "Switch to system theme"
+        ? "Switch to automatic"
         : "Switch to light mode";
 
   return (
@@ -109,73 +148,13 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       onClick={cycle}
       className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft ${className}`}
       aria-label={label}
-      title={
-        preference === "system" ? "Theme: system" : `Theme: ${preference}`
-      }
+      title={preference === "system" ? "Theme: Automatic" : `Theme: ${preference}`}
     >
-      {/* Avoid hydration mismatch: show sun until mounted */}
-      {mounted && isDark ? (
+      {isDark ? (
         <Moon className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
       ) : (
         <Sun className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
       )}
     </button>
-  );
-}
-
-const APPEARANCE_OPTIONS: {
-  value: ThemePreference;
-  label: string;
-  Icon: typeof Sun;
-}[] = [
-  { value: "light", label: "Light", Icon: Sun },
-  { value: "dark", label: "Dark", Icon: Moon },
-  { value: "system", label: "Device settings", Icon: Monitor },
-];
-
-/** Labeled Light / Dark / Device settings control for the mobile drawer. */
-export function ThemeAppearanceControl({
-  className = "",
-}: {
-  className?: string;
-}) {
-  const { preference, mounted, setTheme } = useThemePreference();
-  const selected = mounted ? preference : "system";
-
-  return (
-    <div className={className}>
-      <p
-        id="appearance-label"
-        className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-muted"
-      >
-        Appearance
-      </p>
-      <div
-        role="radiogroup"
-        aria-labelledby="appearance-label"
-        className="grid grid-cols-3 gap-1 rounded-xl bg-surface-soft p-1"
-      >
-        {APPEARANCE_OPTIONS.map(({ value, label, Icon }) => {
-          const isSelected = selected === value;
-          return (
-            <button
-              key={value}
-              type="button"
-              role="radio"
-              aria-checked={isSelected}
-              onClick={() => setTheme(value)}
-              className={`inline-flex flex-col items-center justify-center gap-1 rounded-lg px-1.5 py-2 text-center text-[11px] font-semibold leading-tight transition ${
-                isSelected
-                  ? "bg-bg text-heading shadow-sm ring-1 ring-border-strong"
-                  : "text-text hover:text-heading"
-              }`}
-            >
-              <Icon className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden="true" />
-              <span>{label}</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
   );
 }

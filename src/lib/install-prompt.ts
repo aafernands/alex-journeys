@@ -277,6 +277,21 @@ export function installButtonLabel(userAgent: string): string {
   return /Android|iPhone|iPad|Mobile/i.test(userAgent) ? "Add to home screen" : "Install";
 }
 
+/**
+ * Browsers with a real install path: the native dialog, iOS share steps,
+ * an in-app handoff, or a named menu/dock instruction. Vague desktop
+ * fallbacks stay hidden.
+ */
+export function installCanBeOffered(guide: InstallGuide): boolean {
+  if (guide.native) return true;
+  if (guide.steps.length > 0) return true;
+  if (guide.inAppName) return true;
+  if (guide.fallback && /Add to Dock|Home screen|Install app/i.test(guide.fallback)) {
+    return true;
+  }
+  return false;
+}
+
 export function readInstallMemory(storage: {
   getItem(key: string): string | null;
 }): InstallMemory {

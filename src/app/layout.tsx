@@ -19,6 +19,7 @@ import {
   siteConfig,
   websiteJsonLd,
 } from "@/lib/seo";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { TRIP_FOCUS_BOOT } from "@/lib/trip-focus";
 import "./globals.css";
 
@@ -104,8 +105,6 @@ export const metadata: Metadata = {
     : {}),
 };
 
-const themeInitScript = `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
-
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -135,7 +134,7 @@ export default function RootLayout({
     >
       <head>
         <script
-          dangerouslySetInnerHTML={{ __html: themeInitScript }}
+          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
         />
         <script
           dangerouslySetInnerHTML={{ __html: TRIP_FOCUS_BOOT }}
