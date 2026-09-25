@@ -37,12 +37,12 @@ users/{userId}/trips/{tripId}
     dayIndex?       // 1-based day. Missing or outside the trip = unscheduled
     time?           // optional HH:MM
   }]
-  packingNotes // freeform packing list, up to 4000 characters
+  packingNotes // packing checklist, up to 16000 characters (plain text or @@ajpack1 JSON)
   checklist   // item ids with status "booked"
   createdAt, updatedAt
 ```
 
-`userId` is Auth.js `session.user.id`. Item `type` is `flight | hotel | car | activity | note | other`. `status` is `todo | booked | skipped`. Day 1 is the trip start (inclusive through the end date, or the flexible check-in through checkout). The hub shows at most 45 days. Guest drafts store the same item fields in `localStorage`. **Copy itinerary link** puts the draft in the page hash (`#itinerary=`) so someone can open it without an account. **Packing notes** live on the same draft and on the Firestore trip.
+`userId` is Auth.js `session.user.id`. Item `type` is `flight | hotel | car | activity | note | other`. `status` is `todo | booked | skipped`. Day 1 is the trip start (inclusive through the end date, or the flexible check-in through checkout). The hub shows at most 45 days. Guest drafts store the same item fields in `localStorage`. **Copy itinerary link** puts the draft in the page hash (`#itinerary=`) so someone can open it without an account. **Packing** lives on the same draft and on the Firestore trip. Older trips keep a plain-text or checkbox list. New edits save a structured checklist (categories, quantities, packed state) in that same `packingNotes` field.
 
 ## API
 

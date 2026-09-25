@@ -3,6 +3,12 @@
  * can lazy-load the renderer. Uses the same days, items, and packing notes
  * the trip workspace already saves locally and on an account.
  */
+import {
+  packingPdfGroups,
+  parsePackingList,
+  type LegacyPackingGroup,
+  type LegacyPackingItem,
+} from "@/lib/packing-list";
 import { parseIsoDate } from "@/lib/trip-planner-model";
 import {
   compareScheduledItems,
@@ -79,8 +85,9 @@ export type TripPdfDocument = {
   blocks: PdfBlock[];
 };
 
-export type PackingItem = { label: string; checked: boolean };
-export type PackingGroup = { title: string; items: PackingItem[] };
+export type PackingItem = LegacyPackingItem;
+export type PackingGroup = LegacyPackingGroup;
+export { parsePackingList };
 
 const SECTION_LABEL: Record<TripPdfSection, string> = {
   itinerary: "Itinerary",
@@ -115,18 +122,11 @@ const ADDRESS_LINE =
 const STREET_LINE =
   /\b\d{1,5}\s+[A-Za-zÀ-ÿ0-9].{0,80}?\b(?:street|st\.?|avenue|ave\.?|road|rd\.?|boulevard|blvd\.?|lane|ln\.?|drive|dr\.?|way|rua|calle|gata)\b/i;
 
-const CHECKED_ITEM =
-  /^(?:[-*•]\s+)?(?:\[[xX]\]|\([xX]\)|[✓✔☑])\s*(.*)$/;
-const UNCHECKED_ITEM =
-  /^(?:[-*•]\s+)?(?:\[\s?\]|\(\s?\)|[☐])\s*(.*)$/;
-const BULLET_ITEM = /^[-*•]\s+(.*)$/;
-const MARKDOWN_HEADING = /^#{1,3}\s+(.*)$/;
-
 const EMPTY_ITINERARY =
   "No days or plans yet. Add dates and a few plans in your trip, then download this again.";
 const EMPTY_DAY = "Nothing planned yet.";
 const EMPTY_PACKING =
-  "Nothing to pack yet. Add one item per line on the Packing tab. Put a category on its own line, then mark packed items with [x].";
+  "Nothing to pack yet. Add items on the Packing tab, then download this again.";
 const PLACEHOLDER_NAMES = new Set([
   "account",
   "guest",
@@ -235,74 +235,6 @@ export function extractAddress(notes: string): string {
     if (STREET_LINE.test(line)) return line.trim().slice(0, 180);
   }
   return "";
-}
-
-function itemMarker(line: string): { checked: boolean; label: string } | null {
-  const checked = line.match(CHECKED_ITEM);
-  if (checked) return { checked: true, label: (checked[1] ?? "").trim() };
-  const open = line.match(UNCHECKED_ITEM);
-  if (open) return { checked: false, label: (open[1] ?? "").trim() };
-  const bullet = line.match(BULLET_ITEM);
-  if (bullet) return { checked: false, label: (bullet[1] ?? "").trim() };
-  return null;
-}
-
-function isMarkedItem(line: string): boolean {
-  return itemMarker(line) !== null;
-}
-
-/** Categories from a heading line, then checklist items. Plain lines stay one group. */
-export function parsePackingList(notes: string): PackingGroup[] {
-  const lines = notes.replace(/\r\n/g, "\n").split("\n");
-  const groups: PackingGroup[] = [];
-  let current: PackingGroup | null = null;
-
-  function openGroup(title: string) {
-    const name = title.replace(/:\s*$/, "").replace(/\s+/g, " ").trim() || "To pack";
-    current = { title: name.slice(0, 80), items: [] };
-    groups.push(current);
-    return current;
-  }
-
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = (lines[index] ?? "").trim();
-    if (!line) continue;
-
-    const markdown = line.match(MARKDOWN_HEADING);
-    if (markdown?.[1]?.trim()) {
-      openGroup(markdown[1]);
-      continue;
-    }
-
-    const next =
-      lines
-        .slice(index + 1)
-        .map((entry) => entry.trim())
-        .find(Boolean) ?? "";
-    const colonHeading =
-      /:\s*$/.test(line) && line.length <= 60 && !isMarkedItem(line);
-    const checklistHeading =
-      !isMarkedItem(line) &&
-      isMarkedItem(next) &&
-      line.length <= 48 &&
-      !/[.!?]$/.test(line);
-
-    if (colonHeading || checklistHeading) {
-      openGroup(line);
-      continue;
-    }
-
-    const parsed = itemMarker(line);
-    const label = (parsed?.label ?? line).replace(/\s+/g, " ").trim();
-    if (!label) continue;
-    const group = current ?? openGroup("To pack");
-    group.items.push({
-      label: label.slice(0, 200),
-      checked: parsed?.checked ?? false,
-    });
-  }
-
-  return groups.filter((group) => group.items.length > 0);
 }
 
 function statusLabel(status: TripItemStatus): string {
@@ -495,7 +427,7 @@ function itineraryBlocks(source: TripPdfSource): PdfBlock[] {
 }
 
 function packingBlocks(notes: string): PdfBlock[] {
-  const groups = parsePackingList(notes);
+  const groups = packingPdfGroups(notes);
   if (groups.length === 0) {
     return [{ type: "message", text: EMPTY_PACKING }];
   }

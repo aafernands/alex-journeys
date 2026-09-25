@@ -41,6 +41,7 @@ import {
   type StoredPlan,
 } from "@/lib/trip-planner-storage";
 import type { JournalNote, JournalPlace } from "@/lib/trip-journal";
+import type { PackingGuide } from "@/lib/packing-guides";
 import {
   decodeSharedPlan,
   planATripHref,
@@ -63,6 +64,7 @@ type Props = {
   journalPlaces: readonly string[];
   journalNotes?: readonly JournalNote[];
   journalPlaceIndex?: readonly JournalPlace[];
+  packingGuides?: readonly PackingGuide[];
   urlTripId?: string | null;
   /** Open the hotel lane after a stay was booked on /stays. */
   focusStay?: boolean;
@@ -176,6 +178,7 @@ export function TripPlanner({
   journalPlaces,
   journalNotes = [],
   journalPlaceIndex = [],
+  packingGuides = [],
   urlTripId = null,
   focusStay = false,
   focusFlight = false,
@@ -859,6 +862,7 @@ export function TripPlanner({
             journalNotes={journalNotes}
             journalPlaceIndex={journalPlaceIndex}
             packingNotes={plan.packingNotes}
+            packingGuides={packingGuides}
             onItemsChange={saveItems}
             onPackingNotesChange={(packingNotes) =>
               savePlan({ step, state, packingNotes })

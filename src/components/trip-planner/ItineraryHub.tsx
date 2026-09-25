@@ -64,6 +64,8 @@ import { ItemColorField } from "@/components/trip-planner/ItemColorField";
 import { bookedStayHref, ItineraryItemRow } from "@/components/trip-planner/ItineraryItemRow";
 import { WeekView } from "@/components/trip-planner/WeekView";
 import { DownloadTripPdf } from "@/components/trip-planner/DownloadTripPdf";
+import { PackingPanel } from "@/components/trip-planner/PackingPanel";
+import type { PackingGuide } from "@/lib/packing-guides";
 
 type Props = {
   headingId: string;
@@ -82,6 +84,7 @@ type Props = {
   journalNotes: readonly JournalNote[];
   journalPlaceIndex: readonly JournalPlace[];
   packingNotes: string;
+  packingGuides?: readonly PackingGuide[];
   onItemsChange: (items: TripItem[]) => void;
   onPackingNotesChange: (notes: string) => void;
   onEditTrip: () => void;
@@ -1012,6 +1015,7 @@ export function ItineraryHub({
   journalNotes,
   journalPlaceIndex,
   packingNotes,
+  packingGuides = [],
   onItemsChange,
   onPackingNotesChange,
   onEditTrip,
@@ -1038,6 +1042,13 @@ export function ItineraryHub({
     }
     if (window.matchMedia(TRIP_SECTION_BAR_QUERY).matches) {
       window.scrollTo(0, 0);
+      if (next === "packing") {
+        window.requestAnimationFrame(() => {
+          document.getElementById(`${headingId}-view-packing`)?.scrollIntoView({
+            block: "start",
+          });
+        });
+      }
     }
   }
   useEffect(() => {
@@ -2386,32 +2397,15 @@ export function ItineraryHub({
         className="plan-packing-panel"
         tabIndex={0}
       >
-          <section
-            className="plan-stack-tight"
-            aria-labelledby={`${headingId}-packing`}
-          >
-            <h3
-              id={`${headingId}-packing`}
-              className={plan.h3}
-            >
-              Packing list
-            </h3>
-            <p className={`${plan.prose} text-muted`}>
-              One item per line. A category on its own line, then items, groups
-              the list. Put [x] in front of anything already packed.
-            </p>
-            <textarea
-              className={plan.input}
-              aria-label="Packing list"
-              rows={5}
-              maxLength={4000}
-              placeholder={"Documents\n[x] Passport\n\nClothes\n[ ] Rain jacket"}
-              value={packingNotes}
-              onChange={(event) =>
-                onPackingNotesChange(event.target.value.slice(0, 4000))
-              }
-            />
-          </section>
+        <PackingPanel
+          headingId={headingId}
+          notes={packingNotes}
+          onChange={onPackingNotesChange}
+          state={state}
+          items={items}
+          flexibleOn={flexibleOn}
+          guides={packingGuides}
+        />
       </div>
       <div className="plan-hub-more" hidden={view === "bookings"}>
         <p className={`${plan.caption} px-1 pt-3 text-muted`}>

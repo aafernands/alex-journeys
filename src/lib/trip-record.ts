@@ -2,6 +2,7 @@
  * Saved-trip shape shared by the itinerary hub, local drafts, and APIs.
  * Safe to import from client components (no Firestore, no filesystem).
  */
+import { PACKING_NOTES_LIMIT } from "@/lib/packing-list";
 import { cleanItemColor, type TripItemColor } from "@/lib/trip-item-color";
 import {
   dateSummary,
@@ -129,7 +130,10 @@ export type TripWrite = {
   carDropoffDate: string;
   unsure: boolean;
   items: TripItem[];
-  /** Freeform packing list for this trip. */
+  /**
+   * Packing checklist. Plain text from older trips, or a structured list.
+   * Capped so a share link and a saved trip stay a reasonable size.
+   */
   packingNotes: string;
 };
 
@@ -163,7 +167,7 @@ export const MAX_SAVED_TRIPS = 50;
 
 export function cleanPackingNotes(value: unknown): string {
   if (typeof value !== "string") return "";
-  return value.replace(/\r\n/g, "\n").slice(0, 4000);
+  return value.replace(/\r\n/g, "\n").slice(0, PACKING_NOTES_LIMIT);
 }
 
 const MAX_ITEMS = 40;
