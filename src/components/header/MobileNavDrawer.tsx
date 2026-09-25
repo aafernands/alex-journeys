@@ -13,7 +13,6 @@ import {
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
 import { BrandLogo } from "@/components/brand/BrandLogo";
-import { SearchInput } from "@/components/search/SearchInput";
 import { ThemeAppearanceControl } from "@/components/ThemeToggle";
 import { site } from "@/data/content";
 import { destinationsTree } from "@/data/destinations";
@@ -75,23 +74,62 @@ export function MobileNavDrawer({
         className="absolute inset-0 flex w-full flex-col bg-bg shadow-xl"
         aria-label="Mobile"
       >
-        <div className="flex shrink-0 items-center gap-2 border-b border-border py-3 pr-2 pl-0">
-          <div className="flex w-[4.75rem] shrink-0 items-center justify-start overflow-hidden">
+        <div className="flex shrink-0 items-center gap-1 border-b border-border px-3 py-3">
+          <div className="flex w-[clamp(7rem,30vw,11rem)] shrink-0 items-center justify-start">
             <BrandLogo
               href="/"
               onClick={onClose}
               applyScale={false}
               width={320}
               height={88}
-              className="block h-auto max-h-8 w-auto max-w-[4.75rem] object-contain"
+              className="block h-auto w-full object-contain"
             />
           </div>
-          <SearchInput
-            variant="drawer"
-            id="mobile-drawer-search"
-            className="min-w-0 flex-1"
-            onNavigate={onClose}
-          />
+          <ul
+            className="ml-auto flex shrink-0 items-center"
+            aria-label="Social"
+          >
+            <li>
+              <OutboundLink
+                href={site.social.instagram}
+                className="inline-flex h-11 w-8 sm:w-10 items-center justify-center text-heading transition hover:text-accent"
+                aria-label="Instagram"
+                onClick={onClose}
+              >
+                <SocialInstagramIcon />
+              </OutboundLink>
+            </li>
+            <li>
+              <OutboundLink
+                href={site.social.youtube}
+                className="inline-flex h-11 w-8 sm:w-10 items-center justify-center text-heading transition hover:text-accent"
+                aria-label="YouTube"
+                onClick={onClose}
+              >
+                <SocialYouTubeIcon />
+              </OutboundLink>
+            </li>
+            <li>
+              <OutboundLink
+                href={site.social.pinterest}
+                className="inline-flex h-11 w-8 sm:w-10 items-center justify-center text-heading transition hover:text-accent"
+                aria-label="Pinterest"
+                onClick={onClose}
+              >
+                <SocialPinterestIcon />
+              </OutboundLink>
+            </li>
+            <li>
+              <OutboundLink
+                href={site.social.coffee}
+                className="inline-flex h-11 w-8 sm:w-10 items-center justify-center text-accent transition hover:text-accent-deep"
+                aria-label="Buy me a coffee"
+                onClick={onClose}
+              >
+                <SocialCoffeeIcon />
+              </OutboundLink>
+            </li>
+          </ul>
           <button
             type="button"
             className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
@@ -111,16 +149,6 @@ export function MobileNavDrawer({
             </svg>
           </button>
         </div>
-
-        {googleConfigured ? (
-          <div className="shrink-0 border-b border-border px-5 py-4">
-            <ReaderAuthButtons
-              variant="drawer-cta"
-              googleConfigured={googleConfigured}
-              onNavigate={onClose}
-            />
-          </div>
-        ) : null}
 
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pt-4">
           <ul className="flex flex-col" aria-label="Primary">
@@ -230,53 +258,16 @@ export function MobileNavDrawer({
           </ul>
 
           <div className="mt-auto space-y-3 border-t border-border pt-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
+            {googleConfigured ? (
+              <div className="border-b border-border pb-4">
+                <ReaderAuthButtons
+                  variant="drawer-cta"
+                  googleConfigured={googleConfigured}
+                  onNavigate={onClose}
+                />
+              </div>
+            ) : null}
             <ThemeAppearanceControl />
-
-            <ul
-              className="flex flex-row items-center justify-center gap-5"
-              aria-label="Social"
-            >
-              <li>
-                <OutboundLink
-                  href={site.social.instagram}
-                  className="inline-flex h-10 w-10 items-center justify-center text-heading transition hover:text-accent"
-                  aria-label="Instagram"
-                  onClick={onClose}
-                >
-                  <SocialInstagramIcon />
-                </OutboundLink>
-              </li>
-              <li>
-                <OutboundLink
-                  href={site.social.youtube}
-                  className="inline-flex h-10 w-10 items-center justify-center text-heading transition hover:text-accent"
-                  aria-label="YouTube"
-                  onClick={onClose}
-                >
-                  <SocialYouTubeIcon />
-                </OutboundLink>
-              </li>
-              <li>
-                <OutboundLink
-                  href={site.social.pinterest}
-                  className="inline-flex h-10 w-10 items-center justify-center text-heading transition hover:text-accent"
-                  aria-label="Pinterest"
-                  onClick={onClose}
-                >
-                  <SocialPinterestIcon />
-                </OutboundLink>
-              </li>
-              <li>
-                <OutboundLink
-                  href={site.social.coffee}
-                  className="inline-flex h-10 w-10 items-center justify-center text-accent transition hover:text-accent-deep"
-                  aria-label="Buy me a coffee"
-                  onClick={onClose}
-                >
-                  <SocialCoffeeIcon />
-                </OutboundLink>
-              </li>
-            </ul>
           </div>
         </div>
       </nav>

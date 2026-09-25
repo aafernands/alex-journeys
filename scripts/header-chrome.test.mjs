@@ -20,12 +20,12 @@ describe("header chrome", () => {
     assert.doesNotMatch(header, /md:flex/);
     const drawer = source("../src/components/header/MobileNavDrawer.tsx");
     assert.match(drawer, /variant="drawer-cta"/);
-    assert.match(drawer, /variant="drawer"/);
-    assert.match(drawer, /mobile-drawer-search/);
+    assert.doesNotMatch(drawer, /SearchInput|mobile-drawer-search/);
+    assert.ok(drawer.indexOf('aria-label="Social"') < drawer.indexOf('aria-label="Primary"'));
+    assert.ok(drawer.indexOf('<ReaderAuthButtons') > drawer.indexOf('aria-label="Primary"'));
+    assert.ok(drawer.indexOf('<ReaderAuthButtons') < drawer.indexOf('<ThemeAppearanceControl'));
     assert.match(drawer, /<BrandLogo/);
     assert.match(drawer, /applyScale=\{false\}/);
-    assert.match(drawer, /max-w-\[4\.75rem\]/);
-    assert.match(drawer, /pl-0/);
     assert.match(drawer, /inset-0 flex w-full/);
     assert.match(drawer, /xl:hidden/);
     const bottomNav = source("../src/components/header/MobileBottomNav.tsx");
