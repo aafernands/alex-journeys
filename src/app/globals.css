@@ -1840,7 +1840,8 @@ select.plan-input {
 /* The planner is the page. Keep the journal signup and the guide index
    off this flow so they don’t sit under the steps. Other pages keep both. */
 body:has(main.plan-flow) #newsletter,
-body:has(main.plan-flow) a[href="#newsletter"] {
+body:has(main.plan-flow) a[href="#newsletter"],
+body:has(main.plan-flow) footer {
   display: none;
 }
 
@@ -1997,8 +1998,13 @@ body:has(main.plan-flow) a[href="#newsletter"] {
   }
 
   html:has(body.trip-focus .plan-sticky),
-  html:has(.plan-workspace-shell .plan-sticky) {
-    scroll-padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  html:has(.plan-workspace-shell .plan-sticky),
+  html:has(main.plan-flow .plan-sticky) {
+    scroll-padding-bottom: calc(7.25rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  html:has(.plan-sticky-pair) {
+    scroll-padding-bottom: calc(11rem + env(safe-area-inset-bottom, 0px));
   }
 
   .plan-day-card {
@@ -2444,7 +2450,7 @@ body:has(main.plan-flow) .plan-sticky {
   body:has(.plan-workspace-shell) .plan-trip:has(.plan-sticky),
   body:has(main.plan-flow) .plan-trip:has(.plan-sticky),
   body:has(main.plan-flow) .plan-sticky-host:has(.plan-sticky) {
-    padding-bottom: calc(8rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(9rem + env(safe-area-inset-bottom, 0px));
   }
 
   body.trip-focus .plan-trip:has(.plan-sticky-pair),
@@ -2648,7 +2654,7 @@ body:has(main.plan-flow) .plan-sticky {
   body.trip-focus .plan-trip-hotel:has(.plan-sticky),
   body:has(.plan-workspace-shell) .plan-trip-hotel:has(.plan-sticky),
   body:has(main.plan-flow) .plan-trip-hotel:has(.plan-sticky) {
-    padding-bottom: calc(8rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(9rem + env(safe-area-inset-bottom, 0px));
   }
 
   body.trip-focus .plan-trip-hotel:has(.plan-sticky-pair),
@@ -2726,6 +2732,14 @@ body:has(main.plan-flow) .plan-sticky {
 .plan-trip-hotel .plan-sticky {
   border-top: 1px solid var(--border);
   background: color-mix(in srgb, var(--bg) 94%, white);
+}
+
+@media (max-width: 639px) {
+  .plan-sticky,
+  .plan-trip-hotel .plan-sticky {
+    background: var(--white);
+    box-shadow: 0 -8px 24px rgba(20, 17, 13, 0.08);
+  }
 }
 
 .plan-trip-hotel .plan-lane-panel:not([hidden]) {
