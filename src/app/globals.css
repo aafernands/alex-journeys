@@ -106,9 +106,9 @@ body {
 }
 
 
-/* Space for fixed mobile bottom tab bar — only when scroll-reveal bar is visible. Desktop unchanged. */
+/* Space for fixed mobile bottom tab bar — while discovery navigation is visible. Desktop unchanged. */
 :root {
-  --mobile-nav-bar: 3.5rem;
+  --mobile-nav-bar: 4rem;
   --mobile-nav-gap: 1.75rem;
   --mobile-nav-clearance: calc(
     var(--mobile-nav-bar) + env(safe-area-inset-bottom, 0px) + var(--mobile-nav-gap)
@@ -128,6 +128,14 @@ body.mobile-bottom-nav-visible {
   scroll-padding-bottom: var(--mobile-nav-clearance);
 }
 
+/* Keep focused trip work and modal tasks clear of global navigation. */
+body:has(.plan-workspace-shell, dialog[open], [aria-modal="true"]:not([hidden])) {
+  --mobile-nav-clearance: 0px;
+}
+body:has(.plan-workspace-shell, dialog[open], [aria-modal="true"]:not([hidden])) .mobile-bottom-nav {
+  display: none;
+}
+
 /* Admin public chrome — below mobile nav / drawers, above page content. */
 .admin-bar {
   position: fixed;
@@ -136,13 +144,13 @@ body.mobile-bottom-nav-visible {
   z-index: 120;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1279px) {
   body.mobile-bottom-nav-visible .admin-bar {
     bottom: var(--mobile-nav-clearance);
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1280px) {
   body.mobile-bottom-nav-visible .mobile-bottom-nav-pad {
     padding-bottom: 0;
   }

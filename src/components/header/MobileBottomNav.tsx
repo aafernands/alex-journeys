@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { destinationSlugs } from "@/data/destinations";
 import { NavIcon } from "@/components/icons/NavIcon";
 
 type Tab = {
@@ -18,7 +19,8 @@ const TABS: Tab[] = [
     label: "Places",
     icon: "map-pin",
     match: (path) =>
-      path === "/destinations" || path.startsWith("/destinations/"),
+      path === "/destinations" || path.startsWith("/destinations/") ||
+      destinationSlugs.some((slug) => path === `/${slug}` || path.startsWith(`/${slug}/`)),
   },
   {
     href: "/blog",
@@ -27,40 +29,27 @@ const TABS: Tab[] = [
     match: (path) => path === "/blog" || path.startsWith("/blog/"),
   },
   {
-    href: "/guides",
-    label: "Guides",
-    icon: "book-marked",
-    match: (path) => path === "/guides" || path.startsWith("/guides/"),
+    href: "/guides/plan-a-trip",
+    label: "Plan trip",
+    icon: "suitcase",
+    match: (path) => path === "/guides/plan-a-trip",
   },
   {
-    href: "/account",
+    href: "/account#saved",
     label: "Saved",
     icon: "bookmark",
     match: (path) => path === "/account" || path.startsWith("/account/"),
   },
 ];
 
-/** Show bottom bar once scrollY exceeds this; hide when back near top. */
-const SHOW_THRESHOLD_PX = 80;
-
 const BODY_VISIBLE_CLASS = "mobile-bottom-nav-visible";
 
-/**
- * Fixed bottom tab bar (compact phone/tablet navigation): Places / Stories / Guides / Saved.
- * Hidden near the top of the page; appears after scrolling down past the threshold.
- */
+/** Persistent discovery navigation; focused workspaces and overlays hide it in CSS. */
 export function MobileBottomNav() {
   const pathname = usePathname();
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const update = () => {
-      setVisible(window.scrollY >= SHOW_THRESHOLD_PX);
-    };
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
-  }, []);
+  const visible = !/^\/(cms|api|login|signup|forgot-password|reset-password)(\/|$)/.test(pathname)
+    && !/\/(checkout|confirmation)(\/|$)/.test(pathname)
+    && pathname !== "/flights/book";
 
   useEffect(() => {
     document.body.classList.toggle(BODY_VISIBLE_CLASS, visible);
@@ -69,35 +58,29 @@ export function MobileBottomNav() {
     };
   }, [visible]);
 
+  if (!visible) return null;
+
   return (
     <nav
-      className={`fixed inset-x-0 bottom-0 z-[150] border-t border-border bg-white/95 shadow-[0_-8px_24px_rgba(20,17,13,0.08)] backdrop-blur-md transition-[transform,opacity] duration-200 ease-out xl:hidden motion-reduce:transition-none dark:shadow-[0_-10px_28px_rgba(0,0,0,0.45)] ${
-        visible
-          ? "translate-y-0 opacity-100"
-          : "pointer-events-none translate-y-full opacity-0"
-      }`}
+      className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-[150] border-t border-border bg-white/95 shadow-[0_-8px_24px_rgba(20,17,13,0.08)] backdrop-blur-md xl:hidden dark:shadow-[0_-10px_28px_rgba(0,0,0,0.45)]"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       aria-label="Primary mobile"
-      aria-hidden={!visible}
     >
-      <ul className="grid h-14 grid-cols-4 items-stretch">
+      <ul className="grid h-16 grid-cols-4 items-stretch">
         {TABS.map((tab) => {
           const active = tab.match(pathname);
           return (
             <li key={tab.href} className="flex">
               <Link
                 href={tab.href}
-                tabIndex={visible ? undefined : -1}
-                className={`flex flex-1 flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-semibold tracking-tight transition ${
+                className={`flex flex-1 flex-col items-center justify-center gap-0.5 px-1 text-xs font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-accent ${
                   active ? "text-accent" : "text-muted hover:text-heading"
                 }`}
                 aria-current={active ? "page" : undefined}
               >
-                <NavIcon
-                  name={tab.icon}
-                  size={20}
-                  className={active ? "text-accent" : "text-current"}
-                />
+                <span className={`flex h-7 w-14 items-center justify-center rounded-full ${active ? "bg-accent/15" : ""}`}>
+                  <NavIcon name={tab.icon} size={22} />
+                </span>
                 <span>{tab.label}</span>
               </Link>
             </li>
