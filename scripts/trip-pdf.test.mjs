@@ -9,6 +9,7 @@ import {
   buildTripPdf,
   parsePackingList,
   redactPaymentDetails,
+  resolveTripTravelerName,
   tripPdfFilename,
 } from "../src/lib/trip-pdf.ts";
 import { renderTripPdf } from "../src/lib/trip-pdf-render.ts";
@@ -257,25 +258,67 @@ test("filenames stay safe and iPhone uses the share sheet", () => {
   );
 });
 
+test("traveler name prefers the signed-in name, then a booking", () => {
+  const source = sampleSource();
+  assert.equal(buildTripPdf(source, "itinerary").travelerName, "");
+  const fromNotes = {
+    ...source,
+    items: source.items.map((item, index) =>
+      index === 0 ? { ...item, notes: "Passenger: Mina Costa\nWindow seat" } : item,
+    ),
+  };
+  assert.equal(resolveTripTravelerName(fromNotes), "Mina Costa");
+  assert.equal(
+    resolveTripTravelerName({
+      ...fromNotes,
+      travelerName: "Alex Fernandes",
+      bookingNames: ["Someone Else"],
+    }),
+    "Alex Fernandes",
+  );
+  assert.equal(
+    resolveTripTravelerName({
+      ...source,
+      travelerName: "Account",
+      bookingNames: ["alex@example.com", "Jonah Adeyemi"],
+    }),
+    "Jonah Adeyemi",
+  );
+  assert.equal(
+    buildTripPdf({ ...source, travelerName: "  " }, "packing").travelerName,
+    "",
+  );
+});
+
 test("the three sections render as PDFs without card numbers", async () => {
   const fonts = {
     outfit: readFileSync("public/fonts/pdf/Outfit-SemiBold.ttf"),
     inter: readFileSync("public/fonts/pdf/Inter-Regular.ttf"),
     interMedium: readFileSync("public/fonts/pdf/Inter-Medium.ttf"),
   };
+  const logo = readFileSync("public/brand/logo-on-light.png");
   const source = sampleSource();
   const dir = mkdtempSync(join(tmpdir(), "trip-pdf-"));
   for (const section of ["itinerary", "packing", "bookings"]) {
-    const model = buildTripPdf(source, section);
-    const bytes = await renderTripPdf(model, fonts);
+    const model = buildTripPdf(
+      section === "itinerary" ? { ...source, travelerName: "Alex Fernandes" } : source,
+      section,
+    );
+    const bytes = await renderTripPdf(model, fonts, logo);
     assert.equal(Buffer.from(bytes).subarray(0, 5).toString(), "%PDF-");
     assert.ok(bytes.byteLength > 2000);
     const file = join(dir, model.filename);
     writeFileSync(file, bytes);
     const text = spawnSync("pdftotext", ["-layout", file, "-"], { encoding: "utf8" });
     if (text.status !== 0) continue;
-    assert.match(text.stdout, /Alex Journeys/);
+    assert.match(text.stdout, /Alex Journeys|ALEX JOURNEYS/);
+    assert.match(text.stdout, /www\.fernandesjourneys\.com/);
     assert.match(text.stdout, /Iceland in October/);
+    if (section === "itinerary") {
+      assert.match(text.stdout, /Prepared for Alex Fernandes/);
+    } else {
+      assert.doesNotMatch(text.stdout, /Prepared for/);
+    }
     assert.doesNotMatch(text.stdout, new RegExp(CARD));
     assert.doesNotMatch(text.stdout, /4242 4242/);
     if (section === "packing") {

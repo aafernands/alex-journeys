@@ -15,10 +15,11 @@ import {
   type TripItemType,
 } from "@/lib/trip-record";
 
-/** Public journal name, author, and host. Matches `site` in src/data/content.ts. */
+/** Public journal name. Matches `site.name` in src/data/content.ts. */
 export const TRIP_PDF_BRAND = "Alex Journeys";
 export const TRIP_PDF_AUTHOR = "Alex Fernandes";
-export const TRIP_PDF_SITE = "alexjourneys.com";
+/** Printed in the footer. The public site host is alexjourneys.com. */
+export const TRIP_PDF_SITE = "www.fernandesjourneys.com";
 
 export const TRIP_PDF_SECTIONS = [
   "itinerary",
@@ -35,6 +36,13 @@ export type TripPdfSource = {
   days: TripDay[];
   items: TripItem[];
   packingNotes: string;
+  /**
+   * Signed-in display name, when the workspace knows one.
+   * Booking names are the fallback and live on `bookingNames` or in item notes.
+   */
+  travelerName?: string;
+  /** Passenger or guest names already stored with this trip’s bookings. */
+  bookingNames?: string[];
 };
 
 export type PdfRow = { label: string; value: string };
@@ -64,6 +72,8 @@ export type TripPdfDocument = {
   title: string;
   dates: string;
   destination: string;
+  /** Empty when no traveler name is known. The PDF leaves the line out. */
+  travelerName: string;
   section: TripPdfSection;
   sectionLabel: string;
   blocks: PdfBlock[];
@@ -117,6 +127,56 @@ const EMPTY_ITINERARY =
 const EMPTY_DAY = "Nothing planned yet.";
 const EMPTY_PACKING =
   "Nothing to pack yet. Add one item per line on the Packing tab. Put a category on its own line, then mark packed items with [x].";
+const PLACEHOLDER_NAMES = new Set([
+  "account",
+  "guest",
+  "reader",
+  "traveler",
+  "traveller",
+  "user",
+  "you",
+]);
+
+const BOOKING_NAME_LINE =
+  /^(?:lead\s+)?(?:guest(?:\s+name)?|passenger(?:\s+name)?|travell?er(?:\s+name)?|booked\s+for|reserved\s+for|name)\s*[:\-–]\s*(.+)$/i;
+
+/** A real person’s name. Placeholders, emails, and blank values are dropped. */
+export function cleanTravelerName(value: string | null | undefined): string {
+  if (!value) return "";
+  const name = value.replace(/\s+/g, " ").trim();
+  if (name.length < 2 || name.length > 80) return "";
+  if (name.includes("@") || /\d/.test(name)) return "";
+  if (!/[A-Za-zÀ-ÿ]/.test(name)) return "";
+  if (PLACEHOLDER_NAMES.has(name.toLowerCase())) return "";
+  return name;
+}
+
+function travelerNameFromNotes(items: TripItem[]): string {
+  for (const item of items) {
+    if (item.type === "note") continue;
+    for (const line of item.notes.split("\n")) {
+      const match = line.trim().match(BOOKING_NAME_LINE);
+      const name = cleanTravelerName(match?.[1]);
+      if (name) return name;
+    }
+  }
+  return "";
+}
+
+/**
+ * Signed-in display name, then a name saved with a booking.
+ * Returns "" when nothing usable is known.
+ */
+export function resolveTripTravelerName(source: TripPdfSource): string {
+  const account = cleanTravelerName(source.travelerName);
+  if (account) return account;
+  for (const candidate of source.bookingNames ?? []) {
+    const name = cleanTravelerName(candidate);
+    if (name) return name;
+  }
+  return travelerNameFromNotes(source.items);
+}
+
 const EMPTY_BOOKINGS =
   "No bookings yet. Stays, flights, cars, experiences, and forwarded confirmations you add to this trip will show up here.";
 
@@ -513,6 +573,7 @@ export function buildTripPdf(
       destination && destination.toLowerCase() !== title.toLowerCase()
         ? destination
         : "",
+    travelerName: resolveTripTravelerName(source),
     section,
     sectionLabel,
     blocks,

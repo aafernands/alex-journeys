@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useSession } from "next-auth/react";
 import { Download } from "lucide-react";
+import { getSiteDesign } from "@/lib/site-design";
 import {
   buildTripPdf,
   type TripPdfDocument,
@@ -9,6 +11,7 @@ import {
   type TripPdfSource,
 } from "@/lib/trip-pdf";
 import { deliverTripPdf, presentReadyPdf } from "@/lib/trip-pdf-save";
+import type { TripItem } from "@/lib/trip-record";
 import type { TripPdfFontBytes } from "@/lib/trip-pdf-render";
 
 const CHOICES: { id: TripPdfSection; label: string; detail: string }[] = [
@@ -25,6 +28,53 @@ type ReadyFile = {
   label: string;
 };
 
+function logoPath(): string {
+  const path = getSiteDesign().branding.logoOnLight.trim();
+  return path.startsWith("/") ? path : "/brand/logo-on-light.png";
+}
+
+/** Passenger names kept with flight confirmations for this trip’s booking codes. */
+function storedBookingNames(items: TripItem[]): string[] {
+  if (typeof sessionStorage === "undefined") return [];
+  const refs = new Set<string>();
+  for (const item of items) {
+    const confirmation = item.confirmation?.trim().toLowerCase();
+    if (confirmation) refs.add(confirmation);
+    const booking = item.url.match(/[?&]booking=([^&#]+)/i)?.[1];
+    if (booking) {
+      try {
+        refs.add(decodeURIComponent(booking).trim().toLowerCase());
+      } catch {
+        refs.add(booking.trim().toLowerCase());
+      }
+    }
+  }
+  if (refs.size === 0) return [];
+  try {
+    const raw = sessionStorage.getItem("fj.flight-confirmations.v1");
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    const names: string[] = [];
+    for (const entry of parsed) {
+      if (!entry || typeof entry !== "object") continue;
+      const record = entry as { confirmation?: unknown };
+      const confirmation =
+        record.confirmation && typeof record.confirmation === "object"
+          ? (record.confirmation as Record<string, unknown>)
+          : (entry as Record<string, unknown>);
+      const code = String(confirmation.confirmationCode ?? "").trim().toLowerCase();
+      const bookingId = String(confirmation.bookingId ?? "").trim().toLowerCase();
+      const name = String(confirmation.passengerName ?? "").trim();
+      if (!name) continue;
+      if ((code && refs.has(code)) || (bookingId && refs.has(bookingId))) names.push(name);
+    }
+    return names;
+  } catch {
+    return [];
+  }
+}
+
 async function loadFonts(): Promise<TripPdfFontBytes | undefined> {
   try {
     const load = async (path: string) => {
@@ -38,6 +88,16 @@ async function loadFonts(): Promise<TripPdfFontBytes | undefined> {
       load("/fonts/pdf/Inter-Medium.ttf"),
     ]);
     return { outfit, inter, interMedium };
+  } catch {
+    return undefined;
+  }
+}
+
+async function loadLogo(): Promise<Uint8Array | undefined> {
+  try {
+    const response = await fetch(logoPath());
+    if (!response.ok) return undefined;
+    return new Uint8Array(await response.arrayBuffer());
   } catch {
     return undefined;
   }
@@ -58,6 +118,7 @@ export function DownloadTripPdf({
   /** Changes each time the overflow menu closes, which clears a leftover file. */
   session: number;
 }) {
+  const { data: auth } = useSession();
   const rootRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState<TripPdfSection | null>(null);
   const [ready, setReady] = useState<ReadyFile | null>(null);
@@ -75,9 +136,17 @@ export function DownloadTripPdf({
     setReady(null);
     setError(null);
     try {
-      const document: TripPdfDocument = buildTripPdf(source, section);
+      const document: TripPdfDocument = buildTripPdf(
+        {
+          ...source,
+          travelerName: auth?.user?.name ?? "",
+          bookingNames: storedBookingNames(source.items),
+        },
+        section,
+      );
       const { renderTripPdf } = await import("@/lib/trip-pdf-render");
-      const bytes = await renderTripPdf(document, await loadFonts());
+      const [fonts, logo] = await Promise.all([loadFonts(), loadLogo()]);
+      const bytes = await renderTripPdf(document, fonts, logo);
       const blob = new Blob([Uint8Array.from(bytes)], { type: "application/pdf" });
       const outcome = await deliverTripPdf(blob, document.filename, document.shareTitle);
       if (outcome === "needs-tap") {

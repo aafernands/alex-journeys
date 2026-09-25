@@ -18,8 +18,9 @@ type FontSet = {
 const PAGE_W = 595.28;
 const PAGE_H = 841.89;
 const MARGIN = 46;
-const BOTTOM = 42;
+const BOTTOM = 52;
 const CONTENT_W = PAGE_W - MARGIN * 2;
+const LOGO_H = 11;
 
 const PAPER: Rgb = [246, 240, 230];
 const INK: Rgb = [31, 26, 20];
@@ -68,11 +69,17 @@ class Painter {
   readonly doc: jsPDF;
   readonly fonts: FontSet;
   readonly document: TripPdfDocument;
+  readonly logo: Uint8Array | undefined;
   page = 1;
   y = 0;
 
-  constructor(document: TripPdfDocument, fonts: TripPdfFontBytes | undefined) {
+  constructor(
+    document: TripPdfDocument,
+    fonts: TripPdfFontBytes | undefined,
+    logo: Uint8Array | undefined,
+  ) {
     this.document = document;
+    this.logo = logo;
     this.doc = new jsPDF({
       unit: "pt",
       format: "a4",
@@ -180,6 +187,19 @@ class Painter {
       y += 28;
     }
 
+    if (this.document.travelerName) {
+      const prepared = this.wrap(`Prepared for ${this.document.travelerName}`, CONTENT_W, {
+        size: 11,
+      });
+      this.useBody("normal");
+      this.doc.setFontSize(11);
+      this.setInk(TEXT);
+      for (const row of prepared.slice(0, 2)) {
+        this.doc.text(row, MARGIN, y);
+        y += 15;
+      }
+    }
+
     const meta = [this.document.dates, this.document.destination].filter(Boolean);
     for (const line of meta) {
       const wrapped = this.wrap(line, CONTENT_W, { weight: "bold", size: 11 });
@@ -214,23 +234,52 @@ class Painter {
     return 58;
   }
 
+  private logoSize(): { width: number; height: number } | null {
+    if (!this.logo) return null;
+    try {
+      const props = this.doc.getImageProperties(this.logo);
+      if (!props.width || !props.height) return null;
+      const height = LOGO_H;
+      const width = Math.min(height * (props.width / props.height), 120);
+      return { width, height };
+    } catch {
+      return null;
+    }
+  }
+
   private stampFooters() {
     const count = this.doc.getNumberOfPages();
+    const logo = this.logoSize();
+    const ruleY = PAGE_H - 40;
+    const logoY = ruleY + 8;
     for (let index = 1; index <= count; index += 1) {
       this.doc.setPage(index);
       this.setDraw(BORDER);
       this.doc.setLineWidth(0.6);
-      this.doc.line(MARGIN, PAGE_H - 32, PAGE_W - MARGIN, PAGE_H - 32);
+      this.doc.line(MARGIN, ruleY, PAGE_W - MARGIN, ruleY);
+      let textX = MARGIN;
+      if (logo && this.logo) {
+        try {
+          this.doc.addImage(
+            this.logo,
+            "PNG",
+            MARGIN,
+            logoY,
+            logo.width,
+            logo.height,
+            "trip-pdf-logo",
+          );
+          textX = MARGIN + logo.width + 8;
+        } catch {
+          textX = MARGIN;
+        }
+      }
       this.useBody("normal");
-      this.doc.setFontSize(9);
+      this.doc.setFontSize(8);
       this.setInk(MUTED);
-      const left = [this.document.brand, this.document.author, this.document.site]
-        .filter(Boolean)
-        .join("  ·  ");
-      this.doc.text(left, MARGIN, PAGE_H - 18);
-      this.doc.text(`${index} / ${count}`, PAGE_W - MARGIN, PAGE_H - 18, {
-        align: "right",
-      });
+      const textY = logo ? logoY + logo.height - 1.5 : PAGE_H - 22;
+      this.doc.text(this.document.site, textX, textY);
+      this.doc.text(`${index} / ${count}`, PAGE_W - MARGIN, textY, { align: "right" });
     }
   }
 
@@ -466,6 +515,7 @@ class Painter {
 export async function renderTripPdf(
   document: TripPdfDocument,
   fonts?: TripPdfFontBytes,
+  logo?: Uint8Array,
 ): Promise<Uint8Array> {
-  return new Painter(document, fonts).draw(document.blocks);
+  return new Painter(document, fonts, logo).draw(document.blocks);
 }
