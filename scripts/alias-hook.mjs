@@ -5,9 +5,15 @@
 export async function resolve(specifier, context, nextResolve) {
   if (specifier.startsWith("@/")) {
     const target = specifier.slice(2);
-    const extension = target.endsWith(".json") ? "" : ".ts";
+    const isJson = target.endsWith(".json");
+    const extension = isJson ? "" : ".ts";
     const url = new URL(`../src/${target}${extension}`, import.meta.url);
-    return nextResolve(url.href, context);
+    return nextResolve(url.href, {
+      ...context,
+      importAttributes: isJson
+        ? { ...context.importAttributes, type: "json" }
+        : context.importAttributes,
+    });
   }
   if (specifier === "next/server") {
     return nextResolve("next/server.js", context);

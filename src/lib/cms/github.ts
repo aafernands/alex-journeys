@@ -264,6 +264,9 @@ export async function fetchDraftFromGithub(
   bookingTools?: Post["bookingTools"];
   bookingDestination?: Post["bookingDestination"];
   experienceWidgetHtml?: Post["experienceWidgetHtml"];
+  seoTitle?: string;
+  seoDescription?: string;
+  focusKeyword?: string;
   contentHtml: string;
   itinerary?: Post["itinerary"];
   source?: unknown;
@@ -280,6 +283,9 @@ export async function fetchDraftFromGithub(
     bookingTools?: Post["bookingTools"];
     bookingDestination?: Post["bookingDestination"];
     experienceWidgetHtml?: Post["experienceWidgetHtml"];
+    seoTitle?: string;
+    seoDescription?: string;
+    focusKeyword?: string;
     contentHtml: string;
     itinerary?: Post["itinerary"];
     source?: unknown;
@@ -485,6 +491,11 @@ export async function publishDraft(
     ...(validated.experienceWidgetHtml
       ? { experienceWidgetHtml: validated.experienceWidgetHtml }
       : {}),
+    ...(validated.seoTitle ? { seoTitle: validated.seoTitle } : {}),
+    ...(validated.seoDescription
+      ? { seoDescription: validated.seoDescription }
+      : {}),
+    ...(validated.focusKeyword ? { focusKeyword: validated.focusKeyword } : {}),
     contentHtml: validated.contentHtml,
     source: "cms" as const,
     ...(validated.itinerary ? { itinerary: validated.itinerary } : {}),

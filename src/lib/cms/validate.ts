@@ -15,6 +15,7 @@ import type {
   PostMeta,
 } from "@/lib/post-types";
 import { sanitizeCmsHtml } from "@/lib/cms/sanitize-html";
+import { optionalSeoFields, readSeoFields } from "@/lib/post-seo";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const ALLOWED_DESTINATIONS = new Set(destinationSlugs);
@@ -39,6 +40,9 @@ export type PostInput = {
   bookingDestination?: unknown;
   experienceWidgetHtml?: unknown;
   itinerary?: unknown;
+  seoTitle?: unknown;
+  seoDescription?: unknown;
+  focusKeyword?: unknown;
 };
 
 export type ValidatedPost = {
@@ -57,6 +61,9 @@ export type ValidatedPost = {
   experienceWidgetHtml: string;
   /** Present only when enabled with at least one day. */
   itinerary?: PostItinerary;
+  seoTitle: string;
+  seoDescription: string;
+  focusKeyword: string;
 };
 
 function asString(value: unknown): string {
@@ -372,6 +379,10 @@ export function validatePostInput(
   const itineraryResult = validateItinerary(input.itinerary);
   if (!itineraryResult.ok) return itineraryResult;
 
+  const seo = readSeoFields(input);
+  if (!seo.ok) return seo;
+  const { seoTitle, seoDescription, focusKeyword } = seo;
+
   return {
     ok: true,
     data: {
@@ -386,6 +397,9 @@ export function validatePostInput(
       bookingTools,
       bookingDestination,
       experienceWidgetHtml,
+      seoTitle,
+      seoDescription,
+      focusKeyword,
       ...(itineraryResult.data ? { itinerary: itineraryResult.data } : {}),
     },
   };
@@ -404,6 +418,7 @@ export function toPostJson(data: ValidatedPost): Post {
     ...(data.bookingTools.length > 0 ? { bookingTools: data.bookingTools } : {}),
     ...(data.bookingDestination ? { bookingDestination: data.bookingDestination } : {}),
     ...(data.experienceWidgetHtml ? { experienceWidgetHtml: data.experienceWidgetHtml } : {}),
+    ...optionalSeoFields(data),
     contentHtml: data.contentHtml,
     source: "cms",
     ...(data.itinerary ? { itinerary: data.itinerary } : {}),
@@ -422,5 +437,6 @@ export function toPostMeta(data: ValidatedPost): PostMeta {
     ...(data.guideHubs.length > 0 ? { guideHubs: data.guideHubs } : {}),
     ...(data.bookingTools.length > 0 ? { bookingTools: data.bookingTools } : {}),
     ...(data.bookingDestination ? { bookingDestination: data.bookingDestination } : {}),
+    ...optionalSeoFields(data),
   };
 }

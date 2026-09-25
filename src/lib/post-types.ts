@@ -42,6 +42,12 @@ export type PostMeta = {
   bookingTools?: PostBookingTool[];
   /** Exact place used to prefill booking searches, independent of country tags. */
   bookingDestination?: string;
+  /** Search title. Falls back to `title` when empty. */
+  seoTitle?: string;
+  /** Meta description. Falls back to `excerpt` when empty. */
+  seoDescription?: string;
+  /** Optional editor keyword. Not rendered on the public page. */
+  focusKeyword?: string;
 };
 
 /** Day-by-day trip timeline stored separately from contentHtml. */

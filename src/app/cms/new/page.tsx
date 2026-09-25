@@ -11,6 +11,7 @@ import {
 } from "@/lib/cms/github";
 import { sanitizeSlug } from "@/lib/cms/validate";
 import { getPostBySlug } from "@/lib/posts";
+import { getSeoLinkCatalog } from "@/lib/seo-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +63,9 @@ export default async function CmsNewPostPage({ searchParams }: PageProps) {
           "bookingDestination" in source ? (source.bookingDestination ?? "") : "",
         experienceWidgetHtml:
           "experienceWidgetHtml" in source ? (source.experienceWidgetHtml ?? "") : "",
+        seoTitle: "seoTitle" in source ? (source.seoTitle ?? "") : "",
+        seoDescription: "seoDescription" in source ? (source.seoDescription ?? "") : "",
+        focusKeyword: "focusKeyword" in source ? (source.focusKeyword ?? "") : "",
         itinerary:
           "itinerary" in source ? (source.itinerary ?? undefined) : undefined,
       };
@@ -74,7 +78,7 @@ export default async function CmsNewPostPage({ searchParams }: PageProps) {
   }));
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6">
       <div>
         <Link
           href="/cms/posts"
@@ -98,7 +102,12 @@ export default async function CmsNewPostPage({ searchParams }: PageProps) {
           .
         </p>
       </div>
-      <PostForm destinations={destinations} mode="create" initial={initial} />
+      <PostForm
+        destinations={destinations}
+        mode="create"
+        initial={initial}
+        linkCatalog={getSeoLinkCatalog()}
+      />
     </div>
   );
 }

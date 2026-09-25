@@ -10,6 +10,7 @@ import {
   HelpCircle,
   ImageIcon,
   LayoutDashboard,
+  ListChecks,
   MapPin,
   Menu,
   MessageSquare,
@@ -23,6 +24,7 @@ import { LogoutButton } from "./LogoutButton";
 const NAV = [
   { href: "/cms", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/cms/posts", label: "Posts", icon: PenLine },
+  { href: "/cms/seo", label: "SEO", icon: ListChecks },
   { href: "/cms/comments", label: "Comments", icon: MessageSquare },
   { href: "/cms/pages", label: "Pages", icon: FileText },
   { href: "/cms/trip-planner", label: "Trip planner", icon: Compass },

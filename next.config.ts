@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { legacyPathRedirects } from "./src/data/guides";
+import { postSlugRedirects } from "./src/data/post-slug-redirects";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["firebase-admin"],
@@ -49,6 +50,11 @@ const nextConfig: NextConfig = {
       permanent: true,
     }));
     return [
+      ...postSlugRedirects.map((redirect) => ({
+        source: redirect.source,
+        destination: redirect.destination,
+        permanent: true,
+      })),
       ...legacy,
       // Cleaner public URLs: posts + destination countries at /{slug}
       { source: "/blog/:slug", destination: "/:slug", permanent: true },

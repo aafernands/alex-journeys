@@ -227,7 +227,7 @@ export const guideHubs: GuideHub[] = [
       },
       {
         title: "Chasing Sunrise at Maroon Bells",
-        href: "/marron-bells",
+        href: "/maroon-bells",
         kind: "post",
       },
       {

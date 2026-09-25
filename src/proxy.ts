@@ -16,6 +16,7 @@ export function proxy(request: NextRequest) {
   const needsAuth =
     pathname.startsWith("/cms/new") ||
     pathname.startsWith("/cms/edit") ||
+    pathname.startsWith("/cms/seo") ||
     pathname.startsWith("/cms/destinations");
 
   if (!needsAuth) {
@@ -42,6 +43,8 @@ export const config = {
     "/cms/new",
     "/cms/new/:path*",
     "/cms/edit/:path*",
+    "/cms/seo",
+    "/cms/seo/:path*",
     "/cms/destinations",
     "/cms/destinations/:path*",
   ],

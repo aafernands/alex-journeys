@@ -1,10 +1,7 @@
-const DEFAULT_SITE_URL = "https://www.alexjourneys.com";
+import { getSiteUrl } from "@/lib/site-url";
 
 function siteOrigin(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL?.trim() || DEFAULT_SITE_URL).replace(
-    /\/+$/,
-    "",
-  );
+  return getSiteUrl();
 }
 
 export const PINTEREST_CREATE_PIN_BASE =
