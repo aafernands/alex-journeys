@@ -20,7 +20,7 @@ const PlacesWorldMap = dynamic(
 
 function PlacesWorldMapFallback() {
   return (
-    <section className="mt-8" aria-labelledby="places-world-map-heading">
+    <section className="mt-10" aria-labelledby="places-world-map-heading">
       <h2
         id="places-world-map-heading"
         className="font-display text-title text-heading"
@@ -31,7 +31,7 @@ function PlacesWorldMapFallback() {
         Visited countries in orange — tap a country or a pin to explore that
         journal.
       </p>
-      <div className="panel mt-4 max-w-full overflow-hidden p-0">
+      <div className="panel mt-5 max-w-full overflow-hidden p-0">
         <div
           className="flex h-[18rem] w-full items-center justify-center bg-surface-soft text-sm text-muted sm:h-[26rem] md:h-[32rem] lg:h-[36rem]"
           role="status"

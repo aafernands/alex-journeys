@@ -34,12 +34,12 @@ function GuideIndex({
   return (
     <>
       {pages.length > 0 ? (
-        <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+        <ul className="mt-8 grid gap-3 sm:grid-cols-2">
           {pages.map((page) => (
             <li key={page.href}>
               <Link
                 href={page.href}
-                className="panel-interactive group flex h-full gap-4 p-4"
+                className="panel-interactive group flex h-full gap-4 p-5"
               >
                 <span className="icon-tile">
                   <NavIcon name="book-open" size={20} />
@@ -64,7 +64,7 @@ function GuideIndex({
           ))}
         </ul>
       ) : (
-        <p className="mt-8 text-text">
+        <p className="mt-10 text-text">
           More notes coming soon. Meanwhile, browse the{" "}
           <Link href="/blog" className="text-link hover:text-accent">
             full blog
@@ -181,7 +181,6 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
       compact={isPlanner}
       planFlow={isPlanner}
       hideHeader={isPlanner}
-      comfortableClass={isPlanner ? undefined : "guides-page"}
       tone={isPlanner ? "default" : "white"}
       crumbs={[
         { href: "/", label: "Home" },
