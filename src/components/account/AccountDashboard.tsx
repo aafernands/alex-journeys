@@ -1,5 +1,6 @@
 "use client";
 
+import { VerifyEmailPanel } from "@/components/account/VerifyEmailPanel";
 import Link from "next/link";
 import {
   Bookmark,
@@ -112,6 +113,10 @@ export type AccountDashboardProps = {
   comments: AccountCommentRow[];
   commentsError: string | null;
   membership: MembershipPanel;
+  /** Show the confirm-your-email panel (email/password accounts only). */
+  needsEmailVerification?: boolean;
+  /** A guest Premium purchase is waiting for this email. */
+  pendingPremium?: boolean;
 };
 
 type SavedFilter = "all" | "hotels" | "stories";
@@ -197,6 +202,8 @@ export function AccountDashboard({
   comments,
   commentsError,
   membership,
+  needsEmailVerification = false,
+  pendingPremium = false,
 }: AccountDashboardProps) {
   const [section, setSection] = useState<Section>("overview");
   const [savedFilter, setSavedFilter] = useState<SavedFilter>("all");
@@ -313,6 +320,12 @@ export function AccountDashboard({
               </h1>
             </div>
           )}
+
+          {needsEmailVerification && email ? (
+            <div className="mb-4">
+              <VerifyEmailPanel email={email} pendingPremium={pendingPremium} />
+            </div>
+          ) : null}
 
           {/* Overview */}
           <div hidden={section !== "overview"} className="space-y-4">

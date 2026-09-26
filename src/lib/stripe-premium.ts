@@ -98,6 +98,17 @@ export async function subscriptionSyncFromId(
   return membershipFromSubscription(subscription, premiumPriceIds());
 }
 
+/** Raw subscription plus its membership snapshot (webhook emails need both). */
+export async function subscriptionWithSync(
+  subscriptionId: string,
+): Promise<{ subscription: unknown; sync: SubscriptionSync } | null> {
+  const stripe = getPremiumStripe();
+  if (!stripe) return null;
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const sync = membershipFromSubscription(subscription, premiumPriceIds());
+  return sync ? { subscription, sync } : null;
+}
+
 export async function subscriptionSyncFromCheckoutSession(
   sessionId: string,
 ): Promise<SubscriptionSync | null> {

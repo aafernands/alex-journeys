@@ -16,7 +16,7 @@ import {
   type MembershipRecord,
   type SubscriptionSync,
 } from "@/lib/membership";
-import { getUserByEmail } from "@/lib/users";
+import { getUserById, getVerifiedUserByEmail, normalizeEmail } from "@/lib/users";
 
 function usersCollection() {
   if (!isFirebaseConfigured()) return null;
@@ -115,8 +115,10 @@ export type MembershipTarget =
 
 /**
  * Who a Stripe subscription belongs to: metadata userId, then the reader who
- * already holds this Stripe customer, then a reader account with the buyer
- * email, then a pending record for that email.
+ * already holds this Stripe customer, then a reader account that has
+ * VERIFIED the buyer email, then a pending record for that email. An
+ * unverified account with that email never receives the membership directly;
+ * it waits in pending until the owner verifies (see email-verification.ts).
  */
 export async function resolveMembershipTarget(input: {
   userId: string | null;
@@ -130,8 +132,8 @@ export async function resolveMembershipTarget(input: {
   }
   const email = cleanPremiumEmail(input.email);
   if (!email) return null;
-  const account = await getUserByEmail(email);
-  if (account && !account.disabled) return { kind: "user", userId: account.id };
+  const account = await getVerifiedUserByEmail(email);
+  if (account) return { kind: "user", userId: account.id };
   return { kind: "pending", email };
 }
 
@@ -180,7 +182,8 @@ export async function applySubscriptionSync(
 
 /**
  * Membership for a signed-in reader. When their doc has no Premium yet and a
- * signed-out purchase is waiting for their email, move it onto the account.
+ * signed-out purchase is waiting for their email, move it onto the account,
+ * but only once the account has verified that email.
  */
 export async function getReaderMembership(
   userId: string,
@@ -191,12 +194,30 @@ export async function getReaderMembership(
   const clean = cleanPremiumEmail(email);
   if (!clean) return current;
   try {
+    if (!(await ownsVerifiedEmail(userId, clean))) return current;
     const claimed = await claimPendingMembership(userId, clean, current);
     return claimed ?? current;
   } catch (err) {
     console.warn("[premium] pending membership claim failed:", err);
     return current;
   }
+}
+
+/** The profile's own email is `email` and it has been verified. */
+async function ownsVerifiedEmail(userId: string, email: string): Promise<boolean> {
+  const profile = await getUserById(userId);
+  if (!profile || profile.disabled || !profile.emailVerified) return false;
+  return normalizeEmail(profile.email) === email;
+}
+
+/** True when a guest purchase is waiting for this email. */
+export async function hasPendingMembership(email: string | null | undefined): Promise<boolean> {
+  const clean = cleanPremiumEmail(email);
+  if (!clean) return false;
+  const pending = pendingCollection();
+  if (!pending) return false;
+  const snap = await pending.doc(pendingMembershipDocId(clean)).get();
+  return snap.exists;
 }
 
 async function claimPendingMembership(

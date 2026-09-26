@@ -5,7 +5,12 @@
  * - RESEND_API_KEY (required to send)
  * - EMAIL_FROM optional — default uses Resend’s onboarding address for testing.
  *   Production should use a verified domain, e.g.
- *   `Alex Journeys <contact@alexjourneys.com>`.
+ *   `Alex Journeys Support <support@alexjourneys.com>`.
+ * - EMAIL_REPLY_TO optional — where replies go. Defaults to SUPPORT_EMAIL.
+ * - SUPPORT_EMAIL optional — shown in email footers. Default
+ *   `support@alexjourneys.com`.
+ *
+ * See docs/EMAILS.md for the full list of emails and DNS setup.
  *
  * With the default `onboarding@resend.dev` sender, Resend only delivers to the
  * email address on the Resend account until a custom domain is verified.
@@ -39,11 +44,25 @@ export function emailFromAddress(): string {
   return from || DEFAULT_FROM;
 }
 
+const DEFAULT_SUPPORT_EMAIL = "support@alexjourneys.com";
+
+/** Support address shown in email footers and used as the default reply-to. */
+export function supportEmailAddress(): string {
+  return process.env.SUPPORT_EMAIL?.trim() || DEFAULT_SUPPORT_EMAIL;
+}
+
+/** Reply-To header for outgoing mail. */
+export function emailReplyToAddress(): string {
+  return process.env.EMAIL_REPLY_TO?.trim() || supportEmailAddress();
+}
+
 export type SendEmailInput = {
   to: string;
   subject: string;
   html: string;
   text?: string;
+  /** Overrides the default reply-to (EMAIL_REPLY_TO / SUPPORT_EMAIL). */
+  replyTo?: string;
 };
 
 /** Strip secrets / truncate for safe client-facing copy. */
@@ -79,6 +98,7 @@ export async function sendEmail(input: SendEmailInput): Promise<void> {
     body: JSON.stringify({
       from: emailFromAddress(),
       to: [to],
+      reply_to: input.replyTo?.trim() || emailReplyToAddress(),
       subject: input.subject,
       html: input.html,
       ...(input.text ? { text: input.text } : {}),
@@ -129,4 +149,31 @@ export function publicSiteOrigin(): string {
     process.env.NEXTAUTH_URL?.trim() ||
     "https://www.alexjourneys.com";
   return raw.replace(/\/$/, "");
+}
+
+export type SafeSendResult =
+  | { status: "sent" }
+  | { status: "skipped"; reason: "not_configured" }
+  | { status: "failed"; error: string };
+
+/**
+ * Send without throwing. When RESEND_API_KEY is missing the email is logged
+ * and skipped, so background senders (Stripe webhook, sign-up) never crash.
+ */
+export async function sendEmailSafe(
+  input: SendEmailInput,
+  label = "email",
+): Promise<SafeSendResult> {
+  if (!isEmailConfigured()) {
+    console.info(`[email] ${label} skipped: RESEND_API_KEY is not set.`);
+    return { status: "skipped", reason: "not_configured" };
+  }
+  try {
+    await sendEmail(input);
+    return { status: "sent" };
+  } catch (err) {
+    const error = err instanceof Error ? err.message : "Failed to send email.";
+    console.error(`[email] ${label} failed:`, error);
+    return { status: "failed", error };
+  }
 }

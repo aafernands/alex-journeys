@@ -9,6 +9,8 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       isAdmin?: boolean;
+      /** Account email is verified (see src/lib/email-verification.ts). */
+      emailConfirmed?: boolean;
     };
   }
 }
@@ -22,5 +24,7 @@ declare module "next-auth/jwt" {
     profileSyncedAt?: number;
     /** Auth.js provider id from the sign-in that created this token. */
     authProvider?: string;
+    /** Mirrors users/{id}.emailVerified, refreshed with the profile sync. */
+    emailConfirmed?: boolean;
   }
 }

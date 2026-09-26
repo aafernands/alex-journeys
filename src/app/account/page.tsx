@@ -39,7 +39,11 @@ import {
   toMembershipPublic,
   type MembershipPublic,
 } from "@/lib/membership";
-import { getReaderMembership, saveMembership } from "@/lib/membership-store";
+import {
+  getReaderMembership,
+  hasPendingMembership,
+  saveMembership,
+} from "@/lib/membership-store";
 import { subscriptionSyncFromCheckoutSession } from "@/lib/stripe-premium";
 import type { MembershipPanel } from "@/components/account/MembershipSettings";
 import { dateSummary } from "@/lib/trip-planner-model";
@@ -138,6 +142,8 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
   let hasPassword = false;
   let profileLoaded = false;
   let pendingNewEmail: string | null = null;
+  let needsEmailVerification = false;
+  let pendingPremium = false;
   let profileName = user?.name?.trim() || "";
   let profileImage = user?.image ?? null;
   let profileEmail = user?.email ?? "";
@@ -169,6 +175,10 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
         profileName = profile.name?.trim() || profileName;
         profileImage = profile.image ?? profileImage;
         profileEmail = profile.email || profileEmail;
+        needsEmailVerification = Boolean(profile.email) && !profile.emailVerified;
+      }
+      if (needsEmailVerification && profile?.email) {
+        pendingPremium = await hasPendingMembership(profile.email).catch(() => false);
       }
       const pending = await getPendingEmailChangeForUser(userId);
       pendingNewEmail = pending?.newEmail ?? null;
@@ -321,6 +331,8 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
       welcome: query.premium === "welcome",
       unavailable: membershipUnavailable,
     }),
+    needsEmailVerification,
+    pendingPremium,
   };
 
   return (

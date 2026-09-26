@@ -11,6 +11,7 @@ Reader sessions **never** unlock `/cms`. CMS still requires `CMS_ADMIN_EMAILS` (
 | Header **Sign in** | Goes to `/login` (not direct Google). On a phone it is only in the menu, as a full-width **Sign in / Create account**. The sticky bar keeps search and the menu. |
 | `/login` | Sign in / Create account (name, email, password ≥ 8) + Continue with Google + Continue with X (when configured) + **Forgot password?** |
 | `/forgot-password` | Request a time-limited reset email (Resend) |
+| `/verify-email` | Confirm the account email with a 6-digit code, or open the emailed link (`?uid=…&token=…`). See [EMAILS.md](./EMAILS.md). |
 | `/reset-password?token=…` | Set a new password, then sign in |
 | `/account` | Dashboard; **Profile settings** (name, photo, email change) + **Change password** for credentials users |
 | `/account/confirm-email?token=…` | Confirm a pending email change |

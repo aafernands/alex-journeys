@@ -12,6 +12,7 @@ import {
   ImageIcon,
   LayoutDashboard,
   ListChecks,
+  Mail,
   MapPin,
   Menu,
   MessageSquare,
@@ -35,6 +36,7 @@ const NAV = [
   { href: "/cms/design", label: "Website design", icon: Palette },
   { href: "/cms/users", label: "Users", icon: Users },
   { href: "/cms/members", label: "Members", icon: Gem },
+  { href: "/cms/emails", label: "Emails", icon: Mail },
   { href: "/cms/downloads", label: "Downloads", icon: FileDown },
   { href: "/cms/help", label: "Help", icon: HelpCircle },
 ] as const;

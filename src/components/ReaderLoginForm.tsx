@@ -131,6 +131,7 @@ export function ReaderLoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [oauthPending, setOauthPending] = useState<OauthProvider | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
@@ -211,6 +212,8 @@ export function ReaderLoginForm({
     }
 
     setPending(true);
+    setNotice(null);
+    let verifyAfterSignup = false;
     try {
       if (mode === "signup") {
         const res = await fetch("/api/auth/register", {
@@ -223,7 +226,12 @@ export function ReaderLoginForm({
             ...(turnstileToken ? { turnstileToken } : {}),
           }),
         });
-        const data = (await res.json()) as { error?: string };
+        const data = (await res.json()) as {
+          error?: string;
+          message?: string;
+          pendingPassword?: boolean;
+          verification?: string;
+        };
         if (!res.ok) {
           setError(data.error || "Could not create account.");
           setPending(false);
@@ -236,6 +244,18 @@ export function ReaderLoginForm({
         // if the follow-up credentials sign-in needs to be retried.
         turnstileRef.current?.reset();
         setTurnstileToken(null);
+
+        // Email already has a Google (or other) account: the password turns
+        // on only after the owner taps the link we emailed.
+        if (data.pendingPassword) {
+          setNotice(
+            data.message ||
+              "This email already has an account. Check your inbox to finish adding a password, or continue with Google.",
+          );
+          setPending(false);
+          return;
+        }
+        verifyAfterSignup = data.verification === "sent";
       }
 
       const result = await signIn("credentials", {
@@ -255,6 +275,14 @@ export function ReaderLoginForm({
         return;
       }
 
+      // New email sign-ups confirm their address next (skippable). Inline
+      // prompts (onAuthenticated) keep the reader where they are; the
+      // account page asks them to confirm later.
+      if (verifyAfterSignup && !onAuthenticated) {
+        router.push(`/verify-email?next=${encodeURIComponent(callbackUrl)}`);
+        router.refresh();
+        return;
+      }
       router.push(callbackUrl);
       router.refresh();
       onAuthenticated?.();
@@ -271,6 +299,12 @@ export function ReaderLoginForm({
         {mode === "signin" ? "Welcome back" : "Create your account"}
       </LoginTitle>
       <p className="mt-3 text-sm leading-relaxed text-muted">{supportingLine}</p>
+
+      {notice ? (
+        <p className="mt-4 text-sm font-medium text-heading" role="status">
+          {notice}
+        </p>
+      ) : null}
 
       {error || authError ? (
         <p

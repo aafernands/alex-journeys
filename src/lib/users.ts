@@ -26,6 +26,7 @@ import { createHash, randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
 import type { DocumentData } from "firebase-admin/firestore";
 import { getFirestoreDb, isFirebaseConfigured } from "@/lib/firebase-admin";
+import { isEmailVerifiedProfile } from "@/lib/email-verification";
 
 import type { AuthProviderId, UserPublic } from "@/lib/user-types";
 
@@ -159,6 +160,7 @@ function docToProfile(
     emailManagedLocally: data.emailManagedLocally === true,
     nameManagedLocally: data.nameManagedLocally === true,
     imageManagedLocally: data.imageManagedLocally === true,
+    emailVerified: isEmailVerifiedProfile(data),
   };
 }
 
@@ -201,6 +203,26 @@ export async function getUserByEmail(
   );
 }
 
+/**
+ * An enabled account that has verified this email, or null. Use this (not
+ * getUserByEmail) whenever an email match hands over something valuable,
+ * like a Premium membership bought as a guest.
+ */
+export async function getVerifiedUserByEmail(
+  email: string,
+): Promise<UserProfile | null> {
+  const normalized = normalizeEmail(email);
+  if (!normalized) return null;
+  const first = await getUserByEmail(normalized);
+  if (first && first.emailVerified && !first.disabled) return first;
+  const snap = await usersCollection()
+    .where("email", "==", normalized)
+    .limit(5)
+    .get();
+  const profiles = snap.docs.map((d) => docToProfile(d.id, d.data()));
+  return profiles.find((p) => p.emailVerified && !p.disabled) ?? null;
+}
+
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, BCRYPT_ROUNDS);
 }
@@ -218,13 +240,25 @@ export type RegisterInput = {
   password: string;
 };
 
+export type RegisterResult = {
+  user: UserPublic;
+  /**
+   * The email already belongs to a Google (or other sign-in) account. The
+   * password is held as `pendingPasswordHash` and only switched on after the
+   * owner taps the link we email them, so nobody can add a password to
+   * someone else's account.
+   */
+  pendingPassword: boolean;
+};
+
 /**
  * Create an email/password user. Throws Error with message for validation /
  * conflict; throws UsersUnavailableError when Firestore is down.
+ * New accounts start with `emailVerified: false`.
  */
 export async function registerCredentialsUser(
   input: RegisterInput,
-): Promise<UserPublic> {
+): Promise<RegisterResult> {
   const name = input.name.trim();
   const email = normalizeEmail(input.email);
   const password = input.password;
@@ -245,8 +279,18 @@ export async function registerCredentialsUser(
   const now = new Date().toISOString();
   const passwordHash = await hashPassword(password);
 
-  // Prefer existing OAuth doc id so saves stay under the same user.
-  const docId = byEmail?.id ?? credentialsUserId(email);
+  // Existing Google/X/GitHub account for this email: hold the password until
+  // the owner confirms from their inbox (see confirmPendingPassword).
+  if (byEmail) {
+    if (byEmail.disabled) throw new Error("An account with this email already exists.");
+    await usersCollection().doc(byEmail.id).set(
+      { pendingPasswordHash: passwordHash, pendingPasswordAt: now, updatedAt: now },
+      { merge: true },
+    );
+    return { user: toUserPublic(byEmail), pendingPassword: true };
+  }
+
+  const docId = credentialsUserId(email);
   const ref = usersCollection().doc(docId);
   const prior = await ref.get();
   const priorData = prior.exists ? prior.data() ?? {} : {};
@@ -267,13 +311,60 @@ export async function registerCredentialsUser(
       updatedAt: now,
       lastLoginAt: toIso(priorData.lastLoginAt) ?? null,
       disabled: priorData.disabled === true,
+      emailVerified: priorData.emailVerified === true,
     },
     { merge: true },
   );
 
   const created = await getUserById(docId);
   if (!created) throw new Error("Could not create account.");
-  return toUserPublic(created);
+  return { user: toUserPublic(created), pendingPassword: false };
+}
+
+/**
+ * Owner confirmed from their inbox: turn the held password on and mark the
+ * email verified. Returns false when nothing was waiting.
+ */
+export async function confirmPendingPassword(userId: string): Promise<boolean> {
+  const id = userId.trim();
+  if (!id || id.includes("/")) return false;
+  const ref = usersCollection().doc(id);
+  const snap = await ref.get();
+  if (!snap.exists) return false;
+  const data = snap.data() ?? {};
+  if (data.disabled === true) return false;
+  if (typeof data.pendingPasswordHash !== "string" || !data.pendingPasswordHash) return false;
+  const providers = parseProviders(data.providers);
+  if (!providers.includes("credentials")) providers.push("credentials");
+  const { FieldValue } = await import("firebase-admin/firestore");
+  const now = new Date().toISOString();
+  await ref.set(
+    {
+      passwordHash: data.pendingPasswordHash,
+      providers,
+      pendingPasswordHash: FieldValue.delete(),
+      pendingPasswordAt: FieldValue.delete(),
+      emailVerified: true,
+      emailVerifiedAt: now,
+      updatedAt: now,
+    },
+    { merge: true },
+  );
+  return true;
+}
+
+/** Mark the account email as verified (code, link, reset, or email change). */
+export async function markEmailVerified(userId: string, email: string): Promise<void> {
+  const id = userId.trim();
+  if (!id || id.includes("/")) return;
+  const ref = usersCollection().doc(id);
+  const snap = await ref.get();
+  if (!snap.exists) return;
+  const data = snap.data() ?? {};
+  if (typeof data.email !== "string" || normalizeEmail(data.email) !== normalizeEmail(email)) return;
+  if (data.emailVerified === true) return;
+  const now = new Date().toISOString();
+  await ref.set({ emailVerified: true, emailVerifiedAt: now, updatedAt: now }, { merge: true });
 }
 
 /**
@@ -372,6 +463,23 @@ export async function upsertOauthUser(
       lastLoginAt: now,
     };
     if (email && !emailManagedLocally) patch.email = email;
+    // Google only returns verified addresses. When the stored email is that
+    // same address, the account counts as verified.
+    const storedEmail =
+      typeof patch.email === "string"
+        ? patch.email
+        : typeof priorData.email === "string"
+          ? normalizeEmail(priorData.email)
+          : "";
+    if (
+      input.provider === "google" &&
+      email &&
+      storedEmail === email &&
+      priorData.emailVerified !== true
+    ) {
+      patch.emailVerified = true;
+      patch.emailVerifiedAt = now;
+    }
     if (!nameManagedLocally) {
       if (input.name != null && String(input.name).trim()) {
         patch.name = String(input.name).trim();
@@ -663,13 +771,19 @@ export async function resetPasswordWithToken(
     throw new Error("This reset link is invalid or has expired.");
   }
 
-  const publicUser = await setPasswordForUser(user.id, password);
+  await setPasswordForUser(user.id, password);
   const now = new Date().toISOString();
   await resetTokensCollection()
     .doc(record.tokenHash)
     .set({ usedAt: now }, { merge: true });
   await invalidateResetTokensForUser(user.id);
-  return publicUser;
+  // The link reached this inbox, so the reader owns the address.
+  if (record.email && record.email === normalizeEmail(user.email)) {
+    await markEmailVerified(user.id, record.email);
+  }
+  const updated = await getUserById(user.id);
+  if (!updated) throw new Error("Could not update password.");
+  return toUserPublic(updated);
 }
 
 /**
@@ -999,6 +1113,9 @@ export async function confirmEmailChange(
         updatedAt: now,
         // Always set after a verified change so future OAuth logins keep it.
         emailManagedLocally: true,
+        // The confirmation link reached the new inbox.
+        emailVerified: true,
+        emailVerifiedAt: now,
       },
       { merge: true },
     );
