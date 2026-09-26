@@ -32,7 +32,7 @@ import { bookingDestinationLabel } from "@/lib/post-types";
 import { auth } from "@/auth";
 import { PremiumGate } from "@/components/premium/PremiumGate";
 import { isPremium } from "@/lib/membership";
-import { getMembership } from "@/lib/membership-store";
+import { getReaderMembership } from "@/lib/membership-store";
 
 /** Pull simple TOC from h2 text in HTML when present */
 function extractToc(html: string): { id: string; label: string }[] {
@@ -78,7 +78,9 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
   let member = false;
   if (post.membersOnly && userId) {
     try {
-      member = isPremium({ membership: await getMembership(userId) });
+      member = isPremium({
+        membership: await getReaderMembership(userId, session?.user?.email),
+      });
     } catch (err) {
       console.warn("[premium] story gate lookup failed:", err);
     }

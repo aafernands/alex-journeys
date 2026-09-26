@@ -4918,6 +4918,426 @@ body.mobile-bottom-nav-visible .premium-join-bar {
   }
 }
 
+/* ——— Premium on-site checkout (/premium/join) ——— */
+/* A focused task: trip-focus hides the tab bar and ticker (see trip-focus.ts). */
+main.premium-join {
+  min-height: calc(100dvh - var(--header-bar) - 2rem);
+}
+
+.pj-shell {
+  width: 100%;
+  max-width: 30rem;
+  margin-inline: auto;
+  padding: 1.25rem 1.25rem calc(2.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .pj-shell {
+    padding-top: 2.75rem;
+    padding-bottom: 4.5rem;
+  }
+}
+
+.pj-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pj-back {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--white);
+  color: var(--heading);
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.pj-back:hover {
+  background: var(--surface-soft);
+  border-color: var(--accent);
+}
+
+.pj-step-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pj-progress {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+}
+
+.pj-progress > span {
+  height: 0.375rem;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background-color 250ms ease;
+}
+
+.pj-progress > span.is-filled {
+  background: var(--accent);
+}
+
+.pj-panel {
+  margin-top: 2rem;
+}
+
+.pj-title {
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--heading);
+  text-wrap: balance;
+  outline: none;
+}
+
+@media (min-width: 768px) {
+  .pj-title {
+    font-size: 2rem;
+  }
+}
+
+.pj-lead {
+  margin-top: 0.875rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.pj-as {
+  margin-top: 0.875rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.pj-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.375rem;
+  margin-top: 1.875rem;
+}
+
+.pj-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pj-optional {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.pj-input {
+  display: block;
+  width: 100%;
+  height: 3.5rem;
+  padding: 0 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-strong);
+  background: var(--white);
+  color: var(--heading);
+  font-size: 1.0625rem;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.pj-input::placeholder {
+  color: var(--muted-light);
+}
+
+html.dark .pj-input::placeholder {
+  color: var(--muted);
+}
+
+.pj-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.pj-input[aria-invalid="true"] {
+  border-color: #dc2626;
+}
+
+.pj-hint {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.pj-error {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: #dc2626;
+}
+
+html.dark .pj-error {
+  color: #f87171;
+}
+
+html.dark .pj-input[aria-invalid="true"] {
+  border-color: #f87171;
+}
+
+.pj-form-error {
+  margin-top: 1rem;
+}
+
+.pj-link {
+  font-weight: 600;
+  color: var(--accent-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+html.dark .pj-link {
+  color: var(--accent);
+}
+
+.pj-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  margin-top: 2rem;
+}
+
+.btn.pj-cta {
+  width: 100%;
+  min-height: 3.5rem;
+  border-radius: 0.875rem;
+  font-size: 1.0625rem;
+}
+
+.btn.pj-cta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pj-secure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.pj-secure svg {
+  color: var(--steel);
+}
+
+.pj-summary {
+  margin-top: 1.5rem;
+  padding: 1.125rem 1.25rem;
+  border: 2px solid var(--accent);
+  border-radius: 1rem;
+  background: var(--white);
+  box-shadow: 0 16px 36px -24px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.pj-eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+}
+
+html.dark .pj-eyebrow {
+  color: var(--accent);
+}
+
+.pj-trial {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--heading);
+}
+
+.pj-trial svg {
+  color: var(--accent);
+}
+
+.pj-plan-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+}
+
+.pj-plan-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+  min-height: 3.5rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-strong);
+  background: var(--white);
+  text-align: left;
+}
+
+.pj-plan-option.is-selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--white));
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.pj-payment {
+  margin-top: 1.75rem;
+}
+
+.pj-element-wrap:has(.pj-element-skeleton) {
+  min-height: 12rem;
+}
+
+.pj-element-hidden {
+  height: 0;
+  overflow: hidden;
+}
+
+.pj-element-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pj-skel {
+  display: block;
+  border-radius: 0.75rem;
+  background: linear-gradient(
+    90deg,
+    var(--surface) 0%,
+    var(--surface-soft) 50%,
+    var(--surface) 100%
+  );
+  background-size: 200% 100%;
+  animation: pj-shimmer 1.4s ease-in-out infinite;
+}
+
+.pj-skel-tabs {
+  height: 4.25rem;
+}
+
+.pj-skel-label {
+  width: 7rem;
+  height: 0.875rem;
+  margin-top: 0.5rem;
+  border-radius: 999px;
+}
+
+.pj-skel-input {
+  height: 3.25rem;
+}
+
+.pj-skel-note {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+@keyframes pj-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.pj-payment-fallback {
+  margin-top: 1rem;
+  padding: 1rem 1.125rem;
+  border-radius: 0.875rem;
+  border: 1px dashed var(--border-strong);
+  background: var(--surface-soft);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.pj-terms {
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--muted);
+  text-align: center;
+  text-wrap: pretty;
+}
+
+.pj-success {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-solid);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.pj-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.pj-signin-card {
+  margin-top: 2rem;
+  padding: 1.375rem 1.25rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface-soft);
+}
+
+.pj-spinner {
+  display: inline-block;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  animation: pj-spin 0.9s linear infinite;
+}
+
+@keyframes pj-spin {
+  to { transform: rotate(360deg); }
+}
+
+.pj-loading {
+  min-height: 20rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pj-skel,
+  .pj-spinner {
+    animation: none;
+  }
+}
+
 /* Compact booking flows. Same tokens as Plan a Trip. */
 main.plan-page[data-density="compact"] h1.text-display {
   font-size: var(--type-title-size);

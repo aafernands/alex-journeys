@@ -363,7 +363,30 @@ export type SubscriptionSync = {
   userId: string | null;
   customerId: string;
   membership: MembershipRecord;
+  /** Buyer email from on-site checkout metadata, when set. Lowercased. */
+  email?: string | null;
 };
+
+/** Loose email check shared by the on-site checkout form and its API. */
+export const PREMIUM_EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+export function cleanPremiumEmail(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const email = value.trim().toLowerCase();
+  if (!email || email.length > 254 || !PREMIUM_EMAIL_PATTERN.test(email)) return null;
+  return email;
+}
+
+/**
+ * On-site checkout with a trial starts the subscription as `trialing` with a
+ * pending SetupIntent. Until the card is saved it is not a membership.
+ */
+export function awaitingTrialPaymentMethod(subscription: unknown): boolean {
+  const record = asRecord(subscription);
+  if (!record || record.status !== "trialing") return false;
+  if (!idOf(record.pending_setup_intent)) return false;
+  return !idOf(record.default_payment_method);
+}
 
 /** Map a Stripe Subscription (current or older API shape) onto a membership record. */
 export function membershipFromSubscription(
@@ -385,8 +408,10 @@ export function membershipFromSubscription(
   const metadata = asRecord(record.metadata);
   const userId = cleanUserId(metadata?.userId);
 
+  const email = cleanPremiumEmail(metadata?.email);
+
   const membership: MembershipRecord = {
-    status: mapStatus(record.status),
+    status: awaitingTrialPaymentMethod(record) ? "incomplete" : mapStatus(record.status),
     plan: planForPrice(priceId, priceIds),
     currentPeriodEnd: periodEnd,
     cancelAtPeriodEnd: record.cancel_at_period_end === true,
@@ -397,7 +422,7 @@ export function membershipFromSubscription(
     stripeEventAt: null,
   };
 
-  return { userId, customerId, membership };
+  return { userId, customerId, membership, email };
 }
 
 /**

@@ -39,7 +39,7 @@ import {
   toMembershipPublic,
   type MembershipPublic,
 } from "@/lib/membership";
-import { getMembership, saveMembership } from "@/lib/membership-store";
+import { getReaderMembership, saveMembership } from "@/lib/membership-store";
 import { subscriptionSyncFromCheckoutSession } from "@/lib/stripe-premium";
 import type { MembershipPanel } from "@/components/account/MembershipSettings";
 import { dateSummary } from "@/lib/trip-planner-model";
@@ -142,7 +142,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
 
   if (signedIn && userId && firebaseOk) {
     try {
-      const stored = await getMembership(userId);
+      const stored = await getReaderMembership(userId, user?.email);
       membership = stored ? toMembershipPublic(stored) : null;
       portalAvailable = Boolean(stored?.stripeCustomerId && process.env.STRIPE_SECRET_KEY?.trim());
     } catch (err) {
