@@ -48,7 +48,7 @@ export function Hero() {
         </p>
       ) : null}
 
-      <div className="section-shell relative z-10 w-full pb-10 pt-[calc(var(--site-header-bar)+1.5rem)] md:pb-12 md:pt-[calc(var(--site-header-bar)+2rem)]">
+      <div className="section-shell relative z-10 w-full pb-10 pt-[calc(var(--site-header-bar)_+_1.5rem)] md:pb-12 md:pt-[calc(var(--site-header-bar)_+_2rem)]">
         <div className="max-w-xl xl:max-w-2xl">
           <h1
             id="hero-heading"
