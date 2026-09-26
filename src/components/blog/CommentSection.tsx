@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useReaderLoginPrompt } from "@/components/ReaderLoginPrompt";
 import { COMMENT_MAX_BODY, type Comment } from "@/lib/comment-types";
 
 type Props = {
@@ -79,6 +79,9 @@ export function CommentSection({ slug }: Props) {
   const [pending, setPending] = useState(false);
   const [thanks, setThanks] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  /** The reader's own comments on this story that are still waiting for moderation. */
+  const [mine, setMine] = useState<Comment[]>([]);
+  const openReaderLogin = useReaderLoginPrompt();
 
   const refresh = useCallback(async () => {
     try {
@@ -107,10 +110,38 @@ export function CommentSection({ slug }: Props) {
     void refresh();
   }, [refresh]);
 
+  useEffect(() => {
+    if (!signedIn) {
+      setMine([]);
+      return;
+    }
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch(`/api/comments/mine?slug=${encodeURIComponent(slug)}`, {
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const data = (await res.json()) as { comments?: Comment[] };
+        if (!alive || !Array.isArray(data.comments)) return;
+        setMine(data.comments.filter((c) => c.status === "pending"));
+      } catch {
+        // Own pending comments are a nicety; the public list still loads.
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [signedIn, slug]);
+
   const threads = useMemo((): Thread[] => {
-    const tops = comments.filter((c) => !c.parentId);
+    const seen = new Set(comments.map((c) => c.id));
+    const shown = [...comments, ...mine.filter((c) => !seen.has(c.id))].sort((a, b) =>
+      a.createdAt.localeCompare(b.createdAt),
+    );
+    const tops = shown.filter((c) => !c.parentId);
     const byParent = new Map<string, Comment[]>();
-    for (const c of comments) {
+    for (const c of shown) {
       if (!c.parentId) continue;
       const list = byParent.get(c.parentId) ?? [];
       list.push(c);
@@ -120,15 +151,14 @@ export function CommentSection({ slug }: Props) {
       parent,
       replies: byParent.get(parent.id) ?? [],
     }));
-  }, [comments]);
+  }, [comments, mine]);
 
   const count = comments.length;
 
-  const loginHref = (() => {
-    if (typeof window === "undefined") return `/login?callbackUrl=/${slug}`;
+  const askToSignIn = () => {
     const path = window.location.pathname + window.location.search + "#comments";
-    return `/login?callbackUrl=${encodeURIComponent(path)}`;
-  })();
+    openReaderLogin({ returnTo: path, intro: "Sign in to comment on this story." });
+  };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -154,6 +184,7 @@ export function CommentSection({ slug }: Props) {
       const data = (await res.json().catch(() => null)) as {
         error?: string;
         message?: string;
+        comment?: Comment;
       } | null;
       if (res.status === 503) {
         setUnavailable(true);
@@ -166,6 +197,14 @@ export function CommentSection({ slug }: Props) {
       }
       setBody("");
       setReplyTo(null);
+      const created = data?.comment;
+      if (created?.id) {
+        if (created.status === "approved") {
+          setComments((prev) => [...prev, created]);
+        } else {
+          setMine((prev) => [...prev, created]);
+        }
+      }
       setThanks(
         data?.message ??
           "Thanks — your comment is awaiting moderation.",
@@ -178,6 +217,7 @@ export function CommentSection({ slug }: Props) {
   };
 
   const onDelete = async (id: string) => {
+    if (!window.confirm("Delete this comment? Replies to it are removed too.")) return;
     setDeletingId(id);
     setError(null);
     try {
@@ -194,6 +234,7 @@ export function CommentSection({ slug }: Props) {
       setComments((prev) =>
         prev.filter((c) => c.id !== id && c.parentId !== id),
       );
+      setMine((prev) => prev.filter((c) => c.id !== id && c.parentId !== id));
     } catch {
       setError("Could not delete.");
     } finally {
@@ -279,15 +320,12 @@ export function CommentSection({ slug }: Props) {
               </div>
             </form>
           ) : (
-            <p className="rounded-lg border border-border bg-surface-soft px-4 py-3 text-sm text-text">
-              <Link
-                href={loginHref}
-                className="font-semibold text-link hover:text-accent"
-              >
-                Sign in
-              </Link>{" "}
-              to comment.
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface-soft px-4 py-3">
+              <p className="text-sm text-text">Sign in to comment. Comments are moderated before they appear.</p>
+              <button type="button" onClick={askToSignIn} className="btn btn-secondary">
+                Sign in to comment
+              </button>
+            </div>
           )}
 
           {thanks ? (
@@ -299,7 +337,7 @@ export function CommentSection({ slug }: Props) {
             </p>
           ) : null}
           {error ? (
-            <p className="mt-3 text-sm text-red-600 dark:text-red-400" role="status">
+            <p className="mt-3 text-sm text-[var(--link)]" role="status">
               {error}
             </p>
           ) : null}
@@ -322,7 +360,7 @@ export function CommentSection({ slug }: Props) {
                 canDelete={canDelete(parent)}
                 deleting={deletingId === parent.id}
                 onReply={
-                  signedIn
+                  signedIn && parent.status !== "pending"
                     ? () => {
                         setReplyTo(parent);
                         setThanks(null);
@@ -380,16 +418,21 @@ function CommentRow({
           >
             {formatWhen(comment.createdAt)}
           </time>
+          {comment.status === "pending" ? (
+            <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">
+              Pending · only you can see this
+            </span>
+          ) : null}
         </div>
         <p className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-text">
           {comment.body}
         </p>
-        <div className="mt-2 flex flex-wrap gap-3">
+        <div className="mt-1 flex flex-wrap gap-1">
           {onReply ? (
             <button
               type="button"
               onClick={onReply}
-              className="text-xs font-semibold text-link hover:text-accent"
+              className="-ml-2 inline-flex min-h-11 items-center px-2 text-xs font-semibold text-link hover:text-accent"
             >
               Reply
             </button>
@@ -399,7 +442,7 @@ function CommentRow({
               type="button"
               onClick={onDelete}
               disabled={deleting}
-              className="text-xs font-semibold text-muted hover:text-red-600 disabled:opacity-60"
+              className="inline-flex min-h-11 items-center px-2 text-xs font-semibold text-muted hover:text-[var(--link)] disabled:opacity-60"
             >
               {deleting ? "Deleting…" : "Delete"}
             </button>

@@ -338,3 +338,35 @@ export async function deleteComment(id: string): Promise<void> {
   batch.delete(ref);
   await batch.commit();
 }
+
+export type ReaderComment = Comment & {
+  /** Story title from content, or the slug when the story is gone. */
+  postTitle: string;
+  /** Link back to the comment on its story. */
+  href: string;
+};
+
+/**
+ * Every comment a reader wrote (any status), newest first, for My Journey.
+ * Single-field equality on `authorId` with an in-memory sort, so no
+ * composite index is needed.
+ */
+export async function listCommentsByAuthor(
+  userId: string,
+  limit = 100,
+): Promise<ReaderComment[]> {
+  const authorId = sanitizeUserId(userId);
+  const snap = await commentsCollection().where("authorId", "==", authorId).get();
+  const comments = sortByCreatedAt(
+    snap.docs.map((doc) => docToComment(doc.id, doc.data())),
+    "desc",
+  ).slice(0, Math.min(Math.max(limit, 1), 500));
+  return comments.map((comment) => {
+    const post = comment.slug ? getPostBySlug(comment.slug) : null;
+    return {
+      ...comment,
+      postTitle: post?.title ?? comment.slug,
+      href: `/${comment.slug}#comments`,
+    };
+  });
+}
