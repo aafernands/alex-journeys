@@ -6,7 +6,7 @@ import { CMS_DESIGN_HREF } from "@/lib/admin-edit";
 import { getSiteDesign } from "@/lib/site-design";
 
 /**
- * Full-viewport photo hero.
+ * Photo hero. Content height on phones; about half the viewport on desktop.
  * NOTE: do not use Tailwind `text-white` / `bg-white` here — in dark mode
  * `--white` is remapped to a dark surface, so those utilities go dark.
  * Use `text-hero-type` (cream in both themes) on the photo.
@@ -17,7 +17,7 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="relative flex min-h-[100dvh] items-center overflow-hidden"
+      className="relative flex items-center overflow-hidden md:min-h-[48vh]"
       aria-labelledby="hero-heading"
     >
       <div className="absolute inset-0" aria-hidden="true">
@@ -48,7 +48,7 @@ export function Hero() {
         </p>
       ) : null}
 
-      <div className="section-shell relative z-10 w-full pb-24 pt-28 md:pb-28 md:pt-32">
+      <div className="section-shell relative z-10 w-full pb-10 pt-[calc(var(--site-header-bar)+1.5rem)] md:pb-12 md:pt-[calc(var(--site-header-bar)+2rem)]">
         <div className="max-w-xl xl:max-w-2xl">
           <h1
             id="hero-heading"
@@ -57,11 +57,11 @@ export function Hero() {
             {hero.tagline}
           </h1>
 
-          <p className="animate-fade-up animate-delay-2 mt-5 max-w-lg text-lead text-hero-type/90 [text-shadow:0_1px_3px_rgba(0,0,0,0.4)]">
+          <p className="animate-fade-up animate-delay-2 mt-3 max-w-lg text-lead text-hero-type/90 [text-shadow:0_1px_3px_rgba(0,0,0,0.4)]">
             {hero.subtitle}
           </p>
 
-          <div className="animate-fade-up animate-delay-3 mt-8 flex w-full max-w-sm flex-col items-start gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="animate-fade-up animate-delay-3 mt-6 flex w-full max-w-sm flex-col items-start gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
             <Link
               href={hero.ctaPrimary.href}
               className="btn btn-block border border-transparent bg-hero-type text-near-black hover:bg-hero-type/90 sm:!w-auto sm:min-w-[11rem]"
@@ -88,7 +88,7 @@ export function Hero() {
 
           {hero.showFromTheRoad ? (
             <nav
-              className="animate-fade-up animate-delay-3 mt-10 hidden sm:block"
+              className="animate-fade-up animate-delay-3 mt-6 hidden sm:block"
               aria-label={hero.fromTheRoad.label}
             >
               <p className="inline-flex items-center gap-2 text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-hero-type">
