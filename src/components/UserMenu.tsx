@@ -31,7 +31,7 @@ function displayName(name?: string | null, email?: string | null): string {
   return local || "Account";
 }
 
-function initials(name?: string | null, email?: string | null): string {
+export function initials(name?: string | null, email?: string | null): string {
   const source = name?.trim() || email?.trim() || "?";
   const parts = source.split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
