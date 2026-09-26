@@ -35,6 +35,8 @@ type Props = {
   planFlow?: boolean;
   /** Keep the shared shell/admin chrome but let a page render its own hero/header. */
   hideHeader?: boolean;
+  /** Reading pages (Phase 4): opt into comfortable density with a scoping class, e.g. "journal-page". */
+  comfortableClass?: string;
 };
 
 /** Shared product page chrome — same section shell + type system as homepage. */
@@ -54,6 +56,7 @@ export function SitePage({
   compact = false,
   planFlow = false,
   hideHeader = false,
+  comfortableClass,
 }: Props) {
   const width = narrow ? "max-w-3xl" : "max-w-none";
   const bg =
@@ -65,9 +68,21 @@ export function SitePage({
 
   return (
     <main
-      className={[bg, compact ? "plan-page" : "", planFlow ? "plan-flow" : ""]
+      className={[
+        bg,
+        compact ? "plan-page" : "",
+        planFlow ? "plan-flow" : "",
+        !compact && comfortableClass ? comfortableClass : "",
+      ]
         .filter(Boolean)
         .join(" ")}
+      data-density={
+        compact && !planFlow
+          ? "compact"
+          : !compact && comfortableClass
+            ? "comfortable"
+            : undefined
+      }
     >
       {editHref ? (
         <AdminPublicChrome

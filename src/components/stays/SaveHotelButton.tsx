@@ -166,11 +166,7 @@ export function SaveHotelButton({ hotel, tripContext }: Props) {
     <div className="flex flex-col items-start gap-1 sm:items-end">
       <button
         type="button"
-        className={`inline-flex min-h-11 items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition disabled:opacity-60 ${
-          saved
-            ? "border-accent bg-accent/10 text-accent-deep"
-            : "border-border bg-white text-heading hover:border-accent hover:text-accent"
-        }`}
+        className={`btn ui-btn ${saved ? "btn-ink" : "btn-secondary"} disabled:opacity-60`}
         onClick={() => void toggle()}
         disabled={pending || (!ready && signedIn)}
         aria-pressed={signedIn ? saved : undefined}
@@ -179,11 +175,11 @@ export function SaveHotelButton({ hotel, tripContext }: Props) {
         {pending ? (saved ? "Removing…" : "Saving…") : label}
       </button>
       {saved && tripHref ? (
-        <a href={tripHref} className="text-xs font-semibold text-link hover:text-accent">
+        <a href={tripHref} className="ui-row-action">
           Saved to trip · View trip
         </a>
       ) : null}
-      {error ? <p className="text-xs text-red-600" role="status">{error}</p> : null}
+      {error ? <p className="ui-field-error" role="status">{error}</p> : null}
     </div>
   );
 }

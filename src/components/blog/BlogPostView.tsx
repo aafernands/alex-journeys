@@ -87,7 +87,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
   const storyPath = publicPostPath(slug);
 
   return (
-    <main>
+    <main className="journal-page" data-density="comfortable">
       <AdminPublicChrome
         editHref={editHref}
         editLabel="Edit post"
@@ -99,8 +99,8 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
       {/* Product-style article header — no magazine dark hero */}
       <header className="border-b border-border bg-white">
         <div
-          className={`section-shell pt-10 md:pt-14 ${
-            post.featuredImage ? "" : "pb-10 md:pb-14"
+          className={`section-shell pt-8 md:pt-10 ${
+            post.featuredImage ? "" : "pb-8 md:pb-10"
           }`}
         >
           <div className="mx-auto max-w-3xl">
@@ -130,7 +130,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
               </ol>
             </nav>
 
-            <p className="mt-8 eyebrow">
+            <p className="mt-6 eyebrow">
               {post.membersOnly ? "Members story" : "Journal"}
             </p>
             <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
@@ -140,7 +140,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
               <AdminSectionEdit href={editHref} label="Edit post" />
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-4">
               <span className="relative inline-flex shrink-0">
                 <span
@@ -191,7 +191,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
 
         {post.featuredImage ? (
           <PinnableImage
-            className="relative mt-10 aspect-[16/10] w-full bg-surface"
+            className="relative mt-8 aspect-[16/10] w-full bg-surface md:aspect-auto md:h-[min(48vh,30rem)]"
             pagePath={publicPostPath(slug)}
             mediaSrc={post.featuredImage.url}
             description={post.featuredImage.alt || post.title}
@@ -215,7 +215,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
           ) : null}
 
           <aside
-            className="panel-nested mt-8 bg-surface-soft px-5 py-4"
+            className="panel-nested mt-6 bg-surface-soft p-4"
             aria-label="Affiliates disclosure"
           >
             <p className="font-display text-sm font-bold text-heading">
@@ -237,7 +237,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
 
           {!locked && toc.length > 0 ? (
             <nav
-              className="panel mt-8 p-5"
+              className="panel mt-6 p-4"
               aria-label="Summary"
             >
               <p className="eyebrow">On this page</p>
@@ -263,7 +263,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
           {locked ? (
             <PremiumGate signedIn={Boolean(userId)} returnTo={storyPath} />
           ) : (
-            <div className="mt-10 md:mt-12">
+            <div className="mt-8">
               <PostContent
                 html={post.contentHtml}
                 pagePath={publicPostPath(slug)}
@@ -287,7 +287,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
             <PostItineraryTimeline itinerary={post.itinerary} />
           ) : null}
 
-          <aside className="panel-soft mt-14 flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
+          <aside className="panel-soft mt-10 flex flex-col gap-4 p-4 sm:flex-row sm:items-start">
             <div className="relative size-16 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-soft">
               <Image
                 src={site.authorPhoto}
@@ -298,7 +298,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
               />
             </div>
             <div>
-              <p className="font-display text-lg font-bold text-heading">
+              <p className="font-display text-xl font-bold text-heading">
                 I&apos;m Alex
               </p>
               <p className="mt-2 text-sm leading-relaxed text-text">
@@ -312,7 +312,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
 
           <CommentSection slug={slug} />
 
-          <footer className="mt-12 flex flex-wrap gap-3 border-t border-border pt-8">
+          <footer className="mt-10 flex flex-wrap gap-3 border-t border-border pt-6">
             <Link href="/blog" className="btn btn-secondary">
               ← All posts
             </Link>
@@ -326,7 +326,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
 
       {related.length > 0 ? (
         <div className="border-t border-border bg-surface-soft">
-          <div className="section-shell py-12 md:py-16">
+          <div className="section-shell py-8 md:py-12">
             <RelatedPosts posts={related} />
           </div>
         </div>

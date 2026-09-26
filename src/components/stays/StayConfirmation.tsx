@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
-import { plan } from "@/components/trip-planner/density";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { ListRow } from "@/components/ui/ListRow";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import type { StayConfirmationDetails } from "@/lib/stays";
 
 type Props = {
@@ -16,12 +18,7 @@ type Props = {
 
 function Row({ label, value }: { label: string; value: string }) {
   if (!value) return null;
-  return (
-    <div>
-      <dt className={plan.label}>{label}</dt>
-      <dd className="font-semibold text-heading">{value}</dd>
-    </div>
-  );
+  return <ListRow title={value} detail={label} />;
 }
 
 export function StayConfirmation({
@@ -34,23 +31,16 @@ export function StayConfirmation({
 }: Props) {
   const showBookingId = confirmation.bookingId !== confirmation.confirmationCode;
   return (
-    <section className="space-y-6 rounded-xl border border-line bg-white p-5 shadow-sm sm:p-7" aria-labelledby="stay-confirmation">
-      <div className="flex items-start gap-4">
-        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-700">
-          <CheckCircle2 className="h-7 w-7" aria-hidden="true" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-emerald-700">Reservation confirmed</p>
-          <h2 id="stay-confirmation" className="mt-1 font-display text-2xl font-bold text-heading">
-            {confirmation.hotelName}
-          </h2>
-        </div>
-      </div>
-      <p className="text-sm leading-relaxed text-text">
-        Nuitee accepted this {confirmation.sandbox ? "sandbox " : ""}reservation
-        {confirmation.status ? ` · ${confirmation.status}` : ""}.
+    <Card density="compact" aria-labelledby="stay-confirmation" className="flex flex-col gap-2">
+      <SectionHeader
+        id="stay-confirmation"
+        title={confirmation.hotelName}
+        subtitle={`Reservation confirmed${confirmation.status ? ` · ${confirmation.status}` : ""}`}
+      />
+      <p className="ui-field-hint">
+        Nuitee accepted this {confirmation.sandbox ? "sandbox " : ""}reservation.
       </p>
-      <dl className="grid gap-4 rounded-xl bg-surface p-4 text-sm sm:grid-cols-2 sm:p-5">
+      <div className="ui-list-stack">
         <Row label="Confirmation" value={confirmation.confirmationCode} />
         {showBookingId ? <Row label="Booking id" value={confirmation.bookingId} /> : null}
         <Row label="Dates" value={confirmation.dateLabel} />
@@ -59,10 +49,10 @@ export function StayConfirmation({
         <Row label="Total" value={confirmation.totalLabel} />
         <Row label="Guest" value={confirmation.guestName} />
         <Row label="Email" value={confirmation.guestEmail} />
-      </dl>
+      </div>
       {confirmation.cancellation.length > 0 ? (
         <div className="plan-stack-tight">
-          <h3 className={plan.h4}>Cancellation</h3>
+          <h3 className="text-base font-semibold text-heading">Cancellation</h3>
           <ul className="plan-stack-tight text-sm leading-relaxed text-text">
             {confirmation.cancellation.map((line) => (
               <li key={line}>{line}</li>
@@ -72,7 +62,7 @@ export function StayConfirmation({
       ) : null}
       {confirmation.conditions.length > 0 || confirmation.remarks || confirmation.terms ? (
         <div className="plan-stack-tight text-sm leading-relaxed text-text">
-          <h3 className={plan.h4}>Before you arrive</h3>
+          <h3 className="text-base font-semibold text-heading">Before you arrive</h3>
           {confirmation.remarks ? <p>{confirmation.remarks}</p> : null}
           {confirmation.conditions.map((line) => (
             <p key={line}>{line}</p>
@@ -90,20 +80,15 @@ export function StayConfirmation({
       ) : null}
       <div className="flex flex-wrap gap-3">
         {itinerary === "added" ? (
-          <Link href={planHref} className="btn btn-primary">
+          <Link href={planHref} className="btn ui-btn btn-primary">
             View on itinerary
           </Link>
         ) : (
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={itinerary === "adding"}
-            onClick={onAddToItinerary}
-          >
+          <Button variant="primary" disabled={itinerary === "adding"} onClick={onAddToItinerary}>
             {itinerary === "adding" ? "Adding to itinerary…" : "Add to itinerary"}
-          </button>
+          </Button>
         )}
-        <Link href={listHref} className="btn btn-secondary">
+        <Link href={listHref} className="btn ui-btn btn-secondary">
           Search more stays
         </Link>
       </div>
@@ -126,6 +111,6 @@ export function StayConfirmation({
           There’s no trip open in this browser yet. Start one in Plan a Trip, then add the stay.
         </p>
       ) : null}
-    </section>
+    </Card>
   );
 }

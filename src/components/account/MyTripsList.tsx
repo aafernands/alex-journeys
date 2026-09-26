@@ -124,7 +124,7 @@ export function MyTripsList({ trips }: Props) {
 
   if (items.length === 0) {
     return (
-      <div className="panel p-6 md:p-8">
+      <div className="panel p-4">
         <h3 className="font-display text-lg font-bold text-heading">
           No trips saved yet
         </h3>
@@ -132,7 +132,7 @@ export function MyTripsList({ trips }: Props) {
           Plan a trip, then save the itinerary to your account. It will show up
           here so you can open it, rename it, or delete it.
         </p>
-        <Link href={planATripHref()} className="btn btn-primary mt-6">
+        <Link href={planATripHref()} className="btn btn-primary mt-4">
           Plan a trip
         </Link>
       </div>
@@ -151,7 +151,7 @@ export function MyTripsList({ trips }: Props) {
           const busy = pendingId === trip.id;
           const editing = editingId === trip.id;
           return (
-            <li key={trip.id} className="panel p-4 md:p-5">
+            <li key={trip.id} className="panel p-4">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   {editing ? (

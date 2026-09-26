@@ -26,10 +26,10 @@ export function AccountPreferences() {
 
   return (
     <>
-      <section className="panel p-6 md:p-8" aria-labelledby="settings-appearance">
+      <section className="panel p-4" aria-labelledby="settings-appearance">
         <h2
           id="settings-appearance"
-          className="font-display text-2xl font-bold text-heading"
+          className="font-display text-ds-title font-bold text-heading"
         >
           Appearance
         </h2>
@@ -72,8 +72,8 @@ export function AccountPreferences() {
       </section>
 
       {offerInstall ? (
-        <section className="panel p-6 md:p-8" aria-labelledby="settings-app">
-          <h2 id="settings-app" className="font-display text-2xl font-bold text-heading">
+        <section className="panel p-4" aria-labelledby="settings-app">
+          <h2 id="settings-app" className="font-display text-ds-title font-bold text-heading">
             App
           </h2>
           <p className="mt-1 text-sm text-muted">

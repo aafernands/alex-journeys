@@ -3609,8 +3609,7 @@ body:has(main.plan-flow) .plan-sticky {
 .plan-week-day-picker > button > span:first-child { font-weight: 700; }
 .plan-workspace .plan-hub-days > .plan-fold > h3 { display: none; }
 .plan-workspace .plan-hub-days .plan-fold-panel { display: block; }
-.plan-bookings-heading { margin-bottom: 1.25rem; }
-.plan-entry-dialog { margin: auto; width: min(38rem, calc(100% - 2rem)); max-height: 88dvh; overflow-y: auto; overscroll-behavior: contain; padding: 1.5rem; background: var(--white); color: var(--text); border: 1px solid var(--border); border-radius: 1.25rem; box-shadow: 0 24px 80px #0003; }
+.plan-entry-dialog { position: fixed; box-sizing: border-box; margin: auto; width: min(38rem, calc(100% - 2rem)); max-width: 100%; overflow-x: hidden; max-height: 88dvh; overflow-y: auto; overscroll-behavior: contain; padding: 1.5rem; background: var(--white); color: var(--text); border: 1px solid var(--border); border-radius: 1.25rem; box-shadow: 0 24px 80px #0003; }
 .plan-entry-dialog::backdrop { background: #171b23a3; backdrop-filter: blur(3px); }
 .plan-entry-dialog-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
 .plan-entry-dialog-heading h2 { font-size: 1.5rem; font-weight: 600; }
@@ -3618,6 +3617,23 @@ body:has(main.plan-flow) .plan-sticky {
 .plan-local-save { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; }
 .plan-paste-details { padding-block: .75rem; }
 .plan-paste-details > summary { cursor: pointer; }
+/* Sheet fields never outgrow the sheet (iOS date/time inputs have an intrinsic min width). */
+.plan-entry-dialog form,
+.plan-entry-dialog .plan-field,
+.plan-entry-dialog .plan-grid-2 > *,
+.plan-entry-dialog .plan-input { min-width: 0; max-width: 100%; }
+.plan-entry-dialog input[type="time"]::-webkit-date-and-time-value,
+.plan-entry-dialog input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+@supports (-webkit-touch-callout: none) {
+  .plan-entry-dialog input[type="time"].plan-input,
+  .plan-entry-dialog input[type="date"].plan-input { display: block; -webkit-appearance: none; appearance: none; }
+}
+/* Sheet swatches: 32px circles that wrap; 44px tap area from an invisible hit box. */
+.plan-entry-dialog .plan-color-row { gap: var(--space-2); }
+.plan-entry-dialog .plan-color-choice { min-width: 32px; min-height: 32px; }
+.plan-entry-dialog .plan-color-choice::after { content: ""; position: absolute; inset: -6px; }
+.plan-entry-dialog .plan-color-face { width: 32px; height: 32px; }
+.plan-entry-dialog .plan-color-default { width: auto; padding-inline: .6rem .75rem; font-size: var(--type-caption-size); }
 .plan-unassigned-bookings { margin-bottom: 1.5rem; }
 .plan-unassigned-bookings h3 { margin-bottom: .75rem; }
 /* Once a trip exists, its own header replaces the setup introduction. */
@@ -3730,7 +3746,7 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
   .plan-next-action { padding: 1.25rem; }
   .plan-workspace .plan-hub-days, .plan-workspace .plan-hub-lanes { padding: 1rem; }
   .plan-preview-day { grid-template-columns: 4.5rem 1fr; gap: .75rem; }
-  .plan-entry-dialog { width: 100%; max-width: 100%; max-height: 94dvh; margin: auto 0 0; border-radius: 1.25rem 1.25rem 0 0; padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+  .plan-entry-dialog { width: 100%; max-width: 100%; max-height: 94dvh; margin: auto 0 0; border-radius: 1.25rem 1.25rem 0 0; padding-inline: var(--space-4); padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
 }
 
 /* Landscape phones: keep the photo prominent without covering the trip. */
@@ -3898,20 +3914,32 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
 
 /* Packing checklist. Paper cards, 44px targets, no extra blur on the scrolling list. */
 .plan-pack { display: grid; gap: 1.15rem; min-width: 0; }
-.plan-pack-head { display: grid; gap: var(--space-2); min-width: 0; }
-.plan-pack-head-action { display: flex; justify-content: flex-start; }
+/* Section header (Packing, Itinerary): title, then the trip action on its own row,
+   then a status row with quiet text toggles on the right. */
+.plan-section-head { display: grid; gap: var(--space-2); min-width: 0; }
+.plan-head-action { display: flex; justify-content: flex-start; }
 /* The trigger sits at the left edge here, so open the menu rightward and keep it on screen. */
-.plan-pack-head-action .plan-add-options,
-.plan-workspace .plan-pack-head-action .plan-add-options { left: 0; right: auto; width: max-content; max-width: calc(100vw - 1.5rem); }
-.plan-pack-status { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-width: 0; }
-.plan-pack-status .plan-pack-summary { margin-top: 0; }
-.plan-pack-quiet-tools { display: flex; flex-shrink: 0; align-items: center; gap: var(--space-3); }
+.plan-head-action .plan-add-options,
+.plan-workspace .plan-head-action .plan-add-options { left: 0; right: auto; width: max-content; max-width: calc(100vw - 1.5rem); }
+.plan-head-status { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-width: 0; }
+.plan-head-status > p { margin: 0; }
+.plan-head-meta { color: var(--muted); font-size: var(--type-secondary-size); font-weight: 500; line-height: 1.3; }
+.plan-quiet-toggles { display: flex; flex-shrink: 0; align-items: center; gap: var(--space-3); }
 /* Quiet text toggle: 14px secondary text, 44px hit area without adding row height. */
-.plan-pack .plan-pack-quiet { position: relative; padding: 0; border: 0; background: none; color: var(--muted); font-size: var(--type-secondary-size); font-weight: 500; line-height: 1.3; white-space: nowrap; }
-.plan-pack .plan-pack-quiet::before { content: ""; position: absolute; inset: calc((1.3em - 44px) / 2) calc(var(--space-3) / -2); }
-.plan-pack .plan-pack-quiet:hover, .plan-pack .plan-pack-quiet:focus-visible { color: var(--heading); }
-.plan-pack .plan-pack-quiet[aria-pressed="true"] { color: var(--heading); }
-.plan-pack .plan-pack-quiet:disabled { opacity: .45; }
+.plan-quiet-toggles .plan-quiet-toggle { position: relative; min-height: 0; padding: 0; border: 0; border-radius: 0; background: none; color: var(--muted); font: inherit; font-size: var(--type-secondary-size); font-weight: 500; line-height: 1.3; white-space: nowrap; cursor: pointer; }
+.plan-quiet-toggles .plan-quiet-toggle::before { content: ""; position: absolute; inset: calc((1.3em - 44px) / 2) calc(var(--space-3) / -2); }
+.plan-quiet-toggles .plan-quiet-toggle:hover,
+.plan-quiet-toggles .plan-quiet-toggle:focus-visible { color: var(--heading); }
+.plan-quiet-toggles .plan-quiet-toggle[aria-pressed="true"],
+.plan-quiet-toggles .plan-quiet-toggle[aria-selected="true"] { color: var(--heading); font-weight: 600; }
+.plan-quiet-toggles .plan-quiet-toggle:disabled { opacity: .45; cursor: default; }
+/* Section description under the title: muted 14px secondary text. */
+.plan-head-desc { margin: 0; color: var(--muted); font-size: var(--type-secondary-size); font-weight: 400; line-height: 1.4; }
+/* A quiet text button that runs an action (not a toggle): dark text, weight 600. */
+.plan-quiet-toggles .plan-quiet-toggle.plan-quiet-action { color: var(--heading); font-weight: 600; }
+/* Bookings header: keep the quiet action on the right even when the trip action is absent. */
+.plan-bookings-head { margin-bottom: 1.25rem; }
+.plan-bookings-head .plan-quiet-toggles { margin-left: auto; }
 .plan-pack-summary { margin-top: .15rem; font-family: var(--font-outfit), system-ui, sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--heading); }
 .plan-pack-block { display: grid; gap: .6rem; min-width: 0; }
 .plan-pack h4 { margin: 0; }
@@ -4081,6 +4109,11 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
   font-size: var(--type-body-size);
   font-weight: var(--type-body-weight);
   line-height: var(--type-body-leading);
+}
+
+.ui-control:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 
 .ui-control-area {
@@ -4518,7 +4551,8 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
   margin-bottom: calc(-1 * var(--space-2) - 20px);
 }
 
-[data-density="compact"] .plan-workspace > .plan-hub-lead ~ * {
+/* Not dialogs: position:relative would override the modal sheet's position:fixed. */
+[data-density="compact"] .plan-workspace > .plan-hub-lead ~ :not(dialog) {
   position: relative;
   z-index: 2;
 }
@@ -4651,18 +4685,23 @@ main.plan-flow:has(.plan-trip-summary) > .section-band {
 
 [data-density="compact"] .plan-timeline-entry {
   border: 0;
-  border-radius: 0;
-  border-bottom: var(--hairline);
-  background: transparent;
-}
-
-[data-density="compact"] .plan-timeline-entry:last-child {
-  border-bottom: 0;
+  border-radius: var(--radius-control);
+  padding-inline: var(--space-1);
 }
 
 [data-density="compact"] .plan-timeline {
-  gap: 0;
+  gap: var(--space-1);
 }
+
+/* Itinerary entries: a light tint of the chosen color, no border. Default gets a neutral paper tint. */
+.plan-preview-entries { display: flex; flex-direction: column; gap: var(--space-1); }
+.plan-entry-tint { border-radius: var(--radius-control); background: color-mix(in srgb, var(--surface) 55%, transparent); }
+.plan-entry-tint:not([data-color="default"]) { background: color-mix(in srgb, var(--plan-item-accent) 12%, transparent); }
+.plan-preview-entries > .plan-entry-tint { padding: var(--space-2) var(--space-3); }
+.plan-preview-entries > .plan-entry-tint .ui-list-row,
+.plan-preview-entries > .plan-entry-tint .ui-list-main { min-height: 0; }
+.plan-entry-tint[data-status="booked"] .plan-entry-status { color: var(--heading); font-weight: 600; }
+.plan-entry-tint[data-status="skipped"] .ui-list-title { color: var(--muted); text-decoration: line-through; }
 
 [data-density="compact"] .plan-lane-tab[aria-selected="true"]::after,
 [data-density="compact"] .plan-lane-tab-aside[aria-selected="true"]::after {
@@ -4742,18 +4781,12 @@ main.plan-flow:has(.plan-trip-summary) > .section-band {
   white-space: nowrap;
 }
 
-[data-density="compact"] .plan-hub-days .plan-toolbar,
-[data-density="compact"] .plan-bookings-heading {
+[data-density="compact"] .plan-hub-days .plan-toolbar {
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-}
-
-[data-density="compact"] .plan-bookings-heading > div:first-child {
-  flex: 1 1 auto;
-  min-width: 0;
 }
 
 [data-density="compact"] .plan-inline-actions {
@@ -4882,5 +4915,397 @@ body.mobile-bottom-nav-visible .premium-join-bar {
 @media (prefers-reduced-motion: reduce) {
   .premium-join-bar {
     transition: none;
+  }
+}
+
+/* Compact booking flows. Same tokens as Plan a Trip. */
+main.plan-page[data-density="compact"] h1.text-display {
+  font-size: var(--type-title-size);
+  font-weight: var(--type-title-weight);
+  line-height: var(--type-title-leading);
+  letter-spacing: -0.02em;
+}
+
+main.plan-page[data-density="compact"] .text-lead {
+  margin-top: var(--space-1);
+  font-size: var(--type-secondary-size);
+  line-height: var(--type-secondary-leading);
+}
+
+main.plan-page[data-density="compact"] .eyebrow {
+  margin-top: var(--space-2);
+  color: var(--muted);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  line-height: var(--type-caption-leading);
+}
+
+main.plan-page[data-density="compact"] .section-band {
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-6);
+}
+
+main.plan-page[data-density="compact"] .hub-follow {
+  margin-top: var(--space-3);
+}
+
+[data-density="compact"] .book-flow .eyebrow {
+  color: var(--muted);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  line-height: var(--type-caption-leading);
+}
+
+[data-density="compact"] .book-flow .btn,
+[data-density="compact"] .book-flow .ui-btn {
+  min-height: var(--control-height);
+  border-radius: var(--radius-control);
+  font-size: var(--type-secondary-size);
+  font-weight: 600;
+  line-height: var(--type-secondary-leading);
+  box-shadow: var(--shadow-content);
+}
+
+[data-density="compact"] .book-flow .plan-input,
+[data-density="compact"] .book-flow .ui-control {
+  min-height: var(--control-height);
+  height: var(--control-height);
+  border: var(--hairline);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-3);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
+  box-shadow: var(--shadow-content);
+}
+
+[data-density="compact"] .book-flow textarea.plan-input,
+[data-density="compact"] .book-flow textarea.ui-control {
+  height: auto;
+  min-height: 6.5rem;
+  padding-block: var(--space-3);
+}
+
+[data-density="compact"] .book-flow .plan-date-trigger {
+  height: var(--control-height);
+}
+
+[data-density="compact"] .book-flow .plan-date-trigger .plan-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.book-flow a.ui-chip {
+  color: var(--heading);
+  text-decoration: none;
+}
+
+.book-flow ul.ui-list-stack {
+  margin: 0;
+  list-style: none;
+}
+
+.book-flow .ui-list-stack > * + * {
+  border-top: var(--hairline);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+.book-hit {
+  position: relative;
+}
+
+.book-hit .ui-list-main::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.book-thumb {
+  display: block;
+  width: var(--row-height);
+  height: var(--row-height);
+  object-fit: cover;
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+
+.book-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: var(--heading);
+  font-size: var(--type-secondary-size);
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.book-price small {
+  color: var(--muted);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  line-height: var(--type-caption-leading);
+}
+
+.book-hero {
+  height: 210px;
+  min-height: 210px;
+  max-height: 210px;
+}
+
+.book-room-photo {
+  position: relative;
+  height: calc(var(--row-height) * 2);
+  min-height: calc(var(--row-height) * 2);
+  overflow: hidden;
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+
+@media (min-width: 768px) {
+  .book-hero {
+    height: clamp(220px, 22vw, 280px);
+    min-height: clamp(220px, 22vw, 280px);
+    max-height: clamp(220px, 22vw, 280px);
+  }
+}
+
+
+/* ——— Phase 4: comfortable density — journal/stories pages ———
+   Scoped to main.journal-page[data-density="comfortable"] (/blog and post pages),
+   so home, compact app pages and not-yet-migrated pages are untouched.
+   17px lead and body text, 16px card padding,
+   32px (mobile) / 48px (desktop) page band, H1 32–40px. */
+main.journal-page[data-density="comfortable"] .text-lead {
+  font-size: var(--type-reading-size, 1.0625rem);
+  line-height: var(--type-reading-leading, 1.65);
+}
+
+main.journal-page[data-density="comfortable"] .hub-follow {
+  margin-top: var(--space-6);
+}
+
+main.journal-page[data-density="comfortable"] .post-card-body {
+  padding: var(--space-4);
+}
+
+main.journal-page[data-density="comfortable"] .section-band {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+main.journal-page[data-density="comfortable"] h1.text-display {
+  font-size: clamp(2rem, 3.6vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+main.journal-page[data-density="comfortable"] .post-prose {
+  max-width: 70ch;
+  font-size: var(--type-reading-size, 1.0625rem);
+  line-height: 1.7;
+}
+
+main.journal-page[data-density="comfortable"] .post-prose h2 {
+  font-size: 1.5rem;
+  margin-top: 1.6em;
+}
+
+main.journal-page[data-density="comfortable"] .post-prose h3 {
+  font-size: 1.25rem;
+  margin-top: 1.4em;
+}
+
+main.journal-page[data-density="comfortable"] .post-prose :is(img, figure, iframe, video, table) {
+  max-width: 100%;
+}
+
+main.journal-page[data-density="comfortable"] .post-prose figcaption {
+  font-size: var(--type-secondary-size, 0.875rem);
+}
+
+@media (min-width: 768px) {
+  main.journal-page[data-density="comfortable"] .section-band {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+}
+
+/* ——— Phase 4b: comfortable density — guides and places ———
+   Scoped to main.guides-page / main.places-page with data-density="comfortable"
+   (/guides, /guides/[slug] except plan-a-trip, /destinations, place pages).
+   Same values as the journal block: H1 32–40px, section titles 20–24px,
+   17px lead, 16px card padding, 32px (mobile) / 48px (desktop) section gaps. */
+:is(main.guides-page, main.places-page)[data-density="comfortable"] .text-lead {
+  font-size: var(--type-reading-size, 1.0625rem);
+  line-height: var(--type-reading-leading, 1.65);
+}
+
+:is(main.guides-page, main.places-page)[data-density="comfortable"] .hub-follow {
+  margin-top: var(--space-6);
+}
+
+:is(main.guides-page, main.places-page)[data-density="comfortable"] .post-card-body {
+  padding: var(--space-4);
+}
+
+:is(main.guides-page, main.places-page)[data-density="comfortable"] .section-band {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+:is(main.guides-page, main.places-page)[data-density="comfortable"] h1.text-display {
+  font-size: clamp(2rem, 3.6vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+:is(main.guides-page, main.places-page)[data-density="comfortable"] .text-title {
+  font-size: 1.25rem;
+  line-height: var(--type-title-leading, 1.25);
+  letter-spacing: -0.01em;
+}
+
+:is(main.guides-page, main.places-page)[data-density="comfortable"] .hub-block {
+  margin-top: 2rem;
+}
+
+@media (min-width: 768px) {
+  :is(main.guides-page, main.places-page)[data-density="comfortable"] .section-band {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  :is(main.guides-page, main.places-page)[data-density="comfortable"] .text-title {
+    font-size: 1.5rem;
+  }
+
+  :is(main.guides-page, main.places-page)[data-density="comfortable"] .hub-block {
+    margin-top: 3rem;
+  }
+}
+
+/* Bookings title stays on one line on 360–399px phones. */
+@media (max-width: 399px) {
+  .plan-bookings-head .plan-h3,
+  .plan-trip-hotel .plan-bookings-head .plan-h3,
+  [data-density="compact"].plan-trip-hotel .plan-bookings-head .plan-h3 { font-size: 1.125rem; }
+}
+
+/* ——— Phase 5: Experiences (/experiences) — compact-to-comfortable browsing ———
+   Scoped to main.experiences-page[data-density="comfortable"]; nothing else changes.
+   Shorter header, H1 28–32px, 16px intro, 44px controls (from .btn),
+   14px secondary, 16px panels, 24px gaps. Viator widget markup is untouched. */
+main.experiences-page[data-density="comfortable"] .section-band {
+  padding-top: var(--space-6);
+  padding-bottom: 2rem;
+}
+
+main.experiences-page[data-density="comfortable"] nav[aria-label="Breadcrumb"] + .eyebrow {
+  margin-top: var(--space-4);
+}
+
+main.experiences-page[data-density="comfortable"] h1.text-display {
+  font-size: clamp(1.75rem, 3vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+main.experiences-page[data-density="comfortable"] .text-lead {
+  margin-top: var(--space-2);
+  font-size: var(--type-body-size, 1rem);
+  line-height: var(--type-body-leading, 1.5);
+}
+
+main.experiences-page[data-density="comfortable"] .hub-follow {
+  margin-top: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  main.experiences-page[data-density="comfortable"] .section-band {
+    padding-top: 2rem;
+    padding-bottom: 2.5rem;
+  }
+}
+
+/* ——— Phase 5b: Tools (/tools) — compact-to-comfortable ———
+   Scoped to main.tools-page[data-density="comfortable"]. Spacing and type only;
+   affiliate links, order and disclosure text are untouched.
+   H1 28–32px, 16px intro, 24px header→content, 16px cards. */
+main.tools-page[data-density="comfortable"] .section-band {
+  padding-top: var(--space-6);
+  padding-bottom: 2rem;
+}
+
+main.tools-page[data-density="comfortable"] nav[aria-label="Breadcrumb"] + .eyebrow {
+  margin-top: var(--space-4);
+}
+
+main.tools-page[data-density="comfortable"] h1.text-display {
+  font-size: clamp(1.75rem, 3vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+main.tools-page[data-density="comfortable"] .text-lead {
+  margin-top: var(--space-2);
+  font-size: var(--type-body-size, 1rem);
+  line-height: var(--type-body-leading, 1.5);
+}
+
+main.tools-page[data-density="comfortable"] .hub-follow {
+  margin-top: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  main.tools-page[data-density="comfortable"] .section-band {
+    padding-top: 2rem;
+    padding-bottom: 2.5rem;
+  }
+}
+
+/* ——— Phase 5b: Account (/account, /login, /account/confirm-email) — compact app ———
+   Scoped to main.account-page[data-density="compact"]. Plan a Trip values:
+   44px fields and buttons, 20px titles, 16px body/fields, 14px secondary, 16px panels. */
+main.account-page[data-density="compact"] .section-band {
+  padding-top: var(--space-6);
+  padding-bottom: 2rem;
+}
+
+main.account-page[data-density="compact"] h1.text-display {
+  font-size: clamp(1.5rem, 2.5vw, 1.75rem);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+main.account-page[data-density="compact"] .reader-login-panel {
+  padding: var(--space-4);
+}
+
+main.account-page[data-density="compact"] .reader-login-title {
+  font-size: var(--type-title-size);
+  line-height: var(--type-title-leading);
+}
+
+main.account-page[data-density="compact"] .reader-login-panel input:not([type="checkbox"]):not([type="radio"]) {
+  font-size: var(--type-body-size);
+}
+
+@media (min-width: 768px) {
+  main.account-page[data-density="compact"] .section-band {
+    padding-top: 2rem;
+    padding-bottom: 2.5rem;
+  }
+
+  main.account-page[data-density="compact"] .reader-login-panel {
+    padding: var(--space-6);
   }
 }

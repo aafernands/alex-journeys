@@ -104,19 +104,19 @@ function SummaryCard({
     <button
       type="button"
       onClick={onOpen}
-      className="panel-interactive flex h-full flex-col p-5 text-left"
+      className="panel-interactive flex h-full flex-col p-4 text-left"
     >
       <span className="flex items-center justify-between gap-3">
         <span className="eyebrow">{eyebrow}</span>
         {icon}
       </span>
-      <span className="font-display mt-3 text-3xl font-bold text-heading">
+      <span className="font-display mt-2 text-2xl font-bold text-heading">
         {value}
       </span>
       <span className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted">
         {detail}
       </span>
-      <span className="mt-4 text-sm font-semibold text-accent">{action}</span>
+      <span className="mt-3 text-sm font-semibold text-accent">{action}</span>
     </button>
   );
 }
@@ -254,15 +254,15 @@ export function AccountDashboard({
             hidden={section !== "overview"}
             className="space-y-6"
           >
-            <section className="panel p-5 sm:p-7" aria-labelledby="account-identity">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <section className="panel p-4" aria-labelledby="account-identity">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-center gap-4">
                   <ProfileAvatar src={image} name={displayName} email={email} />
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2
                         id="account-identity"
-                        className="font-display truncate text-2xl font-bold text-heading sm:text-3xl"
+                        className="font-display truncate text-ds-title font-bold text-heading"
                       >
                         {displayName}
                       </h2>
@@ -338,7 +338,7 @@ export function AccountDashboard({
             <section aria-labelledby="account-explore">
               <h2
                 id="account-explore"
-                className="font-display text-lg font-bold text-heading"
+                className="font-display text-ds-title font-bold text-heading"
               >
                 Keep exploring
               </h2>
@@ -394,7 +394,7 @@ export function AccountDashboard({
           >
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="font-display text-2xl font-bold text-heading">
+                <h2 className="font-display text-ds-title font-bold text-heading">
                   Trips
                 </h2>
                 <p className="mt-1 max-w-xl text-sm text-muted">
@@ -412,7 +412,7 @@ export function AccountDashboard({
               ) : null}
             </div>
             {tripsError ? (
-              <div className="panel p-6 md:p-8">
+              <div className="panel p-4">
                 <p className="text-sm leading-relaxed text-text" role="status">
                   {tripsError}
                 </p>
@@ -427,11 +427,11 @@ export function AccountDashboard({
             role="tabpanel"
             aria-labelledby="account-tab-saved"
             hidden={section !== "saved"}
-            className="space-y-10"
+            className="space-y-8"
           >
             <section aria-labelledby="saved-hotels-heading">
               <div className="mb-4">
-                <h2 id="saved-hotels-heading" className="font-display text-2xl font-bold text-heading">
+                <h2 id="saved-hotels-heading" className="font-display text-ds-title font-bold text-heading">
                   Favorite hotels
                 </h2>
                 <p className="mt-1 max-w-xl text-sm text-muted">
@@ -439,11 +439,11 @@ export function AccountDashboard({
                 </p>
               </div>
               {hotelsError ? (
-                <div className="panel p-6 md:p-8">
+                <div className="panel p-4">
                   <p className="text-sm leading-relaxed text-text" role="status">
                     {hotelsError}
                   </p>
-                  <Link href="/stays" className="btn btn-secondary mt-6">
+                  <Link href="/stays" className="btn btn-secondary mt-4">
                     Find hotels
                   </Link>
                 </div>
@@ -452,9 +452,9 @@ export function AccountDashboard({
               )}
             </section>
 
-            <section aria-labelledby="saved-stories-heading" className="border-t border-border pt-8">
+            <section aria-labelledby="saved-stories-heading" className="border-t border-border pt-6">
               <div className="mb-4">
-                <h2 id="saved-stories-heading" className="font-display text-2xl font-bold text-heading">
+                <h2 id="saved-stories-heading" className="font-display text-ds-title font-bold text-heading">
                   Saved stories
                 </h2>
                 <p className="mt-1 max-w-xl text-sm text-muted">
@@ -462,11 +462,11 @@ export function AccountDashboard({
                 </p>
               </div>
               {postsError ? (
-                <div className="panel p-6 md:p-8">
+                <div className="panel p-4">
                   <p className="text-sm leading-relaxed text-text" role="status">
                     {postsError}
                   </p>
-                  <Link href="/blog" className="btn btn-secondary mt-6">
+                  <Link href="/blog" className="btn btn-secondary mt-4">
                     Browse stories
                   </Link>
                 </div>
@@ -483,10 +483,10 @@ export function AccountDashboard({
             hidden={section !== "settings"}
             className="space-y-6"
           >
-            <section className="panel p-6 md:p-8" aria-labelledby="settings-profile">
+            <section className="panel p-4" aria-labelledby="settings-profile">
               <h2
                 id="settings-profile"
-                className="font-display text-2xl font-bold text-heading"
+                className="font-display text-ds-title font-bold text-heading"
               >
                 Profile
               </h2>
@@ -508,10 +508,10 @@ export function AccountDashboard({
             <AccountPreferences />
 
             {hasPassword ? (
-              <section className="panel p-6 md:p-8" aria-labelledby="settings-password">
+              <section className="panel p-4" aria-labelledby="settings-password">
                 <h2
                   id="settings-password"
-                  className="font-display text-2xl font-bold text-heading"
+                  className="font-display text-ds-title font-bold text-heading"
                 >
                   Password
                 </h2>

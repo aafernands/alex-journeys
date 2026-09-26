@@ -31,6 +31,7 @@ export default function BlogIndexPage() {
       title={page.title}
       description={intro}
       narrow={false}
+      comfortableClass="journal-page"
       crumbs={[
         { href: "/", label: "Home" },
         { label: page.title },
