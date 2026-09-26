@@ -34,6 +34,7 @@ export default function DestinationsIndexPage() {
       title={page.title}
       description={page.description}
       narrow={false}
+      comfortableClass="places-page"
       crumbs={[
         { href: "/", label: "Home" },
         { label: "Places" },
@@ -55,7 +56,7 @@ export default function DestinationsIndexPage() {
         preloadFirst
       />
 
-      <nav aria-label="Continents" className="mt-8 flex flex-wrap gap-2">
+      <nav aria-label="Continents" className="mt-6 flex flex-wrap gap-2">
         {destinationsTree.map((continent) => (
           <a
             key={continent.id}
@@ -70,7 +71,7 @@ export default function DestinationsIndexPage() {
         ))}
       </nav>
 
-      <div className="hub-block space-y-12 md:space-y-16">
+      <div className="hub-block space-y-8 md:space-y-12">
         {destinationsTree.map((continent) => (
           <section
             key={continent.id}
@@ -93,7 +94,7 @@ export default function DestinationsIndexPage() {
               </div>
               <span
                 aria-hidden="true"
-                className="hidden select-none font-display text-5xl font-bold leading-none text-heading/[0.07] sm:block"
+                className="hidden select-none font-display text-3xl font-bold leading-none text-heading/[0.07] sm:block"
               >
                 {continent.name.slice(0, 2)}
               </span>
