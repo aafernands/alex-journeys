@@ -155,11 +155,11 @@
       "title": "Discovering Iceland: A Week in the Land of Fire and Ice",
       "slug": "discovering-iceland-a-week-in-the-land-of-fire-and-ice",
       "date": "2025-07-02T18:30:53",
-      "updatedAt": "2026-09-23T16:37:31.190Z",
+      "updatedAt": "2026-09-26T10:49:44.000Z",
       "excerpt": "Iceland has always held a special allure for me—a land where fire and ice coexist in stunning harmony. During my week-long adventure, I found myself captivated by its otherworldly landscapes: bubbling geysers, majestic glaciers, and dramatic volcanic craters that seemed to tell stories of ancient forces at play. Each day unfolded new wonders, from hiking along breathtaking cliffs to soaking in natural hot springs. Join me on this journey as I share the unforgettable experiences and moments that made my time in Iceland truly magical.",
       "featuredImage": {
         "url": "/media/migrated/2025-07-img-6855-scaled-1-1afdda54.webp",
-        "alt": "Discovering Iceland: A Week in the Land of Fire and Ice"
+        "alt": "Standing by icebergs on the shore of Jökulsárlón glacier lagoon"
       },
       "destinations": [
         "iceland"
@@ -169,7 +169,10 @@
         "hotel",
         "experience"
       ],
-      "bookingDestination": "Iceland"
+      "bookingDestination": "Iceland",
+      "seoTitle": "Iceland Itinerary 1 Week: Blue Lagoon to Glaciers",
+      "seoDescription": "My Iceland itinerary 1 week: Blue Lagoon, south coast waterfalls, Jökulsárlón, a glacier hike and the Golden Circle, plus driving and safety tips.",
+      "focusKeyword": "Iceland itinerary 1 week"
     },
     {
       "slug": "discover-the-top-accommodation-sites-of-2025",
