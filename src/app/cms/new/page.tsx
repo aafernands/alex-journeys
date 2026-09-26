@@ -68,6 +68,7 @@ export default async function CmsNewPostPage({ searchParams }: PageProps) {
         focusKeyword: "focusKeyword" in source ? (source.focusKeyword ?? "") : "",
         noindex: "noindex" in source ? source.noindex === true : false,
         membersOnly: "membersOnly" in source ? source.membersOnly === true : false,
+        dealNote: "dealNote" in source ? source.dealNote === true : false,
         itinerary:
           "itinerary" in source ? (source.itinerary ?? undefined) : undefined,
       };

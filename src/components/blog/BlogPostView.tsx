@@ -133,7 +133,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
             </nav>
 
             <p className="mt-6 eyebrow">
-              {post.membersOnly ? "Members story" : "Journal"}
+              {post.dealNote ? "Deal note" : post.membersOnly ? "Members story" : "Journal"}
             </p>
             <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
               <h1 className="font-display text-display text-heading">
@@ -263,7 +263,17 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
           ) : null}
 
           {locked ? (
-            <PremiumGate signedIn={Boolean(userId)} returnTo={storyPath} />
+            <PremiumGate
+              signedIn={Boolean(userId)}
+              returnTo={storyPath}
+              {...(post.dealNote
+                ? {
+                    title: "This week’s deals are for members",
+                    body: "Premium members get a weekly note on deals leaving Newark, JFK, and Philadelphia. Booking stays open to everyone.",
+                    signInIntro: "Sign in to read the deal notes if you already joined.",
+                  }
+                : {})}
+            />
           ) : (
             <div className="mt-8">
               <PostContent

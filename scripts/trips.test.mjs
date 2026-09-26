@@ -491,7 +491,7 @@ describe("saved trips", () => {
       }),
       "local",
     );
-    assert.equal(tripCapacityMessage(MAX_SAVED_TRIPS)?.includes("50"), true);
+    assert.equal(tripCapacityMessage(MAX_SAVED_TRIPS, true)?.includes("200"), true);
     assert.equal(tripCapacityMessage(3), null);
   });
 

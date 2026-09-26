@@ -45,6 +45,7 @@ export type PostInput = {
   focusKeyword?: unknown;
   noindex?: unknown;
   membersOnly?: unknown;
+  dealNote?: unknown;
 };
 
 export type ValidatedPost = {
@@ -68,6 +69,8 @@ export type ValidatedPost = {
   focusKeyword: string;
   noindex: boolean;
   membersOnly: boolean;
+  /** Weekly deal note for members. Always members-only. */
+  dealNote: boolean;
 };
 
 function asString(value: unknown): string {
@@ -387,7 +390,9 @@ export function validatePostInput(
   if (!seo.ok) return seo;
   const { seoTitle, seoDescription, focusKeyword } = seo;
   const noindex = readNoindex(input.noindex);
-  const membersOnly = input.membersOnly === true;
+  const dealNote = input.dealNote === true;
+  // A deal note is a member perk, so it is always members-only.
+  const membersOnly = input.membersOnly === true || dealNote;
 
   return {
     ok: true,
@@ -408,6 +413,7 @@ export function validatePostInput(
       focusKeyword,
       noindex,
       membersOnly,
+      dealNote,
       ...(itineraryResult.data ? { itinerary: itineraryResult.data } : {}),
     },
   };
@@ -428,6 +434,7 @@ export function toPostJson(data: ValidatedPost): Post {
     ...(data.experienceWidgetHtml ? { experienceWidgetHtml: data.experienceWidgetHtml } : {}),
     ...optionalSeoFields(data),
     ...(data.membersOnly ? { membersOnly: true } : {}),
+    ...(data.dealNote ? { dealNote: true } : {}),
     contentHtml: data.contentHtml,
     source: "cms",
     ...(data.itinerary ? { itinerary: data.itinerary } : {}),
@@ -448,5 +455,6 @@ export function toPostMeta(data: ValidatedPost): PostMeta {
     ...(data.bookingDestination ? { bookingDestination: data.bookingDestination } : {}),
     ...optionalSeoFields(data),
     ...(data.membersOnly ? { membersOnly: true } : {}),
+    ...(data.dealNote ? { dealNote: true } : {}),
   };
 }

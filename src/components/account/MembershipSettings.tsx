@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Gem } from "lucide-react";
 import { useState } from "react";
 
 export type MembershipPanel = {
@@ -62,6 +63,13 @@ export function MembershipSettings({ panel }: { panel: MembershipPanel }) {
           {panel.detail ? (
             <p className="mt-1 text-sm text-text">{panel.detail}</p>
           ) : null}
+          <Link
+            href="/premium/perks"
+            className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-accent transition hover:text-accent-deep"
+          >
+            <Gem className="h-4 w-4" strokeWidth={2.25} aria-hidden="true" />
+            Your member perks
+          </Link>
         </>
       ) : (
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-text">

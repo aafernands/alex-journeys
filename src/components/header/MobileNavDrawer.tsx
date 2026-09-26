@@ -16,6 +16,8 @@ import { useReaderLoginPrompt } from "@/components/ReaderLoginPrompt";
 import { Gem, UserRound, X } from "lucide-react";
 import { AddToHomeScreenButton } from "@/components/AddToHomeScreenButton";
 import { useSession } from "next-auth/react";
+import { usePremium } from "@/components/premium/usePremium";
+import { PERKS_HUB_PATH } from "@/lib/premium-perks";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { site } from "@/data/content";
 import { destinationsTree } from "@/data/destinations";
@@ -48,6 +50,24 @@ const leafLinkClass =
  * Mobile hamburger drawer: compact hub list (48px primary rows, 44px nested rows, 16px text).
  * Places and Guides restore nested expanders (no leading icons).
  */
+/**
+ * Bottom of the drawer: Subscribe for readers, Member perks for members.
+ * Only mounted while the drawer is open, so the membership check runs then.
+ */
+function DrawerPremiumLink({ onClose }: { onClose: () => void }) {
+  const { isPremium } = usePremium();
+  return (
+    <Link
+      href={isPremium ? PERKS_HUB_PATH : "/premium"}
+      className="flex min-h-14 w-full items-center justify-center gap-2.5 rounded-lg bg-accent px-4 font-display text-lg font-bold tracking-tight text-on-solid transition hover:bg-accent-deep"
+      onClick={onClose}
+    >
+      <Gem size={20} strokeWidth={2.25} aria-hidden="true" />
+      {isPremium ? "Member perks" : "Subscribe"}
+    </Link>
+  );
+}
+
 export function MobileNavDrawer({ open, onClose }: Props) {
   const [placesOpen, setPlacesOpen] = useState(false);
   const openReaderLogin = useReaderLoginPrompt();
@@ -288,14 +308,7 @@ export function MobileNavDrawer({ open, onClose }: Props) {
                 className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-border-strong bg-white px-4 text-sm font-semibold text-heading transition hover:bg-surface-soft"
                 onPress={onClose}
               />
-              <Link
-                href="/premium"
-                className="flex min-h-14 w-full items-center justify-center gap-2.5 rounded-lg bg-accent px-4 font-display text-lg font-bold tracking-tight text-on-solid transition hover:bg-accent-deep"
-                onClick={onClose}
-              >
-                <Gem size={20} strokeWidth={2.25} aria-hidden="true" />
-                Subscribe
-              </Link>
+              <DrawerPremiumLink onClose={onClose} />
             </div>
           </div>
         </div>

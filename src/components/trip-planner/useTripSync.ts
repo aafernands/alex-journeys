@@ -27,6 +27,7 @@ import {
   isReasonableTripDraft,
   planATripHref,
   storedPlanFromTrip,
+  TRIP_LIMIT_CODE,
   TRIPS_ACCOUNT_UNAVAILABLE,
   tripCapacityMessage,
   tripWriteFromPlan,
@@ -42,6 +43,8 @@ export type TripSaveMode =
   | "saving"
   | "saved"
   | "unavailable"
+  /** A new trip hit the saved-trip limit (5 free). The draft stays in this browser. */
+  | "limit"
   | "error";
 
 export type RemoteTripState =
@@ -82,6 +85,7 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
   const pendingRef = useRef(false);
   const authRejectedRef = useRef(false);
   const unavailableRef = useRef(false);
+  const limitRef = useRef(false);
   const saveGen = useRef(0);
   const tripIdRef = useRef<string | null>(plan.tripId);
   tripIdRef.current = plan.tripId;
@@ -250,11 +254,19 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
       }
       if (!res.ok) {
         let detail: string | null = null;
+        let code: string | null = null;
         try {
-          const data = (await res.json()) as { error?: string };
+          const data = (await res.json()) as { error?: string; code?: string };
           detail = typeof data.error === "string" ? data.error : null;
+          code = typeof data.code === "string" ? data.code : null;
         } catch {
           detail = null;
+        }
+        if (res.status === 409 && code === TRIP_LIMIT_CODE && !id) {
+          limitRef.current = true;
+          setSaveDetail(detail || tripCapacityMessage(Number.POSITIVE_INFINITY));
+          setMode("limit");
+          return;
         }
         if (res.status === 409 && !detail) {
           detail = tripCapacityMessage(Number.POSITIVE_INFINITY);
@@ -337,6 +349,11 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
       setMode("unavailable");
       return;
     }
+    // At the saved-trip limit a new trip stays local until the reader retries.
+    if (limitRef.current && !plan.tripId) {
+      setMode("limit");
+      return;
+    }
     if (urlTripId && remote !== "ready" && plan.tripId !== urlTripId) return;
     if (urlTripId && (remote === "loading" || remote === "missing")) return;
     if (!detailsReady(plan.state, flexibleOn)) return;
@@ -392,6 +409,7 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
   const saveToAccount = useCallback(() => {
     clearGuestSaveFlags();
     unavailableRef.current = false;
+    limitRef.current = false;
     authRejectedRef.current = false;
     setSaveDetail(null);
     void persist();
@@ -404,6 +422,7 @@ export function useTripSync({ plan, flexibleOn, urlTripId }: Options) {
 
   const retrySave = useCallback(() => {
     unavailableRef.current = false;
+    limitRef.current = false;
     authRejectedRef.current = false;
     setSaveDetail(null);
     void persist();

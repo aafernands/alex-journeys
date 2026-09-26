@@ -163,7 +163,30 @@ export const TRIPS_ACCOUNT_UNAVAILABLE =
 export const TRIPS_LIST_UNAVAILABLE =
   "We can’t load your saved trips right now. Try again in a little while.";
 
-export const MAX_SAVED_TRIPS = 50;
+/** Saved trips a free signed-in reader can keep. */
+export const FREE_SAVED_TRIPS = 5;
+/** Saved trips a Premium member can keep. Shown to readers as "unlimited". */
+export const MEMBER_SAVED_TRIPS = 200;
+/** Highest limit anyone has. Kept for older imports. */
+export const MAX_SAVED_TRIPS = MEMBER_SAVED_TRIPS;
+
+/** Error code the trips APIs send with a 409 when the saved-trip limit is hit. */
+export const TRIP_LIMIT_CODE = "trip_limit";
+
+export function savedTripLimit(member: boolean): number {
+  return member ? MEMBER_SAVED_TRIPS : FREE_SAVED_TRIPS;
+}
+
+/**
+ * Whether one more trip can be saved. Trips already over the limit (for
+ * example after a membership ends) are never removed; only new saves stop.
+ */
+export function canSaveAnotherTrip(count: number, member: boolean): boolean {
+  if (!Number.isFinite(count) || count < 0) return false;
+  return count < savedTripLimit(member);
+}
+
+export const FREE_TRIP_LIMIT_MESSAGE = `You’ve saved ${FREE_SAVED_TRIPS} trips. Premium members get unlimited trips.`;
 
 export function cleanPackingNotes(value: unknown): string {
   if (typeof value !== "string") return "";
@@ -274,9 +297,11 @@ export function accountSaveIntent(input: {
   return "autosave";
 }
 
-export function tripCapacityMessage(count: number): string | null {
-  if (!Number.isFinite(count) || count < MAX_SAVED_TRIPS) return null;
-  return `You can save up to ${MAX_SAVED_TRIPS} trips. Remove one from My trips to save another.`;
+/** Null while there is room; otherwise the copy shown where the save stopped. */
+export function tripCapacityMessage(count: number, member = false): string | null {
+  if (Number.isFinite(count) && canSaveAnotherTrip(count, member)) return null;
+  if (!member) return FREE_TRIP_LIMIT_MESSAGE;
+  return `You can save up to ${MEMBER_SAVED_TRIPS} trips. Remove one from My trips to save another.`;
 }
 
 export function parseTripTitle(

@@ -3,9 +3,11 @@ import { auth } from "@/auth";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
 import {
   parseTripWrite,
+  TRIP_LIMIT_CODE,
   TRIPS_ACCOUNT_UNAVAILABLE,
   TRIPS_LIST_UNAVAILABLE,
 } from "@/lib/trip-record";
+import { readReaderAccess } from "@/lib/premium-access";
 import {
   createTrip,
   listTrips,
@@ -67,13 +69,20 @@ export async function POST(request: Request) {
   if (!parsed.ok) return clientError(parsed.error, 400);
 
   try {
-    const trip = await createTrip(gate.userId, parsed.data);
+    // Saved-trip limit is checked on the server: 5 free, 200 for members.
+    const access = await readReaderAccess();
+    const trip = await createTrip(gate.userId, parsed.data, { member: access.member });
     return NextResponse.json({ ok: true, trip });
   } catch (err) {
     if (err instanceof TripsUnavailableError) {
       return firebaseUnavailable(TRIPS_ACCOUNT_UNAVAILABLE);
     }
-    if (err instanceof TripLimitError) return clientError(err.message, 409);
+    if (err instanceof TripLimitError) {
+      return NextResponse.json(
+        { error: err.message, code: TRIP_LIMIT_CODE, limit: err.limit, member: err.member },
+        { status: 409 },
+      );
+    }
     const message = err instanceof Error ? err.message : "Save failed.";
     if (message === "Invalid user id.") return clientError(message, 400);
     console.error("[api/trips] POST failed:", err);

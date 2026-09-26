@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ChevronDown,
   ChevronRight,
+  Gem,
   LayoutDashboard,
   LogOut,
   Pencil,
@@ -12,6 +13,8 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+import { usePremium } from "@/components/premium/usePremium";
+import { PERKS_HUB_PATH } from "@/lib/premium-perks";
 import {
   useCallback,
   useEffect,
@@ -56,6 +59,21 @@ export function initials(name?: string | null, email?: string | null): string {
 
 /** Account settings tab on /account (profile name, photo, password). */
 const EDIT_PROFILE_HREF = "/account#settings";
+
+/**
+ * "Member perks" row, for Premium members only. Mounted inside the open menu
+ * so the membership check runs when the menu opens, not on every page.
+ */
+function MemberPerksItem({ className, onNavigate }: { className: string; onNavigate: () => void }) {
+  const { isPremium } = usePremium();
+  if (!isPremium) return null;
+  return (
+    <Link href={PERKS_HUB_PATH} role="menuitem" className={className} onClick={onNavigate}>
+      <Gem className="h-5 w-5 shrink-0 text-accent" strokeWidth={2.25} aria-hidden="true" />
+      Member perks
+    </Link>
+  );
+}
 
 /**
  * Logged-in avatar menu: profile header with Edit profile, My Journey,
@@ -310,6 +328,8 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
             />
             My Journey
           </Link>
+
+          <MemberPerksItem className={itemClass} onNavigate={onItemNavigate} />
 
           {isAdmin ? (
             <Link

@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import {
   BookOpen,
   Compass,
+  FileDown,
   FileText,
   HelpCircle,
   ImageIcon,
@@ -34,6 +35,7 @@ const NAV = [
   { href: "/cms/design", label: "Website design", icon: Palette },
   { href: "/cms/users", label: "Users", icon: Users },
   { href: "/cms/members", label: "Members", icon: Gem },
+  { href: "/cms/downloads", label: "Downloads", icon: FileDown },
   { href: "/cms/help", label: "Help", icon: HelpCircle },
 ] as const;
 

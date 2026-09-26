@@ -2,18 +2,23 @@
  * Premium membership: display prices, Stripe snapshot mapping, and `isPremium`.
  * Safe for client and server. Persistence lives in membership-store.ts.
  *
- * Launch perks that are listed on /premium and not built yet:
- * TODO(premium): member hotel rates — do not gate booking. Wire a member rate
+ * What membership opens today (all checked on the server):
+ * - Members-only stories: BlogPostView gates `membersOnly` posts.
+ * - Trip planner: 5 saved trips free, 200 for members (shown as unlimited).
+ *   createTrip in trips.ts enforces it; see savedTripLimit in trip-record.ts.
+ *   Share links are members-only in the planner UI (the link is built in the
+ *   browser, so there is no server step to gate). The trip PDF stays free.
+ * - Downloads (PDF guides, Lightroom presets): member-downloads.ts, served only
+ *   by /api/premium/download/[id]. Hooks: ids "pdf-guides", "lightroom-presets".
+ * - Deal notes: posts with `dealNote`, listed on /premium/deals. Hook "deal-email".
+ * - Members hub: /premium/perks (premium-perks.ts).
+ *
+ * Not built yet:
+ * TODO(premium): member hotel rates. Do not gate booking. Wire a member rate
  *   when Alex has a LiteAPI/Nuitee rate code. Label stays "Coming soon".
- * TODO(premium): weekly deal email for Newark, JFK, and Philadelphia departures.
- *   No send job yet. Hook: PREMIUM_PERKS id "deal-email".
- * TODO(premium): Alex's Lightroom presets. No files or download route yet.
- *   Hook: PREMIUM_PERKS id "lightroom-presets".
- * TODO(premium): downloadable PDF guides. Trip PDF export already exists for
- *   saved trips; a member guide library does not. Hook: id "pdf-guides".
- * TODO(premium): premium trip planner (unlimited trips, collaborators, offline
- *   export). Saved trips still stop at MAX_SAVED_TRIPS in trip-record.ts.
- *   Hook: id "trip-planner".
+ * TODO(premium): weekly deal email. Deal notes are on the site only; no send
+ *   job yet. Hook: PREMIUM_PERKS id "deal-email".
+ * TODO(premium): trip planner collaborators and offline mode.
  */
 
 export const PREMIUM_EXAMPLE_PATH = "/a-note-for-members";
@@ -80,8 +85,8 @@ export const PREMIUM_PERKS: PremiumPerk[] = [
   },
   {
     id: "trip-planner",
-    title: "Premium trip planner",
-    detail: "Unlimited trips, collaborators, and PDF or offline export.",
+    title: "Unlimited trip planner",
+    detail: "Save every trip you plan and share a link to any of them. Free accounts keep up to 5.",
   },
   {
     id: "pdf-guides",
@@ -91,7 +96,7 @@ export const PREMIUM_PERKS: PremiumPerk[] = [
   {
     id: "deal-email",
     title: "Weekly travel deals",
-    detail: "A weekly note on deals leaving Newark, JFK, and Philadelphia.",
+    detail: "A weekly note on deals leaving Newark, JFK, and Philadelphia, posted for members.",
   },
   {
     id: "lightroom-presets",
