@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import { StayPhotoGallery } from "@/components/stays/StayPhotoGallery";
 import { SaveHotelButton } from "@/components/stays/SaveHotelButton";
+import { StayStickyRoomBar } from "@/components/stays/StayStickyRoomBar";
 import Link from "next/link";
 import {
   Accessibility,
-  BedDouble,
   Car,
   ChevronRight,
   Clock3,
@@ -155,7 +155,13 @@ export function StayHotelOverview({
   const hotelHighlights = highlights(hotel, reviews);
   const locationHref = mapHref(hotel);
   const mapEmbed = mapEmbedHref(hotel);
-  const fromPrice = rooms.find((room) => room.price)?.price ?? null;
+  // "Rooms from" is the cheapest live rate, not just the first one Nuitee lists.
+  const fromPrice =
+    rooms.reduce<StayRoomOffer["price"]>(
+      (lowest, room) =>
+        room.price && (!lowest || room.price.amount < lowest.amount) ? room.price : lowest,
+      null,
+    ) ?? null;
   const fromPriceLabel = fromPrice ? formatStayMoney(fromPrice) : "";
   const stars = Math.max(0, Math.min(5, Math.round(hotel.stars ?? 0)));
   const fullAddress = [hotel.address, hotel.city, hotel.country].filter(Boolean).join(", ");
@@ -189,7 +195,21 @@ export function StayHotelOverview({
                     ))}
                   </div>
                 ) : null}
-                <h1 className="ui-section-title">{hotel.name}</h1>
+                <div className="flex items-start gap-2">
+                  <h1 className="ui-section-title min-w-0 flex-1">{hotel.name}</h1>
+                  <SaveHotelButton
+                    tripContext={saveTripContext}
+                    hotel={{
+                      hotelId: hotel.id,
+                      name: hotel.name,
+                      city: hotel.city,
+                      neighborhood: hotel.neighborhood,
+                      photo: hotel.photos[0]?.url ?? "",
+                      rating: score,
+                      stars: hotel.stars,
+                    }}
+                  />
+                </div>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
                   {scoreText ? (
                     <a href="#reviews" className="inline-flex items-center gap-2 rounded-lg transition hover:bg-surface-soft">
@@ -209,29 +229,17 @@ export function StayHotelOverview({
                 </div>
               </div>
 
-              <div className="flex flex-col items-start gap-3 lg:items-end">
-                <SaveHotelButton
-                  tripContext={saveTripContext}
-                  hotel={{
-                    hotelId: hotel.id,
-                    name: hotel.name,
-                    city: hotel.city,
-                    neighborhood: hotel.neighborhood,
-                    photo: hotel.photos[0]?.url ?? "",
-                    rating: score,
-                    stars: hotel.stars,
-                  }}
-                />
-                {fromPriceLabel ? (
-                  <div className="hidden text-right md:block">
+              {fromPriceLabel ? (
+                <div className="hidden flex-col items-start gap-3 md:flex lg:items-end">
+                  <div className="text-right">
                     <p className="ui-field-hint">Rooms from</p>
                     <p className="book-price mt-1">{fromPriceLabel}</p>
                     <a href="#rooms" className="btn ui-btn btn-primary mt-2 inline-flex">
                       Select a room
                     </a>
                   </div>
-                ) : null}
-              </div>
+                </div>
+              ) : null}
             </div>
           </section>
 
@@ -504,23 +512,7 @@ export function StayHotelOverview({
         </div>
       </div>
 
-      <div className="safe-bottom-bar glass glass-strip fixed inset-x-0 bottom-0 z-[140] px-3 pt-3 md:hidden">
-        <div className="mx-auto flex max-w-xl items-center gap-3">
-          {fromPriceLabel ? (
-            <div className="min-w-0 flex-1">
-              <p className="ui-field-hint">Rooms from</p>
-              <p className="book-price truncate">{fromPriceLabel}</p>
-            </div>
-          ) : null}
-          <a
-            href={hasStayDates ? "#rooms" : "#hotel-search-editor"}
-            className="btn ui-btn btn-primary flex-1 justify-center text-center"
-          >
-            <BedDouble className="mr-2 h-4 w-4" aria-hidden="true" />
-            {hasStayDates ? "Select a room" : "Add dates"}
-          </a>
-        </div>
-      </div>
+      <StayStickyRoomBar fromPriceLabel={fromPriceLabel} hasStayDates={hasStayDates} />
     </main>
   );
 }

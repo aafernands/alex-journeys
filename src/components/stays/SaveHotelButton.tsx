@@ -160,26 +160,41 @@ export function SaveHotelButton({ hotel, tripContext }: Props) {
     }
   }
 
-  const label = !signedIn ? "Sign in to save" : saved ? "Saved" : "Save hotel";
+  const label = !signedIn ? "Sign in to save" : saved ? "Remove from saved" : "Save stay";
 
+  // Bare heart next to the hotel name: 44px tap target, 22px icon, no border or fill.
+  // Filled accent heart when saved; outline otherwise (also when signed out).
   return (
-    <div className="flex flex-col items-start gap-1 sm:items-end">
+    <div className="-mt-2 -mr-2 flex shrink-0 flex-col items-end">
       <button
         type="button"
-        className={`btn ui-btn ${saved ? "btn-ink" : "btn-secondary"} disabled:opacity-60`}
+        className={`inline-flex h-11 w-11 items-center justify-center rounded-full transition hover:bg-surface-soft disabled:opacity-60 ${
+          saved ? "text-accent" : "text-heading"
+        }`}
         onClick={() => void toggle()}
         disabled={pending || (!ready && signedIn)}
+        aria-label={label}
         aria-pressed={signedIn ? saved : undefined}
+        aria-busy={pending || undefined}
+        title={label}
       >
-        <Heart className={`h-4 w-4 ${saved ? "fill-current" : ""}`} aria-hidden="true" />
-        {pending ? (saved ? "Removing…" : "Saving…") : label}
+        <Heart
+          size={22}
+          strokeWidth={2}
+          className={saved ? "fill-current" : ""}
+          aria-hidden="true"
+        />
       </button>
       {saved && tripHref ? (
-        <a href={tripHref} className="ui-row-action">
-          Saved to trip · View trip
+        <a href={tripHref} className="ui-row-action whitespace-nowrap text-xs">
+          View trip
         </a>
       ) : null}
-      {error ? <p className="ui-field-error" role="status">{error}</p> : null}
+      {error ? (
+        <p className="ui-field-error max-w-[10rem] text-right text-xs" role="status">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

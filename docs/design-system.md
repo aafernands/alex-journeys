@@ -71,6 +71,12 @@ Primary is accent fill with on-solid label. Secondary is a white fill, hairline,
 
 14px sentence, 12px padding, optional single action.
 
+### Skeleton
+
+Warm placeholder block for content that is still loading (`--border` fill, control radius). Size it with utilities (`h-4 w-1/2`, `book-room-photo`, `rounded-full`). It pulses gently; under `prefers-reduced-motion` it sits still. Skeletons are `aria-hidden`: pair a group with one short `role="status"` line such as "Finding rooms…". Match the real layout (row, card, photo) so nothing jumps when content arrives. Where a layout would be guesswork, use the status line alone.
+
+Stays uses it in `src/components/stays/StaySkeletons.tsx` for the hotel results list and the room cards (via `loading.tsx` on `/stays` and `/stays/[hotelId]`).
+
 ## Density
 
 ```html

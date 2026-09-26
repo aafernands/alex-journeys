@@ -5061,13 +5061,33 @@ main.plan-page[data-density="compact"] .hub-follow {
   max-height: 210px;
 }
 
+/* Room card photo in the "Choose your room" list: 3:2 on phones (was a 96px strip). */
 .book-room-photo {
   position: relative;
-  height: calc(var(--row-height) * 2);
-  min-height: calc(var(--row-height) * 2);
+  aspect-ratio: 3 / 2;
   overflow: hidden;
   border-radius: var(--radius-control);
   background: var(--surface);
+}
+
+/* Rate row actions: "Rate details" on the left, the Select button on the right. */
+.book-rate-actions {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-bottom: var(--space-1);
+}
+
+.book-rate-details {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.book-rate-select {
+  flex-shrink: 0;
+  min-width: 6rem;
+  justify-content: center;
 }
 
 @media (min-width: 768px) {
@@ -5075,6 +5095,39 @@ main.plan-page[data-density="compact"] .hub-follow {
     height: clamp(220px, 22vw, 280px);
     min-height: clamp(220px, 22vw, 280px);
     max-height: clamp(220px, 22vw, 280px);
+  }
+}
+
+@media (min-width: 768px) {
+  /* Wide cards: a fixed band instead of a very tall 3:2 photo. */
+  .book-room-photo {
+    aspect-ratio: auto;
+    height: clamp(220px, 22vw, 280px);
+  }
+}
+
+/* ——— Skeleton (src/components/ui/Skeleton.tsx) ———
+   Warm placeholder while Nuitee search and room rates load. */
+.ui-skeleton {
+  display: block;
+  border-radius: var(--radius-control);
+  background: var(--border);
+  animation: ui-skeleton-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ui-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-skeleton {
+    animation: none;
   }
 }
 
