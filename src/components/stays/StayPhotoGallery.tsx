@@ -78,7 +78,7 @@ export function StayPhotoGallery({ photos, hotelName }: Props) {
 
   if (usable.length === 0) {
     return (
-      <section aria-label="Hotel photos" className="grid h-72 place-items-center rounded-xl bg-surface text-muted">
+      <section aria-label="Hotel photos" className="book-hero grid place-items-center rounded-[var(--radius-card)] bg-surface text-sm text-muted">
         <div className="text-center">
           <Images className="mx-auto mb-2 h-8 w-8" aria-hidden="true" />
           <span>No hotel photos available</span>
@@ -90,25 +90,25 @@ export function StayPhotoGallery({ photos, hotelName }: Props) {
   return (
     <>
       <section aria-label="Hotel photos" className="relative">
-        <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto rounded-xl md:hidden">
+        <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto rounded-[var(--radius-card)] md:hidden">
           {usable.map((photo, index) => (
             <button
               key={photo.url}
               type="button"
               onClick={() => show(index)}
-              className="relative min-w-full snap-center overflow-hidden rounded-xl bg-surface"
+              className="book-hero relative min-w-full snap-center overflow-hidden rounded-[var(--radius-card)] bg-surface"
               aria-label={`Open photo ${index + 1} of ${usable.length}`}
             >
               <Photo
                 photo={photo}
                 hotelName={hotelName}
-                className="h-[52vh] min-h-80 w-full object-cover"
+                className="h-full w-full object-cover"
               />
             </button>
           ))}
         </div>
 
-        <div className="hidden overflow-hidden rounded-xl bg-surface md:grid md:grid-cols-4 md:grid-rows-2 md:gap-1">
+        <div className="book-hero hidden overflow-hidden rounded-[var(--radius-card)] bg-surface md:grid md:grid-cols-4 md:grid-rows-2 md:gap-1">
           <button
             type="button"
             onClick={() => show(0)}
@@ -118,7 +118,7 @@ export function StayPhotoGallery({ photos, hotelName }: Props) {
             <Photo
               photo={usable[0]}
               hotelName={hotelName}
-              className="h-[32rem] w-full object-cover transition duration-200 hover:brightness-95"
+              className="h-full w-full object-cover transition duration-200 hover:brightness-95"
             />
           </button>
           {usable.slice(1, 5).map((photo, index) => (
@@ -142,7 +142,7 @@ export function StayPhotoGallery({ photos, hotelName }: Props) {
           <button
             type="button"
             onClick={() => show(0)}
-            className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-full bg-heading/90 px-3 py-2 text-sm font-semibold text-white shadow-sm"
+            className="absolute bottom-3 right-3 inline-flex min-h-11 items-center gap-2 rounded-full bg-heading/90 px-3 text-sm font-semibold text-on-solid"
           >
             <Images className="h-4 w-4" aria-hidden="true" />
             {usable.length} photos
