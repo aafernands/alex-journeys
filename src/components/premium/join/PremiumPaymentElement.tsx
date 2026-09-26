@@ -51,6 +51,15 @@ function isDark(): boolean {
 
 const GENERIC = "Your payment couldn’t be completed. Check your details or try another card.";
 
+/** Show Stripe's card messages to readers, but never raw setup/integration errors. */
+function readableError(error: { type?: string; message?: string }): string {
+  if (error.type === "card_error" || error.type === "validation_error") {
+    return error.message || GENERIC;
+  }
+  console.error("[premium] payment error:", error);
+  return "Something went wrong on our side. Please try again in a moment.";
+}
+
 /**
  * Stripe Payment Element in deferred-intent mode: the fields render before a
  * subscription exists; the subscription is created on Pay and confirmed here.
@@ -103,6 +112,8 @@ export function PremiumPaymentElement({
       const elements = stripe.elements({
         mode: start.mode,
         currency: start.currency,
+        // Must match payment_method_types on the server-side subscription.
+        paymentMethodTypes: ["card", "link"],
         ...(start.mode === "subscription" ? { amount: start.amount } : {}),
         appearance: premiumStripeAppearance(isDark()),
         fonts: STRIPE_FONTS,
@@ -147,7 +158,9 @@ export function PremiumPaymentElement({
     const elements = elementsRef.current;
     if (!elements) return;
     elements.update(
-      mode === "subscription" ? { mode, amount, currency } : { mode, currency },
+      mode === "subscription"
+        ? { mode, amount, currency, paymentMethodTypes: ["card", "link"] }
+        : { mode, currency, paymentMethodTypes: ["card", "link"] },
     );
   }, [mode, amount, currency]);
 
@@ -195,7 +208,7 @@ export function PremiumPaymentElement({
             confirmParams,
             redirect: "if_required",
           });
-          if (result.error) return result.error.message || GENERIC;
+          if (result.error) return readableError(result.error);
           const status = result.setupIntent?.status;
           return status === "succeeded" || status === "processing" ? null : GENERIC;
         }
@@ -205,7 +218,7 @@ export function PremiumPaymentElement({
           confirmParams,
           redirect: "if_required",
         });
-        if (result.error) return result.error.message || GENERIC;
+        if (result.error) return readableError(result.error);
         const status = result.paymentIntent?.status;
         return status === "succeeded" || status === "processing" ? null : GENERIC;
       },
