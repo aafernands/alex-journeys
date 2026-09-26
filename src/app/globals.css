@@ -5008,20 +5008,20 @@ main.plan-page[data-density="compact"] .hub-follow {
 }
 
 /* ——— Phase 4: comfortable density — reading pages ———
-   Scoped to main.home-page / main.journal-page with data-density="comfortable",
+   Scoped to main.home-page / .journal-page / .guides-page / .places-page with data-density="comfortable",
    so compact app pages and not-yet-migrated pages are untouched.
    Section titles ~20–24px, 17px lead and body text, 16px card padding,
    32px (mobile) / 48px (desktop) between sections. */
-:is(main.home-page, main.journal-page)[data-density="comfortable"] .text-lead {
+:is(main.home-page, main.journal-page, main.guides-page, main.places-page)[data-density="comfortable"] .text-lead {
   font-size: var(--type-reading-size, 1.0625rem);
   line-height: var(--type-reading-leading, 1.65);
 }
 
-:is(main.home-page, main.journal-page)[data-density="comfortable"] .hub-follow {
+:is(main.home-page, main.journal-page, main.guides-page, main.places-page)[data-density="comfortable"] .hub-follow {
   margin-top: var(--space-6);
 }
 
-:is(main.home-page, main.journal-page)[data-density="comfortable"] .post-card-body {
+:is(main.home-page, main.journal-page, main.guides-page, main.places-page)[data-density="comfortable"] .post-card-body {
   padding: var(--space-4);
 }
 
@@ -5042,13 +5042,23 @@ main.home-page[data-density="comfortable"] .text-display {
   letter-spacing: -0.01em;
 }
 
-/* Journal: index and posts */
-main.journal-page[data-density="comfortable"] .section-band {
+/* Journal, guides, places: page band, H1, section titles */
+:is(main.journal-page, main.guides-page, main.places-page)[data-density="comfortable"] .section-band {
   padding-top: 2rem;
   padding-bottom: 2rem;
 }
 
-main.journal-page[data-density="comfortable"] h1.text-display {
+:is(main.guides-page, main.places-page)[data-density="comfortable"] .text-title {
+  font-size: 1.25rem;
+  line-height: var(--type-title-leading, 1.25);
+  letter-spacing: -0.01em;
+}
+
+:is(main.guides-page, main.places-page)[data-density="comfortable"] .hub-block {
+  margin-top: 2rem;
+}
+
+:is(main.journal-page, main.guides-page, main.places-page)[data-density="comfortable"] h1.text-display {
   font-size: clamp(2rem, 3.6vw, 2.5rem);
   line-height: 1.15;
   letter-spacing: -0.015em;
@@ -5080,12 +5090,20 @@ main.journal-page[data-density="comfortable"] .post-prose figcaption {
 
 @media (min-width: 768px) {
   main.home-page[data-density="comfortable"] section:not(#top) > .section-shell,
-  main.journal-page[data-density="comfortable"] .section-band {
+  :is(main.journal-page, main.guides-page, main.places-page)[data-density="comfortable"] .section-band {
     padding-top: 3rem;
     padding-bottom: 3rem;
   }
 
   main.home-page[data-density="comfortable"] .text-display {
     font-size: 1.5rem;
+  }
+
+  :is(main.guides-page, main.places-page)[data-density="comfortable"] .text-title {
+    font-size: 1.5rem;
+  }
+
+  :is(main.guides-page, main.places-page)[data-density="comfortable"] .hub-block {
+    margin-top: 3rem;
   }
 }
