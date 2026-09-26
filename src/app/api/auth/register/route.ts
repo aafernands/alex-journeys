@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { isCredentialsAuthConfigured } from "@/auth";
 import { rateLimit } from "@/lib/cms/rate-limit";
+import { startEmailVerification } from "@/lib/email-verification-store";
 import {
+  getUserById,
   registerCredentialsUser,
   UsersUnavailableError,
 } from "@/lib/users";
@@ -73,8 +75,33 @@ export async function POST(request: Request) {
   }
 
   try {
-    const user = await registerCredentialsUser({ name, email, password });
-    return NextResponse.json({ ok: true, user });
+    const { user, pendingPassword } = await registerCredentialsUser({ name, email, password });
+    // Send the confirm email. Never fail sign-up because mail is down.
+    let verification: string = "skipped";
+    try {
+      const profile = await getUserById(user.id);
+      if (profile) {
+        const started = await startEmailVerification(
+          profile,
+          pendingPassword ? "add-password" : "verify",
+        );
+        verification = started.status;
+      }
+    } catch (err) {
+      console.error("[api/auth/register] verification email failed:", err);
+    }
+    if (pendingPassword) {
+      // The email already has an account (e.g. Google). The password only
+      // switches on after the owner taps the link we just emailed.
+      return NextResponse.json({
+        ok: true,
+        pendingPassword: true,
+        verification,
+        message:
+          "This email already has an account. We sent a link to that inbox. Tap it to finish adding your password, or continue with Google.",
+      });
+    }
+    return NextResponse.json({ ok: true, user, verification });
   } catch (err) {
     if (err instanceof UsersUnavailableError) {
       return NextResponse.json(

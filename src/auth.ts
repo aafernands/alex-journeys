@@ -219,6 +219,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               if (profile.image !== undefined) {
                 token.picture = profile.image;
               }
+              token.emailConfirmed = profile.emailVerified;
               token.profileSyncedAt = Date.now();
             }
           } catch (err) {
@@ -254,6 +255,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           session.user.image = token.picture as string | null;
         }
         session.user.isAdmin = Boolean(token.isAdmin);
+        if (typeof token.emailConfirmed === "boolean") {
+          session.user.emailConfirmed = token.emailConfirmed;
+        }
       }
       return session;
     },

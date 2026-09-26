@@ -22,4 +22,9 @@ export type UserPublic = {
   nameManagedLocally: boolean;
   /** When true, OAuth upsert must not overwrite `image` (custom photo). */
   imageManagedLocally: boolean;
+  /**
+   * The account has proved it owns `email` (code/link, reset link, email
+   * change, or Google). See src/lib/email-verification.ts.
+   */
+  emailVerified: boolean;
 };

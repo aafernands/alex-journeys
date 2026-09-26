@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isCredentialsAuthConfigured } from "@/auth";
 import { isCmsAuthenticated } from "@/lib/cms/auth";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
+import { passwordResetEmail } from "@/lib/emails/templates";
 import {
   EmailNotConfiguredError,
   EmailSendError,
@@ -20,13 +21,6 @@ export const runtime = "nodejs";
 
 type Ctx = { params: Promise<{ id: string }> };
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 /**
  * POST /api/cms/users/[id]/send-reset — CMS admin sends the same 1-hour
@@ -91,26 +85,8 @@ export async function POST(_request: Request, ctx: Ctx) {
     });
     const resetUrl = `${publicSiteOrigin()}/reset-password?token=${encodeURIComponent(rawToken)}`;
 
-    const html = `
-      <p>Hi${user.name ? ` ${escapeHtml(user.name)}` : ""},</p>
-      <p>We received a request to reset your Alex Journeys password.</p>
-      <p><a href="${resetUrl}">Reset your password</a></p>
-      <p>This link expires in 1 hour. If you did not request a reset, you can ignore this email.</p>
-      <p style="color:#888;font-size:12px;">Or paste this URL:<br/>${escapeHtml(resetUrl)}</p>
-    `;
-    const text = [
-      `Reset your Alex Journeys password:`,
-      resetUrl,
-      "",
-      "This link expires in 1 hour. If you did not request a reset, ignore this email.",
-    ].join("\n");
-
-    await sendEmail({
-      to: user.email,
-      subject: "Reset your Alex Journeys password",
-      html,
-      text,
-    });
+    const message = passwordResetEmail({ name: user.name, resetUrl });
+    await sendEmail({ to: user.email, ...message });
 
     return NextResponse.json({
       ok: true,
