@@ -191,15 +191,15 @@ export default async function AccountPage() {
   };
 
   return (
-    <main className="bg-bg">
+    <main className="account-page bg-bg" data-density="compact">
       <header className="border-b border-border bg-white">
-        <div className="section-shell py-8 md:py-10">
+        <div className="section-shell py-6 md:py-8">
           <div className={`mx-auto ${signedIn ? "max-w-5xl" : "max-w-xl"}`}>
             <p className="eyebrow">Alex Journeys</p>
             <h1 className="font-display text-display mt-2 text-heading">
               Your journal
             </h1>
-            <p className="mt-3 max-w-xl text-sm text-muted md:text-base">
+            <p className="mt-2 max-w-xl text-sm text-muted md:text-base">
               {signedIn
                 ? "Trips you’re planning, favorite hotels, saved stories, and your account details."
                 : "Sign in to keep trip plans, favorite hotels, and saved stories with you on any device."}
@@ -215,7 +215,7 @@ export default async function AccountPage() {
           <div className="mx-auto max-w-md">
             <Suspense
               fallback={
-                <div className="panel p-6 md:p-8">
+                <div className="panel p-4">
                   <p className="text-sm text-muted">Loading…</p>
                 </div>
               }

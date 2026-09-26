@@ -51,7 +51,7 @@ export function SavedHotelsList({ hotels }: { hotels: SavedHotelRow[] }) {
 
   if (items.length === 0) {
     return (
-      <div className="panel p-6 md:p-8">
+      <div className="panel p-4">
         <Heart className="h-6 w-6 text-accent" aria-hidden="true" />
         <h3 className="mt-3 font-display text-lg font-bold text-heading">
           No favorite hotels yet
@@ -59,7 +59,7 @@ export function SavedHotelsList({ hotels }: { hotels: SavedHotelRow[] }) {
         <p className="mt-2 max-w-md text-sm leading-relaxed text-text">
           Open a hotel and tap <strong>Save hotel</strong>. It will appear here on your account.
         </p>
-        <Link href="/stays" className="btn btn-primary mt-6 inline-flex">
+        <Link href="/stays" className="btn btn-primary mt-4 inline-flex">
           Find hotels
         </Link>
       </div>
