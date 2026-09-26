@@ -16,6 +16,12 @@ import {
   trialEndingEmail,
   type EmailContext,
 } from "@/lib/emails/templates";
+import {
+  staffTicketAlertEmail,
+  ticketClosedEmail,
+  ticketReceivedEmail,
+  ticketReplyEmail,
+} from "@/lib/emails/support-templates";
 
 export type EmailSample = {
   id: string;
@@ -114,6 +120,67 @@ export const EMAIL_SAMPLES: EmailSample[] = [
     when: "Stripe customer.subscription.deleted, when no cancel email was sent earlier.",
     render: (c) =>
       subscriptionCanceledEmail({ name: NAME, plan: "monthly", accessUntil: new Date().toISOString(), ended: true }, c),
+  },
+  {
+    id: "ticket-received",
+    label: "Support: message received",
+    when: "Right after a reader sends the Help & Contact form.",
+    render: (c) =>
+      ticketReceivedEmail(
+        {
+          name: NAME,
+          ticketNumber: "AJ-2026-482913",
+          topic: "Premium membership or billing",
+          subject: "Question about my yearly plan",
+          message: "Hi! I signed up for the yearly plan last week.\nCan I switch to monthly when it renews?",
+          createdAt: new Date().toISOString(),
+        },
+        c,
+      ),
+  },
+  {
+    id: "ticket-reply",
+    label: "Support: reply from the team",
+    when: "When you reply to a ticket from CMS → Support.",
+    render: (c) =>
+      ticketReplyEmail(
+        {
+          name: NAME,
+          ticketNumber: "AJ-2026-482913",
+          subject: "Question about my yearly plan",
+          reply:
+            "Hi Maria,\n\nYes, you can! Open Account → Membership → Manage membership and pick Monthly. The change starts at your next renewal.\n\nHappy travels,\nAlex",
+          authorName: "Alex",
+          closed: false,
+        },
+        c,
+      ),
+  },
+  {
+    id: "ticket-closed",
+    label: "Support: request resolved",
+    when: "When you close a ticket from CMS → Support without writing a reply.",
+    render: (c) =>
+      ticketClosedEmail({ name: NAME, ticketNumber: "AJ-2026-482913", subject: "Question about my yearly plan" }, c),
+  },
+  {
+    id: "ticket-staff-alert",
+    label: "Support: alert to the support inbox",
+    when: "To SUPPORT_NOTIFY_EMAIL for every new request and every reader reply.",
+    render: (c) =>
+      staffTicketAlertEmail(
+        {
+          kind: "new",
+          name: NAME,
+          email: "maria@example.com",
+          ticketNumber: "AJ-2026-482913",
+          topic: "Premium membership or billing",
+          subject: "Question about my yearly plan",
+          message: "Hi! I signed up for the yearly plan last week.\nCan I switch to monthly when it renews?",
+          cmsUrl: `${c.siteUrl}/cms/support/AJ-2026-482913`,
+        },
+        c,
+      ),
   },
 ];
 

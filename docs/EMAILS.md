@@ -37,6 +37,7 @@ plain-text version:
 | Subscription renewed | `subscription-renewed` | Webhook: `invoice.paid` with `billing_reason = subscription_cycle` and an amount above 0 (includes the first charge after a trial) |
 | Payment failed | `payment-failed` | Webhook: `invoice.payment_failed` (not the very first checkout payment, which the checkout page already shows). Button goes to Account → Membership, where "Manage membership" opens the Stripe portal. |
 | Membership canceled (access until …) | `subscription-canceled` | Webhook: `customer.subscription.updated` when renewal is turned off (`cancel_at_period_end` / `cancel_at` changed) |
+| Support: message received / reply / resolved / inbox alert | `ticket-received`, `ticket-reply`, `ticket-closed`, `ticket-staff-alert` | Help & Contact form and CMS → Support. See [SUPPORT.md](./SUPPORT.md). |
 | Membership ended | `subscription-ended` | Webhook: `customer.subscription.deleted`, only if the "canceled" email was not already sent for that subscription |
 
 ### No double sends
@@ -91,6 +92,7 @@ Firestore collections added: `emailVerifications/{userId}`,
 | `EMAIL_FROM` | Yes for production | `Alex Journeys Support <support@alexjourneys.com>`. Default `Alex Journeys <onboarding@resend.dev>` only delivers to the Resend account owner. |
 | `EMAIL_REPLY_TO` | Optional | Defaults to `SUPPORT_EMAIL` |
 | `SUPPORT_EMAIL` | Optional | `support@alexjourneys.com` (shown in every footer) |
+| `SUPPORT_INBOUND_EMAIL`, `SUPPORT_NOTIFY_EMAIL`, `SUPPORT_REPLY_NAME` | Optional | Support tickets, see [SUPPORT.md](./SUPPORT.md) |
 | `AUTH_URL` | Already set | Base for links in emails (`https://www.alexjourneys.com`) |
 | `STRIPE_WEBHOOK_SECRET`, `STRIPE_SECRET_KEY`, price ids | Already set | Premium emails come from the existing webhook |
 
