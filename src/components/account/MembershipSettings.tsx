@@ -37,8 +37,8 @@ export function MembershipSettings({ panel }: { panel: MembershipPanel }) {
   }
 
   return (
-    <section className="panel p-6 md:p-8" aria-labelledby="settings-membership" id="membership">
-      <h2 id="settings-membership" className="font-display text-2xl font-bold text-heading">
+    <section className="panel p-4" aria-labelledby="settings-membership" id="membership">
+      <h2 id="settings-membership" className="font-display text-ds-title font-bold text-heading">
         Membership
       </h2>
       {panel.welcome && panel.isMember ? (
@@ -55,7 +55,7 @@ export function MembershipSettings({ panel }: { panel: MembershipPanel }) {
         </p>
       ) : panel.isMember ? (
         <>
-          <p className="mt-4 text-sm font-semibold text-heading">
+          <p className="mt-2 text-sm font-semibold text-heading">
             {panel.planLabel ?? "Premium"}
             <span className="font-normal text-muted"> · {panel.statusLabel}</span>
           </p>
@@ -70,7 +70,7 @@ export function MembershipSettings({ panel }: { panel: MembershipPanel }) {
         </p>
       )}
 
-      <div className="mt-6">
+      <div className="mt-4">
         {panel.isMember && panel.portalAvailable ? (
           <button
             type="button"

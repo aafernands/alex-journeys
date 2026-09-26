@@ -49,9 +49,15 @@ import {
   TRIPS_LIST_UNAVAILABLE,
 } from "@/lib/trip-record";
 import { listTrips, TripsUnavailableError } from "@/lib/trips";
+import {
+  accountBookings,
+  accountPackingLists,
+  type AccountBookingRow,
+  type AccountPackingRow,
+} from "@/lib/account-journey";
 
 export const metadata: Metadata = {
-  title: "Account",
+  title: "My Journey",
   description:
     "Your Alex Journeys journal — trips you’re planning and stories you’ve saved.",
   robots: { index: false, follow: false },
@@ -219,6 +225,8 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
 
   let trips: AccountTripRow[] = [];
   let tripsError: string | null = null;
+  let bookings: AccountBookingRow[] = [];
+  let packingLists: AccountPackingRow[] = [];
   if (signedIn && userId) {
     if (!isFirebaseConfigured()) {
       tripsError =
@@ -226,7 +234,10 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
     } else {
       try {
         const flexibleDates = getTripPlannerConfig().flexibleDates;
-        trips = (await listTrips(userId)).map((trip) => ({
+        const records = await listTrips(userId);
+        bookings = accountBookings(records);
+        packingLists = accountPackingLists(records);
+        trips = records.map((trip) => ({
           id: trip.id,
           title: trip.title,
           destination: trip.destination,
@@ -253,6 +264,8 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
     profileLoaded,
     trips,
     tripsError,
+    bookings,
+    packingLists,
     posts,
     postsError,
     hotels,
@@ -267,26 +280,24 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
 
   return (
     <main className="account-page bg-bg" data-density="compact">
-      <header className="border-b border-border bg-white">
-        <div className="section-shell py-6 md:py-8">
-          <div className={`mx-auto ${signedIn ? "max-w-5xl" : "max-w-xl"}`}>
-            <p className="eyebrow">Alex Journeys</p>
-            <h1 className="font-display text-display mt-2 text-heading">
-              Your journal
-            </h1>
-            <p className="mt-2 max-w-xl text-sm text-muted md:text-base">
-              {signedIn
-                ? "Trips you’re planning, favorite hotels, saved stories, and your account details."
-                : "Sign in to keep trip plans, favorite hotels, and saved stories with you on any device."}
-            </p>
-          </div>
-        </div>
-      </header>
-
       {signedIn ? (
         <AccountDashboard {...dashboardProps} />
       ) : (
-        <div className="section-shell section-band">
+        <>
+          <header className="border-b border-border bg-white">
+            <div className="section-shell py-6 md:py-8">
+              <div className="mx-auto max-w-xl">
+                <p className="eyebrow">Alex Journeys</p>
+                <h1 className="font-display text-display mt-2 text-heading">
+                  Your journal
+                </h1>
+                <p className="mt-2 max-w-xl text-sm text-muted md:text-base">
+                  Sign in to keep trip plans, favorite hotels, and saved stories with you on any device.
+                </p>
+              </div>
+            </div>
+          </header>
+          <div className="section-shell section-band">
           <div className="mx-auto max-w-md">
             <Suspense
               fallback={
@@ -303,6 +314,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             </Suspense>
           </div>
         </div>
+        </>
       )}
     </main>
   );
