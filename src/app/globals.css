@@ -4070,6 +4070,11 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
   line-height: var(--type-body-leading);
 }
 
+.ui-control:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
 .ui-control-area {
   min-height: 6.5rem;
   padding-block: var(--space-3);
@@ -4792,6 +4797,154 @@ main.plan-flow:has(.plan-trip-summary) > .section-band {
   [data-density="compact"] .plan-workspace .plan-trip-summary .plan-trip-hero-title {
     font-size: 1.35rem;
     line-height: 1.2;
+  }
+}
+
+/* Compact booking flows. Same tokens as Plan a Trip. */
+main.plan-page[data-density="compact"] h1.text-display {
+  font-size: var(--type-title-size);
+  font-weight: var(--type-title-weight);
+  line-height: var(--type-title-leading);
+  letter-spacing: -0.02em;
+}
+
+main.plan-page[data-density="compact"] .text-lead {
+  margin-top: var(--space-1);
+  font-size: var(--type-secondary-size);
+  line-height: var(--type-secondary-leading);
+}
+
+main.plan-page[data-density="compact"] .eyebrow {
+  margin-top: var(--space-2);
+  color: var(--muted);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  line-height: var(--type-caption-leading);
+}
+
+main.plan-page[data-density="compact"] .section-band {
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-6);
+}
+
+main.plan-page[data-density="compact"] .hub-follow {
+  margin-top: var(--space-3);
+}
+
+[data-density="compact"] .book-flow .btn,
+[data-density="compact"] .book-flow .ui-btn {
+  min-height: var(--control-height);
+  border-radius: var(--radius-control);
+  font-size: var(--type-secondary-size);
+  font-weight: 600;
+  line-height: var(--type-secondary-leading);
+  box-shadow: var(--shadow-content);
+}
+
+[data-density="compact"] .book-flow .plan-input,
+[data-density="compact"] .book-flow .ui-control {
+  min-height: var(--control-height);
+  height: var(--control-height);
+  border: var(--hairline);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-3);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
+  box-shadow: var(--shadow-content);
+}
+
+[data-density="compact"] .book-flow textarea.plan-input,
+[data-density="compact"] .book-flow textarea.ui-control {
+  height: auto;
+  min-height: 6.5rem;
+  padding-block: var(--space-3);
+}
+
+[data-density="compact"] .book-flow .plan-date-trigger {
+  height: var(--control-height);
+}
+
+[data-density="compact"] .book-flow .plan-date-trigger .plan-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.book-flow ul.ui-list-stack {
+  margin: 0;
+  list-style: none;
+}
+
+.book-flow .ui-list-stack > li + li {
+  border-top: var(--hairline);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+.book-hit {
+  position: relative;
+}
+
+.book-hit .ui-list-main::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.book-thumb {
+  display: block;
+  width: var(--row-height);
+  height: var(--row-height);
+  object-fit: cover;
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+
+.book-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: var(--heading);
+  font-size: var(--type-secondary-size);
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.book-price small {
+  color: var(--muted);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  line-height: var(--type-caption-leading);
+}
+
+.book-hero {
+  height: 210px;
+  min-height: 210px;
+  max-height: 210px;
+}
+
+.book-room-photo {
+  position: relative;
+  height: calc(var(--row-height) * 2);
+  min-height: calc(var(--row-height) * 2);
+  overflow: hidden;
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+
+@media (min-width: 768px) {
+  .book-hero {
+    height: clamp(220px, 22vw, 280px);
+    min-height: clamp(220px, 22vw, 280px);
+    max-height: clamp(220px, 22vw, 280px);
   }
 }
 

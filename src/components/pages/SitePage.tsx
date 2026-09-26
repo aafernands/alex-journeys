@@ -68,6 +68,7 @@ export function SitePage({
       className={[bg, compact ? "plan-page" : "", planFlow ? "plan-flow" : ""]
         .filter(Boolean)
         .join(" ")}
+      data-density={compact && !planFlow ? "compact" : undefined}
     >
       {editHref ? (
         <AdminPublicChrome
