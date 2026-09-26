@@ -85,6 +85,7 @@ export default async function ExperiencesPage({ searchParams }: PageProps) {
       }
       narrow={false}
       tone="default"
+      comfortableClass="experiences-page"
       crumbs={[
         { href: "/", label: "Home" },
         { href: planHref, label: "Plan a trip" },
@@ -109,7 +110,7 @@ export default async function ExperiencesPage({ searchParams }: PageProps) {
             <ExperiencesViatorMount markup={markup} ready={settings.widgetReady} />
           </div>
           {searchUrl ? (
-            <p className={settings.widgetReady ? "mt-4" : "mt-6"}>
+            <p className="mt-4">
               <OutboundLink
                 href={searchUrl}
                 affiliate
@@ -128,22 +129,22 @@ export default async function ExperiencesPage({ searchParams }: PageProps) {
           ) : null}
         </div>
       ) : (
-        <div className="panel hub-follow max-w-2xl p-6 sm:p-8">
-          <h2 className="font-display text-2xl font-bold tracking-tight text-heading">
+        <div className="panel hub-follow max-w-2xl p-4">
+          <h2 className="font-display text-xl font-bold tracking-tight text-heading">
             Add a destination in Plan a Trip
           </h2>
-          <p className="mt-3 text-text">
+          <p className="mt-2 text-base text-text">
             Experiences follow the place on your trip. Set a destination and
             this page opens tours and activities for it.
           </p>
-          <Link href={planHref} className="btn btn-primary mt-6 inline-flex">
+          <Link href={planHref} className="btn btn-primary mt-4 inline-flex">
             Plan a trip
           </Link>
         </div>
       )}
 
       <aside
-        className="panel-soft hub-follow px-5 py-4"
+        className="panel-soft hub-follow p-4"
         aria-label="Affiliate disclosure"
       >
         <p className="text-sm leading-relaxed text-text">
