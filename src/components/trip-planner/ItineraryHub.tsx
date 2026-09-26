@@ -2167,44 +2167,46 @@ export function ItineraryHub({
           defaultOpen
         >
           <section aria-labelledby={`${headingId}-list`}>
-            <div className="plan-toolbar">
+            <header className="plan-section-head">
               <h3 id={`${headingId}-list`} className={plan.h3}>
                 Day-by-day schedule
               </h3>
-              <div
-                className="plan-inline-actions"
-                role="tablist"
-                aria-label="Itinerary layout"
-              >
-                {(
-                  [
-                    { id: "timeline", label: "Timeline" },
-                    { id: "week", label: "Week" },
-                  ] as const
-                ).map((tab) => {
-                  const active = layout === tab.id;
-                  return (
+              {view === "itinerary" ? (
+                <div className="plan-head-action">{addToTripMenu}</div>
+              ) : null}
+              <div className="plan-head-status">
+                {days.length > 0 ? (
+                  <p className="plan-head-meta">
+                    {days.length} {days.length === 1 ? "day" : "days"}
+                  </p>
+                ) : null}
+                <div
+                  className="plan-quiet-toggles"
+                  role="tablist"
+                  aria-label="Itinerary layout"
+                >
+                  {(
+                    [
+                      { id: "timeline", label: "Timeline" },
+                      { id: "week", label: "Week" },
+                    ] as const
+                  ).map((tab) => (
                     <button
                       key={tab.id}
                       type="button"
                       role="tab"
                       id={`${headingId}-${tab.id}-tab`}
-                      aria-selected={active}
+                      aria-selected={layout === tab.id}
                       aria-controls={`${headingId}-${tab.id}-panel`}
-                      className={`${plan.chip} ${
-                        active
-                          ? "border-ink bg-ink text-on-solid"
-                          : "border-border bg-white text-text hover:border-border-strong hover:bg-surface-soft"
-                      }`}
+                      className="plan-quiet-toggle"
                       onClick={() => setLayout(tab.id)}
                     >
                       {tab.label}
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-              {view === "itinerary" ? addToTripMenu : null}
-            </div>
+            </header>
             {sorted.length === 0 ? (
               <p
                 className={`${plan.prose} plan-follow text-muted plan-desktop-only`}

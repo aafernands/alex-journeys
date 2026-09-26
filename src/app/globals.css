@@ -3915,20 +3915,25 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
 
 /* Packing checklist. Paper cards, 44px targets, no extra blur on the scrolling list. */
 .plan-pack { display: grid; gap: 1.15rem; min-width: 0; }
-.plan-pack-head { display: grid; gap: var(--space-2); min-width: 0; }
-.plan-pack-head-action { display: flex; justify-content: flex-start; }
+/* Section header (Packing, Itinerary): title, then the trip action on its own row,
+   then a status row with quiet text toggles on the right. */
+.plan-section-head { display: grid; gap: var(--space-2); min-width: 0; }
+.plan-head-action { display: flex; justify-content: flex-start; }
 /* The trigger sits at the left edge here, so open the menu rightward and keep it on screen. */
-.plan-pack-head-action .plan-add-options,
-.plan-workspace .plan-pack-head-action .plan-add-options { left: 0; right: auto; width: max-content; max-width: calc(100vw - 1.5rem); }
-.plan-pack-status { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-width: 0; }
-.plan-pack-status .plan-pack-summary { margin-top: 0; }
-.plan-pack-quiet-tools { display: flex; flex-shrink: 0; align-items: center; gap: var(--space-3); }
+.plan-head-action .plan-add-options,
+.plan-workspace .plan-head-action .plan-add-options { left: 0; right: auto; width: max-content; max-width: calc(100vw - 1.5rem); }
+.plan-head-status { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-width: 0; }
+.plan-head-status > p { margin: 0; }
+.plan-head-meta { color: var(--muted); font-size: var(--type-secondary-size); font-weight: 500; line-height: 1.3; }
+.plan-quiet-toggles { display: flex; flex-shrink: 0; align-items: center; gap: var(--space-3); }
 /* Quiet text toggle: 14px secondary text, 44px hit area without adding row height. */
-.plan-pack .plan-pack-quiet { position: relative; padding: 0; border: 0; background: none; color: var(--muted); font-size: var(--type-secondary-size); font-weight: 500; line-height: 1.3; white-space: nowrap; }
-.plan-pack .plan-pack-quiet::before { content: ""; position: absolute; inset: calc((1.3em - 44px) / 2) calc(var(--space-3) / -2); }
-.plan-pack .plan-pack-quiet:hover, .plan-pack .plan-pack-quiet:focus-visible { color: var(--heading); }
-.plan-pack .plan-pack-quiet[aria-pressed="true"] { color: var(--heading); }
-.plan-pack .plan-pack-quiet:disabled { opacity: .45; }
+.plan-quiet-toggles .plan-quiet-toggle { position: relative; min-height: 0; padding: 0; border: 0; border-radius: 0; background: none; color: var(--muted); font: inherit; font-size: var(--type-secondary-size); font-weight: 500; line-height: 1.3; white-space: nowrap; cursor: pointer; }
+.plan-quiet-toggles .plan-quiet-toggle::before { content: ""; position: absolute; inset: calc((1.3em - 44px) / 2) calc(var(--space-3) / -2); }
+.plan-quiet-toggles .plan-quiet-toggle:hover,
+.plan-quiet-toggles .plan-quiet-toggle:focus-visible { color: var(--heading); }
+.plan-quiet-toggles .plan-quiet-toggle[aria-pressed="true"],
+.plan-quiet-toggles .plan-quiet-toggle[aria-selected="true"] { color: var(--heading); font-weight: 600; }
+.plan-quiet-toggles .plan-quiet-toggle:disabled { opacity: .45; cursor: default; }
 .plan-pack-summary { margin-top: .15rem; font-family: var(--font-outfit), system-ui, sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--heading); }
 .plan-pack-block { display: grid; gap: .6rem; min-width: 0; }
 .plan-pack h4 { margin: 0; }
