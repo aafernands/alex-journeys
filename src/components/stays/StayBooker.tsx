@@ -2,11 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Check, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { StayConfirmation } from "@/components/stays/StayConfirmation";
 import { StayFailureNotice } from "@/components/stays/StayFailureNotice";
 import { StayRoomGallery } from "@/components/stays/StayRoomGallery";
-import { plan } from "@/components/trip-planner/density";
+import { Button } from "@/components/ui/Button";
+import { Field, Input } from "@/components/ui/Input";
+import { ListRow } from "@/components/ui/ListRow";
+import { EmptyState } from "@/components/ui/EmptyState";
 import {
   buildStayConfirmation,
   classifyStayFailure,
@@ -51,7 +54,6 @@ type Props = {
   hotelHref?: string;
 };
 
-const inputClass = plan.input;
 type Pending = "" | "prebook" | "book" | "rates";
 type ItineraryState = "adding" | "added" | "missing";
 
@@ -364,43 +366,39 @@ export function StayBooker({
       ) : null}
 
       {!checkoutMode && rooms.length === 0 ? (
-        <div className="panel plan-inset p-5">
-          <h2 className="font-display text-xl font-bold text-heading">No rooms for these dates</h2>
-          <p className="mt-2 text-sm leading-relaxed text-text">
-            Nuitee didn’t return a rate for {hotelName}. Try different dates.
-          </p>
-          <Link href={listHref} className="btn btn-secondary mt-4 inline-flex">
-            Search again
-          </Link>
-        </div>
+        <EmptyState
+          action={
+            <Link href={listHref} className="btn ui-btn btn-secondary">
+              Search again
+            </Link>
+          }
+        >
+          Nuitee didn’t return a rate for {hotelName}. Try different dates.
+        </EmptyState>
       ) : !checkoutMode ? (
-        <div className="space-y-5 pb-2">
+        <div className="flex flex-col gap-3 pb-2">
           <h2 className="sr-only">Available rooms</h2>
           {roomGroups.map((group) => {
             const room = group[0];
             const nights = stayNights(query.startDate, query.endDate);
             const lowest = lowestAmount(group);
             let markedLowest = false;
+            const facts = [room.bed, room.size, room.maxGuests ? `Sleeps ${room.maxGuests}` : ""]
+              .filter(Boolean)
+              .join(" · ");
             return (
-              <article key={room.offerId} className="overflow-hidden rounded-xl border border-line bg-white shadow-sm">
-                <div className="md:grid md:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
-                  <div className="relative h-64 md:h-full md:min-h-72">
-                    <StayRoomGallery
-                      photos={room.photos ?? []}
-                      fallback={fallbackPhoto}
-                      label={room.name}
-                    />
-                  </div>
-                  <div className="min-w-0 p-4 sm:p-5">
-                    <h3 className="font-display text-xl font-bold text-heading">{room.name}</h3>
-                    <RoomFacts room={room} />
-                    <RoomAmenities amenities={room.amenities ?? []} />
-                    <p className="mt-3 text-sm text-muted">
-                      {group.length} {group.length === 1 ? "rate" : "rates"} for your dates
-                    </p>
-                  </div>
+              <article key={room.offerId} className="ui-card ui-card-compact">
+                <div className="book-room-photo">
+                  <StayRoomGallery
+                    photos={room.photos ?? []}
+                    fallback={fallbackPhoto}
+                    label={room.name}
+                  />
                 </div>
-                <div className="divide-y divide-line border-t border-line">
+                <h3 className="mt-2 text-base font-semibold text-heading">{room.name}</h3>
+                {facts ? <p className="ui-list-detail">{facts}</p> : null}
+                <RoomAmenities amenities={room.amenities ?? []} />
+                <div className="ui-list-stack mt-2">
                   {group.map((rate) => {
                     const isLowest =
                       !markedLowest && group.length > 1 && rate.price?.amount === lowest;
@@ -422,31 +420,30 @@ export function StayBooker({
         </div>
       ) : null}
       {pending === "prebook" ? (
-        <div className={checkoutMode ? "rounded-xl border border-line bg-white p-6 text-center" : ""} role="status">
+        <div className={checkoutMode ? "ui-card ui-card-compact text-center" : ""} role="status">
           <p className="font-semibold text-heading">Checking your selected room…</p>
-          <p className="mt-2 text-sm text-muted">Confirming the latest rate and cancellation terms with Nuitee.</p>
+          <p className="mt-1 text-sm text-muted">Confirming the latest rate and cancellation terms with Nuitee.</p>
         </div>
       ) : null}
 
       {prebook ? (
         <form
           id="stay-guest-form"
-          className={`space-y-5 rounded-xl border border-line bg-white p-5 shadow-sm sm:p-6 ${checkoutMode ? "max-md:mb-24" : ""}`}
+          className={`ui-card ui-card-compact flex flex-col gap-3 ${checkoutMode ? "max-md:mb-24" : ""}`}
           onSubmit={(event) => void bookRoom(event)}
         >
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Selected room</p>
-              <h2 className="mt-1 font-display text-xl font-bold text-heading">Review your room</h2>
+              <p className="ui-field-label">Selected room</p>
+              <h2 className="ui-section-title">Review your room</h2>
             </div>
             {checkoutMode ? (
-              <Link href={`${hotelHref}#rooms`} className="btn btn-secondary">
+              <Link href={`${hotelHref}#rooms`} className="btn ui-btn btn-secondary">
                 Change room
               </Link>
             ) : (
-              <button
-                type="button"
-                className="btn btn-secondary"
+              <Button
+                variant="secondary"
                 disabled={busy}
                 onClick={() => {
                   setPrebook(null);
@@ -455,7 +452,7 @@ export function StayBooker({
                 }}
               >
                 Change room
-              </button>
+              </Button>
             )}
           </div>
           <SelectedRoomSummary
@@ -466,12 +463,12 @@ export function StayBooker({
             alternatives={sameRoomRates(rooms, selectedForReview, offerId, prebook.roomName)}
             hotelId={hotelId}
           />
-          <div className="border-t border-line pt-5">
-            <p className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+          <div className="border-t border-border pt-3">
+            <p className="flex items-center gap-2 text-sm font-semibold text-heading">
               <ShieldCheck className="h-4 w-4" aria-hidden="true" />
               Rate confirmed by Nuitee
             </p>
-            <h3 className="mt-2 font-display text-xl font-bold text-heading">Who’s checking in?</h3>
+            <h3 className="ui-section-title mt-1">Who’s checking in?</h3>
           </div>
           <p className="text-sm leading-relaxed text-text">
             {prebook.roomName ? `${prebook.roomName}. ` : ""}
@@ -507,7 +504,7 @@ export function StayBooker({
           {query.children > 0 ? (
             <p className="text-sm text-muted">Children are priced as age 10, in the first room.</p>
           ) : null}
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-2 sm:grid-cols-2">
             <GuestField
               label="First name"
               autoComplete="given-name"
@@ -556,13 +553,9 @@ export function StayBooker({
             />
           </div>
           <div className={checkoutMode ? "hidden md:block" : undefined}>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={pending === "book" || pending === "rates"}
-            >
+            <Button type="submit" className="w-full" disabled={pending === "book" || pending === "rates"}>
               {pending === "book" ? "Booking…" : "Book this stay"}
-            </button>
+            </Button>
           </div>
           {pending === "book" ? (
             <p className="text-sm text-muted" role="status">
@@ -587,14 +580,14 @@ export function StayBooker({
                   : "Total confirmed at booking"}
               </p>
             </div>
-            <button
+            <Button
               type="submit"
               form="stay-guest-form"
-              className="btn btn-primary shrink-0"
+              className="shrink-0"
               disabled={pending === "book" || pending === "rates"}
             >
               {pending === "book" ? "Booking…" : "Book this stay"}
-            </button>
+            </Button>
           </div>
         </div>
       ) : null}
@@ -699,7 +692,7 @@ function RoomAmenities({ amenities }: { amenities: string[] }) {
       {amenities.length > 4 ? (
         <button
           type="button"
-          className="inline-flex min-h-11 items-center text-sm font-semibold text-link"
+          className="inline-flex min-h-11 items-center text-sm font-semibold text-heading underline"
           aria-expanded={open}
           onClick={() => setOpen((value) => !value)}
         >
@@ -732,55 +725,39 @@ function RateRow({
   ].filter(Boolean);
   const nightly =
     rate.price && nights > 0 ? nightlyLabel(rate.price.amount, rate.price.currency, nights) : "";
+  const detail = [
+    freeLine || refundableLabel(rate.refundable),
+    lowest ? "Lowest price" : "",
+    selected ? "Selected" : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return (
-    <div className={`grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:p-5 ${selected ? "bg-surface" : ""}`}>
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="font-semibold text-heading">{rate.boardName || "Room only"}</p>
-          {selected ? (
-            <span className="rounded-full bg-heading px-2.5 py-1 text-xs font-semibold text-on-solid">
-              Selected
-            </span>
-          ) : null}
-          {lowest ? (
-            <span className="rounded-full bg-surface px-2.5 py-1 text-xs font-semibold text-heading">
-              Lowest price
-            </span>
-          ) : null}
-        </div>
-        <p className={`mt-1 flex items-center gap-1.5 text-sm font-semibold ${refundable ? "text-emerald-700" : "text-muted"}`}>
-          {refundable ? <Check className="h-4 w-4" aria-hidden="true" /> : null}
-          {freeLine || refundableLabel(rate.refundable)}
-        </p>
-        {extra.length > 0 ? (
-          <details className="mt-1">
-            <summary className="inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">
-              Rate details
-            </summary>
-            <div className="space-y-1 pb-2">
-              {extra.map((line) => (
-                <p key={line} className="text-sm leading-6 text-text">
-                  {line}
-                </p>
-              ))}
-            </div>
-          </details>
-        ) : null}
-      </div>
-      <div className="shrink-0 sm:min-w-44 sm:text-right">
-        <p className="text-xs text-muted">Total for your stay</p>
-        <p className="mt-1 font-display text-2xl font-bold text-heading">
-          {rate.price ? formatStayMoney(rate.price) : "Price on confirm"}
-        </p>
-        {nightly ? <p className="mt-1 text-xs text-muted">{nightly} per night</p> : null}
-        {selected ? (
-          <p className="mt-3 text-sm font-semibold text-heading">This rate</p>
-        ) : (
-          <Link href={href} className="btn btn-primary mt-3 w-full sm:w-auto">
-            Select
-          </Link>
-        )}
-      </div>
+    <div className={selected ? "rounded-[var(--radius-control)] bg-surface-soft" : undefined}>
+      <ListRow
+        className={selected ? undefined : "book-hit"}
+        href={selected ? undefined : href}
+        title={rate.boardName || "Room only"}
+        detail={detail}
+        trailing={
+          <span className="book-price">
+            {rate.price ? formatStayMoney(rate.price) : "On confirm"}
+            {nightly ? <small>{nightly}/night</small> : <small>total</small>}
+          </span>
+        }
+      />
+      {extra.length > 0 ? (
+        <details className="pb-1">
+          <summary className="ui-row-action cursor-pointer">Rate details</summary>
+          <div className="space-y-1 pb-2">
+            {extra.map((line) => (
+              <p key={line} className="text-sm text-text">
+                {line}
+              </p>
+            ))}
+          </div>
+        </details>
+      ) : null}
     </div>
   );
 }
@@ -828,28 +805,28 @@ function SelectedRoomSummary({
   const label = prebook.roomName || room?.name || "Selected room";
 
   return (
-    <section className="overflow-hidden rounded-lg border border-heading bg-surface" aria-label="Selected room details">
-      <div className="relative h-72 sm:h-96">
+    <section className="overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface-soft" aria-label="Selected room details">
+      <div className="book-hero relative">
         <StayRoomGallery
           photos={room?.photos ?? []}
           fallback={fallbackPhoto}
           label={label}
         />
       </div>
-      <div className="plan-stack p-4 sm:p-5">
+      <div className="flex flex-col gap-2 p-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <span className="inline-flex rounded-full bg-heading px-2.5 py-1 text-xs font-semibold text-on-solid">
               Selected
             </span>
-            <h3 className="mt-2 font-display text-xl font-bold leading-tight text-heading">{label}</h3>
+            <h3 className="ui-section-title mt-1">{label}</h3>
             <p className="mt-2 text-sm text-muted">{occupancy}</p>
             {room ? <RoomFacts room={room} /> : null}
           </div>
           {total ? (
             <div className="shrink-0 sm:text-right">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Confirmed total</p>
-              <p className="mt-1 font-display text-xl font-bold text-heading">{total}</p>
+              <p className="ui-field-hint">Confirmed total</p>
+              <p className="book-price mt-1">{total}</p>
               {nightly ? <p className="mt-1 text-xs text-muted">{nightly} per night</p> : null}
             </div>
           ) : null}
@@ -932,26 +909,20 @@ function GuestField({
   type?: string;
   disabled: boolean;
 }) {
-  const errorId = error ? `guest-${autoComplete}-error` : undefined;
+  const id = `guest-${autoComplete}`;
   return (
-    <label className="plan-stack-tight">
-      <span className={plan.label}>{label}</span>
-      <input
+    <Field label={label} htmlFor={id} error={error}>
+      <Input
+        id={id}
         required
         type={type}
         autoComplete={autoComplete}
-        className={inputClass}
         value={value}
         disabled={disabled}
         aria-invalid={error ? true : undefined}
-        aria-describedby={errorId}
+        aria-describedby={error ? `${id}-error` : undefined}
         onChange={(event) => onChange(event.target.value)}
       />
-      {error ? (
-        <span id={errorId} className={plan.error}>
-          {error}
-        </span>
-      ) : null}
-    </label>
+    </Field>
   );
 }

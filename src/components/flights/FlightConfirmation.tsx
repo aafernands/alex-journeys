@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { plan } from "@/components/trip-planner/density";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { ListRow } from "@/components/ui/ListRow";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import type { FlightConfirmationDetails } from "@/lib/flights";
 
 type Props = {
@@ -15,12 +18,7 @@ type Props = {
 
 function Row({ label, value }: { label: string; value: string }) {
   if (!value) return null;
-  return (
-    <div>
-      <dt className={plan.label}>{label}</dt>
-      <dd className="font-semibold text-heading">{value}</dd>
-    </div>
-  );
+  return <ListRow title={value} detail={label} />;
 }
 
 export function FlightConfirmation({
@@ -33,16 +31,16 @@ export function FlightConfirmation({
 }: Props) {
   const showBookingId = confirmation.bookingId !== confirmation.confirmationCode;
   return (
-    <section className="panel plan-inset plan-stack p-5 sm:p-6" aria-labelledby="flight-confirmation">
-      <p className="eyebrow">Reservation confirmed</p>
-      <h2 id="flight-confirmation" className="font-display text-2xl font-bold text-heading">
-        {confirmation.title}
-      </h2>
-      <p className="text-sm leading-relaxed text-text">
-        Nuitee accepted this {confirmation.sandbox ? "sandbox " : ""}reservation
-        {confirmation.status ? ` · ${confirmation.status}` : ""}.
+    <Card density="compact" aria-labelledby="flight-confirmation" className="flex flex-col gap-2">
+      <SectionHeader
+        id="flight-confirmation"
+        title={confirmation.title}
+        subtitle={`Reservation confirmed${confirmation.status ? ` · ${confirmation.status}` : ""}`}
+      />
+      <p className="ui-field-hint">
+        Nuitee accepted this {confirmation.sandbox ? "sandbox " : ""}reservation.
       </p>
-      <dl className="plan-stack-tight text-sm">
+      <div className="ui-list-stack">
         <Row label="Confirmation" value={confirmation.confirmationCode} />
         {showBookingId ? <Row label="Booking id" value={confirmation.bookingId} /> : null}
         <Row label="Route" value={confirmation.routeLabel} />
@@ -52,7 +50,7 @@ export function FlightConfirmation({
         <Row label="Total" value={confirmation.totalLabel} />
         <Row label="Passenger" value={confirmation.passengerName} />
         <Row label="Email" value={confirmation.email} />
-      </dl>
+      </div>
       {confirmation.conditions.length > 0 ? (
         <ul className="plan-stack-tight text-sm leading-relaxed text-text">
           {confirmation.conditions.map((line) => (
@@ -68,22 +66,17 @@ export function FlightConfirmation({
           In the sandbox, this reservation also appears in the Nuitee dashboard.
         </p>
       ) : null}
-      <div className="plan-actions plan-sticky plan-sticky-page">
+      <div className="flex flex-wrap gap-3">
         {itinerary === "added" ? (
-          <Link href={planHref} className="btn btn-primary">
+          <Link href={planHref} className="btn ui-btn btn-primary">
             View on itinerary
           </Link>
         ) : (
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={itinerary === "adding"}
-            onClick={onAddToItinerary}
-          >
+          <Button variant="primary" disabled={itinerary === "adding"} onClick={onAddToItinerary}>
             {itinerary === "adding" ? "Adding to itinerary…" : "Add to itinerary"}
-          </button>
+          </Button>
         )}
-        <Link href={listHref} className="btn btn-secondary">
+        <Link href={listHref} className="btn ui-btn btn-secondary">
           Search more flights
         </Link>
       </div>
@@ -106,6 +99,6 @@ export function FlightConfirmation({
           This browser doesn’t have that trip open. Add it from Plan a trip, or open the saved trip.
         </p>
       ) : null}
-    </section>
+    </Card>
   );
 }

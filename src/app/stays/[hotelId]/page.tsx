@@ -67,22 +67,22 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
           { label: "Hotel" },
         ]}
       >
-        <div className="plan-trip hub-follow plan-stack">
+        <div className="plan-trip book-flow hub-follow plan-stack">
           <StayTripBar query={query} />
-          <div className="panel max-w-2xl p-6 sm:p-8">
-            <h2 className="font-display text-2xl font-bold text-heading">
+          <div className="ui-card ui-card-compact flex max-w-2xl flex-col gap-2">
+            <h2 className="ui-section-title">
               {configured ? "Add trip dates" : "Stays not configured"}
             </h2>
-            <p className="mt-3 text-text">
+            <p className="ui-field-hint">
               {configured
                 ? issue
                 : "Hotel search isn’t connected on this server yet."}
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href={planHref} className="btn btn-primary inline-flex">
+            <div className="flex flex-wrap gap-2">
+              <Link href={planHref} className="btn ui-btn btn-primary">
                 {onTrip ? "Back to itinerary" : "Plan a trip"}
               </Link>
-              <Link href={listHref} className="btn btn-secondary inline-flex">
+              <Link href={listHref} className="btn ui-btn btn-secondary">
                 Search more stays
               </Link>
             </div>
@@ -137,11 +137,9 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
         }
       >
         {previewWithoutDates ? (
-          <div className="rounded-xl border border-line bg-white p-5 sm:p-6">
-            <h3 className="font-display text-xl font-bold text-heading">
-              Choose your stay dates
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-text">
+          <div className="ui-card ui-card-compact">
+            <h3 className="ui-section-title">Choose your stay dates</h3>
+            <p className="ui-field-hint mt-1">
               Add check-in and check-out above to see live rooms, prices, and cancellation terms for this hotel.
             </p>
           </div>
@@ -177,14 +175,14 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
         { label: name },
       ]}
     >
-      <div className="plan-trip hub-follow plan-stack">
+      <div className="plan-trip book-flow hub-follow plan-stack">
         <StayTripBar query={query} />
         {failure ? (
-          <p className="text-sm font-semibold text-link" role="alert">
+          <p className="ui-field-error" role="alert">
             {failure}
           </p>
         ) : null}
-        <Link href={listHref} className="btn btn-secondary inline-flex self-start">
+        <Link href={listHref} className="btn ui-btn btn-secondary inline-flex self-start">
           Search more stays
         </Link>
       </div>

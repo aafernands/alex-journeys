@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import type { StayFailure } from "@/lib/stays";
 
 type Props = {
@@ -22,35 +24,35 @@ export function StayFailureNotice({
 }: Props) {
   const primary =
     failure.recovery === "refresh-rooms" ? (
-      <button type="button" className="btn btn-primary" disabled={pending} onClick={onRefreshRooms}>
+      <Button variant="primary" disabled={pending} onClick={onRefreshRooms}>
         {pending ? "Checking rooms…" : "See open rooms"}
-      </button>
+      </Button>
     ) : failure.recovery === "retry-book" ? (
-      <button type="button" className="btn btn-primary" disabled={pending} onClick={onPickAnother}>
+      <Button variant="primary" disabled={pending} onClick={onPickAnother}>
         Pick another room
-      </button>
+      </Button>
     ) : failure.recovery === "retry" ? (
-      <button type="button" className="btn btn-primary" disabled={pending} onClick={onRetry}>
+      <Button variant="primary" disabled={pending} onClick={onRetry}>
         {pending ? "Trying again…" : "Try again"}
-      </button>
+      </Button>
     ) : (
-      <Link href={listHref} className="btn btn-primary">
+      <Link href={listHref} className="btn ui-btn btn-primary">
         Search again
       </Link>
     );
 
   return (
-    <div className="space-y-4 rounded-xl border border-line bg-white p-5 shadow-sm" role="alert">
-      <h2 className="font-display text-xl font-bold text-heading">{failure.title}</h2>
-      <p className="text-sm leading-relaxed text-text">{failure.message}</p>
-      <div className="flex flex-wrap gap-3">
+    <Card density="compact" role="alert" className="flex flex-col gap-2">
+      <h2 className="ui-section-title">{failure.title}</h2>
+      <p className="ui-field-hint">{failure.message}</p>
+      <div className="flex flex-wrap gap-2">
         {primary}
         {failure.recovery === "back-to-search" ? null : (
-          <Link href={listHref} className="btn btn-secondary">
+          <Link href={listHref} className="btn ui-btn btn-secondary">
             Search again
           </Link>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

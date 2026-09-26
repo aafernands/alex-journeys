@@ -65,16 +65,16 @@ export default async function FlightBookPage({ searchParams }: PageProps) {
           { label: "Fare" },
         ]}
       >
-        <div className="plan-trip hub-follow plan-stack">
+        <div className="plan-trip book-flow hub-follow plan-stack">
           <FlightTripBar query={query} />
-          <div className="panel max-w-2xl p-6 sm:p-8">
-            <h2 className="font-display text-2xl font-bold text-heading">{title}</h2>
-            <p className="mt-3 text-text">{body}</p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href={listHref} className="btn btn-primary inline-flex">
+          <div className="ui-card ui-card-compact flex max-w-2xl flex-col gap-2">
+            <h2 className="ui-section-title">{title}</h2>
+            <p className="ui-field-hint">{body}</p>
+            <div className="flex flex-wrap gap-2">
+              <Link href={listHref} className="btn ui-btn btn-primary">
                 Back to flights
               </Link>
-              <Link href={planHref} className="btn btn-secondary inline-flex">
+              <Link href={planHref} className="btn ui-btn btn-secondary">
                 {query.origin || query.destination || query.tripId ? "Back to itinerary" : "Plan a trip"}
               </Link>
             </div>
@@ -110,19 +110,19 @@ export default async function FlightBookPage({ searchParams }: PageProps) {
         { label: "Fare" },
       ]}
     >
-      <div className="plan-trip hub-follow plan-stack">
+      <div className="plan-trip book-flow hub-follow plan-stack">
         <FlightTripBar query={query} />
         {loaded?.sandbox ? (
-          <p className="text-sm text-muted">
+          <p className="ui-field-hint">
             Sandbox fare. Booking finishes on Alex Journeys through Nuitee and is not a live charge.
           </p>
         ) : null}
         {failure ? (
-          <div className="panel max-w-2xl p-6">
-            <p className="text-sm font-semibold text-link" role="alert">
+          <div className="ui-card ui-card-compact flex max-w-2xl flex-col gap-2">
+            <p className="ui-field-error" role="alert">
               {failure}
             </p>
-            <Link href={listHref} className="btn btn-primary mt-4 inline-flex">
+            <Link href={listHref} className="btn ui-btn btn-primary">
               Search again
             </Link>
           </div>

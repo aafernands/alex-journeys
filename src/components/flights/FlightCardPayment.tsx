@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { loadStripe, type Stripe, type StripeCardElement } from "@stripe/stripe-js";
+import { Button } from "@/components/ui/Button";
 import { flightStripeConfirmed, type FlightCardPayment as CardPayment } from "@/lib/flights";
 
 type Props = {
@@ -90,17 +91,14 @@ export function FlightCardPayment({ payment, busy, sandbox, onAttempt, onPaid, o
           Sandbox card 4242 4242 4242 4242, any future expiry, any CVC. Nuitee does not charge it.
         </p>
       ) : null}
-      <div ref={mountRef} className="rounded-md border border-border bg-white px-3 py-3" />
-      <div className="plan-actions plan-sticky plan-sticky-page plan-sticky-solo">
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={busy || paying || !ready}
-          onClick={() => void pay()}
-        >
-          {paying || busy ? "Confirming payment…" : "Pay and book"}
-        </button>
-      </div>
+      <div
+        ref={mountRef}
+        className="ui-control"
+        style={{ display: "flex", alignItems: "center" }}
+      />
+      <Button className="w-full" disabled={busy || paying || !ready} onClick={() => void pay()}>
+        {paying || busy ? "Confirming payment…" : "Pay and book"}
+      </Button>
     </div>
   );
 }

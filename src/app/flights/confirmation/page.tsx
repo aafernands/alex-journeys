@@ -47,7 +47,7 @@ export default async function FlightConfirmationPage({ searchParams }: PageProps
         { label: "Confirmation" },
       ]}
     >
-      <div className="plan-trip hub-follow plan-stack">
+      <div className="plan-trip book-flow hub-follow plan-stack">
         <FlightTripBar query={query} />
         <FlightConfirmationScreen
           confirmation={confirmation}

@@ -4,6 +4,8 @@ import { useEffect, useId, useState, useTransition, type MouseEvent } from "reac
 import { useRouter } from "next/navigation";
 import { ChevronDown, SlidersHorizontal, Star } from "lucide-react";
 import { plan } from "@/components/trip-planner/density";
+import { Button } from "@/components/ui/Button";
+import { Chip } from "@/components/ui/Chip";
 import {
   clearStayFilters,
   guestPillLabel,
@@ -184,11 +186,7 @@ export function StayFilterBar({
   return (
     <div className={pending ? "opacity-80" : undefined} aria-busy={pending}>
       {propertyTypes ? (
-        <div
-          className="mb-3 grid grid-cols-3 rounded-full bg-surface p-1"
-          role="group"
-          aria-label="Property type"
-        >
+        <div className="mb-2 flex gap-2" role="group" aria-label="Property type">
           {(
             [
               ["any", "Any"],
@@ -198,12 +196,9 @@ export function StayFilterBar({
           ).map(([kind, label]) => {
             const selected = filters.kind === kind;
             return (
-              <button
+              <Chip
                 key={kind}
-                type="button"
-                className={`min-h-11 rounded-full px-3 text-sm font-semibold ${
-                  selected ? "bg-white text-heading shadow-sm" : "text-muted hover:text-heading"
-                }`}
+                selected={selected}
                 aria-pressed={selected}
                 onClick={() => {
                   if (selected) return;
@@ -211,14 +206,14 @@ export function StayFilterBar({
                 }}
               >
                 {label}
-              </button>
+              </Chip>
             );
           })}
         </div>
       ) : null}
 
       <div className="flex items-center gap-2">
-        <div className="stay-filter-scroller flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1">
+        <div className="stay-filter-scroller flex min-w-0 flex-1 gap-2 overflow-x-auto py-1">
           <FilterPill
             label="All filters"
             iconOnly
@@ -268,23 +263,19 @@ export function StayFilterBar({
           />
         </div>
         {activeCount > 0 ? (
-          <button
-            type="button"
-            className="hidden min-h-11 shrink-0 px-2 text-sm font-semibold text-link sm:inline-flex"
+          <Button
+            variant="ghost"
+            className="hidden shrink-0 sm:inline-flex"
             onClick={() => go(clearStayFilters(filters))}
           >
             Clear all
-          </button>
+          </Button>
         ) : null}
       </div>
       {activeCount > 0 ? (
-        <button
-          type="button"
-          className="min-h-11 text-sm font-semibold text-link sm:hidden"
-          onClick={() => go(clearStayFilters(filters))}
-        >
+        <Button variant="ghost" className="sm:hidden" onClick={() => go(clearStayFilters(filters))}>
           Clear all
-        </button>
+        </Button>
       ) : null}
       {pending ? (
         <p className="mt-2 text-sm font-semibold text-muted" role="status">
@@ -304,7 +295,7 @@ export function StayFilterBar({
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className={`glass-strong absolute inset-x-0 bottom-0 max-h-[min(85dvh,40rem)] overflow-y-auto rounded-t-3xl p-4 max-md:!top-auto max-md:!right-0 max-md:!left-0 md:right-auto md:bottom-auto md:rounded-2xl ${
+            className={`glass-strong absolute inset-x-0 bottom-0 max-h-[min(85dvh,40rem)] overflow-y-auto rounded-t-[var(--radius-card)] p-3 max-md:!top-auto max-md:!right-0 max-md:!left-0 md:right-auto md:bottom-auto md:rounded-[var(--radius-card)] ${
               open === "all" ? "md:w-[28rem]" : "md:w-[22rem]"
             }`}
             style={{
@@ -314,7 +305,7 @@ export function StayFilterBar({
             }}
           >
             <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-sand md:hidden" aria-hidden="true" />
-            <h3 id={titleId} className="font-display text-lg font-bold text-heading">
+            <h3 id={titleId} className="ui-section-title">
               {open === "all"
                 ? "All filters"
                 : open === "price"
@@ -402,11 +393,11 @@ export function StayFilterBar({
             ) : null}
 
             {open === "all" ? (
-              <div className="mt-4 space-y-5">
+              <div className="mt-3 space-y-3">
                 {propertyTypes ? (
                   <fieldset>
                     <legend className={plan.label}>Property type</legend>
-                    <div className="mt-2 grid grid-cols-3 gap-2">
+                    <div className="mt-2 flex flex-wrap gap-2">
                       {(
                         [
                           ["any", "Any"],
@@ -414,19 +405,14 @@ export function StayFilterBar({
                           ["home", "Homes"],
                         ] as const
                       ).map(([kind, label]) => (
-                        <button
+                        <Chip
                           key={kind}
-                          type="button"
-                          className={`min-h-11 rounded-full border px-2 text-sm font-semibold ${
-                            draft.kind === kind
-                              ? "border-ink bg-ink text-on-solid"
-                              : "border-border bg-white text-heading"
-                          }`}
+                          selected={draft.kind === kind}
                           aria-pressed={draft.kind === kind}
                           onClick={() => setDraft({ ...draft, kind })}
                         >
                           {label}
-                        </button>
+                        </Chip>
                       ))}
                     </div>
                   </fieldset>
@@ -502,17 +488,13 @@ export function StayFilterBar({
                   />
                   Free cancellation
                 </label>
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
-                  <button
-                    type="button"
-                    className="min-h-11 px-2 text-sm font-semibold text-link"
-                    onClick={() => go(clearStayFilters(filters))}
-                  >
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
+                  <Button variant="ghost" onClick={() => go(clearStayFilters(filters))}>
                     Clear all
-                  </button>
-                  <button type="button" className="btn btn-primary" onClick={() => applyDraft()}>
+                  </Button>
+                  <Button variant="primary" onClick={() => applyDraft()}>
                     Apply filters
-                  </button>
+                  </Button>
                 </div>
               </div>
             ) : null}
@@ -541,28 +523,18 @@ function FilterPill({
   count?: number;
 }) {
   return (
-    <button
-      type="button"
-      className={`relative inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-full border px-3.5 text-sm font-semibold ${
-        iconOnly ? "w-11 px-0" : ""
-      } ${
-        active
-          ? "border-ink bg-ink text-on-solid"
-          : "border-border bg-white text-heading hover:border-border-strong"
-      }`}
-      aria-label={iconOnly ? label : undefined}
+    <Chip
+      selected={active}
+      className="shrink-0 gap-1"
+      aria-label={iconOnly ? (count > 0 ? `${label}, ${count} selected` : label) : undefined}
       aria-expanded={caret ? expanded : undefined}
       aria-pressed={caret ? undefined : active}
       onClick={onClick}
     >
       {iconOnly ? <SlidersHorizontal className="h-4 w-4" aria-hidden="true" /> : <span>{label}</span>}
-      {caret && !iconOnly ? <ChevronDown className="h-4 w-4 opacity-70" aria-hidden="true" /> : null}
-      {count > 0 ? (
-        <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[11px] font-bold text-on-solid">
-          {count}
-        </span>
-      ) : null}
-    </button>
+      {iconOnly && count > 0 ? <span>{count}</span> : null}
+      {caret && !iconOnly ? <ChevronDown className="h-4 w-4" aria-hidden="true" /> : null}
+    </Chip>
   );
 }
 
@@ -746,22 +718,21 @@ function PriceFields({
         </label>
       </div>
       {error ? (
-        <p className="mt-2 text-sm font-semibold text-link" role="alert">
+        <p className="ui-field-error mt-2" role="alert">
           {error}
         </p>
       ) : null}
       {embedded ? (
-        <div className="mt-3">
-          <button
-            type="button"
-            className="min-h-11 px-1 text-sm font-semibold text-link"
+        <div className="mt-2">
+          <Button
+            variant="ghost"
             onClick={() => {
               update("", "");
               onClear();
             }}
           >
             Clear price
-          </button>
+          </Button>
         </div>
       ) : (
         <ApplyRow onApply={() => onApply(minRaw, maxRaw)} onClear={onClear} clearLabel="Clear price" />
@@ -780,13 +751,13 @@ function ApplyRow({
   clearLabel: string;
 }) {
   return (
-    <div className="mt-4 flex items-center justify-between gap-3">
-      <button type="button" className="min-h-11 px-1 text-sm font-semibold text-link" onClick={onClear}>
+    <div className="mt-3 flex items-center justify-between gap-2">
+      <Button variant="ghost" onClick={onClear}>
         {clearLabel}
-      </button>
-      <button type="button" className="btn btn-primary" onClick={onApply}>
+      </Button>
+      <Button variant="primary" onClick={onApply}>
         Apply
-      </button>
+      </Button>
     </div>
   );
 }

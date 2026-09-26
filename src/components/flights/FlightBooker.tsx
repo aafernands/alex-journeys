@@ -5,7 +5,9 @@ import Link from "next/link";
 import { FlightCardPayment } from "@/components/flights/FlightCardPayment";
 import { FlightConfirmationScreen } from "@/components/flights/FlightConfirmationScreen";
 import { FlightFailureNotice } from "@/components/flights/FlightFailureNotice";
-import { plan } from "@/components/trip-planner/density";
+import { Button } from "@/components/ui/Button";
+import { Field, Input, Select } from "@/components/ui/Input";
+import { ListRow } from "@/components/ui/ListRow";
 import {
   blankPassenger,
   buildFlightConfirmation,
@@ -68,18 +70,10 @@ function LegLine({
 }) {
   const offset = flightDayOffset(depart, arrive);
   return (
-    <div className="plan-stack-tight">
-      <p className={plan.label}>{label}</p>
-      <p className="font-display text-xl font-bold text-heading">
-        {formatFlightClock(depart) || "—"}
-        <span className="px-2 text-muted">–</span>
-        {formatFlightClock(arrive) || "—"}
-        {offset > 0 ? <span className="ml-1 text-sm text-muted">+{offset}</span> : null}
-      </p>
-      <p className="text-sm text-muted">
-        {[formatFlightDay(depart), `${from} → ${to}`, stopsLabel(stops)].filter(Boolean).join(" · ")}
-      </p>
-    </div>
+    <ListRow
+      title={`${formatFlightClock(depart) || "—"} – ${formatFlightClock(arrive) || "—"}${offset > 0 ? ` +${offset}` : ""}`}
+      detail={[label, formatFlightDay(depart), `${from} → ${to}`, stopsLabel(stops)].filter(Boolean).join(" · ")}
+    />
   );
 }
 
@@ -282,9 +276,9 @@ export function FlightBooker({
 
   return (
     <div className="plan-stack">
-      <section className="panel plan-inset plan-stack p-5">
-        <p className="eyebrow">{offer.airline}</p>
-        <h2 className="font-display text-2xl font-bold text-heading">{flightRouteLabel(offer)}</h2>
+      <section className="ui-card ui-card-compact flex flex-col gap-2">
+        <p className="ui-field-label">{offer.airline}</p>
+        <h2 className="ui-section-title">{flightRouteLabel(offer)}</h2>
         <p className="text-sm text-muted">
           {[flightDateLabel(offer), offer.cabin, formatFlightDuration(offer.durationMinutes)]
             .filter(Boolean)
@@ -325,8 +319,8 @@ export function FlightBooker({
       </section>
 
       {moved && changes ? (
-        <div className="panel plan-inset plan-stack p-5" role="status">
-          <h2 className="font-display text-xl font-bold text-heading">The fare changed</h2>
+        <div className="ui-card ui-card-compact flex flex-col gap-2" role="status">
+          <h2 className="ui-section-title">The fare changed</h2>
           <p className="text-sm leading-relaxed text-text">
             {changes.oldTotal != null ? (
               <span className="line-through">
@@ -363,7 +357,7 @@ export function FlightBooker({
       {offer.segments.length > 0 ? (
         <ol className="plan-stack">
           {offer.segments.map((segment) => (
-            <li key={`${segment.flightNumber}-${segment.departureTime}`} className="panel plan-inset p-4">
+            <li key={`${segment.flightNumber}-${segment.departureTime}`} className="ui-card ui-card-compact">
               <p className="font-semibold text-heading">
                 {segment.carrierName || segment.flightNumber} {segment.flightNumber}
               </p>
@@ -395,8 +389,8 @@ export function FlightBooker({
       ) : null}
 
       {prebook ? (
-        <section className="panel plan-inset plan-stack p-5">
-          <h2 className="font-display text-xl font-bold text-heading">Fare held</h2>
+        <section className="ui-card ui-card-compact flex flex-col gap-2">
+          <h2 className="ui-section-title">Fare held</h2>
           <p className="text-sm leading-relaxed text-text">
             {total ? `${total} for this itinerary.` : "Nuitee held this itinerary."}{" "}
             {prebook.payment
@@ -419,17 +413,17 @@ export function FlightBooker({
               }
             />
           ) : (
-            <Link href={listHref} className="btn btn-primary inline-flex">
+            <Link href={listHref} className="btn ui-btn btn-primary">
               Search again
             </Link>
           )}
-          <Link href={listHref} className="btn btn-secondary inline-flex">
+          <Link href={listHref} className="btn ui-btn btn-secondary">
             Back to flights
           </Link>
         </section>
       ) : (
-        <form className="panel plan-inset plan-stack p-5" onSubmit={(event) => void holdFare(event)}>
-          <h2 className="font-display text-xl font-bold text-heading">Passengers</h2>
+        <form className="ui-card ui-card-compact flex flex-col gap-3" onSubmit={(event) => void holdFare(event)}>
+          <h2 className="ui-section-title">Passengers</h2>
           <p className="text-sm text-muted">
             Names and passport details as they appear on the travel document.
           </p>
@@ -437,52 +431,52 @@ export function FlightBooker({
             const errors = fieldErrors[index] ?? {};
             const role = index < query.adults ? "Adult" : "Child";
             return (
-              <fieldset key={index} className="plan-stack border-t border-border pt-4">
-                <legend className={plan.label}>
+              <fieldset key={index} className="flex flex-col gap-2 border-t border-border pt-3">
+                <legend className="ui-field-label">
                   {role} {index + 1}
                   {index === 0 ? " · contact" : ""}
                 </legend>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <label className="plan-stack-tight">
-                    <span className={plan.label}>First name</span>
-                    <input
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Field label="First name" htmlFor={`pax-${index}-first`} error={errors.firstName}>
+                    <Input
+                      id={`pax-${index}-first`}
                       required
-                      className={plan.input}
                       value={passenger.firstName}
                       autoComplete={index === 0 ? "given-name" : "off"}
                       aria-invalid={Boolean(errors.firstName)}
+                      aria-describedby={errors.firstName ? `pax-${index}-first-error` : undefined}
                       onChange={(event) => patchPassenger(index, { firstName: event.target.value })}
                     />
-                  </label>
-                  <label className="plan-stack-tight">
-                    <span className={plan.label}>Last name</span>
-                    <input
+                  </Field>
+                  <Field label="Last name" htmlFor={`pax-${index}-last`} error={errors.lastName}>
+                    <Input
+                      id={`pax-${index}-last`}
                       required
-                      className={plan.input}
                       value={passenger.lastName}
                       autoComplete={index === 0 ? "family-name" : "off"}
                       aria-invalid={Boolean(errors.lastName)}
+                      aria-describedby={errors.lastName ? `pax-${index}-last-error` : undefined}
                       onChange={(event) => patchPassenger(index, { lastName: event.target.value })}
                     />
-                  </label>
-                  <label className="plan-stack-tight">
-                    <span className={plan.label}>Date of birth</span>
-                    <input
+                  </Field>
+                  <Field label="Date of birth" htmlFor={`pax-${index}-birthday`} error={errors.birthday}>
+                    <Input
+                      id={`pax-${index}-birthday`}
                       type="date"
                       required
-                      className={plan.input}
                       value={passenger.birthday}
                       aria-invalid={Boolean(errors.birthday)}
+                      aria-describedby={errors.birthday ? `pax-${index}-birthday-error` : undefined}
                       onChange={(event) => patchPassenger(index, { birthday: event.target.value })}
                     />
-                  </label>
-                  <label className="plan-stack-tight">
-                    <span className={plan.label}>Gender</span>
-                    <select
+                  </Field>
+                  <Field label="Gender" htmlFor={`pax-${index}-gender`} error={errors.gender}>
+                    <Select
+                      id={`pax-${index}-gender`}
                       required
-                      className={plan.input}
                       value={passenger.gender}
                       aria-invalid={Boolean(errors.gender)}
+                      aria-describedby={errors.gender ? `pax-${index}-gender-error` : undefined}
                       onChange={(event) =>
                         patchPassenger(index, {
                           gender: event.target.value === "F" ? "F" : event.target.value === "M" ? "M" : "",
@@ -492,106 +486,101 @@ export function FlightBooker({
                       <option value="">Choose</option>
                       <option value="F">Female</option>
                       <option value="M">Male</option>
-                    </select>
-                  </label>
-                  <label className="plan-stack-tight">
-                    <span className={plan.label}>Nationality</span>
-                    <input
+                    </Select>
+                  </Field>
+                  <Field label="Nationality" htmlFor={`pax-${index}-nationality`} error={errors.nationality}>
+                    <Input
+                      id={`pax-${index}-nationality`}
                       required
                       maxLength={2}
-                      className={plan.input}
                       value={passenger.nationality}
                       aria-invalid={Boolean(errors.nationality)}
+                      aria-describedby={errors.nationality ? `pax-${index}-nationality-error` : undefined}
                       onChange={(event) =>
                         patchPassenger(index, { nationality: event.target.value.toUpperCase() })
                       }
                     />
-                  </label>
-                  <label className="plan-stack-tight">
-                    <span className={plan.label}>Passport number</span>
-                    <input
+                  </Field>
+                  <Field label="Passport number" htmlFor={`pax-${index}-document`} error={errors.documentNumber}>
+                    <Input
+                      id={`pax-${index}-document`}
                       required
-                      className={plan.input}
                       value={passenger.documentNumber}
                       autoComplete="off"
                       aria-invalid={Boolean(errors.documentNumber)}
+                      aria-describedby={errors.documentNumber ? `pax-${index}-document-error` : undefined}
                       onChange={(event) =>
                         patchPassenger(index, { documentNumber: event.target.value.toUpperCase() })
                       }
                     />
-                  </label>
-                  <label className="plan-stack-tight">
-                    <span className={plan.label}>Passport expiry</span>
-                    <input
+                  </Field>
+                  <Field label="Passport expiry" htmlFor={`pax-${index}-expiry`} error={errors.documentExpiry}>
+                    <Input
+                      id={`pax-${index}-expiry`}
                       type="date"
                       required
-                      className={plan.input}
                       value={passenger.documentExpiry}
                       aria-invalid={Boolean(errors.documentExpiry)}
+                      aria-describedby={errors.documentExpiry ? `pax-${index}-expiry-error` : undefined}
                       onChange={(event) =>
                         patchPassenger(index, { documentExpiry: event.target.value })
                       }
                     />
-                  </label>
+                  </Field>
                   {index === 0 ? (
                     <>
-                      <label className="plan-stack-tight">
-                        <span className={plan.label}>Email</span>
-                        <input
+                      <Field label="Email" htmlFor={`pax-${index}-email`} error={errors.email}>
+                        <Input
+                          id={`pax-${index}-email`}
                           type="email"
                           required
-                          className={plan.input}
                           value={passenger.email}
                           autoComplete="email"
                           aria-invalid={Boolean(errors.email)}
+                          aria-describedby={errors.email ? `pax-${index}-email-error` : undefined}
                           onChange={(event) => patchPassenger(index, { email: event.target.value })}
                         />
-                      </label>
-                      <label className="plan-stack-tight">
-                        <span className={plan.label}>Phone country</span>
-                        <input
+                      </Field>
+                      <Field label="Phone country" htmlFor={`pax-${index}-phone-country`} error={errors.phoneCountry}>
+                        <Input
+                          id={`pax-${index}-phone-country`}
                           inputMode="numeric"
                           required
-                          className={plan.input}
                           value={passenger.phoneCountry}
                           aria-invalid={Boolean(errors.phoneCountry)}
+                          aria-describedby={errors.phoneCountry ? `pax-${index}-phone-country-error` : undefined}
                           onChange={(event) =>
                             patchPassenger(index, {
                               phoneCountry: event.target.value.replace(/\D/g, "").slice(0, 3),
                             })
                           }
                         />
-                      </label>
-                      <label className="plan-stack-tight">
-                        <span className={plan.label}>Phone</span>
-                        <input
+                      </Field>
+                      <Field label="Phone" htmlFor={`pax-${index}-phone`} error={errors.phoneNumber}>
+                        <Input
+                          id={`pax-${index}-phone`}
                           type="tel"
                           required
-                          className={plan.input}
                           value={passenger.phoneNumber}
                           autoComplete="tel"
                           aria-invalid={Boolean(errors.phoneNumber)}
+                          aria-describedby={errors.phoneNumber ? `pax-${index}-phone-error` : undefined}
                           onChange={(event) =>
                             patchPassenger(index, { phoneNumber: event.target.value })
                           }
                         />
-                      </label>
+                      </Field>
                     </>
                   ) : null}
                 </div>
-                {Object.values(errors).filter(Boolean).length > 0 ? (
-                  <p className="text-sm font-semibold text-link">
-                    {Object.values(errors).filter(Boolean)[0]}
-                  </p>
-                ) : null}
               </fieldset>
             );
           })}
           <div className="plan-actions plan-sticky plan-sticky-page plan-sticky-solo">
-            <button type="submit" className="btn btn-primary" disabled={busy}>
+            <Button type="submit" className="w-full" disabled={busy}>
               {pending === "prebook" ? "Holding fare…" : "Continue"}
-            </button>
-            <Link href={listHref} className="btn btn-secondary">
+            </Button>
+            <Link href={listHref} className="btn ui-btn btn-ghost">
               Back to flights
             </Link>
           </div>

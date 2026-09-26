@@ -162,37 +162,35 @@ export function StayHotelOverview({
   const hasStayDates = Boolean(saveTripContext?.startDate && saveTripContext?.endDate);
 
   return (
-    <main className="safe-bottom-page bg-bg md:pb-16">
-      <div className="section-shell pt-4 sm:pt-6">
+    <main className="book-flow safe-bottom-page bg-bg md:pb-16" data-density="compact">
+      <div className="section-shell pt-3">
         {failure ? (
-          <p className="mb-4 text-sm font-semibold text-link" role="alert">
+          <p className="ui-field-error mb-2" role="alert">
             {failure}
           </p>
         ) : null}
-        <nav aria-label="Breadcrumb" className="mb-3 text-sm text-muted">
-          <Link href={listHref} className="text-link transition hover:text-accent">
-            ← Back to stays
+        <nav aria-label="Breadcrumb" className="mb-2">
+          <Link href={listHref} className="ui-row-action">
+            Back to stays
           </Link>
         </nav>
-        {tripBar ? <div className="mb-4">{tripBar}</div> : null}
+        {tripBar ? <div className="mb-2">{tripBar}</div> : null}
 
         <StayPhotoGallery photos={hotel.photos} hotelName={hotel.name} />
 
         <div className="mx-auto max-w-6xl">
-          <section id="overview" className="scroll-mt-28 border-b border-line py-7 sm:py-9">
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <section id="overview" className="scroll-mt-28 border-b border-border py-3">
+            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div>
                 {stars > 0 ? (
-                  <div className="mb-3 flex items-center gap-1 text-heading" aria-label={`${stars} star hotel`}>
+                  <div className="mb-1 flex items-center gap-1 text-heading" aria-label={`${stars} star hotel`}>
                     {Array.from({ length: stars }, (_, index) => (
                       <Star key={index} className="h-4 w-4 fill-current" aria-hidden="true" />
                     ))}
                   </div>
                 ) : null}
-                <h1 className="font-display text-3xl font-bold leading-tight text-heading sm:text-4xl lg:text-5xl">
-                  {hotel.name}
-                </h1>
-                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text">
+                <h1 className="ui-section-title">{hotel.name}</h1>
+                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
                   {scoreText ? (
                     <a href="#reviews" className="inline-flex items-center gap-2 rounded-lg transition hover:bg-surface-soft">
                       <span className="rounded-md bg-heading px-2 py-1 font-bold text-white">{scoreText}</span>
@@ -226,9 +224,9 @@ export function StayHotelOverview({
                 />
                 {fromPriceLabel ? (
                   <div className="hidden text-right md:block">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Rooms from</p>
-                    <p className="mt-1 font-display text-2xl font-bold text-heading">{fromPriceLabel}</p>
-                    <a href="#rooms" className="btn btn-primary mt-3 inline-flex">
+                    <p className="ui-field-hint">Rooms from</p>
+                    <p className="book-price mt-1">{fromPriceLabel}</p>
+                    <a href="#rooms" className="btn ui-btn btn-primary mt-2 inline-flex">
                       Select a room
                     </a>
                   </div>
@@ -238,20 +236,20 @@ export function StayHotelOverview({
           </section>
 
           <nav aria-label="Hotel sections" className="sticky top-0 z-20 -mx-5 flex gap-1 overflow-x-auto border-b border-line bg-bg/95 px-5 py-2 backdrop-blur sm:static sm:mx-0 sm:bg-transparent sm:px-0">
-            <a href="#overview" className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-heading hover:bg-surface">Overview</a>
-            {amenities.length > 0 ? <a href="#amenities" className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-heading hover:bg-surface">Amenities</a> : null}
-            {locationHref || fullAddress ? <a href="#location" className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-heading hover:bg-surface">Location</a> : null}
-            {reviews.categories.length > 0 ? <a href="#reviews" className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-heading hover:bg-surface">Reviews</a> : null}
-            <a href="#rooms" className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-heading hover:bg-surface">Rooms</a>
+            <a href="#overview" className="ui-chip shrink-0">Overview</a>
+            {amenities.length > 0 ? <a href="#amenities" className="ui-chip shrink-0">Amenities</a> : null}
+            {locationHref || fullAddress ? <a href="#location" className="ui-chip shrink-0">Location</a> : null}
+            {reviews.categories.length > 0 ? <a href="#reviews" className="ui-chip shrink-0">Reviews</a> : null}
+            <a href="#rooms" className="ui-chip shrink-0">Rooms</a>
           </nav>
 
           {hotelHighlights.length > 0 ? (
-            <section className="border-b border-line py-8 sm:py-10">
+            <section className="border-b border-line py-6">
               <p className="eyebrow">Why this stay stands out</p>
-              <h2 className="mt-2 font-display text-2xl font-bold text-heading sm:text-3xl">
+              <h2 className="mt-2 ui-section-title">
                 Highlights for your trip
               </h2>
-              <div className="mt-6 grid gap-5 md:grid-cols-3">
+              <div className="mt-6 grid gap-3 md:grid-cols-3">
                 {hotelHighlights.map((item) => (
                   <div key={item.title} className="flex gap-4">
                     <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-surface text-heading">
@@ -268,8 +266,8 @@ export function StayHotelOverview({
           ) : null}
 
           {amenities.length > 0 ? (
-            <section id="amenities" className="scroll-mt-28 border-b border-line py-8 sm:py-10">
-              <h2 className="font-display text-2xl font-bold text-heading sm:text-3xl">About this property</h2>
+            <section id="amenities" className="scroll-mt-28 border-b border-line py-6">
+              <h2 className="ui-section-title">About this property</h2>
               <div className="mt-6 grid gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
                 {amenities.map((facility) => (
                   <div key={facility} className="flex items-center gap-3 text-sm text-text">
@@ -280,7 +278,7 @@ export function StayHotelOverview({
               </div>
               {hotel.facilities.length > amenities.length ? (
                 <details className="mt-6">
-                  <summary className="cursor-pointer font-semibold text-link">
+                  <summary className="cursor-pointer font-semibold text-heading underline">
                     See all {hotel.facilities.length} amenities
                   </summary>
                   <div className="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -297,25 +295,25 @@ export function StayHotelOverview({
           ) : null}
 
           {(fullAddress || locationHref) ? (
-            <section id="location" className="scroll-mt-28 border-b border-line py-8 sm:py-10">
-              <h2 className="font-display text-2xl font-bold text-heading sm:text-3xl">Explore the area</h2>
-              <div className="mt-6 grid gap-5 lg:grid-cols-[1.45fr_.55fr]">
-                <div className="min-h-72 overflow-hidden rounded-xl border border-line bg-surface">
+            <section id="location" className="scroll-mt-28 border-b border-line py-6">
+              <h2 className="ui-section-title">Explore the area</h2>
+              <div className="mt-6 grid gap-3 lg:grid-cols-[1.45fr_.55fr]">
+                <div className="book-hero overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface">
                   {mapEmbed ? (
                     <iframe
                       title={`Map showing ${hotel.name}`}
                       src={mapEmbed}
-                      className="h-80 w-full border-0 sm:h-96"
+                      className="h-full w-full border-0"
                       loading="lazy"
                       referrerPolicy="no-referrer-when-downgrade"
                     />
                   ) : (
-                    <div className="grid h-80 place-items-center text-muted">Map unavailable</div>
+                    <div className="grid h-full place-items-center text-sm text-muted">Map unavailable</div>
                   )}
                 </div>
-                <div className="rounded-xl border border-line bg-white p-5 sm:p-6">
+                <div className="ui-card ui-card-compact">
                   <MapPin className="h-6 w-6 text-heading" aria-hidden="true" />
-                  <h3 className="mt-4 font-display text-xl font-bold text-heading">Location</h3>
+                  <h3 className="mt-2 font-semibold text-heading">Location</h3>
                   <p className="mt-2 font-semibold text-heading">{hotel.neighborhood || hotel.city || hotel.name}</p>
                   {fullAddress ? <p className="mt-2 text-sm leading-relaxed text-text">{fullAddress}</p> : null}
                   {locationHref ? (
@@ -323,7 +321,7 @@ export function StayHotelOverview({
                       href={locationHref}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-5 inline-flex items-center gap-1 font-semibold text-link"
+                      className="mt-3 inline-flex items-center gap-1 font-semibold text-heading underline"
                     >
                       Open in Google Maps <ChevronRight className="h-4 w-4" aria-hidden="true" />
                     </a>
@@ -334,17 +332,17 @@ export function StayHotelOverview({
           ) : null}
 
           {(hotel.description || hotel.checkIn || hotel.checkOut || hotel.importantInformation) ? (
-            <section className="border-b border-line py-8 sm:py-10">
+            <section className="border-b border-line py-6">
               <div className="grid gap-8 lg:grid-cols-2">
                 <div>
-                  <h2 className="font-display text-2xl font-bold text-heading sm:text-3xl">About the hotel</h2>
+                  <h2 className="ui-section-title">About the hotel</h2>
                   {hotel.description ? (
                     <p className="mt-4 text-sm leading-7 text-text">{hotel.description}</p>
                   ) : null}
                 </div>
                 <div className="space-y-5">
                   {(hotel.checkIn || hotel.checkOut) ? (
-                    <div className="rounded-xl border border-line bg-white p-5">
+                    <div className="ui-card ui-card-compact">
                       <div className="flex items-start gap-3">
                         <Clock3 className="mt-0.5 h-5 w-5 text-heading" aria-hidden="true" />
                         <div>
@@ -359,7 +357,7 @@ export function StayHotelOverview({
                     </div>
                   ) : null}
                   {hotel.importantInformation ? (
-                    <div className="rounded-xl border border-line bg-white p-5">
+                    <div className="ui-card ui-card-compact">
                       <div className="flex items-start gap-3">
                         <ShieldCheck className="mt-0.5 h-5 w-5 text-heading" aria-hidden="true" />
                         <div>
@@ -375,18 +373,18 @@ export function StayHotelOverview({
           ) : null}
 
           {(reviews.categories.length > 0 || reviews.reviews.length > 0) ? (
-            <section id="reviews" className="scroll-mt-28 border-b border-line py-8 sm:py-10">
+            <section id="reviews" className="scroll-mt-28 border-b border-line py-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <h2 className="font-display text-2xl font-bold text-heading sm:text-3xl">What guests mention</h2>
+                  <h2 className="ui-section-title">What guests mention</h2>
                   <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
                     Category scores summarize Nuitee guest feedback. Open the guest reviews below to read the original comments.
                   </p>
                 </div>
                 {reviews.average != null ? (
                   <div className="shrink-0 sm:text-right">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Guest score</p>
-                    <p className="mt-1 font-display text-3xl font-bold text-heading">{reviews.average.toFixed(1)}/10</p>
+                    <p className="ui-field-hint">Guest score</p>
+                    <p className="ui-section-title mt-1">{reviews.average.toFixed(1)}/10</p>
                   </div>
                 ) : null}
               </div>
@@ -420,14 +418,14 @@ export function StayHotelOverview({
                   <div className="flex items-end justify-between gap-4">
                     <div>
                       <p className="eyebrow">Verified guest feedback</p>
-                      <h3 className="mt-1 font-display text-xl font-bold text-heading sm:text-2xl">Guest reviews</h3>
+                      <h3 className="ui-section-title mt-1">Guest reviews</h3>
                     </div>
                     <span className="text-sm text-muted">{reviews.count.toLocaleString()} available</span>
                   </div>
 
                   <div className="mt-5 grid gap-4 lg:grid-cols-2">
                     {reviews.reviews.slice(0, 4).map((review, index) => (
-                      <article key={`${review.name}-${review.date}-${index}`} className="rounded-xl border border-line bg-white p-5">
+                      <article key={`${review.name}-${review.date}-${index}`} className="ui-card ui-card-compact">
                         <div className="flex items-start justify-between gap-4">
                           <div>
                             <h4 className="font-semibold text-heading">{review.name || "Guest"}</h4>
@@ -450,12 +448,12 @@ export function StayHotelOverview({
 
                   {reviews.reviews.length > 4 ? (
                     <details className="mt-5">
-                      <summary className="cursor-pointer font-semibold text-link">
+                      <summary className="cursor-pointer font-semibold text-heading underline">
                         Read more guest reviews
                       </summary>
                       <div className="mt-4 grid gap-4 lg:grid-cols-2">
                         {reviews.reviews.slice(4).map((review, index) => (
-                          <article key={`more-${review.name}-${review.date}-${index}`} className="rounded-xl border border-line bg-white p-5">
+                          <article key={`more-${review.name}-${review.date}-${index}`} className="ui-card ui-card-compact">
                             <div className="flex items-start justify-between gap-4">
                               <div>
                                 <h4 className="font-semibold text-heading">{review.name || "Guest"}</h4>
@@ -482,11 +480,11 @@ export function StayHotelOverview({
             </section>
           ) : null}
 
-          <section id="rooms" className="scroll-mt-24 py-8 sm:py-10">
+          <section id="rooms" className="scroll-mt-24 py-6">
             <div className="mb-6 sm:flex sm:items-end sm:justify-between sm:gap-6">
               <div>
                 <p className="eyebrow">{hasStayDates ? "Available for your dates" : "Check availability"}</p>
-                <h2 className="mt-2 font-display text-2xl font-bold text-heading sm:text-3xl">
+                <h2 className="mt-2 ui-section-title">
                   {hasStayDates ? "Choose your room" : "Add dates to see rooms"}
                 </h2>
               </div>
@@ -510,13 +508,13 @@ export function StayHotelOverview({
         <div className="mx-auto flex max-w-xl items-center gap-3">
           {fromPriceLabel ? (
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">Rooms from</p>
-              <p className="truncate font-display text-lg font-bold text-heading">{fromPriceLabel}</p>
+              <p className="ui-field-hint">Rooms from</p>
+              <p className="book-price truncate">{fromPriceLabel}</p>
             </div>
           ) : null}
           <a
             href={hasStayDates ? "#rooms" : "#hotel-search-editor"}
-            className="btn btn-primary flex-1 justify-center text-center"
+            className="btn ui-btn btn-primary flex-1 justify-center text-center"
           >
             <BedDouble className="mr-2 h-4 w-4" aria-hidden="true" />
             {hasStayDates ? "Select a room" : "Add dates"}

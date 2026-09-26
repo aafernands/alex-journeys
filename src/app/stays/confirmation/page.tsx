@@ -46,7 +46,7 @@ export default async function StayConfirmationPage({ searchParams }: PageProps) 
         { label: "Confirmation" },
       ]}
     >
-      <div className="plan-trip hub-follow plan-stack">
+      <div className="plan-trip book-flow hub-follow plan-stack">
         <StayTripBar query={query} />
         {confirmation ? (
           <StayConfirmation
@@ -57,17 +57,13 @@ export default async function StayConfirmationPage({ searchParams }: PageProps) 
             saved="local"
           />
         ) : (
-          <section className="panel max-w-2xl p-6 sm:p-8">
-            <h2 className="font-display text-2xl font-bold text-heading">
-              Reservation details unavailable
-            </h2>
-            <p className="mt-3 text-text">
-              This confirmation link is missing its reservation number.
-            </p>
-            <Link href={planHref} className="btn btn-primary mt-6 inline-flex">
+          <div className="ui-card ui-card-compact flex max-w-2xl flex-col gap-2">
+            <h2 className="ui-section-title">Reservation details unavailable</h2>
+            <p className="ui-field-hint">This confirmation link is missing its reservation number.</p>
+            <Link href={planHref} className="btn ui-btn btn-primary">
               Back to itinerary
             </Link>
-          </section>
+          </div>
         )}
       </div>
     </SitePage>

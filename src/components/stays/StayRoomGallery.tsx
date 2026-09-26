@@ -178,7 +178,7 @@ export function StayRoomGallery({ photos, fallback = "", label }: Props) {
 
   if (slides.length === 0) {
     return (
-      <div className="grid h-full min-h-52 place-items-center bg-surface px-4 text-center text-sm text-muted">
+      <div className="grid h-full min-h-0 place-items-center bg-surface px-3 text-center text-sm text-muted">
         <div>
           <Images className="mx-auto mb-2 h-6 w-6" aria-hidden="true" />
           <p>No room photos</p>
@@ -190,7 +190,7 @@ export function StayRoomGallery({ photos, fallback = "", label }: Props) {
   const active = slides[index] ?? slides[0];
 
   return (
-    <div className="relative h-full min-h-52 bg-surface">
+    <div className="relative h-full min-h-0 bg-surface">
       <div
         ref={scroller}
         className="absolute inset-0 flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
