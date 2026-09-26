@@ -56,6 +56,8 @@ import {
   type AccountPackingRow,
 } from "@/lib/account-journey";
 import { listHistory, type HistoryEntry } from "@/lib/reading-history";
+import { listCommentsByAuthor } from "@/lib/comments";
+import type { AccountCommentRow } from "@/components/account/AccountCommentsList";
 
 export const metadata: Metadata = {
   title: "My Journey",
@@ -270,6 +272,29 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
     }
   }
 
+  let comments: AccountCommentRow[] = [];
+  let commentsError: string | null = null;
+  if (signedIn && userId) {
+    if (!isFirebaseConfigured()) {
+      commentsError = "Comments aren’t available on this site right now.";
+    } else {
+      try {
+        comments = (await listCommentsByAuthor(userId)).map((c) => ({
+          id: c.id,
+          body: c.body,
+          status: c.status,
+          createdAt: c.createdAt,
+          postTitle: c.postTitle,
+          href: c.href,
+          isReply: Boolean(c.parentId),
+        }));
+      } catch (err) {
+        console.error("[account] list comments failed:", err);
+        commentsError = "Could not load your comments. Try again in a moment.";
+      }
+    }
+  }
+
   const dashboardProps: AccountDashboardProps = {
     name: profileName,
     email: profileEmail,
@@ -288,6 +313,8 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
     hotelsError,
     history,
     historyError,
+    comments,
+    commentsError,
     membership: membershipPanel({
       membership,
       portalAvailable,

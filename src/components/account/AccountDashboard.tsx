@@ -27,6 +27,10 @@ import {
 import { AccountProfileCard } from "@/components/account/AccountProfileCard";
 import { AccountBookingsList } from "@/components/account/AccountBookingsList";
 import { AccountHistoryList } from "@/components/account/AccountHistoryList";
+import {
+  AccountCommentsList,
+  type AccountCommentRow,
+} from "@/components/account/AccountCommentsList";
 import { AccountPackingLists } from "@/components/account/AccountPackingLists";
 import {
   MyTripsList,
@@ -105,6 +109,8 @@ export type AccountDashboardProps = {
   hotelsError: string | null;
   history: HistoryEntry[];
   historyError: string | null;
+  comments: AccountCommentRow[];
+  commentsError: string | null;
   membership: MembershipPanel;
 };
 
@@ -188,11 +194,14 @@ export function AccountDashboard({
   hotelsError,
   history,
   historyError,
+  comments,
+  commentsError,
   membership,
 }: AccountDashboardProps) {
   const [section, setSection] = useState<Section>("overview");
   const [savedFilter, setSavedFilter] = useState<SavedFilter>("all");
   const [historyCount, setHistoryCount] = useState(history.length);
+  const [commentCount, setCommentCount] = useState(comments.length);
   const headerHeight = useSiteHeaderHeight();
   const displayName = name.trim() || "Traveler";
   const googlePhoto = Boolean(image?.includes("googleusercontent.com"));
@@ -238,12 +247,14 @@ export function AccountDashboard({
   const savedCount = posts.length + hotels.length;
   const savedBadge = savedError ? null : savedCount;
   const historyBadge = historyError ? null : historyCount;
+  const commentBadge = commentsError ? null : commentCount;
 
   const count = (id: Section): number | null => {
     if (id === "trips") return tripsError ? null : trips.length;
     if (id === "bookings") return tripsError ? null : bookings.length;
     if (id === "saved") return savedBadge;
     if (id === "history") return historyBadge;
+    if (id === "comments") return commentBadge;
     return null;
   };
 
@@ -311,7 +322,7 @@ export function AccountDashboard({
               image={image}
               membershipLabel={membershipLabel}
               pendingNewEmail={pendingNewEmail}
-              comments={null}
+              comments={commentBadge}
               saved={savedBadge}
               history={historyBadge}
               onOpen={select}
@@ -521,15 +532,11 @@ export function AccountDashboard({
 
           {/* Comments */}
           <div hidden={section !== "comments"}>
-            <EmptyState
-              action={
-                <Link href="/blog" className="btn btn-secondary">
-                  Browse stories
-                </Link>
-              }
-            >
-              Comments you leave on stories and guides will be listed here, with links back.
-            </EmptyState>
+            {commentsError ? (
+              <ErrorPanel message={commentsError} />
+            ) : (
+              <AccountCommentsList comments={comments} onCountChange={setCommentCount} />
+            )}
           </div>
 
           {/* History */}
