@@ -2,18 +2,32 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Download, LayoutDashboard, LogOut, Shield } from "lucide-react";
-import { useInstallOffer } from "@/components/AddToHomeScreenButton";
-import { requestInstallPrompt } from "@/lib/install-prompt";
+import {
+  ChevronDown,
+  ChevronRight,
+  LayoutDashboard,
+  LogOut,
+  Pencil,
+  Shield,
+} from "lucide-react";
+import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 
 type Variant = "header" | "header-mobile" | "mobile" | "drawer" | "drawer-cta";
 
 type Props = {
   /**
    * Desktop header: smaller photo + name (~32px).
-   * header-mobile is unused by the sticky bar (Sign in / avatar live in the drawer).
+   * header-mobile: the phone header's 40px avatar button (via HeaderAccountButton).
    * Drawer: account row (name and avatar) that opens this menu.
    */
   variant?: Variant;
@@ -40,8 +54,13 @@ export function initials(name?: string | null, email?: string | null): string {
   return source.slice(0, 2).toUpperCase();
 }
 
+/** Account settings tab on /account (profile name, photo, password). */
+const EDIT_PROFILE_HREF = "/account#settings";
+
 /**
- * Logged-in avatar menu: Account dashboard, Admin console (admins only), Logout.
+ * Logged-in avatar menu: profile header with Edit profile, My Journey,
+ * Admin console (admins only, from the session's server-computed isAdmin),
+ * and Sign out.
  */
 export function UserMenu({ variant = "header", onNavigate }: Props) {
   const { data: session } = useSession();
@@ -51,30 +70,62 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuId = useId();
-  const offerInstall = useInstallOffer();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   const close = useCallback(() => setOpen(false), []);
 
+  // Close on route change.
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   useEffect(() => {
     if (!open) return;
+    // Move focus into the menu when it opens.
+    const first = menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]');
+    first?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         close();
         buttonRef.current?.focus();
       }
     };
-    const onPointer = (e: MouseEvent) => {
+    const onPointer = (e: PointerEvent) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
         close();
       }
     };
     document.addEventListener("keydown", onKey);
-    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("pointerdown", onPointer);
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("pointerdown", onPointer);
     };
   }, [open, close]);
+
+  function onMenuKeyDown(e: ReactKeyboardEvent<HTMLDivElement>) {
+    const items = Array.from(
+      menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]:not([disabled])') ?? [],
+    );
+    if (items.length === 0) return;
+    const index = items.indexOf(document.activeElement as HTMLElement);
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      items[(index + 1) % items.length]?.focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      items[(index - 1 + items.length) % items.length]?.focus();
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      items[0]?.focus();
+    } else if (e.key === "End") {
+      e.preventDefault();
+      items[items.length - 1]?.focus();
+    } else if (e.key === "Tab") {
+      close();
+    }
+  }
 
   if (!user) return null;
 
@@ -87,12 +138,44 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
   const avatarPx = isDrawer ? 40 : 32;
 
   const itemClass =
-    "flex min-h-11 w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm font-medium text-text transition hover:bg-surface-soft hover:text-heading";
+    "flex min-h-11 w-full items-center gap-3 px-4 text-left text-base font-medium text-text transition hover:bg-surface-soft hover:text-heading focus-visible:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
 
   function onItemNavigate() {
     close();
     onNavigate?.();
   }
+
+  /**
+   * The account page reads its tab from the URL hash on mount and on
+   * hashchange. When already on /account, switch the tab via the hash
+   * instead of a soft navigation that would not re-read it.
+   */
+  function accountTab(section: "overview" | "settings") {
+    return (e: ReactMouseEvent<HTMLAnchorElement>) => {
+      if (pathname === "/account") {
+        e.preventDefault();
+        window.location.hash = section;
+      }
+      onItemNavigate();
+    };
+  }
+
+  const largeAvatar = user.image ? (
+    <Image
+      src={user.image}
+      alt=""
+      width={60}
+      height={60}
+      className="h-15 w-15 shrink-0 rounded-full border border-border object-cover"
+    />
+  ) : (
+    <span
+      className="inline-flex h-15 w-15 shrink-0 items-center justify-center rounded-full border border-border bg-surface font-display text-xl font-bold text-heading"
+      aria-hidden="true"
+    >
+      {initials(user.name, user.email)}
+    </span>
+  );
 
   const avatar = user.image ? (
     <Image
@@ -114,14 +197,16 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
   const triggerClass = isDrawer
     ? "flex min-h-11 w-full items-center gap-3 rounded-xl border border-border bg-white px-3 py-2.5 text-left transition hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     : isHeaderMobile || isMobile
-      ? "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      : "inline-flex min-h-9 max-w-[11rem] items-center gap-2 rounded-full py-0.5 pl-0.5 pr-2.5 transition hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:max-w-[13rem]";
+      ? isHeaderMobile
+        ? "inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border-strong text-heading transition hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        : "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      : "inline-flex min-h-9 max-w-[12rem] items-center gap-2 rounded-full py-0.5 pl-0.5 pr-2 transition hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:max-w-[13rem]";
 
   const menuClass = isDrawer
-    ? "glass-strong absolute left-0 right-0 top-full z-50 mt-1.5 rounded-xl py-1.5"
+    ? "absolute left-0 right-0 top-full z-50 mt-1.5 overflow-hidden rounded-[var(--radius-card)] border border-border bg-white py-1 shadow-[var(--glass-shadow)]"
     : isMobile
-      ? "glass-strong absolute left-0 bottom-full z-50 mb-2 min-w-[14rem] rounded-xl py-1.5"
-      : "glass-strong absolute right-0 top-full z-50 mt-2 min-w-[14rem] rounded-xl py-1.5";
+      ? "absolute left-0 bottom-full z-50 mb-2 w-60 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-[var(--radius-card)] border border-border bg-white py-1 shadow-[var(--glass-shadow)]"
+      : "absolute right-0 top-full z-50 mt-2 w-60 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-[var(--radius-card)] border border-border bg-white py-1 shadow-[var(--glass-shadow)]";
 
   return (
     <div
@@ -169,9 +254,16 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
             </span>
             {avatar}
             {variant === "header" ? (
-              <span className="min-w-0 truncate font-sans text-sm font-semibold tracking-tight text-heading">
-                {name}
-              </span>
+              <>
+                <span className="min-w-0 truncate font-sans text-sm font-semibold tracking-tight text-heading">
+                  {name}
+                </span>
+                <ChevronDown
+                  className={`h-4 w-4 shrink-0 text-muted transition ${open ? "rotate-180" : ""}`}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
+              </>
             ) : null}
           </>
         )}
@@ -179,32 +271,44 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
 
       {open ? (
         <div
+          ref={menuRef}
           id={menuId}
           role="menu"
           aria-label="Account"
           className={menuClass}
+          onKeyDown={onMenuKeyDown}
         >
-          {!isDrawer ? (
-            <div className="border-b border-border px-3.5 py-2.5">
-              <p className="truncate text-sm font-semibold text-heading">{name}</p>
-              {user.email ? (
-                <p className="mt-0.5 truncate text-xs text-muted">{user.email}</p>
-              ) : null}
-            </div>
-          ) : null}
+          <div className="flex flex-col items-center gap-1 px-4 pt-3 pb-1 text-center">
+            {largeAvatar}
+            <p className="mt-1 w-full truncate text-sm font-semibold text-heading">{name}</p>
+            {user.email && user.email !== name ? (
+              <p className="w-full truncate text-sm text-muted">{user.email}</p>
+            ) : null}
+            <Link
+              href={EDIT_PROFILE_HREF}
+              role="menuitem"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--radius-control)] px-2 text-sm font-semibold text-accent transition hover:text-accent-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={accountTab("settings")}
+            >
+              <Pencil className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+              Edit profile
+            </Link>
+          </div>
+
+          <div className="my-1 border-t border-border" role="separator" />
 
           <Link
             href="/account"
             role="menuitem"
             className={itemClass}
-            onClick={onItemNavigate}
+            onClick={accountTab("overview")}
           >
             <LayoutDashboard
-              className="h-4 w-4 shrink-0 text-accent"
+              className="h-5 w-5 shrink-0 text-muted"
               strokeWidth={2}
               aria-hidden="true"
             />
-            Account dashboard
+            My Journey
           </Link>
 
           {isAdmin ? (
@@ -215,7 +319,7 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
               onClick={onItemNavigate}
             >
               <Shield
-                className="h-4 w-4 shrink-0 text-accent"
+                className="h-5 w-5 shrink-0 text-muted"
                 strokeWidth={2}
                 aria-hidden="true"
               />
@@ -223,31 +327,12 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
             </Link>
           ) : null}
 
-          {!isDrawer && offerInstall ? (
-            <button
-              type="button"
-              role="menuitem"
-              className={itemClass}
-              onClick={() => {
-                requestInstallPrompt();
-                onItemNavigate();
-              }}
-            >
-              <Download
-                className="h-4 w-4 shrink-0 text-accent"
-                strokeWidth={2}
-                aria-hidden="true"
-              />
-              Add to home screen
-            </button>
-          ) : null}
-
-          <div className="my-1 border-t border-border" />
+          <div className="my-1 border-t border-border" role="separator" />
 
           <button
             type="button"
             role="menuitem"
-            className={`${itemClass} disabled:opacity-60`}
+            className={`${itemClass} !text-link disabled:opacity-60`}
             disabled={pending}
             onClick={async () => {
               setPending(true);
@@ -261,11 +346,11 @@ export function UserMenu({ variant = "header", onNavigate }: Props) {
             }}
           >
             <LogOut
-              className="h-4 w-4 shrink-0 text-muted"
+              className="h-5 w-5 shrink-0"
               strokeWidth={2}
               aria-hidden="true"
             />
-            {pending ? "Signing out…" : "Logout"}
+            {pending ? "Signing out…" : "Sign out"}
           </button>
         </div>
       ) : null}

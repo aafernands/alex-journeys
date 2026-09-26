@@ -1,12 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Gem, UserRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useReaderLoginPrompt } from "@/components/ReaderLoginPrompt";
-import { initials } from "@/components/UserMenu";
+import { UserMenu } from "@/components/UserMenu";
 
 /** Same footprint for every phone header control. */
 export const HEADER_ICON_BUTTON =
@@ -36,7 +35,7 @@ export function PremiumDiamondButton({
 
 /**
  * Phone header account control. Signed out it opens the shared sign-in sheet;
- * signed in it shows the small profile photo and goes to the account page.
+ * signed in it shows the small profile photo and opens the account dropdown.
  */
 export function HeaderAccountButton({
   enabled = true,
@@ -55,31 +54,8 @@ export function HeaderAccountButton({
   const user = status === "authenticated" ? session?.user : null;
 
   if (user) {
-    return (
-      <Link
-        href="/account"
-        aria-label="Your account"
-        className={`${outlined} overflow-hidden`}
-        onClick={() => onNavigate?.()}
-      >
-        {user.image ? (
-          <Image
-            src={user.image}
-            alt=""
-            width={28}
-            height={28}
-            className="h-7 w-7 rounded-full object-cover"
-          />
-        ) : (
-          <span
-            className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-surface-soft text-[0.6875rem] font-semibold text-heading"
-            aria-hidden="true"
-          >
-            {initials(user.name, user.email)}
-          </span>
-        )}
-      </Link>
-    );
+    // Signed in: avatar button that opens the account dropdown (UserMenu).
+    return <UserMenu variant="header-mobile" onNavigate={onNavigate} />;
   }
 
   return (
