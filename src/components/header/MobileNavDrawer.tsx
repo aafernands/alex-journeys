@@ -13,7 +13,8 @@ import {
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { SearchInput } from "@/components/search/SearchInput";
 import { useReaderLoginPrompt } from "@/components/ReaderLoginPrompt";
-import { UserRound, X } from "lucide-react";
+import { Gem, UserRound, X } from "lucide-react";
+import { AddToHomeScreenButton } from "@/components/AddToHomeScreenButton";
 import { useSession } from "next-auth/react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { site } from "@/data/content";
@@ -122,7 +123,7 @@ export function MobileNavDrawer({ open, onClose }: Props) {
             onNavigate={onClose}
           />
         </div>
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-2 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
           <ul className="flex flex-col" aria-label="Primary">
             <li>
               <Link
@@ -227,15 +228,6 @@ export function MobileNavDrawer({ open, onClose }: Props) {
                 Contact
               </Link>
             </li>
-            <li className="mt-3 border-t border-border pt-2">
-              <Link
-                href="/premium"
-                className="flex min-h-11 items-center text-sm font-semibold text-muted transition hover:text-accent"
-                onClick={onClose}
-              >
-                Premium
-              </Link>
-            </li>
           </ul>
 
           <section className="mt-6 text-center" aria-label="Follow Alex Journeys">
@@ -288,6 +280,24 @@ export function MobileNavDrawer({ open, onClose }: Props) {
               </li>
             </ul>
           </section>
+
+          {/* End of the scrolling list, not pinned: install shortcut, then Subscribe. */}
+          <div className="mt-auto pt-6">
+            <div className="flex flex-col gap-3 border-t border-border pt-5">
+              <AddToHomeScreenButton
+                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-border-strong bg-white px-4 text-sm font-semibold text-heading transition hover:bg-surface-soft"
+                onPress={onClose}
+              />
+              <Link
+                href="/premium"
+                className="flex min-h-14 w-full items-center justify-center gap-2.5 rounded-lg bg-accent px-4 font-display text-lg font-bold tracking-tight text-on-solid transition hover:bg-accent-deep"
+                onClick={onClose}
+              >
+                <Gem size={20} strokeWidth={2.25} aria-hidden="true" />
+                Subscribe
+              </Link>
+            </div>
+          </div>
         </div>
       </nav>
     </div>
