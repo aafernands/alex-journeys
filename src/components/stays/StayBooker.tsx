@@ -732,31 +732,46 @@ function RateRow({
   ]
     .filter(Boolean)
     .join(" · ");
+  const priceLabel = rate.price ? formatStayMoney(rate.price) : "";
+  const rateTitle = rate.boardName || "Room only";
   return (
     <div className={selected ? "rounded-[var(--radius-control)] bg-surface-soft" : undefined}>
       <ListRow
-        className={selected ? undefined : "book-hit"}
-        href={selected ? undefined : href}
-        title={rate.boardName || "Room only"}
+        title={rateTitle}
         detail={detail}
         trailing={
           <span className="book-price">
-            {rate.price ? formatStayMoney(rate.price) : "On confirm"}
+            {priceLabel || "On confirm"}
             {nightly ? <small>{nightly}/night</small> : <small>total</small>}
           </span>
         }
       />
-      {extra.length > 0 ? (
-        <details className="pb-1">
-          <summary className="ui-row-action cursor-pointer">Rate details</summary>
-          <div className="space-y-1 pb-2">
-            {extra.map((line) => (
-              <p key={line} className="text-sm text-text">
-                {line}
-              </p>
-            ))}
-          </div>
-        </details>
+      {extra.length > 0 || !selected ? (
+        <div className="book-rate-actions">
+          {extra.length > 0 ? (
+            <details className="book-rate-details">
+              <summary className="ui-row-action cursor-pointer">Rate details</summary>
+              <div className="space-y-1 pb-2">
+                {extra.map((line) => (
+                  <p key={line} className="text-sm text-text">
+                    {line}
+                  </p>
+                ))}
+              </div>
+            </details>
+          ) : (
+            <span className="book-rate-details" />
+          )}
+          {!selected ? (
+            <Link
+              href={href}
+              className="btn ui-btn btn-primary book-rate-select"
+              aria-label={`Select ${[rate.name, rateTitle, priceLabel].filter(Boolean).join(", ")}`}
+            >
+              Select
+            </Link>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );
