@@ -12,6 +12,7 @@ import { PostItineraryTimeline } from "@/components/blog/PostItineraryTimeline";
 import { OutboundLink } from "@/components/outbound/OutboundLink";
 import { CommentSection } from "@/components/blog/CommentSection";
 import { PostActions } from "@/components/blog/PostActions";
+import { RecordView } from "@/components/account/RecordView";
 import { RelatedPosts } from "@/components/blog/RelatedPosts";
 import { JsonLd } from "@/components/JsonLd";
 import {
@@ -313,6 +314,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
           </aside>
 
           <CommentSection slug={slug} />
+          <RecordView kind="story" slug={slug} />
 
           <footer className="mt-10 flex flex-wrap gap-3 border-t border-border pt-6">
             <Link href="/blog" className="btn btn-secondary">

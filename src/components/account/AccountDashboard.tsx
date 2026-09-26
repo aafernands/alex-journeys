@@ -26,6 +26,7 @@ import {
 } from "@/components/account/AccountJourneyNav";
 import { AccountProfileCard } from "@/components/account/AccountProfileCard";
 import { AccountBookingsList } from "@/components/account/AccountBookingsList";
+import { AccountHistoryList } from "@/components/account/AccountHistoryList";
 import { AccountPackingLists } from "@/components/account/AccountPackingLists";
 import {
   MyTripsList,
@@ -51,6 +52,7 @@ import {
   type AccountSection,
 } from "@/lib/account-section";
 import type { AccountBookingRow, AccountPackingRow } from "@/lib/account-journey";
+import type { HistoryEntry } from "@/lib/reading-history";
 import { planATripHref } from "@/lib/trip-record";
 import {
   MembershipSettings,
@@ -101,8 +103,12 @@ export type AccountDashboardProps = {
   postsError: string | null;
   hotels: SavedHotelRow[];
   hotelsError: string | null;
+  history: HistoryEntry[];
+  historyError: string | null;
   membership: MembershipPanel;
 };
+
+type SavedFilter = "all" | "hotels" | "stories";
 
 function useSiteHeaderHeight(): number {
   const [height, setHeight] = useState(112);
@@ -180,9 +186,13 @@ export function AccountDashboard({
   postsError,
   hotels,
   hotelsError,
+  history,
+  historyError,
   membership,
 }: AccountDashboardProps) {
   const [section, setSection] = useState<Section>("overview");
+  const [savedFilter, setSavedFilter] = useState<SavedFilter>("all");
+  const [historyCount, setHistoryCount] = useState(history.length);
   const headerHeight = useSiteHeaderHeight();
   const displayName = name.trim() || "Traveler";
   const googlePhoto = Boolean(image?.includes("googleusercontent.com"));
@@ -227,11 +237,13 @@ export function AccountDashboard({
   const savedError = postsError || hotelsError;
   const savedCount = posts.length + hotels.length;
   const savedBadge = savedError ? null : savedCount;
+  const historyBadge = historyError ? null : historyCount;
 
   const count = (id: Section): number | null => {
     if (id === "trips") return tripsError ? null : trips.length;
     if (id === "bookings") return tripsError ? null : bookings.length;
     if (id === "saved") return savedBadge;
+    if (id === "history") return historyBadge;
     return null;
   };
 
@@ -301,7 +313,7 @@ export function AccountDashboard({
               pendingNewEmail={pendingNewEmail}
               comments={null}
               saved={savedBadge}
-              history={null}
+              history={historyBadge}
               onOpen={select}
             />
 
@@ -416,56 +428,95 @@ export function AccountDashboard({
           </div>
 
           {/* Saved */}
-          <div hidden={section !== "saved"} className="space-y-6">
-            <section aria-labelledby="saved-hotels-heading">
-              <h2
-                id="saved-hotels-heading"
-                className="font-display text-base font-bold text-heading"
-              >
-                Favorite hotels
-              </h2>
-              <p className="mt-1 text-sm text-muted">Hotels you saved while comparing stays.</p>
-              <div className="mt-3">
-                {hotelsError ? (
-                  <ErrorPanel
-                    message={hotelsError}
-                    action={
-                      <Link href="/stays" className="btn btn-secondary">
-                        Find hotels
-                      </Link>
-                    }
-                  />
-                ) : (
-                  <SavedHotelsList hotels={hotels} />
-                )}
-              </div>
-            </section>
+          <div hidden={section !== "saved"} className="space-y-4">
+            <div
+              role="group"
+              aria-label="Show saved"
+              className="inline-flex rounded-full border border-border bg-white p-0.5"
+            >
+              {(
+                [
+                  { id: "all", label: "All", count: savedError ? null : savedCount },
+                  { id: "hotels", label: "Hotels", count: hotelsError ? null : hotels.length },
+                  { id: "stories", label: "Stories", count: postsError ? null : posts.length },
+                ] as { id: SavedFilter; label: string; count: number | null }[]
+              ).map((option) => {
+                const on = savedFilter === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => setSavedFilter(option.id)}
+                    className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition ${
+                      on ? "bg-ink text-on-solid" : "text-muted hover:text-heading"
+                    }`}
+                  >
+                    {option.label}
+                    {option.count !== null ? (
+                      <span className="tabular-nums opacity-80">{option.count}</span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
 
-            <section aria-labelledby="saved-stories-heading" className="border-t border-border pt-4">
-              <h2
-                id="saved-stories-heading"
-                className="font-display text-base font-bold text-heading"
+            {savedFilter !== "stories" ? (
+              <section aria-labelledby="saved-hotels-heading">
+                <h2
+                  id="saved-hotels-heading"
+                  className="font-display text-base font-bold text-heading"
+                >
+                  Favorite hotels
+                </h2>
+                <p className="mt-1 text-sm text-muted">Hotels you saved while comparing stays.</p>
+                <div className="mt-3">
+                  {hotelsError ? (
+                    <ErrorPanel
+                      message={hotelsError}
+                      action={
+                        <Link href="/stays" className="btn btn-secondary">
+                          Find hotels
+                        </Link>
+                      }
+                    />
+                  ) : (
+                    <SavedHotelsList hotels={hotels} />
+                  )}
+                </div>
+              </section>
+            ) : null}
+
+            {savedFilter !== "hotels" ? (
+              <section
+                aria-labelledby="saved-stories-heading"
+                className={savedFilter === "all" ? "border-t border-border pt-4" : undefined}
               >
-                Saved stories
-              </h2>
-              <p className="mt-1 text-sm text-muted">
-                Bookmarks from the journal. Remove any of them whenever you like.
-              </p>
-              <div className="mt-3">
-                {postsError ? (
-                  <ErrorPanel
-                    message={postsError}
-                    action={
-                      <Link href="/blog" className="btn btn-secondary">
-                        Browse stories
-                      </Link>
-                    }
-                  />
-                ) : (
-                  <SavedPostsList posts={posts} />
-                )}
-              </div>
-            </section>
+                <h2
+                  id="saved-stories-heading"
+                  className="font-display text-base font-bold text-heading"
+                >
+                  Saved stories
+                </h2>
+                <p className="mt-1 text-sm text-muted">
+                  Bookmarks from the journal. Remove any of them whenever you like.
+                </p>
+                <div className="mt-3">
+                  {postsError ? (
+                    <ErrorPanel
+                      message={postsError}
+                      action={
+                        <Link href="/blog" className="btn btn-secondary">
+                          Browse stories
+                        </Link>
+                      }
+                    />
+                  ) : (
+                    <SavedPostsList posts={posts} />
+                  )}
+                </div>
+              </section>
+            ) : null}
           </div>
 
           {/* Comments */}
@@ -483,15 +534,11 @@ export function AccountDashboard({
 
           {/* History */}
           <div hidden={section !== "history"}>
-            <EmptyState
-              action={
-                <Link href="/destinations" className="btn btn-secondary">
-                  Explore places
-                </Link>
-              }
-            >
-              Stories, guides, and places you open while signed in will show here.
-            </EmptyState>
+            {historyError ? (
+              <ErrorPanel message={historyError} />
+            ) : (
+              <AccountHistoryList items={history} onCountChange={setHistoryCount} />
+            )}
           </div>
 
           {/* Profile */}

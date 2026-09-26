@@ -12,6 +12,7 @@ import { DestinationQuickFacts } from "@/components/destinations/DestinationQuic
 import { DestinationMap } from "@/components/destinations/DestinationMap";
 import { DestinationCarousel } from "@/components/destinations/DestinationCarousel";
 import { PlaceStoryList } from "@/components/destinations/PlaceStoryList";
+import { RecordView } from "@/components/account/RecordView";
 import {
   getDestinationBySlug,
   getRelatedDestinations,
@@ -53,6 +54,7 @@ export async function DestinationCountryView({
         editLabel="Edit destination"
         showChip={false}
       />
+      <RecordView kind="place" slug={slug} />
       <div className="section-shell section-band">
         <div className="mx-auto max-w-3xl">
           <nav aria-label="Breadcrumb" className="text-sm text-muted">

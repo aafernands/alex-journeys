@@ -55,6 +55,7 @@ import {
   type AccountBookingRow,
   type AccountPackingRow,
 } from "@/lib/account-journey";
+import { listHistory, type HistoryEntry } from "@/lib/reading-history";
 
 export const metadata: Metadata = {
   title: "My Journey",
@@ -254,6 +255,21 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
     }
   }
 
+  let history: HistoryEntry[] = [];
+  let historyError: string | null = null;
+  if (signedIn && userId) {
+    if (!isFirebaseConfigured()) {
+      historyError = "History isn’t available on this site right now.";
+    } else {
+      try {
+        history = await listHistory(userId);
+      } catch (err) {
+        console.error("[account] list history failed:", err);
+        historyError = "Could not load your history. Try again in a moment.";
+      }
+    }
+  }
+
   const dashboardProps: AccountDashboardProps = {
     name: profileName,
     email: profileEmail,
@@ -270,6 +286,8 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
     postsError,
     hotels,
     hotelsError,
+    history,
+    historyError,
     membership: membershipPanel({
       membership,
       portalAvailable,

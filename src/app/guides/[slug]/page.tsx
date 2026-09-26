@@ -5,6 +5,7 @@ import { PostCard } from "@/components/blog/PostCard";
 import { destinationCity, getAllDestinations } from "@/data/destinations";
 import { NavIcon } from "@/components/icons/NavIcon";
 import { SitePage } from "@/components/pages/SitePage";
+import { RecordView } from "@/components/account/RecordView";
 import { TripPlanner } from "@/components/trip-planner/TripPlanner";
 import {
   getGuideHub,
@@ -227,6 +228,7 @@ export default async function GuideHubPage({ params, searchParams }: PageProps) 
       ) : null}
 
       {plannerConfig ? null : <GuideIndex pages={pages} posts={posts} />}
+      {plannerConfig ? null : <RecordView kind="guide" slug={slug} />}
     </SitePage>
   );
 }
