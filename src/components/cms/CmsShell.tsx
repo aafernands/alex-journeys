@@ -16,6 +16,7 @@ import {
   MessageSquare,
   Palette,
   PenLine,
+  Gem,
   Users,
   X,
 } from "lucide-react";
@@ -32,6 +33,7 @@ const NAV = [
   { href: "/cms/media", label: "Media", icon: ImageIcon },
   { href: "/cms/design", label: "Website design", icon: Palette },
   { href: "/cms/users", label: "Users", icon: Users },
+  { href: "/cms/members", label: "Members", icon: Gem },
   { href: "/cms/help", label: "Help", icon: HelpCircle },
 ] as const;
 
