@@ -116,7 +116,7 @@ export default async function PremiumPerksPage() {
                   <p className="card-body mt-1 flex-1">{locked ? perk.lockedDetail : perk.detail}</p>
                   <div className="mt-5">
                     {perk.comingSoon ? null : locked ? (
-                      <Link href={JOIN_PATH} className="btn btn-primary w-full sm:w-auto">
+                      <Link href={JOIN_PATH} className="btn btn-secondary w-full sm:w-auto">
                         Join to unlock
                       </Link>
                     ) : perk.href ? (

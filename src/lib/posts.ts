@@ -55,9 +55,12 @@ export function getPostsByGuideHub(hubSlug: string): PostMeta[] {
   return getAllPosts().filter((p) => (p.guideHubs ?? []).includes(hubSlug));
 }
 
-/** Newest post by date (index is already newest-first). */
+/**
+ * Newest post by date (index is already newest-first), for the site-wide
+ * "Latest from the road" line. Weekly deal notes are skipped there.
+ */
 export function getLatestPost(): PostMeta | null {
-  const posts = getAllPosts();
+  const posts = getAllPosts().filter((post) => post.dealNote !== true);
   return posts[0] ?? null;
 }
 

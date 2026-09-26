@@ -51,4 +51,5 @@ signed URL after the same membership check.
 
 In the post editor, tick **Deal note** (under Members). It forces Members only.
 Deal notes are listed on `/premium/deals`, newest first. They also appear in the
-regular story lists with the Members label, like other member stories.
+regular story lists with the Members label, like other member stories, but not
+in the site-wide "Latest from the road" line.
