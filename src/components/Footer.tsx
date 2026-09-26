@@ -35,7 +35,7 @@ const explore = [
 const company = [
   { href: "/about", label: "About" },
   { href: "/media-kit", label: "Media kit" },
-  { href: "/contact", label: "Contact" },
+  { href: "/contact", label: "Help & contact" },
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
   { href: "/affiliate-disclosure", label: "Affiliate disclosure" },

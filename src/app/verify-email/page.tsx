@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { auth } from "@/auth";
 import { VerifyEmailClient } from "@/components/VerifyEmailClient";
+import { NeedHelpLink } from "@/components/NeedHelpLink";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
 import { getUserById } from "@/lib/users";
 
@@ -55,6 +56,7 @@ export default async function VerifyEmailPage({
             verified={verified}
             next={safeNext(params.next)}
           />
+          <NeedHelpLink />
         </div>
       </div>
     </main>

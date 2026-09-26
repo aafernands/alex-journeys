@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { isCredentialsAuthConfigured } from "@/auth";
 import { ResetPasswordForm } from "@/components/ResetPasswordForm";
+import { NeedHelpLink } from "@/components/NeedHelpLink";
 
 export const metadata: Metadata = {
   title: "Reset password",
@@ -55,6 +56,7 @@ export default async function ResetPasswordPage({
               credentialsConfigured={credentialsConfigured}
             />
           </Suspense>
+          <NeedHelpLink />
         </div>
       </div>
     </main>

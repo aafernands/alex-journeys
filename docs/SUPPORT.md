@@ -4,6 +4,38 @@ Modeled on the Nurse Intensive support desk, trimmed to what Alex Journeys needs
 
 ## Reader side
 
+### Help & contact page (`/contact`)
+
+- `/help` and `/support` redirect to `/contact` (temporary 307, in
+  `next.config.ts`). The mobile menu and footer link read **Help & contact**;
+  site search finds it for "help" and "support".
+- **Quick answers** (fold-outs) sit above the form. Content lives in
+  `src/content/pages/contact.json` → `sections.quickAnswers`
+  (defaults in `src/lib/page-defaults.ts`), so it is editable from the CMS page
+  editor (Pages → contact → Sections JSON):
+
+  ```json
+  "quickAnswers": {
+    "title": "Quick answers",
+    "items": [
+      { "question": "…", "answer": "…", "linkLabel": "Optional", "linkHref": "/account#help" }
+    ]
+  }
+  ```
+
+  Links must be site paths (start with `/`); others are dropped. Empty
+  question/answer items are skipped. Parsing: `src/lib/quick-answers.ts`.
+  The form heading and intro are `sections.form.heading` / `sections.form.intro`.
+  Keep answers true to how the site works (password reset link lasts 1 hour,
+  Premium is cancelled from Settings → Manage membership, replies usually take
+  a couple of days).
+- Sign-in (`/login` and the signed-out `/account`), forgot password, reset
+  password and verify email show a small "Need help? Get in touch" link
+  (`src/components/NeedHelpLink.tsx`). Unknown URLs get a friendly 404
+  (`src/app/not-found.tsx`) with a help link.
+
+### Contact form
+
 - `/contact` form (guests and signed-in readers): name, email (locked to the
   account email when signed in), topic, optional subject, message. Turnstile
   when configured, a hidden honeypot field, 5 requests per 10 minutes per IP
@@ -15,6 +47,41 @@ Modeled on the Nurse Intensive support desk, trimmed to what Alex Journeys needs
   falls back to the old behavior and opens the reader's email app.
 - Readers answer by replying to any support email. With `SUPPORT_INBOUND_EMAIL`
   set, those replies land back on the ticket (see below).
+
+### My Journey → Help (`/account#help`)
+
+Signed-in readers get a **Help** section in the account nav
+(`src/components/account/AccountHelp.tsx`, loaded only when opened):
+
+- **Get help** opens `/contact` (name and account email are prefilled).
+- **Your requests**: reference number, subject, last update and a plain
+  status: *We’re on it* (open / in progress), *Replied — waiting on you*
+  (waiting), *Resolved* (closed).
+- Tapping a request shows the conversation and a reply box. A reply from the
+  site is stored as a customer message with channel `site`, reopens the
+  request (status `open`, unread for staff) and sends the same staff alert as
+  an emailed reply. The CMS thread labels it "Reply from the website".
+- Which requests show: tickets whose `userId` is the account, plus tickets
+  whose email matches the account email **only if that email is verified**
+  (so messages sent while signed out appear after confirming the address).
+  The email comes from the user profile, not the session token.
+
+APIs (signed in, `Cache-Control: private, no-store`; 401 when signed out,
+404 for requests that aren’t yours):
+
+| Route | Purpose |
+| --- | --- |
+| `GET /api/support/my-requests` | Reader’s requests, newest first |
+| `GET /api/support/my-requests/{number}` | One request + conversation |
+| `POST /api/support/my-requests/{number}/reply` | `{ message }`; 5 per 10 minutes per account |
+
+Responses only carry reader-safe fields (`toReaderTicket` /
+`toReaderMessage` in `src/lib/support-tickets.ts`): no email, user id,
+unread flags, previews, email delivery status or provider ids. Store
+helpers: `listTicketsForReader` (two single-field equality queries on
+`userId` and `email`, merged and sorted in memory, so no composite index)
+and `addCustomerSiteReply` in `src/lib/support-store.ts`; ownership checks in
+`src/lib/support-reader.ts`.
 
 ## CMS side (`/cms/support`)
 
@@ -44,7 +111,7 @@ Modeled on the Nurse Intensive support desk, trimmed to what Alex Journeys needs
   subject, status, createdAt, updatedAt, lastMessageAt, lastMessagePreview,
   messageCount, unreadForStaff, closedAt, source.
 - `supportTickets/{ticketNumber}/messages/{id}`: direction (customer|staff),
-  channel (form|email|cms), authorName, body, createdAt, providerMessageId
+  channel (form|email|cms|site), authorName, body, createdAt, providerMessageId
   (email replies use doc id `email_{resendId}` so duplicates are skipped),
   emailStatus (staff replies: sent|skipped|failed).
 - Listing reads the latest 300 by `updatedAt` and filters in memory, so no
@@ -82,5 +149,7 @@ Priorities, assignment, internal notes, history log, feedback rating link,
 
 ## Tests
 
-`scripts/support-tickets.test.mjs` (helpers, templates, inbound replies) and
-`scripts/support-routes.test.mjs` (form API, CMS auth, reply/close).
+`scripts/support-tickets.test.mjs` (helpers, templates, inbound replies),
+`scripts/support-routes.test.mjs` (form API, CMS auth, reply/close) and
+`scripts/support-reader.test.mjs` (reader statuses, ownership, safe fields,
+quick answers parsing, My Journey → Help APIs).

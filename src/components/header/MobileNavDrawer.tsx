@@ -245,7 +245,7 @@ export function MobileNavDrawer({ open, onClose }: Props) {
             </li>
             <li>
               <Link href="/contact" className={topLinkClass} onClick={onClose}>
-                Contact
+                Help &amp; contact
               </Link>
             </li>
           </ul>

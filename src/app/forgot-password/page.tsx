@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { isCredentialsAuthConfigured } from "@/auth";
 import { ForgotPasswordForm } from "@/components/ForgotPasswordForm";
+import { NeedHelpLink } from "@/components/NeedHelpLink";
 
 export const metadata: Metadata = {
   title: "Forgot password",
@@ -18,6 +19,7 @@ export default function ForgotPasswordPage() {
       <div className="section-shell py-10 md:py-14">
         <div className="mx-auto max-w-md">
           <ForgotPasswordForm credentialsConfigured={credentialsConfigured} />
+          <NeedHelpLink />
         </div>
       </div>
     </main>

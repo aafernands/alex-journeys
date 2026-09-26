@@ -63,6 +63,10 @@ const nextConfig: NextConfig = {
         destination: "/:slug",
         permanent: true,
       },
+      // Help & contact lives on /contact. Temporary so a real /help page can
+      // replace it later without browsers caching the redirect.
+      { source: "/help", destination: "/contact", permanent: false },
+      { source: "/support", destination: "/contact", permanent: false },
       // Saves live on Account — no standalone Saved page
       { source: "/saved", destination: "/account", permanent: true },
       {
