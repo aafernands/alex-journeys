@@ -65,7 +65,12 @@ import { PlanFold, PlanHint } from "@/components/trip-planner/PlanFold";
 import { bookingProgress } from "@/lib/trip-workspace";
 import { TripEntryDialog } from "@/components/trip-planner/TripEntryDialog";
 import { ItemColorField } from "@/components/trip-planner/ItemColorField";
-import { bookedStayHref, ItineraryItemRow } from "@/components/trip-planner/ItineraryItemRow";
+import {
+  bookedStayHref,
+  entryStatusLabel,
+  entryTintProps,
+  ItineraryItemRow,
+} from "@/components/trip-planner/ItineraryItemRow";
 import { WeekView } from "@/components/trip-planner/WeekView";
 import { DownloadTripPdf } from "@/components/trip-planner/DownloadTripPdf";
 import { PackingPanel } from "@/components/trip-planner/PackingPanel";
@@ -294,7 +299,7 @@ function BookingItemForm({
   const [url, setUrl] = useState(existing?.url ?? "");
   const [title, setTitle] = useState(existing?.title ?? "");
   const [confirmation, setConfirmation] = useState(
-    existing?.confirmation ?? "",
+    (existing?.confirmation ?? "").toUpperCase(),
   );
   const [dayIndex, setDayIndex] = useState(() => {
     if (!existing) return initialDay ? String(initialDay) : "";
@@ -347,7 +352,7 @@ function BookingItemForm({
       return;
     }
     if (found.url) setUrl(found.url);
-    if (found.confirmation) setConfirmation(found.confirmation);
+    if (found.confirmation) setConfirmation(found.confirmation.toUpperCase());
     if (found.time) setTime(found.time);
     if (day != null) setDayIndex(String(day));
     setError(null);
@@ -382,7 +387,7 @@ function BookingItemForm({
           return;
         }
         const parsedDay = cleanDayIndex(dayIndex || null);
-        const cleanedConfirmation = cleanConfirmation(confirmation);
+        const cleanedConfirmation = cleanConfirmation(confirmation).toUpperCase();
         const cleanedTime = cleanTime(time);
         const cleanedPickupDate = cleanItemDate(pickupDate);
         const cleanedDropoffDate = cleanItemDate(dropoffDate);
@@ -597,8 +602,23 @@ function BookingItemForm({
           <input
             className={plan.input}
             maxLength={40}
+            autoCapitalize="characters"
+            autoCorrect="off"
+            spellCheck={false}
             value={confirmation}
-            onChange={(event) => setConfirmation(event.target.value)}
+            onChange={(event) => {
+              const input = event.currentTarget;
+              const next = input.value.toUpperCase();
+              if (next !== input.value && next.length === input.value.length) {
+                // Uppercase in place so the caret stays where the reader is typing.
+                const { selectionStart, selectionEnd } = input;
+                input.value = next;
+                if (selectionStart !== null && selectionEnd !== null) {
+                  input.setSelectionRange(selectionStart, selectionEnd);
+                }
+              }
+              setConfirmation(next);
+            }}
           />
         </label>
       ) : null}
@@ -1742,13 +1762,26 @@ export function ItineraryHub({
                     }
                   />
                   {dayItems.length ? (
-                    dayItems.map((item) => (
-                      <ListRow
-                        key={item.id}
-                        title={item.title}
-                        detail={itemScheduleTime(item) || TRIP_STATUS_LABEL[item.status]}
-                      />
-                    ))
+                    <div className="plan-preview-entries">
+                      {dayItems.map((item) => {
+                        const time = itemScheduleTime(item);
+                        return (
+                          <div key={item.id} className="plan-entry-tint" {...entryTintProps(item)}>
+                            <ListRow
+                              title={item.title}
+                              detail={
+                                <>
+                                  <span className="plan-entry-status">
+                                    {entryStatusLabel(item.status)}
+                                  </span>
+                                  {time ? ` · ${time}` : ""}
+                                </>
+                              }
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
                   ) : (
                     <p className={`${plan.caption} text-muted`}>A day to make your own.</p>
                   )}
@@ -2134,44 +2167,46 @@ export function ItineraryHub({
           defaultOpen
         >
           <section aria-labelledby={`${headingId}-list`}>
-            <div className="plan-toolbar">
+            <header className="plan-section-head">
               <h3 id={`${headingId}-list`} className={plan.h3}>
                 Day-by-day schedule
               </h3>
-              <div
-                className="plan-inline-actions"
-                role="tablist"
-                aria-label="Itinerary layout"
-              >
-                {(
-                  [
-                    { id: "timeline", label: "Timeline" },
-                    { id: "week", label: "Week" },
-                  ] as const
-                ).map((tab) => {
-                  const active = layout === tab.id;
-                  return (
+              {view === "itinerary" ? (
+                <div className="plan-head-action">{addToTripMenu}</div>
+              ) : null}
+              <div className="plan-head-status">
+                {days.length > 0 ? (
+                  <p className="plan-head-meta">
+                    {days.length} {days.length === 1 ? "day" : "days"}
+                  </p>
+                ) : null}
+                <div
+                  className="plan-quiet-toggles"
+                  role="tablist"
+                  aria-label="Itinerary layout"
+                >
+                  {(
+                    [
+                      { id: "timeline", label: "Timeline" },
+                      { id: "week", label: "Week" },
+                    ] as const
+                  ).map((tab) => (
                     <button
                       key={tab.id}
                       type="button"
                       role="tab"
                       id={`${headingId}-${tab.id}-tab`}
-                      aria-selected={active}
+                      aria-selected={layout === tab.id}
                       aria-controls={`${headingId}-${tab.id}-panel`}
-                      className={`${plan.chip} ${
-                        active
-                          ? "border-ink bg-ink text-on-solid"
-                          : "border-border bg-white text-text hover:border-border-strong hover:bg-surface-soft"
-                      }`}
+                      className="plan-quiet-toggle"
                       onClick={() => setLayout(tab.id)}
                     >
                       {tab.label}
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-              {view === "itinerary" ? addToTripMenu : null}
-            </div>
+            </header>
             {sorted.length === 0 ? (
               <p
                 className={`${plan.prose} plan-follow text-muted plan-desktop-only`}

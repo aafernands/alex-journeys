@@ -138,20 +138,20 @@ export function PackingPanel({
 
   return (
     <section className="plan-pack" aria-labelledby={`${headingId}-packing`}>
-      <header className="plan-pack-head">
+      <header className="plan-section-head">
         <h3 id={`${headingId}-packing`} className={plan.h3}>
           Packing list
         </h3>
-        {headerAction ? <div className="plan-pack-head-action">{headerAction}</div> : null}
-        <div className="plan-pack-status">
+        {headerAction ? <div className="plan-head-action">{headerAction}</div> : null}
+        <div className="plan-head-status">
           <p className="plan-pack-summary" role="status">
             {summary}
           </p>
           {progress.total > 0 ? (
-            <div className="plan-pack-quiet-tools">
+            <div className="plan-quiet-toggles">
               <button
                 type="button"
-                className="plan-pack-quiet"
+                className="plan-quiet-toggle"
                 aria-pressed={hidePacked}
                 onClick={() => setHidePacked((value) => !value)}
               >
@@ -159,7 +159,7 @@ export function PackingPanel({
               </button>
               <button
                 type="button"
-                className="plan-pack-quiet"
+                className="plan-quiet-toggle"
                 disabled={progress.packed === 0}
                 onClick={() =>
                   commit(

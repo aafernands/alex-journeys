@@ -12,11 +12,11 @@ import {
   stayConfirmationPath,
   stayItemLinkLabel,
 } from "@/lib/stays";
-import { itemAccentHex } from "@/lib/trip-item-color";
+import { cleanItemColor, itemAccentHex } from "@/lib/trip-item-color";
 import {
   itemScheduleTime,
-  TRIP_STATUS_LABEL,
   type TripItem,
+  type TripItemStatus,
   type TripItemType,
 } from "@/lib/trip-record";
 
@@ -37,6 +37,26 @@ const TYPE_LABEL: Record<TripItemType, string> = {
   note: "Note",
   other: "Booking",
 };
+
+/** Status words as the item sheet shows them. */
+const ENTRY_STATUS_LABEL: Record<TripItemStatus, string> = {
+  todo: "Planned",
+  booked: "Booked",
+  skipped: "Skipped",
+};
+
+export function entryStatusLabel(status: TripItemStatus | undefined): string {
+  return (status && ENTRY_STATUS_LABEL[status]) || "Planned";
+}
+
+/** Tint hooks for an entry row: chosen color, or "default" for the neutral paper tint. */
+export function entryTintProps(item: TripItem) {
+  return {
+    "data-status": item.status || "todo",
+    "data-color": cleanItemColor(item.color) || "default",
+    style: { "--plan-item-accent": itemAccentHex(item) } as CSSProperties,
+  };
+}
 
 /** On-site confirmation for a booked stay, matching the link the row used to show. */
 export function bookedStayHref(item: TripItem): string {
@@ -132,17 +152,19 @@ export function ItineraryItemRow({
     return () => document.removeEventListener("pointerdown", onPointer);
   }, []);
 
-  const bodyDetail = [timeLabel, TRIP_STATUS_LABEL[item.status], item.confirmation, extra]
-    .filter(Boolean)
-    .join(" · ");
+  const bodyRest = [timeLabel, item.confirmation, extra].filter(Boolean).join(" · ");
+  const bodyDetail = (
+    <>
+      <span className="plan-entry-status">{entryStatusLabel(item.status)}</span>
+      {bodyRest ? ` · ${bodyRest}` : ""}
+    </>
+  );
 
   return (
     <article
-      className={`plan-timeline-entry${dragging ? " is-dragging" : ""}`}
-      data-status={item.status}
+      className={`plan-timeline-entry plan-entry-tint${dragging ? " is-dragging" : ""}`}
       data-type={item.type}
-      data-color={item.color || "default"}
-      style={{ "--plan-item-accent": itemAccentHex(item) } as CSSProperties}
+      {...entryTintProps(item)}
     >
       <ListRow
         leading={
