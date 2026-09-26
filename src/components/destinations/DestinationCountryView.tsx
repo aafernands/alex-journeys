@@ -11,14 +11,12 @@ import { DestinationItinerary } from "@/components/destinations/DestinationItine
 import { DestinationQuickFacts } from "@/components/destinations/DestinationQuickFacts";
 import { DestinationMap } from "@/components/destinations/DestinationMap";
 import { DestinationCarousel } from "@/components/destinations/DestinationCarousel";
+import { PlaceStoryList } from "@/components/destinations/PlaceStoryList";
 import {
   getDestinationBySlug,
   getRelatedDestinations,
 } from "@/data/destinations";
-import {
-  formatPostDateShort,
-  getPostsByDestination,
-} from "@/lib/posts";
+import { getPostsByDestination } from "@/lib/posts";
 import { cmsEditDestinationHref } from "@/lib/admin-edit";
 import { publicDestinationPath, publicPostPath } from "@/lib/public-paths";
 
@@ -200,45 +198,7 @@ export async function DestinationCountryView({
               >
                 Stories from this place
               </h2>
-              <ul className="mt-4 flex flex-col gap-3">
-                {related.map((post) => (
-                  <li key={post.slug}>
-                    <Link
-                      href={publicPostPath(post.slug)}
-                      className="panel-interactive group flex gap-4 overflow-hidden p-4"
-                    >
-                      <div className="relative h-24 w-28 shrink-0 overflow-hidden rounded-lg border border-border bg-surface sm:h-28 sm:w-36">
-                        {post.featuredImage ? (
-                          <Image
-                            src={post.featuredImage.url}
-                            alt=""
-                            fill
-                            sizes="144px"
-                            className="object-cover transition duration-300 group-hover:scale-[1.03]"
-                          />
-                        ) : null}
-                      </div>
-                      <div className="min-w-0 flex-1 py-0.5">
-                        <time
-                          className="text-ds-caption font-semibold uppercase tracking-[0.12em] text-muted"
-                          dateTime={post.date}
-                        >
-                          {formatPostDateShort(post.date)}
-                        </time>
-                        <p className="card-title mt-1 transition group-hover:text-accent">
-                          {post.title}
-                        </p>
-                        <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-text">
-                          {post.excerpt}
-                        </p>
-                        <span className="mt-2 inline-block text-sm font-semibold text-link transition group-hover:text-accent">
-                          Read story →
-                        </span>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <PlaceStoryList posts={related} placeName={dest.name} />
             </section>
           ) : (
             <div className="panel-soft mt-8 border-dashed px-4 py-10 text-center md:mt-12">
