@@ -5007,9 +5007,25 @@ main.plan-page[data-density="compact"] .hub-follow {
   }
 }
 
-/* ——— Phase 4: comfortable density — home page ———
-   Scoped to main.home-page so compact app pages and other reading pages are untouched.
-   Section titles ~20–24px, 17px lead text, 16px card padding, 32–48px between sections. */
+/* ——— Phase 4: comfortable density — reading pages ———
+   Scoped to main.home-page / main.journal-page with data-density="comfortable",
+   so compact app pages and not-yet-migrated pages are untouched.
+   Section titles ~20–24px, 17px lead and body text, 16px card padding,
+   32px (mobile) / 48px (desktop) between sections. */
+:is(main.home-page, main.journal-page)[data-density="comfortable"] .text-lead {
+  font-size: var(--type-reading-size, 1.0625rem);
+  line-height: var(--type-reading-leading, 1.65);
+}
+
+:is(main.home-page, main.journal-page)[data-density="comfortable"] .hub-follow {
+  margin-top: var(--space-6);
+}
+
+:is(main.home-page, main.journal-page)[data-density="comfortable"] .post-card-body {
+  padding: var(--space-4);
+}
+
+/* Home */
 main.home-page[data-density="comfortable"] section:not(#top) > .section-shell {
   padding-top: 2rem;
   padding-bottom: 2rem;
@@ -5026,21 +5042,45 @@ main.home-page[data-density="comfortable"] .text-display {
   letter-spacing: -0.01em;
 }
 
-main.home-page[data-density="comfortable"] .text-lead {
+/* Journal: index and posts */
+main.journal-page[data-density="comfortable"] .section-band {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+main.journal-page[data-density="comfortable"] h1.text-display {
+  font-size: clamp(2rem, 3.6vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+main.journal-page[data-density="comfortable"] .post-prose {
+  max-width: 70ch;
   font-size: var(--type-reading-size, 1.0625rem);
-  line-height: var(--type-reading-leading, 1.65);
+  line-height: 1.7;
 }
 
-main.home-page[data-density="comfortable"] .hub-follow {
-  margin-top: var(--space-6);
+main.journal-page[data-density="comfortable"] .post-prose h2 {
+  font-size: 1.5rem;
+  margin-top: 1.6em;
 }
 
-main.home-page[data-density="comfortable"] .post-card-body {
-  padding: var(--space-4);
+main.journal-page[data-density="comfortable"] .post-prose h3 {
+  font-size: 1.25rem;
+  margin-top: 1.4em;
+}
+
+main.journal-page[data-density="comfortable"] .post-prose :is(img, figure, iframe, video, table) {
+  max-width: 100%;
+}
+
+main.journal-page[data-density="comfortable"] .post-prose figcaption {
+  font-size: var(--type-secondary-size, 0.875rem);
 }
 
 @media (min-width: 768px) {
-  main.home-page[data-density="comfortable"] section:not(#top) > .section-shell {
+  main.home-page[data-density="comfortable"] section:not(#top) > .section-shell,
+  main.journal-page[data-density="comfortable"] .section-band {
     padding-top: 3rem;
     padding-bottom: 3rem;
   }
