@@ -102,23 +102,22 @@ export function FlightConfirmationScreen({
 
   if (!details) {
     return (
-      <section className="panel plan-inset plan-stack p-5 sm:p-6" aria-labelledby="flight-confirmation-missing">
-        <p className="eyebrow">Reservation</p>
-        <h2 id="flight-confirmation-missing" className="font-display text-2xl font-bold text-heading">
+      <div className="ui-card ui-card-compact flex flex-col gap-2" aria-labelledby="flight-confirmation-missing">
+        <h2 id="flight-confirmation-missing" className="ui-section-title">
           That confirmation isn’t in this browser
         </h2>
-        <p className="text-sm leading-relaxed text-text">
+        <p className="ui-field-hint">
           Open the flight from the trip where you booked it, or search again.
         </p>
-        <div className="plan-actions plan-sticky plan-sticky-page">
-          <Link href={planHref} className="btn btn-primary">
+        <div className="flex flex-wrap gap-2">
+          <Link href={planHref} className="btn ui-btn btn-primary">
             View on itinerary
           </Link>
-          <Link href={listHref} className="btn btn-secondary">
+          <Link href={listHref} className="btn ui-btn btn-secondary">
             Search more flights
           </Link>
         </div>
-      </section>
+      </div>
     );
   }
 
