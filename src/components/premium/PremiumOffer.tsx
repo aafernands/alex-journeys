@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { Check } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useReaderLoginPrompt } from "@/components/ReaderLoginPrompt";
 import { usePremium } from "@/components/premium/usePremium";
-import type { PremiumPlan } from "@/lib/membership";
+import type { PremiumPerk, PremiumPlan } from "@/lib/membership";
 
 const INTENT_KEY = "aj-premium-checkout";
 let checkoutResumeStarted = false;
@@ -18,6 +19,7 @@ type Props = {
   savingsPercent: number;
   trialDays: number;
   checkoutConfigured: boolean;
+  perks: PremiumPerk[];
 };
 
 function readIntent(): PremiumPlan | null {
@@ -47,6 +49,7 @@ export function PremiumOffer({
   savingsPercent,
   trialDays,
   checkoutConfigured,
+  perks,
 }: Props) {
   const { status } = useSession();
   const { isPremium, loading } = usePremium();
@@ -169,8 +172,18 @@ export function PremiumOffer({
   return (
     <>
       <section id="plans" className="scroll-mt-28" aria-labelledby="premium-plan-title">
-        <div className="panel mx-auto max-w-md p-6 sm:p-8">
-          <div className="flex justify-center">
+        <div className="premium-plan-card relative mx-auto max-w-lg rounded-2xl bg-white px-5 pb-6 pt-9 sm:px-8 sm:pb-8">
+          <p className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-accent px-3.5 py-1 text-xs font-bold uppercase tracking-[0.08em] text-on-solid">
+            {plan === "yearly" && savingsPercent > 0 ? "Best value" : "Premium"}
+          </p>
+          <h2
+            id="premium-plan-title"
+            className="text-center font-display text-2xl font-bold text-heading"
+          >
+            Alex Journeys Premium
+          </h2>
+
+          <div className="mt-5 flex justify-center">
             <div
               className="inline-flex rounded-full border border-border bg-surface-soft p-1"
               role="group"
@@ -204,12 +217,11 @@ export function PremiumOffer({
             </div>
           </div>
 
-          <h2 id="premium-plan-title" className="sr-only">
-            Premium plan
-          </h2>
-          <p className="mt-6 text-center font-display text-4xl font-bold text-heading">
+          <p className="mt-6 text-center font-display text-5xl font-bold tracking-tight text-heading">
             {priceLabel}
-            <span className="ml-2 font-sans text-base font-medium text-muted">{cadence}</span>
+            <span className="ml-2 font-sans text-base font-medium tracking-normal text-muted">
+              {cadence}
+            </span>
           </p>
           {plan === "yearly" && savingsPercent > 0 ? (
             <p className="mt-2 text-center text-sm text-muted">
@@ -228,7 +240,6 @@ export function PremiumOffer({
           ) : null}
 
           <div className="mt-6 hidden md:block">{checkoutButton()}</div>
-          <p className="mt-4 text-center text-sm text-muted">Cancel anytime.</p>
           {error ? (
             <p className="mt-3 text-center text-sm text-heading" role="alert">
               {error}
@@ -243,13 +254,34 @@ export function PremiumOffer({
               .
             </p>
           ) : null}
+
+          <ul className="mt-6 space-y-3 border-t border-border pt-6">
+            {perks.map((perk) => (
+              <li key={perk.id} className="flex items-start gap-3 text-sm leading-snug text-text">
+                <span
+                  className="mt-px flex size-5 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent"
+                  aria-hidden="true"
+                >
+                  <Check size={13} strokeWidth={3} />
+                </span>
+                <span>
+                  <span className="font-semibold text-heading">{perk.title}</span>
+                  {perk.comingSoon ? (
+                    <span className="ml-2 inline-block rounded-full border border-border px-2 py-px align-[1px] text-[0.6875rem] font-semibold uppercase tracking-[0.06em] text-muted">
+                      Coming soon
+                    </span>
+                  ) : null}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-6 text-center text-sm text-muted">
+            Cancel anytime. Booking stays open to everyone.
+          </p>
         </div>
       </section>
 
-      <div
-        className="glass glass-strip fixed inset-x-0 bottom-0 z-40 p-3 md:hidden"
-        style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}
-      >
+      <div className="premium-join-bar glass fixed inset-x-3 z-40 rounded-2xl p-3 md:hidden">
         <p className="mb-2 text-center text-xs font-semibold text-heading">
           {priceLabel} {cadence}
           {plan === "yearly" && savingsPercent > 0 ? ` · save ${savingsPercent}%` : ""}
