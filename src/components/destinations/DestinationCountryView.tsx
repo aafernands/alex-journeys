@@ -46,7 +46,10 @@ export async function DestinationCountryView({
   const editHref = cmsEditDestinationHref(slug);
 
   return (
-    <main className="bg-white [--carousel-fade:var(--white)]">
+    <main
+      className="places-page bg-white [--carousel-fade:var(--white)]"
+      data-density="comfortable"
+    >
       <AdminPublicChrome
         editHref={editHref}
         editLabel="Edit destination"
@@ -76,7 +79,7 @@ export async function DestinationCountryView({
           </nav>
 
           <PinnableImage
-            className="relative mt-8 aspect-[16/9] overflow-hidden rounded-xl border border-border bg-surface shadow-sm"
+            className="relative mt-6 aspect-[16/9] md:aspect-[2/1] overflow-hidden rounded-xl border border-border bg-surface shadow-sm"
             pagePath={publicDestinationPath(slug)}
             mediaSrc={dest.image}
             description={dest.imageAlt || dest.name}
@@ -91,7 +94,7 @@ export async function DestinationCountryView({
             />
           </PinnableImage>
 
-          <div className="mt-8 flex flex-wrap items-center gap-2">
+          <div className="mt-6 flex flex-wrap items-center gap-2">
             <p className="eyebrow">
               {dest.continent}
               {dest.region !== dest.continent ? ` · ${dest.region}` : ""}
@@ -108,7 +111,7 @@ export async function DestinationCountryView({
             </h1>
             <AdminSectionEdit href={editHref} label="Edit destination" />
           </div>
-          <p className="mt-6 text-lead text-text">{dest.blurb}</p>
+          <p className="mt-4 text-lead text-text">{dest.blurb}</p>
 
           <DestinationQuickFacts
             quickFacts={dest.quickFacts}
@@ -116,14 +119,14 @@ export async function DestinationCountryView({
           />
 
           {dest.highlights && dest.highlights.length > 0 ? (
-            <section className="mt-10" aria-labelledby="trip-highlights-heading">
+            <section className="mt-8 md:mt-12" aria-labelledby="trip-highlights-heading">
               <h2
                 id="trip-highlights-heading"
                 className="font-display text-title text-heading"
               >
                 Trip highlights
               </h2>
-              <ul className="mt-5 space-y-3">
+              <ul className="mt-4 space-y-3">
                 {dest.highlights.map((item) => (
                   <li
                     key={item}
@@ -159,14 +162,14 @@ export async function DestinationCountryView({
           ) : null}
 
           {coverImages ? (
-            <section className="mt-12" aria-labelledby="photo-strip-heading">
+            <section className="mt-8 md:mt-12" aria-labelledby="photo-strip-heading">
               <h2
                 id="photo-strip-heading"
                 className="font-display text-title text-heading"
               >
                 From the trip
               </h2>
-              <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {coverImages.map((img) => (
                   <li key={img.src}>
                     <PinnableImage
@@ -190,19 +193,19 @@ export async function DestinationCountryView({
           ) : null}
 
           {related.length > 0 ? (
-            <section className="mt-12" aria-labelledby="related-posts-heading">
+            <section className="mt-8 md:mt-12" aria-labelledby="related-posts-heading">
               <h2
                 id="related-posts-heading"
                 className="font-display text-title text-heading"
               >
                 Stories from this place
               </h2>
-              <ul className="mt-6 flex flex-col gap-4">
+              <ul className="mt-4 flex flex-col gap-3">
                 {related.map((post) => (
                   <li key={post.slug}>
                     <Link
                       href={publicPostPath(post.slug)}
-                      className="panel-interactive group flex gap-4 overflow-hidden p-3 sm:p-4"
+                      className="panel-interactive group flex gap-4 overflow-hidden p-4"
                     >
                       <div className="relative h-24 w-28 shrink-0 overflow-hidden rounded-lg border border-border bg-surface sm:h-28 sm:w-36">
                         {post.featuredImage ? (
@@ -217,7 +220,7 @@ export async function DestinationCountryView({
                       </div>
                       <div className="min-w-0 flex-1 py-0.5">
                         <time
-                          className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted"
+                          className="text-ds-caption font-semibold uppercase tracking-[0.12em] text-muted"
                           dateTime={post.date}
                         >
                           {formatPostDateShort(post.date)}
@@ -238,9 +241,9 @@ export async function DestinationCountryView({
               </ul>
             </section>
           ) : (
-            <div className="panel-soft mt-10 border-dashed px-6 py-16 text-center">
+            <div className="panel-soft mt-8 border-dashed px-4 py-10 text-center md:mt-12">
               <p className="eyebrow">Photo space</p>
-              <p className="font-display mt-3 text-2xl text-text">
+              <p className="font-display mt-3 text-xl text-text">
                 Room for trip photos later
               </p>
               <p className="mx-auto mt-2 max-w-sm text-sm text-muted">
@@ -252,7 +255,7 @@ export async function DestinationCountryView({
 
           {morePlaces.length > 0 ? (
             <section
-              className="mt-12"
+              className="mt-8 md:mt-12"
               aria-labelledby="more-places-heading"
             >
               <h2
@@ -272,7 +275,7 @@ export async function DestinationCountryView({
             </section>
           ) : null}
 
-          <div className="mt-10 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap gap-3 md:mt-12">
             <Link href="/destinations" className="btn btn-secondary">
               ← All places
             </Link>

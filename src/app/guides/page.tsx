@@ -25,6 +25,7 @@ export default function GuidesPage() {
       title={page.title}
       description={page.description}
       narrow={false}
+      comfortableClass="guides-page"
       crumbs={[
         { href: "/", label: "Home" },
         { label: "Guides" },
@@ -35,7 +36,7 @@ export default function GuidesPage() {
           <li key={hub.slug}>
             <Link
               href={`/guides/${hub.slug}`}
-              className="panel-interactive group flex h-full gap-4 p-5"
+              className="panel-interactive group flex h-full gap-4 p-4"
             >
               <span className="icon-tile">
                 <NavIcon name={hub.icon} size={20} />

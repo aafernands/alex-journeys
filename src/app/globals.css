@@ -5007,6 +5007,121 @@ main.plan-page[data-density="compact"] .hub-follow {
   }
 }
 
+
+/* ——— Phase 4: comfortable density — journal/stories pages ———
+   Scoped to main.journal-page[data-density="comfortable"] (/blog and post pages),
+   so home, compact app pages and not-yet-migrated pages are untouched.
+   17px lead and body text, 16px card padding,
+   32px (mobile) / 48px (desktop) page band, H1 32–40px. */
+main.journal-page[data-density="comfortable"] .text-lead {
+  font-size: var(--type-reading-size, 1.0625rem);
+  line-height: var(--type-reading-leading, 1.65);
+}
+
+main.journal-page[data-density="comfortable"] .hub-follow {
+  margin-top: var(--space-6);
+}
+
+main.journal-page[data-density="comfortable"] .post-card-body {
+  padding: var(--space-4);
+}
+
+main.journal-page[data-density="comfortable"] .section-band {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+main.journal-page[data-density="comfortable"] h1.text-display {
+  font-size: clamp(2rem, 3.6vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+main.journal-page[data-density="comfortable"] .post-prose {
+  max-width: 70ch;
+  font-size: var(--type-reading-size, 1.0625rem);
+  line-height: 1.7;
+}
+
+main.journal-page[data-density="comfortable"] .post-prose h2 {
+  font-size: 1.5rem;
+  margin-top: 1.6em;
+}
+
+main.journal-page[data-density="comfortable"] .post-prose h3 {
+  font-size: 1.25rem;
+  margin-top: 1.4em;
+}
+
+main.journal-page[data-density="comfortable"] .post-prose :is(img, figure, iframe, video, table) {
+  max-width: 100%;
+}
+
+main.journal-page[data-density="comfortable"] .post-prose figcaption {
+  font-size: var(--type-secondary-size, 0.875rem);
+}
+
+@media (min-width: 768px) {
+  main.journal-page[data-density="comfortable"] .section-band {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+}
+
+/* ——— Phase 4b: comfortable density — guides and places ———
+   Scoped to main.guides-page / main.places-page with data-density="comfortable"
+   (/guides, /guides/[slug] except plan-a-trip, /destinations, place pages).
+   Same values as the journal block: H1 32–40px, section titles 20–24px,
+   17px lead, 16px card padding, 32px (mobile) / 48px (desktop) section gaps. */
+:is(main.guides-page, main.places-page)[data-density="comfortable"] .text-lead {
+  font-size: var(--type-reading-size, 1.0625rem);
+  line-height: var(--type-reading-leading, 1.65);
+}
+
+:is(main.guides-page, main.places-page)[data-density="comfortable"] .hub-follow {
+  margin-top: var(--space-6);
+}
+
+:is(main.guides-page, main.places-page)[data-density="comfortable"] .post-card-body {
+  padding: var(--space-4);
+}
+
+:is(main.guides-page, main.places-page)[data-density="comfortable"] .section-band {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+:is(main.guides-page, main.places-page)[data-density="comfortable"] h1.text-display {
+  font-size: clamp(2rem, 3.6vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+:is(main.guides-page, main.places-page)[data-density="comfortable"] .text-title {
+  font-size: 1.25rem;
+  line-height: var(--type-title-leading, 1.25);
+  letter-spacing: -0.01em;
+}
+
+:is(main.guides-page, main.places-page)[data-density="comfortable"] .hub-block {
+  margin-top: 2rem;
+}
+
+@media (min-width: 768px) {
+  :is(main.guides-page, main.places-page)[data-density="comfortable"] .section-band {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  :is(main.guides-page, main.places-page)[data-density="comfortable"] .text-title {
+    font-size: 1.5rem;
+  }
+
+  :is(main.guides-page, main.places-page)[data-density="comfortable"] .hub-block {
+    margin-top: 3rem;
+  }
+}
+
 /* Bookings title stays on one line on 360–399px phones. */
 @media (max-width: 399px) {
   .plan-bookings-head .plan-h3,
