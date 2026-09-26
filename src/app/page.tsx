@@ -24,7 +24,7 @@ export default function HomePage() {
       >
         Skip to start here
       </a>
-      <main className="flex-1">
+      <main className="home-page flex-1" data-density="comfortable">
         <AdminPublicChrome
           editHref={CMS_DESIGN_HREF}
           editLabel="Edit design"

@@ -5007,3 +5007,45 @@ main.plan-page[data-density="compact"] .hub-follow {
   }
 }
 
+/* ——— Phase 4: comfortable density — home page ———
+   Scoped to main.home-page so compact app pages and other reading pages are untouched.
+   Section titles ~20–24px, 17px lead text, 16px card padding, 32–48px between sections. */
+main.home-page[data-density="comfortable"] section:not(#top) > .section-shell {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+main.home-page[data-density="comfortable"] .text-hero {
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  line-height: 1.1;
+}
+
+main.home-page[data-density="comfortable"] .text-display {
+  font-size: 1.25rem;
+  line-height: var(--type-title-leading, 1.25);
+  letter-spacing: -0.01em;
+}
+
+main.home-page[data-density="comfortable"] .text-lead {
+  font-size: var(--type-reading-size, 1.0625rem);
+  line-height: var(--type-reading-leading, 1.65);
+}
+
+main.home-page[data-density="comfortable"] .hub-follow {
+  margin-top: var(--space-6);
+}
+
+main.home-page[data-density="comfortable"] .post-card-body {
+  padding: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  main.home-page[data-density="comfortable"] section:not(#top) > .section-shell {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  main.home-page[data-density="comfortable"] .text-display {
+    font-size: 1.5rem;
+  }
+}
