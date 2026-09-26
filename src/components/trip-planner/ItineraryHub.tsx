@@ -294,7 +294,7 @@ function BookingItemForm({
   const [url, setUrl] = useState(existing?.url ?? "");
   const [title, setTitle] = useState(existing?.title ?? "");
   const [confirmation, setConfirmation] = useState(
-    existing?.confirmation ?? "",
+    (existing?.confirmation ?? "").toUpperCase(),
   );
   const [dayIndex, setDayIndex] = useState(() => {
     if (!existing) return initialDay ? String(initialDay) : "";
@@ -347,7 +347,7 @@ function BookingItemForm({
       return;
     }
     if (found.url) setUrl(found.url);
-    if (found.confirmation) setConfirmation(found.confirmation);
+    if (found.confirmation) setConfirmation(found.confirmation.toUpperCase());
     if (found.time) setTime(found.time);
     if (day != null) setDayIndex(String(day));
     setError(null);
@@ -382,7 +382,7 @@ function BookingItemForm({
           return;
         }
         const parsedDay = cleanDayIndex(dayIndex || null);
-        const cleanedConfirmation = cleanConfirmation(confirmation);
+        const cleanedConfirmation = cleanConfirmation(confirmation).toUpperCase();
         const cleanedTime = cleanTime(time);
         const cleanedPickupDate = cleanItemDate(pickupDate);
         const cleanedDropoffDate = cleanItemDate(dropoffDate);
@@ -597,8 +597,23 @@ function BookingItemForm({
           <input
             className={plan.input}
             maxLength={40}
+            autoCapitalize="characters"
+            autoCorrect="off"
+            spellCheck={false}
             value={confirmation}
-            onChange={(event) => setConfirmation(event.target.value)}
+            onChange={(event) => {
+              const input = event.currentTarget;
+              const next = input.value.toUpperCase();
+              if (next !== input.value && next.length === input.value.length) {
+                // Uppercase in place so the caret stays where the reader is typing.
+                const { selectionStart, selectionEnd } = input;
+                input.value = next;
+                if (selectionStart !== null && selectionEnd !== null) {
+                  input.setSelectionRange(selectionStart, selectionEnd);
+                }
+              }
+              setConfirmation(next);
+            }}
           />
         </label>
       ) : null}
