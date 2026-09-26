@@ -3918,7 +3918,7 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
 .plan-pack-templates { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
 .plan-pack-template { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; justify-content: center; gap: .12rem; min-height: 44px; padding: .7rem .8rem; text-align: left; border: 1px solid var(--border); border-radius: 1rem; background: var(--surface-soft); color: var(--heading); box-shadow: var(--glass-sheen); }
 .plan-pack-template:hover, .plan-pack-template:focus-visible { border-color: var(--accent); }
-.plan-pack-template-label { flex-shrink: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-outfit), system-ui, sans-serif; font-size: .875rem; font-weight: 600; line-height: 1.15; }
+.plan-pack-template-label { flex-shrink: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-outfit), system-ui, sans-serif; font-size: .875rem; font-weight: 600; line-height: 1.2; }
 .plan-pack-template-detail { flex-shrink: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .72rem; line-height: 1.2; color: var(--muted); }
 .plan-pack-suggestions { display: grid; gap: .55rem; margin: 0; padding: 0; list-style: none; }
 .plan-pack-suggestion { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .7rem; padding: .8rem; border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border)); border-radius: 1rem; background: color-mix(in srgb, var(--accent) 8%, var(--white)); }
