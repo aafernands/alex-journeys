@@ -95,7 +95,7 @@ export function SavedPostsList({ posts }: Props) {
 
   if (items.length === 0) {
     return (
-      <div className="panel p-6 md:p-8">
+      <div className="panel p-4">
         <h3 className="font-display text-lg font-bold text-heading">
           No stories saved yet
         </h3>
@@ -103,7 +103,7 @@ export function SavedPostsList({ posts }: Props) {
           Open any story and tap <strong>Save</strong> to keep it here for the
           next time you travel.
         </p>
-        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <Link href="/blog" className="btn btn-primary w-full sm:w-auto">
             Browse stories
           </Link>

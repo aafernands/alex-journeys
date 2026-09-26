@@ -2,19 +2,36 @@
 
 import Link from "next/link";
 import {
+  Bookmark,
   BookOpen,
+  CalendarCheck,
+  ChevronLeft,
+  ChevronRight,
   Compass,
   ExternalLink,
+  History as HistoryIcon,
+  LayoutGrid,
   Luggage,
   MapPin,
+  MessageSquare,
+  Settings as SettingsIcon,
+  UserRound,
 } from "lucide-react";
 import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { AccountPreferences } from "@/components/account/AccountPreferences";
 import { AccountAuthActions } from "@/components/AccountAuthActions";
 import {
+  AccountJourneyNav,
+  type JourneyNavItem,
+} from "@/components/account/AccountJourneyNav";
+import { AccountProfileCard } from "@/components/account/AccountProfileCard";
+import { AccountBookingsList } from "@/components/account/AccountBookingsList";
+import { AccountPackingLists } from "@/components/account/AccountPackingLists";
+import {
   MyTripsList,
   type AccountTripRow,
 } from "@/components/account/MyTripsList";
+import { TripInboxAddress } from "@/components/account/TripInboxAddress";
 import { ChangePasswordForm } from "@/components/ChangePasswordForm";
 import { ProfileAvatar } from "@/components/account/ProfileAvatar";
 import { ProfileSettingsForm } from "@/components/ProfileSettingsForm";
@@ -26,26 +43,46 @@ import {
   SavedHotelsList,
   type SavedHotelRow,
 } from "@/components/account/SavedHotelsList";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import {
   ACCOUNT_SECTIONS,
   accountSectionFromLocation,
   type AccountSection,
 } from "@/lib/account-section";
+import type { AccountBookingRow, AccountPackingRow } from "@/lib/account-journey";
 import { planATripHref } from "@/lib/trip-record";
 import {
   MembershipSettings,
   type MembershipPanel,
 } from "@/components/account/MembershipSettings";
 
-const SECTIONS = ACCOUNT_SECTIONS;
 type Section = AccountSection;
 
 const SECTION_LABEL: Record<Section, string> = {
   overview: "Overview",
-  trips: "Trips",
+  trips: "My trips",
+  bookings: "Bookings",
   saved: "Saved",
+  comments: "Comments",
+  history: "History",
+  profile: "Profile",
   settings: "Settings",
 };
+
+const SECTION_ICON: Record<Section, JourneyNavItem["icon"]> = {
+  overview: LayoutGrid,
+  trips: Luggage,
+  bookings: CalendarCheck,
+  saved: Bookmark,
+  comments: MessageSquare,
+  history: HistoryIcon,
+  profile: UserRound,
+  settings: SettingsIcon,
+};
+
+/** Query params the page reads once and then drops from the address bar. */
+const ONE_SHOT_PARAMS = ["section", "tab", "session_id", "premium"] as const;
 
 export type AccountDashboardProps = {
   name: string;
@@ -58,6 +95,8 @@ export type AccountDashboardProps = {
   profileLoaded: boolean;
   trips: AccountTripRow[];
   tripsError: string | null;
+  bookings: AccountBookingRow[];
+  packingLists: AccountPackingRow[];
   posts: SavedPostRow[];
   postsError: string | null;
   hotels: SavedHotelRow[];
@@ -89,14 +128,12 @@ function SummaryCard({
   eyebrow,
   value,
   detail,
-  action,
   icon,
   onOpen,
 }: {
   eyebrow: string;
   value: string;
   detail: string;
-  action: string;
   icon: ReactNode;
   onOpen: () => void;
 }) {
@@ -104,20 +141,26 @@ function SummaryCard({
     <button
       type="button"
       onClick={onOpen}
-      className="panel-interactive flex h-full flex-col p-4 text-left"
+      className="panel-interactive flex h-full flex-col p-3 text-left"
     >
       <span className="flex items-center justify-between gap-3">
         <span className="eyebrow">{eyebrow}</span>
         {icon}
       </span>
-      <span className="font-display mt-2 text-2xl font-bold text-heading">
-        {value}
-      </span>
-      <span className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted">
-        {detail}
-      </span>
-      <span className="mt-3 text-sm font-semibold text-accent">{action}</span>
+      <span className="font-display mt-1 text-ds-title font-bold text-heading">{value}</span>
+      <span className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted">{detail}</span>
     </button>
+  );
+}
+
+function ErrorPanel({ message, action }: { message: string; action?: ReactNode }) {
+  return (
+    <div className="ui-card p-3">
+      <p className="text-sm leading-relaxed text-text" role="status">
+        {message}
+      </p>
+      {action ? <div className="mt-3">{action}</div> : null}
+    </div>
   );
 }
 
@@ -131,6 +174,8 @@ export function AccountDashboard({
   profileLoaded,
   trips,
   tripsError,
+  bookings,
+  packingLists,
   posts,
   postsError,
   hotels,
@@ -141,6 +186,7 @@ export function AccountDashboard({
   const headerHeight = useSiteHeaderHeight();
   const displayName = name.trim() || "Traveler";
   const googlePhoto = Boolean(image?.includes("googleusercontent.com"));
+  const membershipLabel = membership.isMember ? "Premium member" : "Free member";
 
   useLayoutEffect(() => {
     const apply = () => {
@@ -150,12 +196,9 @@ export function AccountDashboard({
       );
       setSection(next);
       const params = new URLSearchParams(window.location.search);
-      const shouldClean =
-        params.has("section") || params.has("session_id") || params.has("premium");
+      const shouldClean = ONE_SHOT_PARAMS.some((key) => params.has(key));
       if (!shouldClean) return;
-      params.delete("section");
-      params.delete("session_id");
-      params.delete("premium");
+      for (const key of ONE_SHOT_PARAMS) params.delete(key);
       const search = params.toString();
       const hash = next === "overview" ? "" : `#${next}`;
       const url = `${window.location.pathname}${search ? `?${search}` : ""}${hash}`;
@@ -170,329 +213,293 @@ export function AccountDashboard({
     setSection(next);
     const params = new URLSearchParams(window.location.search);
     params.delete("section");
+    params.delete("tab");
     const search = params.toString();
     const hash = next === "overview" ? "" : `#${next}`;
     const url = `${window.location.pathname}${search ? `?${search}` : ""}${hash}`;
     window.history.replaceState(null, "", url);
-    document.getElementById("account-sections")?.scrollIntoView({
-      block: "start",
-    });
+    const top = document.getElementById("my-journey");
+    if (top && top.getBoundingClientRect().top < headerHeight) {
+      top.scrollIntoView({ block: "start" });
+    }
   }
+
+  const savedError = postsError || hotelsError;
+  const savedCount = posts.length + hotels.length;
+  const savedBadge = savedError ? null : savedCount;
+
+  const count = (id: Section): number | null => {
+    if (id === "trips") return tripsError ? null : trips.length;
+    if (id === "bookings") return tripsError ? null : bookings.length;
+    if (id === "saved") return savedBadge;
+    return null;
+  };
+
+  const navItems: JourneyNavItem[] = ACCOUNT_SECTIONS.map((id) => ({
+    id,
+    label: SECTION_LABEL[id],
+    icon: SECTION_ICON[id],
+    count: count(id),
+  }));
 
   const tripDetail = tripsError
     ? tripsError
     : trips.length === 0
-      ? "No trips saved yet. Plan one and it will wait here."
+      ? "No trips saved yet."
       : [trips[0]?.title, trips[0]?.destination].filter(Boolean).join(" · ");
-  const savedCount = posts.length + hotels.length;
-  const savedDetail = postsError || hotelsError
-    ? postsError || hotelsError || ""
-    : savedCount === 0
-      ? "No favorites yet. Save a hotel or story to keep it here."
-      : hotels[0]?.name || posts[0]?.title || "Places and stories you want to come back to.";
-
-  const tabCount = (id: Section): number | null => {
-    if (id === "trips") return tripsError ? null : trips.length;
-    if (id === "saved") return postsError || hotelsError ? null : savedCount;
-    return null;
-  };
+  const bookingDetail = tripsError
+    ? "Bookings load with your trips."
+    : bookings.length === 0
+      ? "Nothing booked yet."
+      : [bookings[0]?.title, bookings[0]?.when].filter(Boolean).join(" · ");
 
   return (
-    <>
-      <nav
-        id="account-sections"
-        aria-label="Account sections"
-        className="sticky z-40 border-b border-border bg-bg/95 backdrop-blur-md"
-        style={{ top: headerHeight, scrollMarginTop: headerHeight }}
-      >
-        <div className="section-shell">
-          <div
-            className="mx-auto flex max-w-5xl gap-1 overflow-x-auto py-2"
-            role="tablist"
-          >
-            {SECTIONS.map((id) => {
-              const active = section === id;
-              const count = tabCount(id);
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  role="tab"
-                  id={`account-tab-${id}`}
-                  aria-selected={active}
-                  aria-controls={id}
-                  className={`inline-flex min-h-11 shrink-0 items-center rounded-full px-4 text-sm font-semibold transition ${
-                    active
-                      ? "bg-accent text-on-solid"
-                      : "text-muted hover:bg-surface-soft hover:text-heading"
-                  }`}
-                  onClick={() => select(id)}
-                >
-                  {SECTION_LABEL[id]}
-                  {count !== null ? (
-                    <span
-                      className={`ml-2 rounded-full px-1.5 py-0.5 text-xs ${
-                        active ? "bg-on-solid/20" : "bg-surface text-heading"
-                      }`}
-                    >
-                      {count}
-                    </span>
-                  ) : null}
-                </button>
-              );
-            })}
+    <div
+      id="my-journey"
+      className="section-shell section-band"
+      style={{ scrollMarginTop: headerHeight }}
+    >
+      <div className="mx-auto max-w-5xl md:grid md:grid-cols-[14rem_minmax(0,1fr)] md:gap-6">
+        <aside className="hidden md:block">
+          <div className="sticky" style={{ top: headerHeight + 16 }}>
+            <p className="eyebrow mb-2 px-3">My Journey</p>
+            <AccountJourneyNav
+              variant="sidebar"
+              items={navItems}
+              active={section}
+              onSelect={select}
+            />
           </div>
-        </div>
-      </nav>
+        </aside>
 
-      <div className="section-shell section-band">
-        <div className="mx-auto max-w-5xl">
-          <div
-            id="overview"
-            role="tabpanel"
-            aria-labelledby="account-tab-overview"
-            hidden={section !== "overview"}
-            className="space-y-6"
-          >
-            <section className="panel p-4" aria-labelledby="account-identity">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex min-w-0 items-center gap-4">
-                  <ProfileAvatar src={image} name={displayName} email={email} />
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2
-                        id="account-identity"
-                        className="font-display truncate text-ds-title font-bold text-heading"
-                      >
-                        {displayName}
-                      </h2>
-                      {membership.isMember ? (
-                        <span className="inline-flex items-center rounded-full bg-accent/15 px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.06em] text-accent-deep">
-                          Member
-                        </span>
-                      ) : null}
-                    </div>
-                    {email ? (
-                      <p className="mt-0.5 truncate text-sm text-muted">{email}</p>
-                    ) : null}
-                    {pendingNewEmail ? (
-                      <p className="mt-2 text-sm text-text">
-                        Confirm the link sent to{" "}
-                        <span className="font-semibold text-heading">
-                          {pendingNewEmail}
-                        </span>{" "}
-                        to finish changing your email.
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                  <Link
-                    href={planATripHref()}
-                    className="btn btn-primary w-full sm:w-auto"
-                  >
-                    Plan a trip
-                  </Link>
-                  <Link href="/blog" className="btn btn-secondary w-full sm:w-auto">
-                    Browse stories
-                  </Link>
-                  <AccountAuthActions
-                    mode="sign-out"
-                    className="w-full sm:w-auto"
-                  />
-                </div>
+        <div className="min-w-0">
+          {section === "overview" ? (
+            <h1 className="font-display mb-3 text-ds-title font-bold text-heading">My Journey</h1>
+          ) : (
+            <div className="mb-3">
+              <button
+                type="button"
+                onClick={() => select("overview")}
+                className="-ml-2 inline-flex min-h-11 items-center gap-1 px-2 text-sm font-semibold text-accent md:hidden"
+              >
+                <ChevronLeft className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+                My Journey
+              </button>
+              <h1 className="font-display text-ds-title font-bold text-heading">
+                {SECTION_LABEL[section]}
+              </h1>
+            </div>
+          )}
+
+          {/* Overview */}
+          <div hidden={section !== "overview"} className="space-y-4">
+            <AccountProfileCard
+              name={displayName}
+              email={email}
+              image={image}
+              membershipLabel={membershipLabel}
+              pendingNewEmail={pendingNewEmail}
+              comments={null}
+              saved={savedBadge}
+              history={null}
+              onOpen={select}
+            />
+
+            <section className="ui-card flex items-center gap-3 p-3 sm:p-4" aria-labelledby="journey-cta">
+              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
+                <Compass className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <h2 id="journey-cta" className="text-sm font-semibold text-heading">
+                  Plan your next trip
+                </h2>
+                <p className="text-xs text-muted">Flights, stays, and days in one itinerary.</p>
               </div>
+              <Link href={planATripHref()} className="btn btn-primary shrink-0 text-sm">
+                Plan a trip
+              </Link>
             </section>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="md:hidden">
+              <AccountJourneyNav
+                variant="list"
+                items={navItems.filter((item) => item.id !== "overview")}
+                active={section}
+                onSelect={select}
+              />
+            </div>
+
+            <div className="hidden gap-3 md:grid md:grid-cols-2">
               <SummaryCard
-                eyebrow="Trips"
+                eyebrow="My trips"
                 value={tripsError ? "—" : String(trips.length)}
                 detail={tripDetail}
-                action="View trips"
-                icon={
-                  <Luggage
-                    className="h-5 w-5 text-accent"
-                    strokeWidth={2}
-                    aria-hidden="true"
-                  />
-                }
+                icon={<Luggage className="h-4 w-4 text-accent" strokeWidth={2} aria-hidden="true" />}
                 onOpen={() => select("trips")}
               />
               <SummaryCard
-                eyebrow="Saved"
-                value={postsError || hotelsError ? "—" : String(savedCount)}
-                detail={savedDetail}
-                action="View favorites"
-                icon={
-                  <BookOpen
-                    className="h-5 w-5 text-accent"
-                    strokeWidth={2}
-                    aria-hidden="true"
-                  />
-                }
-                onOpen={() => select("saved")}
+                eyebrow="Bookings"
+                value={tripsError ? "—" : String(bookings.length)}
+                detail={bookingDetail}
+                icon={<CalendarCheck className="h-4 w-4 text-accent" strokeWidth={2} aria-hidden="true" />}
+                onOpen={() => select("bookings")}
               />
             </div>
 
             <section aria-labelledby="account-explore">
-              <h2
-                id="account-explore"
-                className="font-display text-ds-title font-bold text-heading"
-              >
+              <h2 id="account-explore" className="eyebrow">
                 Keep exploring
               </h2>
-              <ul className="mt-3 grid gap-3 sm:grid-cols-3">
-                <li>
-                  <Link
-                    href="/destinations"
-                    className="panel-interactive flex items-center gap-3 p-4"
-                  >
-                    <MapPin
-                      className="h-5 w-5 shrink-0 text-accent"
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    />
-                    <span className="font-semibold text-heading">Places</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/blog"
-                    className="panel-interactive flex items-center gap-3 p-4"
-                  >
-                    <BookOpen
-                      className="h-5 w-5 shrink-0 text-accent"
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    />
-                    <span className="font-semibold text-heading">Stories</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/guides"
-                    className="panel-interactive flex items-center gap-3 p-4"
-                  >
-                    <Compass
-                      className="h-5 w-5 shrink-0 text-accent"
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    />
-                    <span className="font-semibold text-heading">Guides</span>
-                  </Link>
-                </li>
+              <ul className="mt-2 grid grid-cols-3 gap-2">
+                {[
+                  { href: "/destinations", label: "Places", Icon: MapPin },
+                  { href: "/blog", label: "Stories", Icon: BookOpen },
+                  { href: "/guides", label: "Guides", Icon: Compass },
+                ].map(({ href, label, Icon }) => (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      className="panel-interactive flex min-h-11 items-center justify-center gap-2 px-2 text-sm font-semibold text-heading"
+                    >
+                      <Icon className="h-4 w-4 shrink-0 text-accent" strokeWidth={2} aria-hidden="true" />
+                      {label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </section>
           </div>
 
-          <div
-            id="trips"
-            role="tabpanel"
-            aria-labelledby="account-tab-trips"
-            hidden={section !== "trips"}
-          >
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="font-display text-ds-title font-bold text-heading">
-                  Trips
-                </h2>
-                <p className="mt-1 max-w-xl text-sm text-muted">
-                  Itineraries you save from Plan a trip. Open one to pick up
-                  flights, stays, and the days in between.
-                </p>
+          {/* My trips */}
+          <div hidden={section !== "trips"} className="space-y-6">
+            <section>
+              <SectionHeader
+                title="Itineraries"
+                subtitle="Trips you save from Plan a trip. Open one to pick up flights, stays, and the days in between."
+                action={
+                  trips.length > 0 || tripsError ? (
+                    <Link href={planATripHref()} className="btn btn-primary text-sm">
+                      Plan a trip
+                    </Link>
+                  ) : undefined
+                }
+                as="h2"
+              />
+              <div className="mt-3">
+                {tripsError ? <ErrorPanel message={tripsError} /> : <MyTripsList trips={trips} />}
               </div>
-              {trips.length > 0 || tripsError ? (
-                <Link
-                  href={planATripHref()}
-                  className="btn btn-primary w-full sm:w-auto"
-                >
-                  Plan a trip
-                </Link>
-              ) : null}
-            </div>
+            </section>
+            {!tripsError && trips.length > 0 ? (
+              <section className="border-t border-border pt-4">
+                <SectionHeader
+                  title="Packing lists"
+                  subtitle="How far along each trip’s packing is."
+                  as="h2"
+                />
+                <div className="mt-3">
+                  <AccountPackingLists lists={packingLists} />
+                </div>
+              </section>
+            ) : null}
+          </div>
+
+          {/* Bookings */}
+          <div hidden={section !== "bookings"} className="space-y-3">
+            <p className="text-sm text-muted">
+              Stays and flights booked or marked booked in your trips. Open one to see the full trip.
+            </p>
             {tripsError ? (
-              <div className="panel p-4">
-                <p className="text-sm leading-relaxed text-text" role="status">
-                  {tripsError}
-                </p>
-              </div>
+              <ErrorPanel message={tripsError} />
             ) : (
-              <MyTripsList trips={trips} />
+              <AccountBookingsList bookings={bookings} />
             )}
           </div>
 
-          <div
-            id="saved"
-            role="tabpanel"
-            aria-labelledby="account-tab-saved"
-            hidden={section !== "saved"}
-            className="space-y-8"
-          >
+          {/* Saved */}
+          <div hidden={section !== "saved"} className="space-y-6">
             <section aria-labelledby="saved-hotels-heading">
-              <div className="mb-4">
-                <h2 id="saved-hotels-heading" className="font-display text-ds-title font-bold text-heading">
-                  Favorite hotels
-                </h2>
-                <p className="mt-1 max-w-xl text-sm text-muted">
-                  Hotels you saved while comparing stays.
-                </p>
+              <h2
+                id="saved-hotels-heading"
+                className="font-display text-base font-bold text-heading"
+              >
+                Favorite hotels
+              </h2>
+              <p className="mt-1 text-sm text-muted">Hotels you saved while comparing stays.</p>
+              <div className="mt-3">
+                {hotelsError ? (
+                  <ErrorPanel
+                    message={hotelsError}
+                    action={
+                      <Link href="/stays" className="btn btn-secondary">
+                        Find hotels
+                      </Link>
+                    }
+                  />
+                ) : (
+                  <SavedHotelsList hotels={hotels} />
+                )}
               </div>
-              {hotelsError ? (
-                <div className="panel p-4">
-                  <p className="text-sm leading-relaxed text-text" role="status">
-                    {hotelsError}
-                  </p>
-                  <Link href="/stays" className="btn btn-secondary mt-4">
-                    Find hotels
-                  </Link>
-                </div>
-              ) : (
-                <SavedHotelsList hotels={hotels} />
-              )}
             </section>
 
-            <section aria-labelledby="saved-stories-heading" className="border-t border-border pt-6">
-              <div className="mb-4">
-                <h2 id="saved-stories-heading" className="font-display text-ds-title font-bold text-heading">
-                  Saved stories
-                </h2>
-                <p className="mt-1 max-w-xl text-sm text-muted">
-                  Bookmarks from the journal. Remove any of them whenever you like.
-                </p>
+            <section aria-labelledby="saved-stories-heading" className="border-t border-border pt-4">
+              <h2
+                id="saved-stories-heading"
+                className="font-display text-base font-bold text-heading"
+              >
+                Saved stories
+              </h2>
+              <p className="mt-1 text-sm text-muted">
+                Bookmarks from the journal. Remove any of them whenever you like.
+              </p>
+              <div className="mt-3">
+                {postsError ? (
+                  <ErrorPanel
+                    message={postsError}
+                    action={
+                      <Link href="/blog" className="btn btn-secondary">
+                        Browse stories
+                      </Link>
+                    }
+                  />
+                ) : (
+                  <SavedPostsList posts={posts} />
+                )}
               </div>
-              {postsError ? (
-                <div className="panel p-4">
-                  <p className="text-sm leading-relaxed text-text" role="status">
-                    {postsError}
-                  </p>
-                  <Link href="/blog" className="btn btn-secondary mt-4">
-                    Browse stories
-                  </Link>
-                </div>
-              ) : (
-                <SavedPostsList posts={posts} />
-              )}
             </section>
           </div>
 
-          <div
-            id="settings"
-            role="tabpanel"
-            aria-labelledby="account-tab-settings"
-            hidden={section !== "settings"}
-            className="space-y-6"
-          >
+          {/* Comments */}
+          <div hidden={section !== "comments"}>
+            <EmptyState
+              action={
+                <Link href="/blog" className="btn btn-secondary">
+                  Browse stories
+                </Link>
+              }
+            >
+              Comments you leave on stories and guides will be listed here, with links back.
+            </EmptyState>
+          </div>
+
+          {/* History */}
+          <div hidden={section !== "history"}>
+            <EmptyState
+              action={
+                <Link href="/destinations" className="btn btn-secondary">
+                  Explore places
+                </Link>
+              }
+            >
+              Stories, guides, and places you open while signed in will show here.
+            </EmptyState>
+          </div>
+
+          {/* Profile */}
+          <div hidden={section !== "profile"} className="space-y-4">
             <section className="panel p-4" aria-labelledby="settings-profile">
-              <h2
-                id="settings-profile"
-                className="font-display text-ds-title font-bold text-heading"
-              >
-                Profile
+              <h2 id="settings-profile" className="font-display text-ds-title font-bold text-heading">
+                Name, photo, and email
               </h2>
-              <p className="mt-1 text-sm text-muted">
-                Update your name, photo, and the email on this account.
-              </p>
               <ProfileSettingsForm
                 initialName={name}
                 initialEmail={email}
@@ -502,51 +509,67 @@ export function AccountDashboard({
                 emailConfigured={emailConfigured}
               />
             </section>
+            {section === "profile" ? <TripInboxAddress /> : null}
+          </div>
+
+          {/* Settings */}
+          <div hidden={section !== "settings"} className="space-y-4">
+            <button
+              type="button"
+              onClick={() => select("profile")}
+              className="ui-card flex min-h-12 w-full items-center gap-3 p-3 text-left transition hover:bg-surface-soft"
+            >
+              <ProfileAvatar src={image} name={displayName} email={email} size="settings" />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold text-heading">
+                  Edit profile
+                </span>
+                <span className="block truncate text-xs text-muted">
+                  Name, photo, email, and trip inbox
+                </span>
+              </span>
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted" strokeWidth={2} aria-hidden="true" />
+            </button>
 
             <MembershipSettings panel={membership} />
 
             <AccountPreferences />
 
-            {hasPassword ? (
-              <section className="panel p-4" aria-labelledby="settings-password">
-                <h2
-                  id="settings-password"
-                  className="font-display text-ds-title font-bold text-heading"
-                >
-                  Password
-                </h2>
-                <p className="mt-1 text-sm text-muted">
-                  Update the password you use with email sign-in.
+            <section className="panel p-4" aria-labelledby="settings-security">
+              <h2 id="settings-security" className="font-display text-ds-title font-bold text-heading">
+                Sign-in and security
+              </h2>
+              {hasPassword ? (
+                <>
+                  <p className="mt-1 text-xs text-muted">
+                    Update the password you use with email sign-in.
+                  </p>
+                  <ChangePasswordForm />
+                </>
+              ) : profileLoaded ? (
+                <p className="mt-1 text-sm text-muted">This account signs in without a password.</p>
+              ) : null}
+              {googlePhoto ? (
+                <p className="mt-3 text-sm text-muted">
+                  <a
+                    href="https://myaccount.google.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-accent hover:underline"
+                  >
+                    Google Account
+                    <ExternalLink className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
+                  </a>
+                  <span> — manage the Google login linked to this photo.</span>
                 </p>
-                <ChangePasswordForm />
-              </section>
-            ) : profileLoaded ? (
-              <p className="text-sm text-muted">
-                This account signs in without a password.
-              </p>
-            ) : null}
-
-            {googlePhoto ? (
-              <p className="text-sm text-muted">
-                <a
-                  href="https://myaccount.google.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 font-semibold text-accent hover:underline"
-                >
-                  Google Account
-                  <ExternalLink
-                    className="h-3.5 w-3.5"
-                    strokeWidth={2}
-                    aria-hidden="true"
-                  />
-                </a>
-                <span> — manage the Google login linked to this photo.</span>
-              </p>
-            ) : null}
+              ) : null}
+              <div className="mt-3 border-t border-border pt-3">
+                <AccountAuthActions mode="sign-out" className="w-full sm:w-auto" />
+              </div>
+            </section>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
