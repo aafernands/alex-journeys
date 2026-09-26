@@ -6,6 +6,7 @@ import { ShieldCheck } from "lucide-react";
 import { StayConfirmation } from "@/components/stays/StayConfirmation";
 import { StayFailureNotice } from "@/components/stays/StayFailureNotice";
 import { StayRoomGallery } from "@/components/stays/StayRoomGallery";
+import { StayCheckoutCardSkeleton } from "@/components/stays/StaySkeletons";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Input";
 import { ListRow } from "@/components/ui/ListRow";
@@ -309,6 +310,11 @@ export function StayBooker({
     setItinerary("added");
   }, []);
 
+  // The confirmation replaces a long form; bring it into view from the top.
+  useEffect(() => {
+    if (confirmation) window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+  }, [confirmation]);
+
   useEffect(() => {
     if (!confirmation) return;
     const confirmationHref = stayConfirmationPath(confirmation, query);
@@ -419,8 +425,11 @@ export function StayBooker({
           })}
         </div>
       ) : null}
-      {pending === "prebook" ? (
-        <div className={checkoutMode ? "ui-card ui-card-compact text-center" : ""} role="status">
+      {checkoutMode && !prebook && !failure && pending !== "rates" && pending !== "book" ? (
+        // Checkout: skeleton from the first frame until Nuitee confirms the rate.
+        <StayCheckoutCardSkeleton />
+      ) : pending === "prebook" ? (
+        <div role="status">
           <p className="font-semibold text-heading">Checking your selected room…</p>
           <p className="mt-1 text-sm text-muted">Confirming the latest rate and cancellation terms with Nuitee.</p>
         </div>

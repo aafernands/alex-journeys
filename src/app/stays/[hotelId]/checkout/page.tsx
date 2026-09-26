@@ -68,7 +68,7 @@ export default async function StayCheckoutPage({ params, searchParams }: PagePro
   const hotel = loaded?.hotel;
   if (!loaded || !hotel) {
     return (
-      <main className="book-flow bg-bg pb-16" data-density="compact">
+      <main className="book-flow min-h-[70vh] bg-bg pb-16" data-density="compact">
         <div className="section-shell pt-3">
           <div className="mx-auto max-w-4xl">
             <Link href={hotelHref} className="ui-row-action">
@@ -90,7 +90,7 @@ export default async function StayCheckoutPage({ params, searchParams }: PagePro
   }
 
   return (
-    <main className="book-flow bg-bg pb-16" data-density="compact">
+    <main className="book-flow min-h-[70vh] bg-bg pb-16" data-density="compact">
       <div className="section-shell pt-3">
         <div className="mx-auto max-w-5xl">
           <nav aria-label="Checkout navigation">

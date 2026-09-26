@@ -1,16 +1,12 @@
-import { StayLoadingStatus } from "@/components/stays/StaySkeletons";
+import { StayCheckoutPageSkeleton } from "@/components/stays/StaySkeletons";
+import { StayScrollTop } from "@/components/stays/StayScrollTop";
 
-/** Checkout reloads the selected rate; a status line reads better than a skeleton here. */
+/** Shown instantly after tapping Select while the checkout route reloads the rate. */
 export default function StayCheckoutLoading() {
   return (
-    <main className="book-flow bg-bg pb-16" data-density="compact">
-      <div className="section-shell pt-3">
-        <div className="mx-auto max-w-5xl">
-          <div className="ui-card ui-card-compact mt-3">
-            <StayLoadingStatus>Checking your selected room…</StayLoadingStatus>
-          </div>
-        </div>
-      </div>
-    </main>
+    <>
+      <StayScrollTop />
+      <StayCheckoutPageSkeleton />
+    </>
   );
 }
