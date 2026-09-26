@@ -29,7 +29,9 @@ import {
   premiumPrices,
   premiumTrialDays,
 } from "@/lib/membership";
+import { isFirebaseConfigured } from "@/lib/firebase-admin";
 import { PAGE_DEFAULTS } from "@/lib/page-defaults";
+import { premiumPublishableKey } from "@/lib/premium-join";
 import { getPageWithFallback } from "@/lib/pages";
 import { MAX_SAVED_TRIPS } from "@/lib/trip-record";
 
@@ -125,6 +127,7 @@ export default function PremiumPage() {
   const prices = premiumPrices();
   const trialDays = premiumTrialDays();
   const checkoutConfigured = isPremiumCheckoutConfigured();
+  const onsiteCheckout = checkoutConfigured && isFirebaseConfigured() && Boolean(premiumPublishableKey());
 
   const mediaKit = getPageWithFallback("media-kit", PAGE_DEFAULTS["media-kit"]);
   const audience = asRecord(mediaKit.sections?.audience);
@@ -173,7 +176,9 @@ export default function PremiumPage() {
         },
         {
           q: "How do I join?",
-          a: "Pick monthly or yearly and sign in. Checkout opens right after, and your membership shows on your account.",
+          a: onsiteCheckout
+            ? "Pick monthly or yearly, add your email and name, and pay right here. Your membership shows on your account for that email."
+            : "Pick monthly or yearly and sign in. Checkout opens right after, and your membership shows on your account.",
         },
       ],
     },
@@ -266,6 +271,7 @@ export default function PremiumPage() {
           savingsPercent={prices.savingsPercent}
           trialDays={trialDays}
           checkoutConfigured={checkoutConfigured}
+          onsiteCheckout={onsiteCheckout}
           perks={PREMIUM_PERKS}
         />
         {!checkoutConfigured ? (

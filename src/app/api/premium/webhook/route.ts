@@ -9,12 +9,12 @@ import {
   readInvoiceRefs,
   subscriptionAppliesToMember,
   withStripeEvent,
-  type MembershipRecord,
 } from "@/lib/membership";
 import {
-  findUserIdByStripeCustomer,
-  getMembership,
-  saveMembership,
+  applySubscriptionSync,
+  readTargetMembership,
+  resolveMembershipTarget,
+  saveTargetMembership,
 } from "@/lib/membership-store";
 import { getPremiumStripe, subscriptionSyncFromId } from "@/lib/stripe-premium";
 
@@ -28,26 +28,12 @@ const HANDLED = new Set([
   "invoice.payment_failed",
 ]);
 
-async function resolveUserId(
-  userId: string | null,
-  customerId: string | null,
-): Promise<string | null> {
-  if (userId) return userId;
-  if (!customerId) return null;
-  return findUserIdByStripeCustomer(customerId);
-}
-
-async function applyRecord(
-  userId: string,
-  next: MembershipRecord,
-  eventCreated: number,
-): Promise<"saved" | "stale" | "ignored"> {
-  const existing = await getMembership(userId);
-  if (isStaleStripeEvent(existing, eventCreated)) return "stale";
-  if (!subscriptionAppliesToMember(next, existing)) return "ignored";
-  await saveMembership(userId, withStripeEvent(next, eventCreated));
-  return "saved";
-}
+/*
+ * Owner lookup (see resolveMembershipTarget): metadata userId, then the
+ * reader holding this Stripe customer, then a reader with the buyer email
+ * from on-site checkout, then a pending record for that email that moves to
+ * the account on first sign-in. Hosted Checkout always carries a userId.
+ */
 
 export async function POST(request: Request) {
   const stripe = getPremiumStripe();
@@ -90,18 +76,19 @@ export async function POST(request: Request) {
       if (!fromSession) {
         return NextResponse.json({ error: "Subscription missing." }, { status: 500 });
       }
-      const userId = await resolveUserId(checkout.userId ?? fromSession.userId, fromSession.customerId);
-      if (!userId) return NextResponse.json({ received: true, ignored: "user" });
-      const result = await applyRecord(userId, fromSession.membership, event.created);
+      const { result, target } = await applySubscriptionSync(
+        { ...fromSession, userId: checkout.userId ?? fromSession.userId },
+        event.created,
+      );
+      if (!target) return NextResponse.json({ received: true, ignored: "user" });
       return NextResponse.json({ received: true, result });
     }
 
     if (event.type.startsWith("customer.subscription.")) {
       const sync = membershipFromSubscription(event.data.object, premiumPriceIds());
       if (!sync) return NextResponse.json({ received: true, ignored: "subscription" });
-      const userId = await resolveUserId(sync.userId, sync.customerId);
-      if (!userId) return NextResponse.json({ received: true, ignored: "user" });
-      const result = await applyRecord(userId, sync.membership, event.created);
+      const { result, target } = await applySubscriptionSync(sync, event.created);
+      if (!target) return NextResponse.json({ received: true, ignored: "user" });
       return NextResponse.json({ received: true, result });
     }
 
@@ -110,15 +97,19 @@ export async function POST(request: Request) {
       if (!refs?.customerId && !refs?.subscriptionId) {
         return NextResponse.json({ received: true, ignored: "invoice" });
       }
-      let sync = refs.subscriptionId
+      const sync = refs.subscriptionId
         ? await subscriptionSyncFromId(refs.subscriptionId)
         : null;
       if (!sync && refs.subscriptionId) {
         return NextResponse.json({ error: "Subscription missing." }, { status: 500 });
       }
-      const userId = await resolveUserId(sync?.userId ?? null, refs.customerId ?? sync?.customerId ?? null);
-      if (!userId) return NextResponse.json({ received: true, ignored: "user" });
-      const existing = await getMembership(userId);
+      const target = await resolveMembershipTarget({
+        userId: sync?.userId ?? null,
+        customerId: refs.customerId ?? sync?.customerId ?? null,
+        email: sync?.email ?? null,
+      });
+      if (!target) return NextResponse.json({ received: true, ignored: "user" });
+      const existing = await readTargetMembership(target);
       if (isStaleStripeEvent(existing, event.created)) {
         return NextResponse.json({ received: true, result: "stale" });
       }
@@ -128,7 +119,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ received: true, ignored: "product" });
       }
       const next = membershipAfterPaymentFailed(base);
-      await saveMembership(userId, withStripeEvent(next, event.created));
+      await saveTargetMembership(target, withStripeEvent(next, event.created));
       return NextResponse.json({ received: true, result: "saved" });
     }
   } catch (err) {

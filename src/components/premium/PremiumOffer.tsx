@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Check } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useReaderLoginPrompt } from "@/components/ReaderLoginPrompt";
 import { usePremium } from "@/components/premium/usePremium";
+import { useHostedCheckout } from "@/components/premium/useHostedCheckout";
 import type { PremiumPerk, PremiumPlan } from "@/lib/membership";
-
-const INTENT_KEY = "aj-premium-checkout";
-let checkoutResumeStarted = false;
+import { premiumJoinHref } from "@/lib/premium-join";
 
 type Props = {
   monthlyLabel: string;
@@ -19,27 +17,10 @@ type Props = {
   savingsPercent: number;
   trialDays: number;
   checkoutConfigured: boolean;
+  /** On-site checkout at /premium/join. False falls back to hosted Checkout. */
+  onsiteCheckout: boolean;
   perks: PremiumPerk[];
 };
-
-function readIntent(): PremiumPlan | null {
-  try {
-    const raw = sessionStorage.getItem(INTENT_KEY);
-    if (raw === "monthly" || raw === "yearly") return raw;
-  } catch {
-    return null;
-  }
-  return null;
-}
-
-function writeIntent(plan: PremiumPlan | null) {
-  try {
-    if (!plan) sessionStorage.removeItem(INTENT_KEY);
-    else sessionStorage.setItem(INTENT_KEY, plan);
-  } catch {
-    // Private mode can block storage. Sign-in still returns to /premium.
-  }
-}
 
 export function PremiumOffer({
   monthlyLabel,
@@ -49,100 +30,28 @@ export function PremiumOffer({
   savingsPercent,
   trialDays,
   checkoutConfigured,
+  onsiteCheckout,
   perks,
 }: Props) {
   const { status } = useSession();
   const { isPremium, loading } = usePremium();
-  const openSignIn = useReaderLoginPrompt();
   const [plan, setPlan] = useState<PremiumPlan>("yearly");
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const startCheckoutRef = useRef<(plan: PremiumPlan) => Promise<void>>(async () => {});
+  const hosted = useHostedCheckout({
+    enabled: checkoutConfigured && !onsiteCheckout,
+    isPremium,
+    premiumLoading: loading,
+    returnTo: "/premium",
+  });
+  const { pending, error } = hosted;
 
   const signedIn = status === "authenticated";
   const priceLabel = plan === "yearly" ? yearlyLabel : monthlyLabel;
   const cadence = plan === "yearly" ? "per year" : "per month";
 
-  async function openPortal() {
-    setError(null);
-    setPending(true);
-    try {
-      const res = await fetch("/api/premium/portal", { method: "POST" });
-      const data = (await res.json()) as { url?: string; error?: string };
-      if (!res.ok || !data.url) {
-        setError(data.error || "The membership page isn’t available right now.");
-        setPending(false);
-        return;
-      }
-      window.location.assign(data.url);
-    } catch {
-      setError("The membership page isn’t available right now.");
-      setPending(false);
-    }
+  function startCheckout(next: PremiumPlan) {
+    if (!checkoutConfigured) return;
+    void hosted.start(next);
   }
-
-  async function startCheckout(next: PremiumPlan) {
-    if (!checkoutConfigured || pending) return;
-    if (isPremium) {
-      await openPortal();
-      return;
-    }
-    if (status !== "authenticated") {
-      writeIntent(next);
-      openSignIn({
-        returnTo: "/premium",
-        intro: "Sign in to become a member. Checkout opens right after.",
-        onAuthenticated: () => {
-          writeIntent(null);
-          void startCheckout(next);
-        },
-      });
-      return;
-    }
-    setError(null);
-    setPending(true);
-    try {
-      const res = await fetch("/api/premium/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: next }),
-      });
-      const data = (await res.json()) as {
-        url?: string;
-        error?: string;
-        alreadyMember?: boolean;
-        comingSoon?: boolean;
-      };
-      if (data.alreadyMember) {
-        await openPortal();
-        return;
-      }
-      if (!res.ok || !data.url) {
-        setError(
-          data.comingSoon
-            ? "Membership is coming soon."
-            : data.error || "Checkout isn’t available right now.",
-        );
-        setPending(false);
-        return;
-      }
-      window.location.assign(data.url);
-    } catch {
-      setError("Checkout isn’t available right now.");
-      setPending(false);
-    }
-  }
-
-  startCheckoutRef.current = startCheckout;
-
-  useEffect(() => {
-    if (!signedIn || loading || checkoutResumeStarted) return;
-    const intent = readIntent();
-    if (!intent) return;
-    checkoutResumeStarted = true;
-    writeIntent(null);
-    if (!isPremium) void startCheckoutRef.current(intent);
-  }, [signedIn, loading, isPremium]);
 
   const buttonLabel = !checkoutConfigured
     ? "Coming soon"
@@ -157,12 +66,19 @@ export function PremiumOffer({
           : "Become a member";
 
   function checkoutButton() {
+    if (checkoutConfigured && onsiteCheckout && !isPremium) {
+      return (
+        <Link href={premiumJoinHref(plan)} className="btn btn-primary w-full">
+          {trialDays > 0 ? `Start ${trialDays}-day free trial` : "Become a member"}
+        </Link>
+      );
+    }
     return (
       <button
         type="button"
         className="btn btn-primary w-full disabled:opacity-60"
         disabled={!checkoutConfigured || pending || (signedIn && loading)}
-        onClick={() => void startCheckout(plan)}
+        onClick={() => startCheckout(plan)}
       >
         {buttonLabel}
       </button>

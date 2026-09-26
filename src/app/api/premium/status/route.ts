@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { isPremium, toMembershipPublic } from "@/lib/membership";
-import { getMembership } from "@/lib/membership-store";
+import { getReaderMembership } from "@/lib/membership-store";
 
 export const runtime = "nodejs";
 
@@ -12,7 +12,7 @@ export async function GET() {
     return NextResponse.json({ signedIn: false, isPremium: false, membership: null });
   }
   try {
-    const membership = await getMembership(userId);
+    const membership = await getReaderMembership(userId, session?.user?.email);
     const publicMembership = toMembershipPublic(membership);
     return NextResponse.json({
       signedIn: true,
