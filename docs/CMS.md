@@ -18,6 +18,7 @@ After sign-in, the shell provides:
 | Destinations | `/cms/destinations` | Countries, map, climate, itinerary → `tree.json` |
 | Media | `/cms/media` | Post image library + author photo |
 | Website design | `/cms/design` | Brand logos (black on light, white on dark), homepage hero, featured slideshow, section chrome |
+| Members | `/cms/members` | Premium subscribers from Firestore `users.membership` (written by the Stripe webhook): active/trial/past-due/canceling counts, estimated MRR, filters, search, CSV export, “View in Stripe”, and per-member “Refresh from Stripe” (`POST /api/cms/members/refresh`, CMS auth required) |
 | Help | `/cms/help` | Short publish checklist |
 
 CMS layout sets `robots: noindex`.

@@ -19,6 +19,7 @@ import {
   countPendingComments,
 } from "@/lib/comments";
 import { isFirebaseConfigured } from "@/lib/firebase-admin";
+import { countActiveMembers } from "@/lib/cms/members";
 import { formatPostDate, getAllPosts } from "@/lib/posts";
 import {
   CheckCircle2,
@@ -73,6 +74,8 @@ export default async function CmsPage() {
     }
   }
 
+  const activeMembers = await countActiveMembers();
+
   const stats = [
     { label: "Published posts", value: posts.length, href: "/cms/posts" },
     { label: "Drafts", value: drafts.length, href: "/cms/posts?status=draft" },
@@ -86,6 +89,11 @@ export default async function CmsPage() {
       label: "Destinations",
       value: destinations.length,
       href: "/cms/destinations",
+    },
+    {
+      label: "Members",
+      value: activeMembers ?? "—",
+      href: "/cms/members",
     },
   ];
 
@@ -117,7 +125,7 @@ export default async function CmsPage() {
         </div>
       </div>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {stats.map((s) => (
           <Link
             key={s.label}
