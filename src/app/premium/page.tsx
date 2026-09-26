@@ -33,7 +33,8 @@ import { isFirebaseConfigured } from "@/lib/firebase-admin";
 import { PAGE_DEFAULTS } from "@/lib/page-defaults";
 import { premiumPublishableKey } from "@/lib/premium-join";
 import { getPageWithFallback } from "@/lib/pages";
-import { MAX_SAVED_TRIPS } from "@/lib/trip-record";
+import { FREE_SAVED_TRIPS } from "@/lib/trip-record";
+import { PERKS_HUB_PATH } from "@/lib/premium-perks";
 
 export const dynamic = "force-dynamic";
 
@@ -149,14 +150,17 @@ export default function PremiumPage() {
     { label: "Stories, destinations, and guides", free: true, member: true },
     { label: "Book hotels and flights", free: true, member: true },
     {
-      label: "Trip planner",
-      free: `Up to ${MAX_SAVED_TRIPS} trips`,
-      member: "Unlimited, shared, and exportable",
+      label: "Saved trips in the trip planner",
+      free: `Up to ${FREE_SAVED_TRIPS}`,
+      member: "Unlimited",
     },
+    { label: "Trip PDF download", free: true, member: true },
+    { label: "Share a trip link", free: false, member: true },
     { label: "Members-only stories", free: false, member: true },
     { label: "Downloadable PDF guides", free: false, member: true },
-    { label: "Weekly deal note: Newark, JFK, Philadelphia", free: false, member: true },
     { label: "Alex’s Lightroom presets", free: false, member: true },
+    { label: "Weekly deal notes: Newark, JFK, Philadelphia", free: false, member: true },
+    { label: "Deal notes by email", free: false, member: "Coming soon" },
     { label: "Member hotel rates", free: false, member: "Coming soon" },
   ];
 
@@ -192,6 +196,22 @@ export default function PremiumPage() {
         {
           q: "Which airports are in the weekly deal note?",
           a: "Newark, JFK, and Philadelphia. That’s the note. It isn’t a feed for every airport.",
+        },
+        {
+          q: "Where do I read the deal notes?",
+          a: "On the Deals page, newest first, once you’re signed in as a member. An email version is coming later.",
+        },
+        {
+          q: "Where do I find my downloads and perks?",
+          a: "Everything lives on your Member perks page: the PDF guides and Lightroom presets, the deal notes, and the member stories. It’s linked from your account menu.",
+        },
+        {
+          q: "How many trips can I save without Premium?",
+          a: `Free accounts save up to ${FREE_SAVED_TRIPS} trips. Members save as many as they plan and can share a link to any trip. Downloading a trip as a PDF stays free for everyone.`,
+        },
+        {
+          q: "What happens to my trips if I cancel?",
+          a: `Nothing is deleted. Every trip you saved stays in My trips. You just can’t add a new one past ${FREE_SAVED_TRIPS} until you rejoin or remove a few.`,
         },
       ],
     },
@@ -352,8 +372,8 @@ export default function PremiumPage() {
               <Link href={PREMIUM_EXAMPLE_PATH} className="btn btn-primary">
                 Read a members-only story
               </Link>
-              <Link href="/about" className="btn btn-secondary">
-                More about me
+              <Link href={PERKS_HUB_PATH} className="btn btn-secondary">
+                See every perk
               </Link>
             </div>
           </div>

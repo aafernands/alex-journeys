@@ -19,6 +19,7 @@ export type DraftPost = {
   focusKeyword?: string;
   noindex?: boolean;
   membersOnly?: boolean;
+  dealNote?: boolean;
   contentHtml: string;
   itinerary?: PostItinerary;
   source?: unknown;

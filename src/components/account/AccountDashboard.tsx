@@ -31,7 +31,8 @@ import {
   accountSectionFromLocation,
   type AccountSection,
 } from "@/lib/account-section";
-import { planATripHref } from "@/lib/trip-record";
+import { FREE_SAVED_TRIPS, FREE_TRIP_LIMIT_MESSAGE, planATripHref } from "@/lib/trip-record";
+import { PremiumLockPrompt } from "@/components/premium/PremiumLockPrompt";
 import {
   MembershipSettings,
   type MembershipPanel,
@@ -401,6 +402,11 @@ export function AccountDashboard({
                   Itineraries you save from Plan a trip. Open one to pick up
                   flights, stays, and the days in between.
                 </p>
+                {!membership.isMember && !membership.unavailable && !tripsError ? (
+                  <p className="mt-1 text-sm text-muted">
+                    {trips.length} saved · Free accounts save up to {FREE_SAVED_TRIPS} trips.
+                  </p>
+                ) : null}
               </div>
               {trips.length > 0 || tripsError ? (
                 <Link
@@ -418,7 +424,14 @@ export function AccountDashboard({
                 </p>
               </div>
             ) : (
-              <MyTripsList trips={trips} />
+              <>
+                {!membership.isMember &&
+                !membership.unavailable &&
+                trips.length >= FREE_SAVED_TRIPS ? (
+                  <PremiumLockPrompt className="mb-4" message={FREE_TRIP_LIMIT_MESSAGE} />
+                ) : null}
+                <MyTripsList trips={trips} />
+              </>
             )}
           </div>
 

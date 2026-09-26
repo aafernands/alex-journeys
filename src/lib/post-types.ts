@@ -55,6 +55,11 @@ export type PostMeta = {
    * Booking tools on the same post stay visible.
    */
   membersOnly?: boolean;
+  /**
+   * Weekly deal note for members. Listed on /premium/deals, newest first.
+   * Always saved with `membersOnly: true`.
+   */
+  dealNote?: boolean;
 };
 
 /** Day-by-day trip timeline stored separately from contentHtml. */

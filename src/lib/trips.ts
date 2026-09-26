@@ -7,6 +7,7 @@ import {
   bookedChecklist,
   normalizeTripItems,
   parseTripWrite,
+  savedTripLimit,
   tripCapacityMessage,
   type TripItem,
   type TripRecord,
@@ -21,9 +22,30 @@ export class TripsUnavailableError extends Error {
 }
 
 export class TripLimitError extends Error {
-  constructor(message = tripCapacityMessage(Number.POSITIVE_INFINITY) ?? "Too many trips.") {
-    super(message);
+  readonly member: boolean;
+  readonly limit: number;
+  constructor(member = false, message?: string) {
+    super(message ?? tripCapacityMessage(Number.POSITIVE_INFINITY, member) ?? "Too many trips.");
     this.name = "TripLimitError";
+    this.member = member;
+    this.limit = savedTripLimit(member);
+  }
+}
+
+/**
+ * Premium check used when the caller did not already resolve membership.
+ * Any failure counts as a free reader, so the smaller limit applies.
+ */
+async function memberForLimit(userId: string): Promise<boolean> {
+  try {
+    const [{ getMembership }, { isPremium }] = await Promise.all([
+      import("@/lib/membership-store"),
+      import("@/lib/membership"),
+    ]);
+    return isPremium({ membership: await getMembership(userId) });
+  } catch (err) {
+    console.warn("[trips] membership lookup failed; using the free limit:", err);
+    return false;
   }
 }
 
@@ -145,13 +167,21 @@ export async function getTrip(
   return recordFromData(doc.id, (doc.data() ?? {}) as Record<string, unknown>);
 }
 
+/**
+ * Create a trip. The saved-trip limit is enforced here, on the server, for
+ * every caller: 5 for free readers, 200 for Premium members. Pass `member`
+ * when the caller already looked it up; otherwise it is read from Firestore.
+ */
 export async function createTrip(
   userId: string,
   write: TripWrite,
+  options: { member?: boolean } = {},
 ): Promise<TripRecord> {
+  const member =
+    typeof options.member === "boolean" ? options.member : await memberForLimit(userId);
   const counted = await tripsCollection(userId).count().get();
-  const capacity = tripCapacityMessage(counted.data().count);
-  if (capacity) throw new TripLimitError(capacity);
+  const capacity = tripCapacityMessage(counted.data().count, member);
+  if (capacity) throw new TripLimitError(member, capacity);
 
   const now = new Date().toISOString();
   const ref = tripsCollection(userId).doc();

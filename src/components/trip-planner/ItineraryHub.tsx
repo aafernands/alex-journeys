@@ -42,6 +42,7 @@ import {
   itemScheduleTime,
   planATripLoginHref,
   TRIPS_ACCOUNT_UNAVAILABLE,
+  FREE_TRIP_LIMIT_MESSAGE,
   sharePlanHref,
   scheduledDayIndex,
   tripDays,
@@ -74,6 +75,8 @@ import {
 import { WeekView } from "@/components/trip-planner/WeekView";
 import { DownloadTripPdf } from "@/components/trip-planner/DownloadTripPdf";
 import { PackingPanel } from "@/components/trip-planner/PackingPanel";
+import { PremiumLockPrompt } from "@/components/premium/PremiumLockPrompt";
+import { usePremium } from "@/components/premium/usePremium";
 import type { PackingGuide } from "@/lib/packing-guides";
 
 type Props = {
@@ -1051,6 +1054,8 @@ export function ItineraryHub({
   onRememberGuestDraft,
 }: Props) {
   const [copied, setCopied] = useState(false);
+  const [shareLocked, setShareLocked] = useState(false);
+  const premium = usePremium();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [view, updateView] = useState<"overview" | "itinerary" | "bookings" | "packing">(
     focusStay || focusFlight ? "bookings" : "overview",
@@ -1447,6 +1452,13 @@ export function ItineraryHub({
             aria-label="Share a copy"
             title="Share a copy"
             onClick={async () => {
+              // Share links are a Premium perk. Opening a shared link stays free.
+              if (premium.loading) return;
+              if (!premium.isPremium) {
+                setShareLocked(true);
+                return;
+              }
+              setShareLocked(false);
               const url = `${window.location.origin}${sharePlanHref({
                 state,
                 items,
@@ -1555,6 +1567,31 @@ export function ItineraryHub({
             Sign in
           </Link>
         </p>
+      ) : null}
+      {shareLocked && !premium.isPremium ? (
+        <div className="plan-hub-save">
+          <PremiumLockPrompt
+            message="Sharing a trip link is a Premium perk."
+            detail="Members can send anyone a copy of this trip. The PDF download stays free in the menu."
+            secondary={
+              <button
+                type="button"
+                className="btn btn-secondary w-full sm:w-auto"
+                onClick={() => setShareLocked(false)}
+              >
+                Not now
+              </button>
+            }
+          />
+        </div>
+      ) : null}
+      {saveMode === "limit" ? (
+        <div className="plan-hub-save">
+          <PremiumLockPrompt
+            message={saveDetail || FREE_TRIP_LIMIT_MESSAGE}
+            detail="This trip stays in this browser. Your saved trips are all still in My trips."
+          />
+        </div>
       ) : null}
       {copied ||
       saveMode === "offer" ||

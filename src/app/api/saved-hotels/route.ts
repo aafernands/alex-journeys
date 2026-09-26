@@ -7,6 +7,8 @@ import {
   removeSavedHotel,
   SavedHotelsUnavailableError,
 } from "@/lib/saved-hotels";
+import { TRIP_LIMIT_CODE } from "@/lib/trip-record";
+import { TripLimitError } from "@/lib/trips";
 
 export const runtime = "nodejs";
 
@@ -84,6 +86,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, hotel });
   } catch (error) {
     if (error instanceof SavedHotelsUnavailableError) return unavailable();
+    if (error instanceof TripLimitError) {
+      return NextResponse.json(
+        { error: error.message, code: TRIP_LIMIT_CODE, limit: error.limit, member: error.member },
+        { status: 409 },
+      );
+    }
     const message = error instanceof Error ? error.message : "Save failed.";
     if (/Invalid|Missing/.test(message)) {
       return NextResponse.json({ error: message }, { status: 400 });

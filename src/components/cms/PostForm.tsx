@@ -47,6 +47,7 @@ export type PostFormInitial = {
   focusKeyword?: string;
   noindex?: boolean;
   membersOnly?: boolean;
+  dealNote?: boolean;
 };
 
 type Props = {
@@ -131,6 +132,7 @@ export function PostForm({
   const [focusKeyword, setFocusKeyword] = useState(initial?.focusKeyword ?? "");
   const [noindex, setNoindex] = useState(initial?.noindex === true);
   const [membersOnly, setMembersOnly] = useState(initial?.membersOnly === true);
+  const [dealNote, setDealNote] = useState(initial?.dealNote === true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{
     commitUrl: string;
@@ -206,7 +208,8 @@ export function PostForm({
             seoDescription,
             focusKeyword,
             noindex,
-            membersOnly,
+            membersOnly: membersOnly || dealNote,
+            dealNote,
             update: mode === "edit" && !isDraft && !asDraft,
             draft: asDraft,
           }),
@@ -250,6 +253,7 @@ export function PostForm({
       focusKeyword,
       noindex,
       membersOnly,
+      dealNote,
       featuredImageAlt,
       featuredImageUrl,
       finalSlug,
@@ -656,13 +660,35 @@ export function PostForm({
               <input
                 type="checkbox"
                 className="size-4 rounded border-border text-accent focus:ring-accent/25"
-                checked={membersOnly}
+                checked={membersOnly || dealNote}
+                disabled={dealNote}
                 onChange={() => {
                   markDirty();
                   setMembersOnly((value) => !value);
                 }}
               />
               Members only
+            </label>
+            <label className="mt-2 flex cursor-pointer items-start gap-2 text-sm text-text">
+              <input
+                type="checkbox"
+                className="mt-0.5 size-4 rounded border-border text-accent focus:ring-accent/25"
+                checked={dealNote}
+                onChange={() => {
+                  markDirty();
+                  setDealNote((value) => {
+                    if (!value) setMembersOnly(true);
+                    return !value;
+                  });
+                }}
+              />
+              <span>
+                Deal note
+                <span className="block text-xs text-muted">
+                  Lists this post on the members&rsquo; Deals page (/premium/deals), newest
+                  first. Deal notes are always members only.
+                </span>
+              </span>
             </label>
           </fieldset>
 
