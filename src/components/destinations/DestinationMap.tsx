@@ -79,7 +79,7 @@ export function DestinationMap({ destinationName, map }: Props) {
   }, [ready, map]);
 
   return (
-    <section className="mt-12" aria-labelledby="destination-map-heading">
+    <section className="mt-8 md:mt-12" aria-labelledby="destination-map-heading">
       <h2
         id="destination-map-heading"
         className="font-display text-title text-heading"
@@ -89,7 +89,7 @@ export function DestinationMap({ destinationName, map }: Props) {
       <p className="mt-1 text-xs text-muted">
         Places from this trip — tap a pin for details
       </p>
-      <div className="panel mt-5 overflow-hidden p-0">
+      <div className="panel mt-4 overflow-hidden p-0">
         <div
           ref={containerRef}
           className="h-[300px] w-full sm:h-[340px]"

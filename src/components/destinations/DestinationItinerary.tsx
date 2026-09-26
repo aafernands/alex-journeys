@@ -20,10 +20,10 @@ export function DestinationItinerary({
 
   return (
     <section
-      className="mt-10"
+      className="mt-8 md:mt-12"
       aria-labelledby="destination-itinerary-heading"
     >
-      <div className="panel-soft p-5 shadow-sm sm:p-6">
+      <div className="panel-soft p-4 shadow-sm">
         <p className="eyebrow">From the trip</p>
         <h2
           id="destination-itinerary-heading"
@@ -32,7 +32,7 @@ export function DestinationItinerary({
           {heading}
         </h2>
 
-        <ol className="mt-5 space-y-3">
+        <ol className="mt-4 space-y-3">
           {days.map((item, idx) => (
             <li
               key={`${item.day}-${item.title}-${idx}`}

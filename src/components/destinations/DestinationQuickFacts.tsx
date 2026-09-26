@@ -78,10 +78,10 @@ export function DestinationQuickFacts({
 
   return (
     <section
-      className="mt-10"
+      className="mt-8 md:mt-12"
       aria-labelledby="destination-quick-facts-heading"
     >
-      <div className="panel-soft p-5 shadow-sm sm:p-6">
+      <div className="panel-soft p-4 shadow-sm">
         <p className="eyebrow">Know before you go</p>
         <h2
           id="destination-quick-facts-heading"
