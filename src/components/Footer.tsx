@@ -29,6 +29,7 @@ const explore = [
   { href: "/guides", label: "Guides" },
   { href: "/start-here", label: "Start here" },
   { href: "/tools", label: "Tools I use" },
+  { href: "/premium", label: "Premium" },
 ];
 
 const company = [

@@ -4847,6 +4847,77 @@ main.plan-flow:has(.plan-trip-summary) > .section-band {
   }
 }
 
+
+/* ——— Premium page ——— */
+/* Room under the footer for the floating join bar on phones. */
+@media (max-width: 767px) {
+  body:has(.premium-join-bar) footer[role="contentinfo"] {
+    padding-bottom: 7.5rem;
+  }
+}
+
+.premium-hero-scrim {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgb(20 17 13 / 0.35), transparent 70%),
+    linear-gradient(to bottom, rgb(20 17 13 / 0.55), rgb(20 17 13 / 0.72) 60%, rgb(20 17 13 / 0.88));
+}
+
+.premium-close-scrim {
+  background: linear-gradient(to bottom, rgb(20 17 13 / 0.6), rgb(20 17 13 / 0.78));
+}
+
+.premium-rail-scrim {
+  background: linear-gradient(to top, rgb(20 17 13 / 0.78), rgb(20 17 13 / 0) 55%);
+}
+
+.premium-portrait {
+  box-shadow:
+    0 0 0 3px var(--accent),
+    0 0 0 9px color-mix(in srgb, var(--accent) 22%, transparent),
+    0 18px 40px rgb(0 0 0 / 0.45);
+}
+
+.premium-plan-card {
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--accent) 10%, transparent),
+    0 28px 60px -28px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.premium-creator {
+  border: 1px solid var(--border);
+}
+
+.premium-creator-photo {
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--accent) 85%, transparent),
+    0 0 0 16px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.premium-rail {
+  scrollbar-width: none;
+}
+
+.premium-rail::-webkit-scrollbar {
+  display: none;
+}
+
+/* Floating join bar: sits above the tab bar while it shows, on the home indicator otherwise. */
+.premium-join-bar {
+  bottom: calc(0.55rem + env(safe-area-inset-bottom, 0px));
+  transition: bottom 0.2s ease-out;
+}
+
+body.mobile-bottom-nav-visible .premium-join-bar {
+  bottom: var(--mobile-nav-clearance);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-join-bar {
+    transition: none;
+  }
+}
+
 /* Compact booking flows. Same tokens as Plan a Trip. */
 main.plan-page[data-density="compact"] h1.text-display {
   font-size: var(--type-title-size);

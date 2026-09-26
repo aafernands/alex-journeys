@@ -50,6 +50,11 @@ export type PostMeta = {
   focusKeyword?: string;
   /** When true, the public post is noindex and omitted from the sitemap. */
   noindex?: boolean;
+  /**
+   * When true, the public page shows the excerpt and then a membership gate.
+   * Booking tools on the same post stay visible.
+   */
+  membersOnly?: boolean;
 };
 
 /** Day-by-day trip timeline stored separately from contentHtml. */

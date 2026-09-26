@@ -46,6 +46,7 @@ async function loadDraft(slug: string): Promise<DraftPost | null> {
         seoDescription: fromGh.seoDescription,
         focusKeyword: fromGh.focusKeyword,
         noindex: fromGh.noindex,
+        membersOnly: fromGh.membersOnly,
         contentHtml: fromGh.contentHtml ?? "",
         itinerary: fromGh.itinerary,
         source: fromGh.source,
@@ -139,6 +140,7 @@ export default async function CmsEditPostPage({ params, searchParams }: PageProp
           seoDescription: source.seoDescription ?? "",
           focusKeyword: source.focusKeyword ?? "",
           noindex: source.noindex === true,
+          membersOnly: source.membersOnly === true,
           itinerary:
             "itinerary" in source ? (source.itinerary ?? undefined) : undefined,
         }}

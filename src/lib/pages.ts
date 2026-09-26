@@ -35,6 +35,7 @@ const PAGES_DIR = path.join(process.cwd(), "src/content/pages");
  */
 export const CODE_ONLY_PAGE_ROUTES = [
   { path: "/account", note: "Reader account dashboard (profile + saves)" },
+  { path: "/premium", note: "Premium membership" },
   { path: "/login", note: "Reader / admin sign-in" },
   { path: "/forgot-password", note: "Password reset request" },
   { path: "/reset-password", note: "Password reset form" },

@@ -30,6 +30,18 @@ import {
   listSavedHotels,
   SavedHotelsUnavailableError,
 } from "@/lib/saved-hotels";
+import {
+  isPremium,
+  isPremiumCheckoutConfigured,
+  membershipDetail,
+  planLabel,
+  statusLabel,
+  toMembershipPublic,
+  type MembershipPublic,
+} from "@/lib/membership";
+import { getMembership, saveMembership } from "@/lib/membership-store";
+import { subscriptionSyncFromCheckoutSession } from "@/lib/stripe-premium";
+import type { MembershipPanel } from "@/components/account/MembershipSettings";
 import { dateSummary } from "@/lib/trip-planner-model";
 import { getTripPlannerConfig } from "@/lib/trip-planner";
 import {
@@ -48,6 +60,44 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
+type AccountPageProps = {
+  searchParams: Promise<{ premium?: string; session_id?: string }>;
+};
+
+async function confirmPremiumCheckout(userId: string, sessionId: string) {
+  if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(sessionId)) return;
+  try {
+    const sync = await subscriptionSyncFromCheckoutSession(sessionId);
+    if (!sync?.membership.plan) return;
+    if (sync.userId && sync.userId !== userId) return;
+    await saveMembership(userId, {
+      ...sync.membership,
+      stripeEventAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.warn("[premium] checkout confirm failed:", err);
+  }
+}
+
+function membershipPanel(input: {
+  membership: MembershipPublic | null;
+  portalAvailable: boolean;
+  welcome: boolean;
+  unavailable: boolean;
+}): MembershipPanel {
+  const member = isPremium({ membership: input.membership });
+  return {
+    isMember: member,
+    planLabel: planLabel(input.membership?.plan ?? null),
+    statusLabel: statusLabel(input.membership?.status ?? "none"),
+    detail: membershipDetail(input.membership),
+    portalAvailable: input.portalAvailable,
+    checkoutConfigured: isPremiumCheckoutConfigured(),
+    welcome: input.welcome,
+    unavailable: input.unavailable,
+  };
+}
+
 function enrichSavedPosts(
   posts: Awaited<ReturnType<typeof listSavedPosts>>,
 ): SavedPostRow[] {
@@ -64,7 +114,8 @@ function enrichSavedPosts(
   });
 }
 
-export default async function AccountPage() {
+export default async function AccountPage({ searchParams }: AccountPageProps) {
+  const query = await searchParams;
   const session = await auth();
   const userId = session?.user?.id?.trim();
   const signedIn = Boolean(session?.user && userId);
@@ -81,6 +132,24 @@ export default async function AccountPage() {
   let profileName = user?.name?.trim() || "";
   let profileImage = user?.image ?? null;
   let profileEmail = user?.email ?? "";
+  let membership: MembershipPublic | null = null;
+  let membershipUnavailable = !firebaseOk;
+  let portalAvailable = false;
+
+  if (signedIn && userId && query.session_id && query.premium === "welcome") {
+    await confirmPremiumCheckout(userId, query.session_id);
+  }
+
+  if (signedIn && userId && firebaseOk) {
+    try {
+      const stored = await getMembership(userId);
+      membership = stored ? toMembershipPublic(stored) : null;
+      portalAvailable = Boolean(stored?.stripeCustomerId && process.env.STRIPE_SECRET_KEY?.trim());
+    } catch (err) {
+      console.warn("[account] membership lookup failed:", err);
+      membershipUnavailable = true;
+    }
+  }
 
   if (signedIn && userId && firebaseOk) {
     try {
@@ -188,6 +257,12 @@ export default async function AccountPage() {
     postsError,
     hotels,
     hotelsError,
+    membership: membershipPanel({
+      membership,
+      portalAvailable,
+      welcome: query.premium === "welcome",
+      unavailable: membershipUnavailable,
+    }),
   };
 
   return (

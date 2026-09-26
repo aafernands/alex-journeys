@@ -13,6 +13,11 @@ import { MobileNavDrawer } from "@/components/header/MobileNavDrawer";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ReaderAuthButtons } from "@/components/ReaderAuthButtons";
 import {
+  HEADER_ICON_BUTTON,
+  HeaderAccountButton,
+  PremiumDiamondButton,
+} from "@/components/header/HeaderActions";
+import {
   SearchInput,
   type SearchInputHandle,
 } from "@/components/search/SearchInput";
@@ -175,63 +180,23 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
         </div>
         )}
 
-        <div className="section-shell relative grid h-12 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 sm:h-[5.5rem] xl:flex xl:h-24 xl:justify-start xl:gap-4 2xl:gap-6">
-          {/* Mobile: search (left) */}
-          <button
-            type="button"
-            className="relative z-10 inline-flex h-11 w-11 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft xl:hidden"
-            aria-expanded={mobileSearchOpen}
-            aria-controls="mobile-search-panel"
-            onClick={() => {
-              setMobileOpen(false);
-              setMobileSearchOpen((v) => {
-                const next = !v;
-                if (next) {
-                  requestAnimationFrame(() => mobileSearchRef.current?.focus());
-                }
-                return next;
-              });
-            }}
-          >
-            <span className="sr-only">
-              {mobileSearchOpen ? "Close search" : "Open search"}
-            </span>
-            {mobileSearchOpen ? (
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-              >
-                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
-              </svg>
-            ) : (
-              <SearchIcon
-                className="h-[22px] w-[22px]"
-                strokeWidth={2}
-                aria-hidden="true"
-              />
-            )}
-          </button>
-
-          {/* Logo: centered in the middle column on mobile, left on desktop */}
-          <div className="z-10 flex min-w-0 items-center justify-center xl:shrink-0 xl:justify-start">
+        <div className="section-shell relative grid h-12 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:h-[5.5rem] xl:flex xl:h-24 xl:justify-start xl:gap-4 2xl:gap-6">
+          {/* Logo: left on every size. On phones the image is wider than its
+              column before the CMS scale; the scaled mark keeps the old size. */}
+          <div className="z-10 flex min-w-0 items-center justify-start xl:shrink-0">
             <BrandLogo
-              className="h-8 w-auto max-w-full object-contain sm:h-[3.75rem] lg:h-16 xl:h-10 xl:max-w-none"
+              className="h-7 w-auto max-w-none object-contain sm:h-[3.75rem] sm:max-w-full lg:h-16 xl:h-10 xl:max-w-none"
               width={400}
               height={110}
               priority
-              scaleOriginClassName="origin-center xl:origin-left"
+              scaleOriginClassName="origin-left"
               onClick={closeAll}
             />
           </div>
 
           {/* Desktop: primary nav */}
           <nav
-            className="hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-3 xl:flex 2xl:gap-6"
+            className="hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-2 xl:flex 2xl:gap-6"
             aria-label="Primary"
           >
             <div className="relative shrink-0" ref={destWrapRef}>
@@ -355,13 +320,15 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
               ref={desktopSearchRef}
               variant="header"
               id="header-search"
-              className="w-36 max-w-xs shrink-0 lg:w-44 xl:w-52"
+              className="w-36 max-w-xs shrink-0 lg:w-44 xl:w-36 2xl:w-52"
             />
 
             <ReaderAuthButtons
               variant="header"
               googleConfigured={googleConfigured}
             />
+
+            <PremiumDiamondButton compact />
 
             <ThemeToggle />
 
@@ -373,11 +340,55 @@ export function Header({ latestPost = null, googleConfigured = false }: Props) {
             </Link>
           </div>
 
-          {/* Mobile: Sign in and the account photo live in the drawer, not this row. */}
-          <div className="relative z-10 flex shrink-0 items-center xl:hidden">
+          {/* Phone and tablet: search, account, Premium, menu */}
+          <div className="relative z-10 flex shrink-0 items-center gap-1.5 xl:hidden">
             <button
               type="button"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-heading transition hover:bg-surface-soft"
+              className={`${HEADER_ICON_BUTTON} text-heading hover:bg-surface-soft`}
+              aria-expanded={mobileSearchOpen}
+              aria-controls="mobile-search-panel"
+              onClick={() => {
+                setMobileOpen(false);
+                setMobileSearchOpen((v) => {
+                  const next = !v;
+                  if (next) {
+                    requestAnimationFrame(() => mobileSearchRef.current?.focus());
+                  }
+                  return next;
+                });
+              }}
+            >
+              <span className="sr-only">
+                {mobileSearchOpen ? "Close search" : "Open search"}
+              </span>
+              {mobileSearchOpen ? (
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+                </svg>
+              ) : (
+                <SearchIcon
+                  className="h-[22px] w-[22px]"
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
+              )}
+            </button>
+            <HeaderAccountButton
+              enabled={googleConfigured}
+              onNavigate={closeAll}
+            />
+            <PremiumDiamondButton onNavigate={closeAll} />
+            <button
+              type="button"
+              className={`${HEADER_ICON_BUTTON} text-heading hover:bg-surface-soft`}
               aria-expanded={mobileOpen}
               aria-controls="mobile-nav"
               onClick={() => {

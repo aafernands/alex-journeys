@@ -32,6 +32,10 @@ import {
   type AccountSection,
 } from "@/lib/account-section";
 import { planATripHref } from "@/lib/trip-record";
+import {
+  MembershipSettings,
+  type MembershipPanel,
+} from "@/components/account/MembershipSettings";
 
 const SECTIONS = ACCOUNT_SECTIONS;
 type Section = AccountSection;
@@ -58,6 +62,7 @@ export type AccountDashboardProps = {
   postsError: string | null;
   hotels: SavedHotelRow[];
   hotelsError: string | null;
+  membership: MembershipPanel;
 };
 
 function useSiteHeaderHeight(): number {
@@ -130,6 +135,7 @@ export function AccountDashboard({
   postsError,
   hotels,
   hotelsError,
+  membership,
 }: AccountDashboardProps) {
   const [section, setSection] = useState<Section>("overview");
   const headerHeight = useSiteHeaderHeight();
@@ -144,8 +150,12 @@ export function AccountDashboard({
       );
       setSection(next);
       const params = new URLSearchParams(window.location.search);
-      if (!params.has("section")) return;
+      const shouldClean =
+        params.has("section") || params.has("session_id") || params.has("premium");
+      if (!shouldClean) return;
       params.delete("section");
+      params.delete("session_id");
+      params.delete("premium");
       const search = params.toString();
       const hash = next === "overview" ? "" : `#${next}`;
       const url = `${window.location.pathname}${search ? `?${search}` : ""}${hash}`;
@@ -249,12 +259,19 @@ export function AccountDashboard({
                 <div className="flex min-w-0 items-center gap-4">
                   <ProfileAvatar src={image} name={displayName} email={email} />
                   <div className="min-w-0">
-                    <h2
-                      id="account-identity"
-                      className="font-display truncate text-ds-title font-bold text-heading"
-                    >
-                      {displayName}
-                    </h2>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2
+                        id="account-identity"
+                        className="font-display truncate text-ds-title font-bold text-heading"
+                      >
+                        {displayName}
+                      </h2>
+                      {membership.isMember ? (
+                        <span className="inline-flex items-center rounded-full bg-accent/15 px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.06em] text-accent-deep">
+                          Member
+                        </span>
+                      ) : null}
+                    </div>
                     {email ? (
                       <p className="mt-0.5 truncate text-sm text-muted">{email}</p>
                     ) : null}
@@ -485,6 +502,8 @@ export function AccountDashboard({
                 emailConfigured={emailConfigured}
               />
             </section>
+
+            <MembershipSettings panel={membership} />
 
             <AccountPreferences />
 

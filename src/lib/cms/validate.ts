@@ -44,6 +44,7 @@ export type PostInput = {
   seoDescription?: unknown;
   focusKeyword?: unknown;
   noindex?: unknown;
+  membersOnly?: unknown;
 };
 
 export type ValidatedPost = {
@@ -66,6 +67,7 @@ export type ValidatedPost = {
   seoDescription: string;
   focusKeyword: string;
   noindex: boolean;
+  membersOnly: boolean;
 };
 
 function asString(value: unknown): string {
@@ -385,6 +387,7 @@ export function validatePostInput(
   if (!seo.ok) return seo;
   const { seoTitle, seoDescription, focusKeyword } = seo;
   const noindex = readNoindex(input.noindex);
+  const membersOnly = input.membersOnly === true;
 
   return {
     ok: true,
@@ -404,6 +407,7 @@ export function validatePostInput(
       seoDescription,
       focusKeyword,
       noindex,
+      membersOnly,
       ...(itineraryResult.data ? { itinerary: itineraryResult.data } : {}),
     },
   };
@@ -423,6 +427,7 @@ export function toPostJson(data: ValidatedPost): Post {
     ...(data.bookingDestination ? { bookingDestination: data.bookingDestination } : {}),
     ...(data.experienceWidgetHtml ? { experienceWidgetHtml: data.experienceWidgetHtml } : {}),
     ...optionalSeoFields(data),
+    ...(data.membersOnly ? { membersOnly: true } : {}),
     contentHtml: data.contentHtml,
     source: "cms",
     ...(data.itinerary ? { itinerary: data.itinerary } : {}),
@@ -442,5 +447,6 @@ export function toPostMeta(data: ValidatedPost): PostMeta {
     ...(data.bookingTools.length > 0 ? { bookingTools: data.bookingTools } : {}),
     ...(data.bookingDestination ? { bookingDestination: data.bookingDestination } : {}),
     ...optionalSeoFields(data),
+    ...(data.membersOnly ? { membersOnly: true } : {}),
   };
 }

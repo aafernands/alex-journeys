@@ -29,6 +29,11 @@ export function PostCard({ post, priority = false }: Props) {
           )}
         </div>
         <div className="post-card-body flex flex-1 flex-col p-5 md:p-6">
+          {post.membersOnly ? (
+            <p className="text-xs font-semibold uppercase tracking-[0.06em] text-accent">
+              Members
+            </p>
+          ) : null}
           <time
             className="text-xs font-semibold uppercase tracking-[0.06em] text-muted"
             dateTime={post.date}

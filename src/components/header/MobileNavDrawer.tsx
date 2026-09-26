@@ -227,6 +227,15 @@ export function MobileNavDrawer({ open, onClose }: Props) {
                 Contact
               </Link>
             </li>
+            <li className="mt-3 border-t border-border pt-2">
+              <Link
+                href="/premium"
+                className="flex min-h-11 items-center text-sm font-semibold text-muted transition hover:text-accent"
+                onClick={onClose}
+              >
+                Premium
+              </Link>
+            </li>
           </ul>
 
           <section className="mt-6 text-center" aria-label="Follow Alex Journeys">

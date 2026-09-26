@@ -3,7 +3,7 @@ import { legacyPathRedirects } from "./src/data/guides";
 import { postSlugRedirects } from "./src/data/post-slug-redirects";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["firebase-admin"],
+  serverExternalPackages: ["firebase-admin", "stripe"],
   images: {
     localPatterns: [
       {
