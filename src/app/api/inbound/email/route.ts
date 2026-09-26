@@ -10,6 +10,8 @@ import {
   parseReceivedEvent,
   verifyResendWebhook,
 } from "@/lib/inbound-webhook";
+import { ingestSupportReply } from "@/lib/support-inbound";
+import { isSupportInboundRecipient } from "@/lib/support-notify";
 
 export const runtime = "nodejs";
 
@@ -70,6 +72,24 @@ export async function POST(request: Request) {
   }
 
   const content = await fetchReceivedEmail(event.emailId);
+
+  // Replies to support emails (SUPPORT_INBOUND_EMAIL) go onto the ticket.
+  if (isSupportInboundRecipient(event.recipients)) {
+    try {
+      const result = await ingestSupportReply({
+        emailId: event.emailId,
+        from: event.from,
+        subject: content?.subject || event.subject,
+        text: content?.text ?? "",
+        html: content?.html ?? "",
+      });
+      return NextResponse.json({ ok: true, support: result });
+    } catch (err) {
+      console.error("[inbound] support reply failed:", err);
+      return NextResponse.json({ error: "Could not store that email." }, { status: 500 });
+    }
+  }
+
   try {
     const result = await ingestInboundEmail({
       recipients: event.recipients,

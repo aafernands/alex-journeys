@@ -14,6 +14,8 @@ export type ReceivedEvent = {
   emailId: string;
   recipients: string[];
   subject: string;
+  /** Sender as sent by Resend, e.g. "Maria <maria@example.com>". */
+  from: string;
 };
 
 export type SampleEmail = {
@@ -98,7 +100,8 @@ export function parseReceivedEvent(payload: unknown): ReceivedEvent | null {
     ...stringList(data.bcc),
     ...stringList(data.received_for),
   ];
-  return { emailId, subject, recipients };
+  const from = typeof data.from === "string" ? data.from.slice(0, 320) : "";
+  return { emailId, subject, recipients, from };
 }
 
 export function unwrapReceivedContent(body: unknown): {

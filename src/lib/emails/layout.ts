@@ -40,6 +40,8 @@ export type EmailContent = {
   details?: EmailDetail[];
   /** Large one-time code block (email verification). */
   code?: string;
+  /** Quoted block, e.g. the reader's message or a reply. Line breaks kept. */
+  quote?: { label?: string; body: string };
   cta?: { label: string; url: string };
   /** Small print under the button. */
   note?: Paragraph;
@@ -76,7 +78,7 @@ function partsOf(p: Paragraph): InlinePart[] {
 function inlineHtml(p: Paragraph, linkColor: string = EMAIL_BRAND.orangeDeep): string {
   return partsOf(p)
     .map((part) => {
-      if (typeof part === "string") return escapeHtml(part);
+      if (typeof part === "string") return escapeHtml(part).replace(/\r?\n/g, "<br>");
       if ("bold" in part) return `<strong>${escapeHtml(part.bold)}</strong>`;
       return `<a href="${escapeHtml(part.href)}" style="color: ${linkColor}; text-decoration: underline;">${escapeHtml(part.link)}</a>`;
     })
@@ -135,6 +137,12 @@ ${details
 </div>`
     : "";
 
+  const quoteHtml = content.quote
+    ? `<div style="margin: 4px 0 24px 0;">
+${content.quote.label ? `  <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: ${b.muted};">${escapeHtml(content.quote.label)}</p>\n` : ""}  <div style="padding: 14px 16px; background-color: ${b.soft}; border-left: 4px solid ${b.orange}; border-radius: 8px; font-size: 14px; line-height: 1.6; color: ${b.ink};">${escapeHtml(content.quote.body).replace(/\r?\n/g, "<br>")}</div>
+</div>`
+    : "";
+
   const ctaHtml = content.cta
     ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin: 28px auto;">
   <tr>
@@ -183,6 +191,7 @@ ${details
         <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: ${b.ink};">Hi <strong>${escapeHtml(greetingName)}</strong>,</p>
 ${paragraphsHtml}
 ${codeHtml}
+${quoteHtml}
 ${detailsHtml}
 ${ctaHtml}
 ${noteHtml}
@@ -203,6 +212,11 @@ ${closingHtml}
   const textLines: string[] = [`Hi ${greetingName},`, ""];
   for (const p of content.paragraphs) textLines.push(inlineText(p), "");
   if (content.code) textLines.push(`Your code: ${content.code}`, "");
+  if (content.quote) {
+    if (content.quote.label) textLines.push(`${content.quote.label}:`);
+    for (const line of content.quote.body.split(/\r?\n/)) textLines.push(`> ${line}`);
+    textLines.push("");
+  }
   if (details.length) {
     const width = Math.max(...details.map((d) => d.label.length)) + 2;
     for (const d of details) textLines.push(`${`${d.label}:`.padEnd(width)} ${d.value}`);
