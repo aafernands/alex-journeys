@@ -12,7 +12,7 @@ export function RelatedPosts({ posts }: Props) {
     <section aria-labelledby="related-posts-heading">
       <h2
         id="related-posts-heading"
-        className="font-display text-2xl font-bold tracking-tight text-heading md:text-3xl"
+        className="font-display text-xl font-bold tracking-tight text-heading md:text-2xl"
       >
         Related posts
       </h2>
@@ -20,7 +20,7 @@ export function RelatedPosts({ posts }: Props) {
         More from the journal — nearby destinations, similar themes, or recent
         notes from the road.
       </p>
-      <ul className="mt-8 grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+      <ul className="mt-6 grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
         {posts.map((post) => (
           <li key={post.slug}>
             <PostCard post={post} />
