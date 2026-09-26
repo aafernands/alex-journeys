@@ -1868,24 +1868,26 @@ export function ItineraryHub({
         hidden={view !== "bookings"}
         className="plan-hub-lanes plan-section scroll-mt-24"
       >
-        <div className="plan-toolbar plan-bookings-heading">
-          <div>
-            <h3 className={plan.h3}>Keep every booking together</h3>
-            <p className={`${plan.body} text-muted`}>
-              Search for something new or add a reservation you already have.
-            </p>
+        <header className="plan-section-head plan-bookings-head">
+          <h3 className={plan.h3}>Keep every booking together</h3>
+          <p className="plan-head-desc">
+            Search for something new or add a reservation you already have.
+          </p>
+          <div className="plan-head-status">
+            {view === "bookings" ? (
+              <div className="plan-head-action">{addToTripMenu}</div>
+            ) : null}
+            <div className="plan-quiet-toggles">
+              <button
+                type="button"
+                className="plan-quiet-toggle plan-quiet-action"
+                onClick={() => setQuickEntry({ type: "other" })}
+              >
+                Add manually
+              </button>
+            </div>
           </div>
-          <div className="plan-inline-actions">
-            {view === "bookings" ? addToTripMenu : null}
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => setQuickEntry({ type: "other" })}
-            >
-              Add manually
-            </button>
-          </div>
-        </div>
+        </header>
         {sorted.some(
           (item) =>
             item.type !== "note" &&

@@ -3609,7 +3609,6 @@ body:has(main.plan-flow) .plan-sticky {
 .plan-week-day-picker > button > span:first-child { font-weight: 700; }
 .plan-workspace .plan-hub-days > .plan-fold > h3 { display: none; }
 .plan-workspace .plan-hub-days .plan-fold-panel { display: block; }
-.plan-bookings-heading { margin-bottom: 1.25rem; }
 .plan-entry-dialog { position: fixed; box-sizing: border-box; margin: auto; width: min(38rem, calc(100% - 2rem)); max-width: 100%; overflow-x: hidden; max-height: 88dvh; overflow-y: auto; overscroll-behavior: contain; padding: 1.5rem; background: var(--white); color: var(--text); border: 1px solid var(--border); border-radius: 1.25rem; box-shadow: 0 24px 80px #0003; }
 .plan-entry-dialog::backdrop { background: #171b23a3; backdrop-filter: blur(3px); }
 .plan-entry-dialog-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
@@ -3934,6 +3933,13 @@ html:has(main.plan-flow .plan-workspace) { overflow-x: clip; }
 .plan-quiet-toggles .plan-quiet-toggle[aria-pressed="true"],
 .plan-quiet-toggles .plan-quiet-toggle[aria-selected="true"] { color: var(--heading); font-weight: 600; }
 .plan-quiet-toggles .plan-quiet-toggle:disabled { opacity: .45; cursor: default; }
+/* Section description under the title: muted 14px secondary text. */
+.plan-head-desc { margin: 0; color: var(--muted); font-size: var(--type-secondary-size); font-weight: 400; line-height: 1.4; }
+/* A quiet text button that runs an action (not a toggle): dark text, weight 600. */
+.plan-quiet-toggles .plan-quiet-toggle.plan-quiet-action { color: var(--heading); font-weight: 600; }
+/* Bookings header: keep the quiet action on the right even when the trip action is absent. */
+.plan-bookings-head { margin-bottom: 1.25rem; }
+.plan-bookings-head .plan-quiet-toggles { margin-left: auto; }
 .plan-pack-summary { margin-top: .15rem; font-family: var(--font-outfit), system-ui, sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--heading); }
 .plan-pack-block { display: grid; gap: .6rem; min-width: 0; }
 .plan-pack h4 { margin: 0; }
@@ -4775,18 +4781,12 @@ main.plan-flow:has(.plan-trip-summary) > .section-band {
   white-space: nowrap;
 }
 
-[data-density="compact"] .plan-hub-days .plan-toolbar,
-[data-density="compact"] .plan-bookings-heading {
+[data-density="compact"] .plan-hub-days .plan-toolbar {
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-}
-
-[data-density="compact"] .plan-bookings-heading > div:first-child {
-  flex: 1 1 auto;
-  min-width: 0;
 }
 
 [data-density="compact"] .plan-inline-actions {
@@ -5120,4 +5120,11 @@ main.journal-page[data-density="comfortable"] .post-prose figcaption {
   :is(main.guides-page, main.places-page)[data-density="comfortable"] .hub-block {
     margin-top: 3rem;
   }
+}
+
+/* Bookings title stays on one line on 360–399px phones. */
+@media (max-width: 399px) {
+  .plan-bookings-head .plan-h3,
+  .plan-trip-hotel .plan-bookings-head .plan-h3,
+  [data-density="compact"].plan-trip-hotel .plan-bookings-head .plan-h3 { font-size: 1.125rem; }
 }
