@@ -94,7 +94,7 @@ export function DestinationClimate({ destinationName, climate }: Props) {
 
   return (
     <section
-      className="mt-12"
+      className="mt-8 md:mt-12"
       aria-labelledby="destination-climate-heading"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
