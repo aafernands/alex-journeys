@@ -178,11 +178,11 @@ export default async function StayHotelPage({ params, searchParams }: PageProps)
       <div className="plan-trip book-flow hub-follow plan-stack">
         <StayTripBar query={query} />
         {failure ? (
-          <p className="text-sm font-semibold text-link" role="alert">
+          <p className="ui-field-error" role="alert">
             {failure}
           </p>
         ) : null}
-        <Link href={listHref} className="btn btn-secondary inline-flex self-start">
+        <Link href={listHref} className="btn ui-btn btn-secondary inline-flex self-start">
           Search more stays
         </Link>
       </div>

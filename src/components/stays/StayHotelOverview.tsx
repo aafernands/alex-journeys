@@ -224,7 +224,7 @@ export function StayHotelOverview({
                 />
                 {fromPriceLabel ? (
                   <div className="hidden text-right md:block">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Rooms from</p>
+                    <p className="ui-field-hint">Rooms from</p>
                     <p className="book-price mt-1">{fromPriceLabel}</p>
                     <a href="#rooms" className="btn ui-btn btn-primary mt-2 inline-flex">
                       Select a room
@@ -278,7 +278,7 @@ export function StayHotelOverview({
               </div>
               {hotel.facilities.length > amenities.length ? (
                 <details className="mt-6">
-                  <summary className="cursor-pointer font-semibold text-link">
+                  <summary className="cursor-pointer font-semibold text-heading underline">
                     See all {hotel.facilities.length} amenities
                   </summary>
                   <div className="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -313,7 +313,7 @@ export function StayHotelOverview({
                 </div>
                 <div className="ui-card ui-card-compact">
                   <MapPin className="h-6 w-6 text-heading" aria-hidden="true" />
-                  <h3 className="mt-4 font-display text-xl font-bold text-heading">Location</h3>
+                  <h3 className="mt-2 font-semibold text-heading">Location</h3>
                   <p className="mt-2 font-semibold text-heading">{hotel.neighborhood || hotel.city || hotel.name}</p>
                   {fullAddress ? <p className="mt-2 text-sm leading-relaxed text-text">{fullAddress}</p> : null}
                   {locationHref ? (
@@ -321,7 +321,7 @@ export function StayHotelOverview({
                       href={locationHref}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-5 inline-flex items-center gap-1 font-semibold text-link"
+                      className="mt-3 inline-flex items-center gap-1 font-semibold text-heading underline"
                     >
                       Open in Google Maps <ChevronRight className="h-4 w-4" aria-hidden="true" />
                     </a>
@@ -383,7 +383,7 @@ export function StayHotelOverview({
                 </div>
                 {reviews.average != null ? (
                   <div className="shrink-0 sm:text-right">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Guest score</p>
+                    <p className="ui-field-hint">Guest score</p>
                     <p className="ui-section-title mt-1">{reviews.average.toFixed(1)}/10</p>
                   </div>
                 ) : null}
@@ -448,7 +448,7 @@ export function StayHotelOverview({
 
                   {reviews.reviews.length > 4 ? (
                     <details className="mt-5">
-                      <summary className="cursor-pointer font-semibold text-link">
+                      <summary className="cursor-pointer font-semibold text-heading underline">
                         Read more guest reviews
                       </summary>
                       <div className="mt-4 grid gap-4 lg:grid-cols-2">
@@ -508,8 +508,8 @@ export function StayHotelOverview({
         <div className="mx-auto flex max-w-xl items-center gap-3">
           {fromPriceLabel ? (
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">Rooms from</p>
-              <p className="truncate font-display text-lg font-bold text-heading">{fromPriceLabel}</p>
+              <p className="ui-field-hint">Rooms from</p>
+              <p className="book-price truncate">{fromPriceLabel}</p>
             </div>
           ) : null}
           <a

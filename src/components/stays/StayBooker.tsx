@@ -692,7 +692,7 @@ function RoomAmenities({ amenities }: { amenities: string[] }) {
       {amenities.length > 4 ? (
         <button
           type="button"
-          className="inline-flex min-h-11 items-center text-sm font-semibold text-link"
+          className="inline-flex min-h-11 items-center text-sm font-semibold text-heading underline"
           aria-expanded={open}
           onClick={() => setOpen((value) => !value)}
         >
@@ -825,7 +825,7 @@ function SelectedRoomSummary({
           </div>
           {total ? (
             <div className="shrink-0 sm:text-right">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Confirmed total</p>
+              <p className="ui-field-hint">Confirmed total</p>
               <p className="book-price mt-1">{total}</p>
               {nightly ? <p className="mt-1 text-xs text-muted">{nightly} per night</p> : null}
             </div>
