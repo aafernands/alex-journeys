@@ -65,7 +65,12 @@ import { PlanFold, PlanHint } from "@/components/trip-planner/PlanFold";
 import { bookingProgress } from "@/lib/trip-workspace";
 import { TripEntryDialog } from "@/components/trip-planner/TripEntryDialog";
 import { ItemColorField } from "@/components/trip-planner/ItemColorField";
-import { bookedStayHref, ItineraryItemRow } from "@/components/trip-planner/ItineraryItemRow";
+import {
+  bookedStayHref,
+  entryStatusLabel,
+  entryTintProps,
+  ItineraryItemRow,
+} from "@/components/trip-planner/ItineraryItemRow";
 import { WeekView } from "@/components/trip-planner/WeekView";
 import { DownloadTripPdf } from "@/components/trip-planner/DownloadTripPdf";
 import { PackingPanel } from "@/components/trip-planner/PackingPanel";
@@ -1757,13 +1762,26 @@ export function ItineraryHub({
                     }
                   />
                   {dayItems.length ? (
-                    dayItems.map((item) => (
-                      <ListRow
-                        key={item.id}
-                        title={item.title}
-                        detail={itemScheduleTime(item) || TRIP_STATUS_LABEL[item.status]}
-                      />
-                    ))
+                    <div className="plan-preview-entries">
+                      {dayItems.map((item) => {
+                        const time = itemScheduleTime(item);
+                        return (
+                          <div key={item.id} className="plan-entry-tint" {...entryTintProps(item)}>
+                            <ListRow
+                              title={item.title}
+                              detail={
+                                <>
+                                  <span className="plan-entry-status">
+                                    {entryStatusLabel(item.status)}
+                                  </span>
+                                  {time ? ` · ${time}` : ""}
+                                </>
+                              }
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
                   ) : (
                     <p className={`${plan.caption} text-muted`}>A day to make your own.</p>
                   )}

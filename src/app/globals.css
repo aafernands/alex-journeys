@@ -4669,18 +4669,23 @@ main.plan-flow:has(.plan-trip-summary) > .section-band {
 
 [data-density="compact"] .plan-timeline-entry {
   border: 0;
-  border-radius: 0;
-  border-bottom: var(--hairline);
-  background: transparent;
-}
-
-[data-density="compact"] .plan-timeline-entry:last-child {
-  border-bottom: 0;
+  border-radius: var(--radius-control);
+  padding-inline: var(--space-1);
 }
 
 [data-density="compact"] .plan-timeline {
-  gap: 0;
+  gap: var(--space-1);
 }
+
+/* Itinerary entries: a light tint of the chosen color, no border. Default gets a neutral paper tint. */
+.plan-preview-entries { display: flex; flex-direction: column; gap: var(--space-1); }
+.plan-entry-tint { border-radius: var(--radius-control); background: color-mix(in srgb, var(--surface) 55%, transparent); }
+.plan-entry-tint:not([data-color="default"]) { background: color-mix(in srgb, var(--plan-item-accent) 12%, transparent); }
+.plan-preview-entries > .plan-entry-tint { padding: var(--space-2) var(--space-3); }
+.plan-preview-entries > .plan-entry-tint .ui-list-row,
+.plan-preview-entries > .plan-entry-tint .ui-list-main { min-height: 0; }
+.plan-entry-tint[data-status="booked"] .plan-entry-status { color: var(--heading); font-weight: 600; }
+.plan-entry-tint[data-status="skipped"] .ui-list-title { color: var(--muted); text-decoration: line-through; }
 
 [data-density="compact"] .plan-lane-tab[aria-selected="true"]::after,
 [data-density="compact"] .plan-lane-tab-aside[aria-selected="true"]::after {
