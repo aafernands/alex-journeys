@@ -43,10 +43,10 @@ export function AuthorIntro() {
       size="md"
       aria-labelledby="author-heading"
     >
-      <div className="grid items-center gap-6 lg:grid-cols-12 lg:gap-10">
+      <div className="grid items-center gap-8 md:gap-10 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-5">
           <div className="panel overflow-hidden shadow-sm">
-            <div className="relative aspect-[4/3] bg-surface-soft lg:aspect-[3/4]">
+            <div className="relative aspect-[4/5] bg-surface-soft sm:aspect-[3/4]">
               <Image
                 src={photoSrc}
                 alt={photoAlt}
@@ -74,7 +74,7 @@ export function AuthorIntro() {
             {author.headline}
           </h2>
           <p className="mt-4 max-w-xl text-lead text-text">{author.body}</p>
-          <div className="mt-6">
+          <div className="mt-7">
             <p>
               <Link
                 href={author.primaryCta.href || "/about"}

@@ -40,7 +40,7 @@ export function GuidesHubStrip() {
           <li key={hub.slug}>
             <Link
               href={`/guides/${hub.slug}`}
-              className="panel-interactive group flex h-full gap-3 p-4"
+              className="panel-interactive group flex h-full gap-3 p-4 md:p-5"
             >
               <span className="icon-tile">
                 <NavIcon name={hub.icon} size={18} />

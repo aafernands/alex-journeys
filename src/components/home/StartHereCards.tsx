@@ -31,12 +31,12 @@ export function StartHereCards() {
       />
       </div>
 
-      <ul className="hub-follow grid gap-3 sm:grid-cols-3 sm:gap-4">
+      <ul className="hub-follow grid gap-4 sm:grid-cols-3 sm:gap-5">
         {startHere.cards.map((card) => (
           <li key={card.href}>
             <Link
               href={card.href}
-              className="panel-interactive group flex h-full flex-col p-4"
+              className="panel-interactive group flex h-full flex-col p-6"
             >
               <span className="flex items-center gap-3">
                 <NavIcon
@@ -49,7 +49,7 @@ export function StartHereCards() {
               <span className="card-body mt-3 flex-1">
                 {card.description}
               </span>
-              <span className="card-cta mt-4 inline-flex items-center gap-1.5 transition group-hover:gap-2.5 group-hover:text-accent">
+              <span className="card-cta mt-5 inline-flex items-center gap-1.5 transition group-hover:gap-2.5 group-hover:text-accent">
                 {card.cta}
                 <span aria-hidden="true">→</span>
               </span>
