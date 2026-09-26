@@ -8,6 +8,7 @@ import {
   isTwitterAuthConfigured,
 } from "@/auth";
 import { AccountSignIn } from "@/components/account/AccountSignIn";
+import { NeedHelpLink } from "@/components/NeedHelpLink";
 import {
   AccountDashboard,
   type AccountDashboardProps,
@@ -369,6 +370,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
                 credentialsConfigured={isCredentialsAuthConfigured()}
               />
             </Suspense>
+            <NeedHelpLink />
           </div>
         </div>
         </>

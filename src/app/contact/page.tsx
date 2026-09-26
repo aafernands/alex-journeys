@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ContactForm } from "@/components/pages/ContactForm";
+import { QuickAnswers } from "@/components/pages/QuickAnswers";
 import { SitePage } from "@/components/pages/SitePage";
 import { site } from "@/data/content";
 import { asRecord, asString } from "@/lib/cms-section-utils";
 import { PAGE_DEFAULTS } from "@/lib/page-defaults";
 import { getPageWithFallback } from "@/lib/pages";
+import { parseQuickAnswers } from "@/lib/quick-answers";
 
 export function generateMetadata(): Metadata {
   const page = getPageWithFallback("contact", PAGE_DEFAULTS.contact);
@@ -19,6 +21,12 @@ export function generateMetadata(): Metadata {
 export default function ContactPage() {
   const page = getPageWithFallback("contact", PAGE_DEFAULTS.contact);
   const form = asRecord(page.sections?.form);
+  const quickAnswers = parseQuickAnswers(page.sections?.quickAnswers);
+  const formHeading = asString(form.heading, "Still need a hand?");
+  const formIntro = asString(
+    form.intro,
+    "Send me a note and I’ll reply by email, usually within a couple of days.",
+  );
   const aside = asRecord(page.sections?.emailAside);
   const mailingAddress = asString(
     page.sections?.mailingAddress,
@@ -37,26 +45,37 @@ export default function ContactPage() {
       description={page.description}
       crumbs={[
         { href: "/", label: "Home" },
-        { label: "Contact" },
+        { label: "Help & contact" },
       ]}
     >
-      <ContactForm
-        labels={{
-          firstNameLabel: asString(form.firstNameLabel, "First name"),
-          lastNameLabel: asString(form.lastNameLabel, "Last name"),
-          emailLabel: asString(form.emailLabel, "Email"),
-          messageLabel: asString(form.messageLabel, "Message"),
-          submitLabel: asString(form.submitLabel, "Send message"),
-          successCopy: asString(
-            form.successCopy,
-            `Opening your email app to send to ${site.email}…`,
-          ),
-          directEmailHint: asString(
-            form.directEmailHint,
-            "Or email me directly at",
-          ),
-        }}
-      />
+      <QuickAnswers data={quickAnswers} />
+      <section
+        className={quickAnswers.items.length > 0 ? "hub-block" : "hub-follow"}
+        aria-labelledby="contact-form-heading"
+      >
+        <h2 id="contact-form-heading" className="font-display text-lg font-bold text-heading">
+          {formHeading}
+        </h2>
+        {formIntro ? <p className="mt-1 text-sm text-muted">{formIntro}</p> : null}
+        <ContactForm
+          className="mt-5"
+          labels={{
+            firstNameLabel: asString(form.firstNameLabel, "First name"),
+            lastNameLabel: asString(form.lastNameLabel, "Last name"),
+            emailLabel: asString(form.emailLabel, "Email"),
+            messageLabel: asString(form.messageLabel, "Message"),
+            submitLabel: asString(form.submitLabel, "Send message"),
+            successCopy: asString(
+              form.successCopy,
+              `Opening your email app to send to ${site.email}…`,
+            ),
+            directEmailHint: asString(
+              form.directEmailHint,
+              "Or email me directly at",
+            ),
+          }}
+        />
+      </section>
       <aside className="panel-soft hub-block p-6">
         <p className="card-title">
           {asString(aside.title, "Prefer email?")}

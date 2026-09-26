@@ -1,11 +1,48 @@
 {
   "slug": "contact",
-  "title": "Contact me",
-  "label": "Hello",
-  "description": "I’d love to hear from you. Say hello about a trip you’ve taken, a story idea, or just to share a photo from the road — this is a personal journal, not a booking desk.",
+  "title": "Help & contact",
+  "label": "Here to help",
+  "description": "Questions about your account, Premium, or a trip you’re planning? Check the quick answers below, or send me a note and I’ll get back to you by email.",
   "contentHtml": "<p></p>",
   "sections": {
+    "quickAnswers": {
+      "title": "Quick answers",
+      "items": [
+        {
+          "question": "I forgot my password",
+          "answer": "Tap Forgot password on the sign-in page and enter the email you use for your account. I’ll send a reset link that works for one hour. If you usually sign in with Google or X, use that button instead — there’s no password to reset.",
+          "linkLabel": "Reset my password",
+          "linkHref": "/forgot-password"
+        },
+        {
+          "question": "How do I cancel Premium?",
+          "answer": "Open My Journey, go to Settings, and tap Manage membership. You can switch plans or cancel there, and you keep Premium through the end of the time you’ve already paid for.",
+          "linkLabel": "Go to Settings",
+          "linkHref": "/account#settings"
+        },
+        {
+          "question": "Where are my saved trips?",
+          "answer": "Sign in and open My Journey. Trips you save from Plan a trip live under My trips, and the hotels and stories you bookmark are under Saved.",
+          "linkLabel": "Open My trips",
+          "linkHref": "/account#trips"
+        },
+        {
+          "question": "How do I change my email?",
+          "answer": "In My Journey, open Profile and enter the new address under Name, photo, and email. I’ll send a confirmation link to the new inbox, and the change happens once you click it.",
+          "linkLabel": "Open Profile",
+          "linkHref": "/account#profile"
+        },
+        {
+          "question": "How soon will I hear back?",
+          "answer": "Usually within a couple of days. You’ll get an email copy of your message right away — just reply to it to add anything. If you’re signed in, you can also follow your messages under My Journey → Help.",
+          "linkLabel": "See my messages",
+          "linkHref": "/account#help"
+        }
+      ]
+    },
     "form": {
+      "heading": "Still need a hand?",
+      "intro": "Send me a note and I’ll reply by email, usually within a couple of days.",
       "firstNameLabel": "First name",
       "lastNameLabel": "Last name",
       "emailLabel": "Email",
@@ -16,7 +53,7 @@
     },
     "emailAside": {
       "title": "Prefer email?",
-      "body": "Reach me at {email}. I read every message — replies may take a few days if I’m mid-itinerary."
+      "body": "Reach me at {email}. I read every message — replies usually take a couple of days, a little longer if I’m mid-itinerary."
     }
   }
 }

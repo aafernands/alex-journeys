@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRef, useState, type FormEvent } from "react";
 import { site } from "@/data/content";
@@ -22,6 +23,8 @@ export type ContactFormLabels = {
 
 type Props = {
   labels?: ContactFormLabels;
+  /** Spacing above the form. Defaults to the hub-page gap. */
+  className?: string;
 };
 
 const inputClass =
@@ -33,7 +36,7 @@ const inputClass =
  * If requests can't be saved right now it falls back to opening the
  * reader's email app, as before.
  */
-export function ContactForm({ labels }: Props) {
+export function ContactForm({ labels, className = "hub-follow" }: Props) {
   const { data: session } = useSession();
   const signedInEmail = session?.user?.email ?? "";
   const signedInName = session?.user?.name ?? "";
@@ -113,7 +116,7 @@ export function ContactForm({ labels }: Props) {
 
   if (done) {
     return (
-      <div className="hub-follow panel-soft p-6" role="status">
+      <div className={`${className} panel-soft p-6`} role="status">
         <p className="card-title">Thanks{done.first ? `, ${done.first}` : ""}! Your message is on its way.</p>
         <p className="card-body mt-2">
           {done.ticketNumber ? (
@@ -124,12 +127,17 @@ export function ContactForm({ labels }: Props) {
           We sent a copy to <strong className="text-heading">{done.email}</strong> and will reply there,
           usually within a couple of days. To add anything, just reply to that email.
         </p>
+        {signedInEmail ? (
+          <Link href="/account#help" className="btn btn-secondary btn-block mt-4">
+            See my messages
+          </Link>
+        ) : null}
       </div>
     );
   }
 
   return (
-    <form className="hub-follow space-y-5" onSubmit={onSubmit} aria-label="Contact form">
+    <form className={`${className} space-y-5`} onSubmit={onSubmit} aria-label="Contact form">
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="contact-first" className="text-sm font-semibold text-heading">
@@ -219,7 +227,7 @@ export function ContactForm({ labels }: Props) {
       <button
         type="submit"
         disabled={pending || (widgetEnabled && !turnstileToken)}
-        className="btn btn-primary btn-block sm:w-auto disabled:cursor-not-allowed disabled:opacity-60 disabled:grayscale"
+        className="btn btn-primary btn-block disabled:cursor-not-allowed disabled:opacity-60 disabled:grayscale"
       >
         {pending ? "Sending…" : submitLabel}
       </button>

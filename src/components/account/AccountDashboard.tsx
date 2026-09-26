@@ -12,6 +12,7 @@ import {
   ExternalLink,
   History as HistoryIcon,
   LayoutGrid,
+  LifeBuoy,
   Luggage,
   MapPin,
   MessageSquare,
@@ -19,6 +20,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
+import { AccountHelp } from "@/components/account/AccountHelp";
 import { AccountPreferences } from "@/components/account/AccountPreferences";
 import { AccountAuthActions } from "@/components/AccountAuthActions";
 import {
@@ -75,6 +77,7 @@ const SECTION_LABEL: Record<Section, string> = {
   history: "History",
   profile: "Profile",
   settings: "Settings",
+  help: "Help",
 };
 
 const SECTION_ICON: Record<Section, JourneyNavItem["icon"]> = {
@@ -86,6 +89,7 @@ const SECTION_ICON: Record<Section, JourneyNavItem["icon"]> = {
   history: HistoryIcon,
   profile: UserRound,
   settings: SettingsIcon,
+  help: LifeBuoy,
 };
 
 /** Query params the page reads once and then drops from the address bar. */
@@ -634,6 +638,11 @@ export function AccountDashboard({
                 <AccountAuthActions mode="sign-out" className="w-full sm:w-auto" />
               </div>
             </section>
+          </div>
+
+          {/* Help */}
+          <div hidden={section !== "help"}>
+            {section === "help" ? <AccountHelp emailUnconfirmed={needsEmailVerification} /> : null}
           </div>
         </div>
       </div>

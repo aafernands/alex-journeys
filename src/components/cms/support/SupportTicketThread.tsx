@@ -26,6 +26,7 @@ const CHANNEL: Record<TicketMessage["channel"], string> = {
   form: "Contact form",
   email: "Email reply",
   cms: "Sent from CMS",
+  site: "Reply from the website",
 };
 
 export function SupportTicketThread({ ticket, messages, emailConfigured }: Props) {

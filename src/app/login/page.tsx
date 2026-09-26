@@ -9,6 +9,7 @@ import {
   isTwitterAuthConfigured,
 } from "@/auth";
 import { ReaderLoginForm } from "@/components/ReaderLoginForm";
+import { NeedHelpLink } from "@/components/NeedHelpLink";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -59,6 +60,7 @@ export default async function LoginPage({
               credentialsConfigured={credentialsConfigured}
             />
           </Suspense>
+          <NeedHelpLink />
         </div>
       </div>
     </main>

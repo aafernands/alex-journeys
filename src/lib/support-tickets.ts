@@ -26,7 +26,8 @@ export const SUPPORT_TOPICS = [
 export type SupportTopic = (typeof SUPPORT_TOPICS)[number];
 
 export type TicketMessageDirection = "customer" | "staff";
-export type TicketMessageChannel = "form" | "email" | "cms";
+/** form = contact form, email = emailed reply, cms = Alex in the CMS, site = reader replied from My Journey → Help. */
+export type TicketMessageChannel = "form" | "email" | "cms" | "site";
 
 export type TicketMessage = {
   id: string;
@@ -186,4 +187,92 @@ export function statusAfterMessage(
   if (direction === "customer") return "open";
   void current;
   return closeAfterReply ? "closed" : "waiting";
+}
+
+/* ------------------------------------------------------------------ */
+/* Reader view (My Journey → Help). Only these fields leave the server. */
+/* ------------------------------------------------------------------ */
+
+export type ReaderTicketStatus = "active" | "waiting" | "resolved";
+
+export const READER_STATUS_LABELS: Record<ReaderTicketStatus, string> = {
+  active: "We’re on it",
+  waiting: "Replied — waiting on you",
+  resolved: "Resolved",
+};
+
+export function readerStatus(status: TicketStatus): ReaderTicketStatus {
+  if (status === "closed") return "resolved";
+  if (status === "waiting") return "waiting";
+  return "active";
+}
+
+export type ReaderTicket = {
+  ticketNumber: string;
+  subject: string;
+  topic: string;
+  status: ReaderTicketStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ReaderTicketMessage = {
+  id: string;
+  fromReader: boolean;
+  /** Staff replies: who signed it. Reader messages: null. */
+  authorName: string | null;
+  body: string;
+  createdAt: string;
+};
+
+export function toReaderTicket(ticket: SupportTicket): ReaderTicket {
+  return {
+    ticketNumber: ticket.ticketNumber,
+    subject: ticket.subject || ticket.topic,
+    topic: ticket.topic,
+    status: readerStatus(ticket.status),
+    createdAt: ticket.createdAt,
+    updatedAt: ticket.lastMessageAt || ticket.updatedAt,
+  };
+}
+
+export function toReaderMessage(message: TicketMessage): ReaderTicketMessage {
+  const fromReader = message.direction === "customer";
+  return {
+    id: message.id,
+    fromReader,
+    authorName: fromReader ? null : message.authorName?.trim() || "Alex",
+    body: message.body,
+    createdAt: message.createdAt,
+  };
+}
+
+/**
+ * May this signed-in reader see the ticket? Their own account id always
+ * matches. The email only counts when the account email is verified, so a
+ * request sent while signed out shows up once they confirm that address.
+ */
+export function readerOwnsTicket(
+  ticket: Pick<SupportTicket, "userId" | "email">,
+  reader: { userId: string; email: string | null; emailVerified: boolean },
+): boolean {
+  if (ticket.userId && ticket.userId === reader.userId) return true;
+  const email = reader.email?.trim().toLowerCase();
+  if (!reader.emailVerified || !email) return false;
+  return ticket.email.trim().toLowerCase() === email;
+}
+
+/** Newest activity first. */
+export function sortByLatest<T extends { lastMessageAt: string; updatedAt: string }>(rows: T[]): T[] {
+  const at = (t: T) => t.lastMessageAt || t.updatedAt || "";
+  return [...rows].sort((a, b) => (at(a) < at(b) ? 1 : at(a) > at(b) ? -1 : 0));
+}
+
+export function validateReaderReply(raw: unknown): { ok: true; body: string } | { ok: false; error: string } {
+  const body = typeof raw === "string" ? raw.replace(/\u0000/g, "").trim() : "";
+  if (body.length < 2) return { ok: false, error: "Please write a short message first." };
+  if (body.length > LIMITS.message) {
+    return { ok: false, error: `Please keep your message under ${LIMITS.message.toLocaleString("en-US")} characters.` };
+  }
+  return { ok: true, body };
 }

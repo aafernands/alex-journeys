@@ -14,6 +14,7 @@ import {
   isTicketNumber,
   isTicketStatus,
   previewOf,
+  sortByLatest,
   statusAfterMessage,
   type NewTicketInput,
   type SupportTicket,
@@ -67,7 +68,7 @@ function toTicket(id: string, data: Record<string, unknown>): SupportTicket {
 function toMessage(id: string, data: Record<string, unknown>): TicketMessage {
   const direction = data.direction === "staff" ? "staff" : "customer";
   const channel: TicketMessageChannel =
-    data.channel === "email" || data.channel === "cms" ? data.channel : "form";
+    data.channel === "email" || data.channel === "cms" || data.channel === "site" ? data.channel : "form";
   const emailStatus =
     data.emailStatus === "sent" || data.emailStatus === "skipped" || data.emailStatus === "failed"
       ? data.emailStatus
@@ -278,4 +279,57 @@ export async function addCustomerEmailReply(
   };
   await ref.set(patch, { merge: true });
   return { ticket: { ...ticket, ...patch }, duplicate: false };
+}
+
+/**
+ * Tickets a signed-in reader may see: sent from their account, plus (when
+ * `email` is given, i.e. the account email is verified) ones sent with that
+ * email. Two single-field equality queries, merged and sorted in memory, so
+ * no composite index is needed.
+ */
+export async function listTicketsForReader(reader: {
+  userId: string;
+  email: string | null;
+}): Promise<SupportTicket[]> {
+  const byId = new Map<string, SupportTicket>();
+  const queries = [tickets().where("userId", "==", reader.userId).limit(100).get()];
+  const email = reader.email?.trim().toLowerCase();
+  if (email) queries.push(tickets().where("email", "==", email).limit(100).get());
+  for (const snap of await Promise.all(queries)) {
+    for (const doc of snap.docs) byId.set(doc.id, toTicket(doc.id, doc.data()));
+  }
+  return sortByLatest([...byId.values()]);
+}
+
+/** Reader replied from My Journey → Help. Reopens the ticket, like an email reply. */
+export async function addCustomerSiteReply(
+  ticketNumber: string,
+  input: { body: string; authorName: string | null },
+): Promise<{ ticket: SupportTicket; message: TicketMessage } | null> {
+  if (!isTicketNumber(ticketNumber)) return null;
+  const ref = tickets().doc(ticketNumber);
+  const snap = await ref.get();
+  if (!snap.exists) return null;
+  const ticket = toTicket(snap.id, snap.data() ?? {});
+  const now = new Date().toISOString();
+  const msgRef = ref.collection("messages").doc();
+  const message = {
+    direction: "customer",
+    channel: "site",
+    authorName: input.authorName ?? ticket.name,
+    body: input.body,
+    createdAt: now,
+  };
+  await msgRef.set(message);
+  const patch = {
+    status: statusAfterMessage(ticket.status, "customer"),
+    updatedAt: now,
+    lastMessageAt: now,
+    lastMessagePreview: previewOf(input.body),
+    messageCount: ticket.messageCount + 1,
+    unreadForStaff: true,
+    closedAt: null,
+  };
+  await ref.set(patch, { merge: true });
+  return { ticket: { ...ticket, ...patch }, message: toMessage(msgRef.id, message) };
 }

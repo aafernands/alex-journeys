@@ -30,11 +30,11 @@ const STATIC_PAGES: Omit<SearchItem, "haystack" | "id">[] = [
   },
   {
     type: "page",
-    title: "Contact",
+    title: "Help & contact",
     slug: "contact",
     href: "/contact",
     excerpt:
-      "Get in touch with Alex — trip notes, collaborations, or a friendly hello from the road.",
+      "Quick answers about your account, Premium, and trips — or send Alex a note. Help, support, and a friendly hello from the road.",
   },
 ];
 
