@@ -26,6 +26,7 @@ type PageProps = {
 /** Slugs that must not be served as generic CMS pages via catch-all. */
 const RESERVED_CATCHALL_SLUGS = new Set([
   "account",
+  "premium",
   "login",
   "search",
   "cms",

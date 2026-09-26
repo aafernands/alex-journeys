@@ -46,6 +46,7 @@ export type PostFormInitial = {
   seoDescription?: string;
   focusKeyword?: string;
   noindex?: boolean;
+  membersOnly?: boolean;
 };
 
 type Props = {
@@ -129,6 +130,7 @@ export function PostForm({
   );
   const [focusKeyword, setFocusKeyword] = useState(initial?.focusKeyword ?? "");
   const [noindex, setNoindex] = useState(initial?.noindex === true);
+  const [membersOnly, setMembersOnly] = useState(initial?.membersOnly === true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{
     commitUrl: string;
@@ -204,6 +206,7 @@ export function PostForm({
             seoDescription,
             focusKeyword,
             noindex,
+            membersOnly,
             update: mode === "edit" && !isDraft && !asDraft,
             draft: asDraft,
           }),
@@ -246,6 +249,7 @@ export function PostForm({
       experienceWidgetHtml,
       focusKeyword,
       noindex,
+      membersOnly,
       featuredImageAlt,
       featuredImageUrl,
       finalSlug,
@@ -640,6 +644,26 @@ export function PostForm({
                 List under Guides → Plan a trip
               </label>
             </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className="text-sm font-semibold text-heading">Members</legend>
+            <p className="mt-1 text-xs text-muted">
+              Readers see the excerpt, then a membership prompt, before the rest of the story.
+              Booking tools on the post stay visible.
+            </p>
+            <label className="mt-3 inline-flex cursor-pointer items-center gap-2 text-sm text-text">
+              <input
+                type="checkbox"
+                className="size-4 rounded border-border text-accent focus:ring-accent/25"
+                checked={membersOnly}
+                onChange={() => {
+                  markDirty();
+                  setMembersOnly((value) => !value);
+                }}
+              />
+              Members only
+            </label>
           </fieldset>
 
           <div>

@@ -1,7 +1,7 @@
 {
   "migratedAt": "2026-09-19T19:52:59.137Z",
   "source": "alexjournly.com WordPress REST API",
-  "count": 32,
+  "count": 33,
   "featuredHomepage": [
     "cancun-5-day-travel-guide",
     "discovering-iceland-a-week-in-the-land-of-fire-and-ice",
@@ -471,6 +471,20 @@
         "alt": "pexels-photo-2305761.jpeg"
       },
       "destinations": []
+    },
+    {
+      "title": "A note I only finish for members",
+      "slug": "a-note-for-members",
+      "date": "2026-09-18T12:00:00",
+      "excerpt": "A quiet note from the morning I leave Newark: the hour before the gate, and the part of the story I keep for members.",
+      "featuredImage": {
+        "url": "/media/migrated/2019-10-pexels-photo-2305761-ab8197c0.webp",
+        "alt": "Notebook and camera packed for a morning flight"
+      },
+      "destinations": [
+        "united-states"
+      ],
+      "membersOnly": true
     }
   ]
 }

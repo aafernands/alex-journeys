@@ -18,6 +18,7 @@ export type DraftPost = {
   seoDescription?: string;
   focusKeyword?: string;
   noindex?: boolean;
+  membersOnly?: boolean;
   contentHtml: string;
   itinerary?: PostItinerary;
   source?: unknown;

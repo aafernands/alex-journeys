@@ -29,6 +29,10 @@ import { blogPostingJsonLd } from "@/lib/seo";
 import { site } from "@/data/content";
 import { cmsEditPostHref } from "@/lib/admin-edit";
 import { bookingDestinationLabel } from "@/lib/post-types";
+import { auth } from "@/auth";
+import { PremiumGate } from "@/components/premium/PremiumGate";
+import { isPremium } from "@/lib/membership";
+import { getMembership } from "@/lib/membership-store";
 
 /** Pull simple TOC from h2 text in HTML when present */
 function extractToc(html: string): { id: string; label: string }[] {
@@ -69,6 +73,18 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
 
   const editHref = cmsEditPostHref(slug);
   const bookingDestination = post.bookingDestination?.trim() ?? "";
+  const session = await auth();
+  const userId = session?.user?.id?.trim() ?? "";
+  let member = false;
+  if (post.membersOnly && userId) {
+    try {
+      member = isPremium({ membership: await getMembership(userId) });
+    } catch (err) {
+      console.warn("[premium] story gate lookup failed:", err);
+    }
+  }
+  const locked = post.membersOnly === true && !member;
+  const storyPath = publicPostPath(slug);
 
   return (
     <main>
@@ -114,7 +130,9 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
               </ol>
             </nav>
 
-            <p className="mt-8 eyebrow">Journal</p>
+            <p className="mt-8 eyebrow">
+              {post.membersOnly ? "Members story" : "Journal"}
+            </p>
             <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
               <h1 className="font-display text-display text-heading">
                 {post.title}
@@ -217,7 +235,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
             </p>
           </aside>
 
-          {toc.length > 0 ? (
+          {!locked && toc.length > 0 ? (
             <nav
               className="panel mt-8 p-5"
               aria-label="Summary"
@@ -242,13 +260,17 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
             </nav>
           ) : null}
 
-          <div className="mt-10 md:mt-12">
-            <PostContent
-              html={post.contentHtml}
-              pagePath={publicPostPath(slug)}
-              shareDescription={post.title}
-            />
-          </div>
+          {locked ? (
+            <PremiumGate signedIn={Boolean(userId)} returnTo={storyPath} />
+          ) : (
+            <div className="mt-10 md:mt-12">
+              <PostContent
+                html={post.contentHtml}
+                pagePath={publicPostPath(slug)}
+                shareDescription={post.title}
+              />
+            </div>
+          )}
 
           {post.bookingTools?.length && bookingDestination ? (
             <PostBookingBox
@@ -261,7 +283,7 @@ export async function BlogPostView({ slug }: BlogPostViewProps) {
             />
           ) : null}
 
-          {post.itinerary?.enabled && post.itinerary.days.length > 0 ? (
+          {!locked && post.itinerary?.enabled && post.itinerary.days.length > 0 ? (
             <PostItineraryTimeline itinerary={post.itinerary} />
           ) : null}
 

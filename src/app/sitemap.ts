@@ -21,6 +21,7 @@ const STATIC_ROUTES: {
   { path: "/stays", changeFrequency: "weekly", priority: 0.7 },
   { path: "/flights", changeFrequency: "weekly", priority: 0.7 },
   { path: "/tools", changeFrequency: "monthly", priority: 0.6 },
+  { path: "/premium", changeFrequency: "monthly", priority: 0.6 },
   { path: "/media-kit", changeFrequency: "monthly", priority: 0.5 },
   { path: "/policies", changeFrequency: "yearly", priority: 0.3 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
