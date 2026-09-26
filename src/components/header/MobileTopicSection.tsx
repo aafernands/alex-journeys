@@ -14,13 +14,13 @@ type Props = {
 };
 
 const topClass =
-  "font-display flex w-full items-center justify-between gap-3 py-3 text-left text-3xl font-semibold leading-none tracking-tight text-heading transition hover:text-accent";
+  "font-display flex min-h-12 w-full items-center justify-between gap-3 text-left text-base font-semibold leading-snug tracking-tight text-heading transition hover:text-accent";
 const midClass =
-  "font-display block py-2 text-xl font-semibold leading-snug tracking-tight text-heading transition hover:text-accent";
+  "flex min-h-11 items-center text-base font-medium leading-snug text-heading transition hover:text-accent";
 
 /**
  * Editorial accordion row for a hub (Guides). No leading icons.
- * Children sit one type size down from the oversized primary list.
+ * 48px primary row, 44px child rows, 16px text (children use medium weight).
  */
 export function MobileTopicSection({
   label,
@@ -40,10 +40,10 @@ export function MobileTopicSection({
         onClick={() => setOpen((v) => !v)}
       >
         {label}
-        <Chevron open={open} size={20} />
+        <Chevron open={open} size={18} />
       </button>
       {open ? (
-        <ul className="mb-3 ml-0.5 border-l border-border pl-4">
+        <ul className="mb-2 ml-0.5 border-l border-border pl-4">
           <li>
             <Link href={href} className={midClass} onClick={onNavigate}>
               {allLabel ?? `All ${label.toLowerCase()}`}
