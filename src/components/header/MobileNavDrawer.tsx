@@ -33,18 +33,18 @@ type Props = {
 };
 
 const topLinkClass =
-  "font-display block py-3 text-3xl font-semibold leading-none tracking-tight text-heading transition hover:text-accent";
+  "font-display flex min-h-12 items-center text-base font-semibold leading-snug tracking-tight text-heading transition hover:text-accent";
 const topButtonClass =
-  "font-display flex w-full items-center justify-between gap-3 py-3 text-left text-3xl font-semibold leading-none tracking-tight text-heading transition hover:text-accent";
+  "font-display flex min-h-12 w-full items-center justify-between gap-3 text-left text-base font-semibold leading-snug tracking-tight text-heading transition hover:text-accent";
 const midLinkClass =
-  "font-display block py-2 text-xl font-semibold leading-snug tracking-tight text-heading transition hover:text-accent";
+  "flex min-h-11 items-center text-base font-medium leading-snug text-heading transition hover:text-accent";
 const midButtonClass =
-  "font-display flex w-full items-center justify-between gap-3 py-2 text-left text-xl font-semibold leading-snug tracking-tight text-heading transition hover:text-accent";
+  "flex min-h-11 w-full items-center justify-between gap-3 text-left text-base font-medium leading-snug text-heading transition hover:text-accent";
 const leafLinkClass =
-  "block py-1.5 text-sm leading-snug text-text transition hover:text-accent";
+  "flex min-h-11 items-center text-base leading-snug text-text transition hover:text-accent";
 
 /**
- * Mobile hamburger drawer: oversized editorial hub list.
+ * Mobile hamburger drawer: compact hub list (48px primary rows, 44px nested rows, 16px text).
  * Places and Guides restore nested expanders (no leading icons).
  */
 export function MobileNavDrawer({ open, onClose }: Props) {
@@ -122,7 +122,7 @@ export function MobileNavDrawer({ open, onClose }: Props) {
             onNavigate={onClose}
           />
         </div>
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]">
           <ul className="flex flex-col" aria-label="Primary">
             <li>
               <Link
@@ -142,10 +142,10 @@ export function MobileNavDrawer({ open, onClose }: Props) {
                 onClick={() => setPlacesOpen((v) => !v)}
               >
                 Places
-                <Chevron open={placesOpen} size={20} />
+                <Chevron open={placesOpen} size={18} />
               </button>
               {placesOpen ? (
-                <ul className="mb-3 ml-0.5 border-l border-border pl-4">
+                <ul className="mb-2 ml-0.5 border-l border-border pl-4">
                   <li>
                     <Link
                       href="/destinations"
@@ -229,8 +229,8 @@ export function MobileNavDrawer({ open, onClose }: Props) {
             </li>
           </ul>
 
-          <section className="mt-8 text-center" aria-label="Follow Alex Journeys">
-            <p className="mb-3 text-xs font-bold uppercase tracking-[.18em] text-muted">
+          <section className="mt-6 text-center" aria-label="Follow Alex Journeys">
+            <p className="mb-2 text-ds-caption font-bold uppercase tracking-[.18em] text-muted">
               Follow the journey
             </p>
             <ul

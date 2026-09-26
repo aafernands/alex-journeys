@@ -12,7 +12,7 @@ export function ToolCard({ tool }: ToolCardProps) {
     <OutboundLink
       href={tool.href}
       affiliate
-      className="panel-interactive group flex h-full items-start gap-3.5 p-4 sm:p-5"
+      className="panel-interactive group flex h-full items-start gap-3 p-4"
     >
       <span className="icon-tile">
         <NavIcon name={tool.icon} size={20} />
@@ -33,7 +33,7 @@ export function ToolCard({ tool }: ToolCardProps) {
 
         <span className="mt-1 flex flex-wrap items-center gap-2">
           <span className="text-sm font-semibold text-muted">{tool.partner}</span>
-          <span className="rounded-full border border-border bg-surface-soft px-1.5 py-0.5 text-[0.625rem] font-semibold uppercase tracking-[0.08em] text-muted">
+          <span className="rounded-full border border-border bg-surface-soft px-1.5 py-0.5 text-ds-caption font-semibold uppercase tracking-[0.08em] text-muted">
             Affiliate
           </span>
         </span>

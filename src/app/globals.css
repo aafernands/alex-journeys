@@ -5164,3 +5164,77 @@ main.experiences-page[data-density="comfortable"] .hub-follow {
     padding-bottom: 2.5rem;
   }
 }
+
+/* ——— Phase 5b: Tools (/tools) — compact-to-comfortable ———
+   Scoped to main.tools-page[data-density="comfortable"]. Spacing and type only;
+   affiliate links, order and disclosure text are untouched.
+   H1 28–32px, 16px intro, 24px header→content, 16px cards. */
+main.tools-page[data-density="comfortable"] .section-band {
+  padding-top: var(--space-6);
+  padding-bottom: 2rem;
+}
+
+main.tools-page[data-density="comfortable"] nav[aria-label="Breadcrumb"] + .eyebrow {
+  margin-top: var(--space-4);
+}
+
+main.tools-page[data-density="comfortable"] h1.text-display {
+  font-size: clamp(1.75rem, 3vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+main.tools-page[data-density="comfortable"] .text-lead {
+  margin-top: var(--space-2);
+  font-size: var(--type-body-size, 1rem);
+  line-height: var(--type-body-leading, 1.5);
+}
+
+main.tools-page[data-density="comfortable"] .hub-follow {
+  margin-top: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  main.tools-page[data-density="comfortable"] .section-band {
+    padding-top: 2rem;
+    padding-bottom: 2.5rem;
+  }
+}
+
+/* ——— Phase 5b: Account (/account, /login, /account/confirm-email) — compact app ———
+   Scoped to main.account-page[data-density="compact"]. Plan a Trip values:
+   44px fields and buttons, 20px titles, 16px body/fields, 14px secondary, 16px panels. */
+main.account-page[data-density="compact"] .section-band {
+  padding-top: var(--space-6);
+  padding-bottom: 2rem;
+}
+
+main.account-page[data-density="compact"] h1.text-display {
+  font-size: clamp(1.5rem, 2.5vw, 1.75rem);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+main.account-page[data-density="compact"] .reader-login-panel {
+  padding: var(--space-4);
+}
+
+main.account-page[data-density="compact"] .reader-login-title {
+  font-size: var(--type-title-size);
+  line-height: var(--type-title-leading);
+}
+
+main.account-page[data-density="compact"] .reader-login-panel input:not([type="checkbox"]):not([type="radio"]) {
+  font-size: var(--type-body-size);
+}
+
+@media (min-width: 768px) {
+  main.account-page[data-density="compact"] .section-band {
+    padding-top: 2rem;
+    padding-bottom: 2.5rem;
+  }
+
+  main.account-page[data-density="compact"] .reader-login-panel {
+    padding: var(--space-6);
+  }
+}

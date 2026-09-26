@@ -27,13 +27,14 @@ export default function ToolsPage() {
       title={page.title}
       description={page.description}
       narrow={false}
+      comfortableClass="tools-page"
       crumbs={[
         { href: "/", label: "Home" },
         { label: "Tools I use" },
       ]}
     >
       <aside
-        className="panel-nested hub-follow bg-surface-soft px-5 py-4"
+        className="panel-nested hub-follow bg-surface-soft p-4"
         aria-label="Affiliate disclosure"
       >
         <p className="font-display text-sm font-bold text-heading">
@@ -59,7 +60,7 @@ export default function ToolsPage() {
         ))}
       </ul>
 
-      <p className="mt-10 text-sm text-muted">
+      <p className="mt-8 text-sm text-muted">
         Related journal notes:{" "}
         <Link
           href="/travel-insurance-allianz-world-nomads"

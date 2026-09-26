@@ -88,7 +88,7 @@ function safeCallbackUrl(raw: string | null): string {
   return raw;
 }
 
-const titleClass = "font-display mt-2 text-2xl font-bold text-heading md:text-3xl";
+const titleClass = "reader-login-title font-display mt-2 text-2xl font-bold text-heading md:text-3xl";
 
 function LoginTitle({
   level,
@@ -167,7 +167,7 @@ export function ReaderLoginForm({
 
   if (!anyAuth) {
     return (
-      <div className="panel p-6 md:p-8">
+      <div className="reader-login-panel panel p-6 md:p-8">
         <p className="eyebrow text-accent">Alex Journeys</p>
         <LoginTitle level={titleLevel}>Sign-in isn’t available yet</LoginTitle>
         <p className="mt-4 text-sm leading-relaxed text-text">
@@ -265,7 +265,7 @@ export function ReaderLoginForm({
   }
 
   return (
-    <div className="panel p-6 md:p-8">
+    <div className="reader-login-panel panel p-6 md:p-8">
       <p className="eyebrow text-accent">Alex Journeys</p>
       <LoginTitle level={titleLevel}>
         {mode === "signin" ? "Welcome back" : "Create your account"}
