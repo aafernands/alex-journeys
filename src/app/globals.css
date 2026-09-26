@@ -5128,3 +5128,39 @@ main.journal-page[data-density="comfortable"] .post-prose figcaption {
   .plan-trip-hotel .plan-bookings-head .plan-h3,
   [data-density="compact"].plan-trip-hotel .plan-bookings-head .plan-h3 { font-size: 1.125rem; }
 }
+
+/* ——— Phase 5: Experiences (/experiences) — compact-to-comfortable browsing ———
+   Scoped to main.experiences-page[data-density="comfortable"]; nothing else changes.
+   Shorter header, H1 28–32px, 16px intro, 44px controls (from .btn),
+   14px secondary, 16px panels, 24px gaps. Viator widget markup is untouched. */
+main.experiences-page[data-density="comfortable"] .section-band {
+  padding-top: var(--space-6);
+  padding-bottom: 2rem;
+}
+
+main.experiences-page[data-density="comfortable"] nav[aria-label="Breadcrumb"] + .eyebrow {
+  margin-top: var(--space-4);
+}
+
+main.experiences-page[data-density="comfortable"] h1.text-display {
+  font-size: clamp(1.75rem, 3vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+main.experiences-page[data-density="comfortable"] .text-lead {
+  margin-top: var(--space-2);
+  font-size: var(--type-body-size, 1rem);
+  line-height: var(--type-body-leading, 1.5);
+}
+
+main.experiences-page[data-density="comfortable"] .hub-follow {
+  margin-top: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  main.experiences-page[data-density="comfortable"] .section-band {
+    padding-top: 2rem;
+    padding-bottom: 2.5rem;
+  }
+}
