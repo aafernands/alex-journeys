@@ -175,6 +175,17 @@ function clientSecretFor(
   return null;
 }
 
+/** Payment types shared by the server subscription and the client Payment Element. */
+export const PREMIUM_PAYMENT_METHOD_TYPES = ["card", "link"] as const;
+
+function hasPremiumPaymentMethodTypes(subscription: Stripe.Subscription): boolean {
+  const types = subscription.payment_settings?.payment_method_types ?? [];
+  return (
+    types.length === PREMIUM_PAYMENT_METHOD_TYPES.length &&
+    PREMIUM_PAYMENT_METHOD_TYPES.every((t) => types.includes(t))
+  );
+}
+
 function isUnfinished(subscription: Stripe.Subscription): boolean {
   if (subscription.status === "incomplete") return true;
   return (
@@ -302,7 +313,8 @@ export async function createPremiumSubscription(input: {
       !reuse &&
       subscriptionPriceId(sub) === price &&
       (wantsTrial ? sub.status === "trialing" : sub.status === "incomplete") &&
-      clientSecretFor(sub) !== null;
+      clientSecretFor(sub) !== null &&
+      hasPremiumPaymentMethodTypes(sub);
     if (matches) {
       reuse = sub;
     } else {
@@ -324,7 +336,11 @@ export async function createPremiumSubscription(input: {
     customer: customer.id,
     items: [{ price, quantity: 1 }],
     payment_behavior: "default_incomplete",
-    payment_settings: { save_default_payment_method: "on_subscription" },
+    payment_settings: {
+      save_default_payment_method: "on_subscription",
+      // Must match the Payment Element's paymentMethodTypes on the client.
+      payment_method_types: [...PREMIUM_PAYMENT_METHOD_TYPES],
+    },
     metadata,
     ...(trialDays > 0
       ? {
